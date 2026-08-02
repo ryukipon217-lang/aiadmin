@@ -874,6 +874,195 @@ html[data-theme="light"] .bd.i{color:var(--indigo)}
 <div class="field"></div><div class="grid"></div><div class="parts" id="parts"></div>
 <div id="root"><div id="bootldg" style="position:fixed;inset:0;display:grid;place-items:center;z-index:1;background:transparent"><div style="text-align:center"><div style="width:46px;height:46px;margin:0 auto;border-radius:50%;border:3px solid rgba(120,180,235,.18);border-top-color:#33B4E8;animation:bspin .8s linear infinite"></div><div style="margin-top:16px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.22em;color:#7fa6c8">CONNEC+A 起動中…</div></div></div></div>
 <style>@keyframes bspin{to{transform:rotate(360deg)}}</style>
+<style id="monet-retheme">/*MONET-RETHEME*/
+/* =====================================================================
+   ▚▚ MONET 全ページ再テーマ (append-only / 2026-08) ▚▚
+   既存<style>末尾に貼るだけで console 全画面が Monet 化する。
+   仕組み: 色の大半は CSS 変数から導出されるので「トークン置換」で一括再テーマ。
+   触らない(競合回避): .eh-* / .tt-* / .msym / .cormo / EventHome / Timetable / 受付
+   ライト/ナイト両対応・コントラスト AA 維持。
+   ===================================================================== */
+
+/* ---- 1. NIGHT (既定) トークン置換 ------------------------------------ */
+/* accent 系を Monet blue #35618f 系へ寄せ、カテゴリ色を珊瑚/琥珀/青緑へ。
+   glass/line も暖色フロスト寄りに再定義。既存の :root(#33)を上書き。 */
+html[data-theme="night"]{
+  /* accent 基幹: 明るい水色→落ち着いた Monet ブルー */
+  --blue:#4a7bb0;--blue-deep:#2c5480;--sky:#5f97c9;
+  /* カテゴリ Monet 3色 */
+  --coral:#df6f52;--orange:#df6f52;--rose:#d06a86;--pink:#c98fb8;
+  --amber:#d7ad4a;--yellow:#d7ad4a;--lime:#b7bd66;
+  --teal:#4aa593;--green:#4aa593;--grass:#5cb79f;--emerald:#4aa593;--cyan:#57b3a8;
+  --violet:#9a8fd6;--indigo:#7d8fce;--slate:#8ea4b6;
+  --head:#f2eee7;--ink:#e6ede6;--ink2:#b3c3c9;--ink3:#8ba0a6;--ink4:#748a90;
+  /* ライン: 青緑がかったフロスト縁 */
+  --line:rgba(120,170,190,.16);--line2:rgba(120,170,190,.30);
+  /* glass: 少し暖色を含むフロスト */
+  --glass:rgba(20,32,44,.44);--glassb:rgba(180,205,215,.22);
+  /* グラデ: Monet ブルー→青緑(#35618f を核に) */
+  --grad:linear-gradient(122deg,#2c5480 0%,#35618f 32%,#3a7f86 60%,#3a917f 82%,#4aa593 100%);
+  --grad-blue:linear-gradient(95deg,#35618f,#3a917f);
+  --scrim:rgba(10,18,24,.66);
+}
+/* ---- 2. LIGHT トークン置換 ------------------------------------------- */
+html[data-theme="light"]{
+  --head:#233a4f;--ink:#33404a;--ink2:#54636e;--ink3:#6a7883;--ink4:#8b98a2;
+  --blue:#35618f;--sky:#3a7fa8;--blue-deep:#284a6c;
+  --coral:#c7583a;--orange:#c7583a;--rose:#c0506a;--pink:#b06496;
+  --amber:#a97e1e;--yellow:#c79a35;--lime:#8a9330;
+  --teal:#2e7d6d;--green:#2e8a72;--grass:#2e8a72;--emerald:#2a8064;--cyan:#2f8a83;
+  --violet:#6a5cc0;--indigo:#4f5eb0;--slate:#6a7e8c;
+  --line:rgba(53,97,143,.14);--line2:rgba(53,97,143,.24);
+  --glass:rgba(255,255,255,.9);--glassb:rgba(255,255,255,.9);
+  --grad:linear-gradient(122deg,#35618f 0%,#3a7f86 55%,#3a917f 100%);
+  --grad-blue:linear-gradient(95deg,#35618f,#3a917f);
+  --scrim:rgba(230,236,240,.55);
+}
+
+/* ---- 3. キャンバス(背景 blob に暖色を足す) -------------------------- */
+/* .field/.grid/body は fixed 全面。トークンでは色が入らないので直接上書き。 */
+html[data-theme="night"] body{
+  background:
+    radial-gradient(1200px 720px at 74% -12%,rgba(53,97,143,.26),transparent 60%),
+    radial-gradient(980px 640px at 4% 108%,rgba(58,145,127,.16),transparent 56%),
+    radial-gradient(760px 760px at 100% 58%,rgba(223,111,82,.10),transparent 60%),
+    radial-gradient(520px 460px at 22% 8%,rgba(199,154,53,.07),transparent 60%),
+    #0a121a;background-attachment:fixed;}
+html[data-theme="night"] .field{
+  background:
+    radial-gradient(54% 60% at 2% -8%,rgba(53,97,143,.40),transparent 60%),
+    radial-gradient(50% 56% at 108% 10%,rgba(58,145,127,.30),transparent 60%),
+    radial-gradient(64% 66% at 88% 116%,rgba(223,111,82,.24),transparent 62%),
+    radial-gradient(40% 44% at 46% -14%,rgba(199,154,53,.12),transparent 56%),
+    #0a121a;}
+html[data-theme="night"] .grid{
+  background-image:linear-gradient(rgba(140,180,190,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(140,180,190,.05) 1px,transparent 1px);}
+html[data-theme="night"] .parts i{background:rgba(120,190,210,.6);box-shadow:0 0 10px rgba(58,145,127,.7);}
+html[data-theme="light"] body{
+  background:
+    radial-gradient(1200px 700px at 78% -12%,#ffffff,transparent 60%),
+    radial-gradient(760px 620px at 4% 110%,rgba(58,145,127,.10),transparent 58%),
+    radial-gradient(680px 560px at 100% 40%,rgba(223,111,82,.07),transparent 60%),
+    linear-gradient(168deg,#fbfaf7 0%,#f6f8fa 55%,#eef3f5 100%);background-attachment:fixed;}
+
+/* ---- 4. フロストガラス(Monet エッジライティング) ------------------- */
+/* 既存 .glass(#51/#339) と .tile.glass を上書き。blur を深め、青緑エッジを付与。 */
+html[data-theme="night"] .glass,
+html[data-theme="night"] .tile.glass{
+  backdrop-filter:blur(40px) saturate(1.9);-webkit-backdrop-filter:blur(40px) saturate(1.9);
+  box-shadow:inset 0 1px 0 rgba(210,230,235,.14),inset 0 0 0 1px rgba(90,150,175,.06),inset 0 -22px 44px rgba(53,97,143,.08),var(--sh1);}
+html[data-theme="light"] .glass,
+html[data-theme="light"] .tile.glass,
+html[data-theme="light"] .kpc{
+  background:radial-gradient(150% 120% at 12% -18%,rgba(255,255,255,.74),transparent 54%),linear-gradient(180deg,rgba(255,255,255,.42),rgba(232,244,242,.26));
+  border-color:rgba(255,255,255,.62);
+  backdrop-filter:blur(42px) saturate(1.9);-webkit-backdrop-filter:blur(42px) saturate(1.9);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.98),inset 0 0 0 1px rgba(255,255,255,.42),inset 0 -20px 42px rgba(160,205,190,.18),0 16px 42px -18px rgba(40,80,110,.24)!important;}
+
+/* ---- 5. サイドバー / トップ / コマンドバー フロスト ------------------ */
+html[data-theme="night"] .side{
+  background:linear-gradient(180deg,rgba(18,30,42,.30),rgba(14,26,38,.22));
+  backdrop-filter:blur(36px) saturate(200%) brightness(1.04);-webkit-backdrop-filter:blur(36px) saturate(200%) brightness(1.04);
+  border-right-color:rgba(120,170,190,.20);}
+html[data-theme="night"] .top.glass{
+  background:rgba(18,30,42,.16);
+  backdrop-filter:blur(44px) saturate(200%) brightness(1.04);-webkit-backdrop-filter:blur(44px) saturate(200%) brightness(1.04);
+  box-shadow:inset 0 1px 0 rgba(210,230,235,.14);}
+html[data-theme="night"] .cmd .dot{background:#e9f2f2;box-shadow:0 0 12px var(--teal);}
+html[data-theme="night"] .cmd::after{background:linear-gradient(115deg,transparent 40%,rgba(58,145,127,.14) 50%,transparent 60%);}
+
+/* ---- 6. ナビ項目(選択状態を Monet アンバー→青緑アクセントに) ------- */
+.ni.on{
+  background:linear-gradient(100deg,color-mix(in srgb,var(--amber) 16%,transparent),color-mix(in srgb,var(--teal) 12%,transparent));
+  box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--amber) 26%,transparent);}
+.ni.on::before{background:var(--amber);box-shadow:0 0 12px color-mix(in srgb,var(--amber) 70%,transparent);}
+.ni.on svg{color:var(--amber);}
+html[data-theme="night"] .ni:hover{background:rgba(120,175,195,.08);}
+.ni .lk{color:var(--amber);background:color-mix(in srgb,var(--amber) 15%,transparent);border-color:color-mix(in srgb,var(--amber) 40%,transparent);}
+.ni.sub .pen:hover{color:var(--amber);background:color-mix(in srgb,var(--amber) 12%,transparent);border-color:color-mix(in srgb,var(--amber) 30%,transparent);}
+
+/* ---- 7. ブランドマーク / アバター ----------------------------------- */
+.brand .mk{box-shadow:0 8px 24px -6px rgba(53,97,143,.6),inset 0 1px 0 rgba(255,255,255,.4);}
+.brand b i{color:var(--teal);}
+
+/* ---- 8. タイポグラフィ(Monet 三書体) ------------------------------ */
+/* 見出し=Zen Old Mincho / 本文=Zen Kaku / 数字=Cormorant italic。
+   .eh-* と .cormo は既定義のため対象外(スコープが違うので競合しない)。 */
+body{font-family:'Zen Kaku Gothic New','Hiragino Sans',var(--s);letter-spacing:.005em;}
+.pghd .tt,.modal .mh .h,.hero h1,.brand b,.navsys{
+  font-family:'Zen Old Mincho','Noto Serif JP',serif;font-weight:700;letter-spacing:.01em;}
+.pghd .tt i,.hero h1 i{color:var(--teal);font-style:italic;}
+/* 数字: Cormorant italic(tabular)。.num と各 KV/ゲージ値。 */
+.num,.kv,.gauge .gv,.kpi-mini .kv,.kpc .kv,.gauge .gv small{
+  font-family:'Cormorant Garamond','Noto Serif JP',serif!important;font-style:italic;font-weight:600;
+  font-variant-numeric:tabular-nums;letter-spacing:.01em;}
+.kick,.gauge .gl,.navgrp .lab{font-family:var(--m);} /* KICK/ラベルはモノのまま(視認性) */
+
+/* ---- 9. KPI 数値グラデの Monet 化(ハードコード白グラデを上書き) ---- */
+html[data-theme="night"] .gauge .gv,
+html[data-theme="night"] .kpi-mini .kv{
+  background:linear-gradient(120deg,#eef4f2,#7fc0b0 110%);
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+html[data-theme="night"] .kpi-mini.attn .kv{
+  background:linear-gradient(120deg,#f4ecd6,var(--amber));
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+html[data-theme="light"] .gauge .gv,
+html[data-theme="light"] .kpi-mini .kv{
+  background:linear-gradient(120deg,#233a4f,var(--blue));
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+.gauge .gv small{-webkit-text-fill-color:var(--ink3);}
+
+/* ---- 10. セグメント / チップ / タブ(白 bg → Monet アクセント) ----- */
+.seg.on{background:var(--blue);color:#fff;font-weight:700;}
+.chipf.on{background:var(--blue);color:#fff;border-color:var(--blue);}
+html[data-theme="night"] .seg.on,html[data-theme="night"] .chipf.on{background:var(--blue);color:#fff;border-color:var(--blue);}
+html[data-theme="night"] .stab button.on{background:var(--grad-blue);color:#fff;}
+
+/* ---- 11. バッジ(緑=青緑 / 黄=琥珀 cream 化) ----------------------- */
+.b-ok{background:color-mix(in srgb,var(--teal) 18%,transparent);color:color-mix(in srgb,var(--teal) 88%,#fff);}
+.b-warn{background:color-mix(in srgb,var(--amber) 18%,transparent);color:var(--amber);}
+.b-info{background:color-mix(in srgb,var(--sky) 18%,transparent);color:var(--sky);}
+
+/* ---- 12. ボタン(primary の Monet 化・shadow) --------------------- */
+.btn-pri,.bsm.pri{box-shadow:0 12px 30px -8px rgba(53,97,143,.55);}
+.btn-yellow,.bsm.amber{background:var(--amber);color:#241a02;box-shadow:0 12px 30px -8px color-mix(in srgb,var(--amber) 55%,transparent);}
+html[data-theme="light"] .btn-yellow{--head:#241a02;box-shadow:0 6px 16px -8px color-mix(in srgb,var(--amber) 50%,transparent),inset 0 1px 0 rgba(255,255,255,.5)!important;}
+html[data-theme="light"] .btn-pri{box-shadow:0 6px 16px -8px rgba(53,97,143,.42),inset 0 1px 0 rgba(255,255,255,.4)!important;}
+html[data-theme="light"] .bsm.pri,html[data-theme="light"] .bsm.ai{box-shadow:0 5px 14px -7px rgba(53,97,143,.4),inset 0 1px 0 rgba(255,255,255,.35)!important;}
+.bsm.go{background:linear-gradient(110deg,var(--teal),var(--grass));box-shadow:0 8px 22px -8px var(--teal);}
+.bsm:hover{border-color:var(--teal);}
+
+/* ---- 13. プログレスバー(青緑グラデ) ------------------------------ */
+.pbar i{background:linear-gradient(90deg,var(--blue),var(--teal));}
+.bootpg i{background:var(--grad-blue);box-shadow:0 0 8px var(--teal);}
+
+/* ---- 14. フォーム(focus を Monet 青緑に) ------------------------- */
+.fld input:focus,.fld select:focus,.fld textarea:focus,.aoi-in input:focus{border-color:var(--teal);}
+input[type=checkbox],input[type=radio]{accent-color:var(--blue);}
+
+/* ---- 15. AI 系(aibox / aicore glow を Monet 寄せ) ---------------- */
+.aibox{border-color:color-mix(in srgb,var(--violet) 34%,var(--line));background:linear-gradient(120deg,color-mix(in srgb,var(--violet) 12%,transparent),color-mix(in srgb,var(--teal) 6%,transparent));}
+.aibox::after{background:linear-gradient(180deg,var(--violet),var(--teal));}
+.bsm.ai{background:linear-gradient(110deg,var(--violet),var(--blue));box-shadow:0 8px 22px -8px var(--violet);}
+html[data-theme="night"] .aicore .glow{
+  background:radial-gradient(circle at 40% 32%,#fff 0%,#eef6f4 16%,#bfe3dc 40%,rgba(58,145,127,.42) 64%,transparent 80%);
+  box-shadow:0 0 70px -2px rgba(58,145,127,.6);}
+
+/* ---- 16. ヒーロー / メッセージ / send(青緑 Monet) ---------------- */
+html[data-theme="night"] .hero{background:linear-gradient(120deg,rgba(44,84,128,.55),rgba(14,26,38,.5)),var(--grad);box-shadow:0 30px 70px -30px rgba(20,50,70,.8);}
+.hero::after{background:radial-gradient(50% 130% at 96% 0,rgba(199,154,53,.2),transparent 50%);}
+.msg.ai{background:color-mix(in srgb,var(--teal) 12%,transparent);}
+.msg.me,.aoi-send{background:var(--grad-blue);}
+
+/* ---- 17. 選択色(::selection を Monet アンバー/青へ) --------------- */
+::selection{background:color-mix(in srgb,var(--amber) 34%,transparent);color:var(--head);}
+html[data-theme="light"] ::selection{background:#cfe0d9;color:#20303a;}
+
+/* ---- 18. サイドの区切り線 / n-badge ------------------------------- */
+.navsys{border-top-color:color-mix(in srgb,var(--ink4) 16%,transparent);}
+.n-badge{background:var(--coral);box-shadow:0 0 9px color-mix(in srgb,var(--coral) 45%,transparent);}
+
+</style>
 <script>
 (function(){var p=document.getElementById('parts');if(!p)return;for(var i=0;i<16;i++){var s=document.createElement('i');s.style.left=(Math.random()*100)+'%';s.style.bottom='-10px';var d=8+Math.random()*10;s.style.animationDuration=d+'s';s.style.animationDelay=(-Math.random()*d)+'s';s.style.opacity=String(.3+Math.random()*.5);s.style.transform='scale('+(.5+Math.random()*1.4)+')';p.appendChild(s);}})();
 window.GAS=(function(){var URL='https://script.google.com/macros/s/AKfycbxLs1eXm39MHM0lSioBf9ghVFL8p8fIhIdYJpBBweBTCLOFDqWclPhoF66c0FgfrbHg/exec';
