@@ -1478,6 +1478,16 @@ html[data-theme="light"] .drhd{--head:#f2f7fc;color:#f2f7fc;}
    ===================================================================== */
 ::selection{background:color-mix(in srgb,var(--mg-accent) 26%,transparent);color:var(--head);}
 html[data-theme="light"] ::selection{background:#cfe0d9;color:#20303a;}
+
+/* ==== MONET-V2-P1-LAYOUT レイアウト明快化(CSSのみ/全画面/低リスク) ==== */
+.tbl tbody tr:nth-child(even){background:rgba(120,170,190,.045)}
+.tbl tbody tr:hover{background:color-mix(in srgb,var(--sky) 8%,transparent)}
+.tbl td{padding-top:13px;padding-bottom:13px;border-bottom-color:var(--line2)}
+.sech .h::before{content:"";display:inline-block;width:3px;height:15px;border-radius:2px;background:var(--blue);margin-right:9px;vertical-align:-2px}
+.sec{margin-bottom:24px}
+.pghd .acts .bsm.pri{box-shadow:0 8px 20px -8px var(--blue);font-weight:800}
+.pghd .acts .bsm:not(.pri):not(.amber):not(.go){opacity:.92}
+.mc{gap:20px}
 </style>
 <script>
 (function(){var p=document.getElementById('parts');if(!p)return;for(var i=0;i<16;i++){var s=document.createElement('i');s.style.left=(Math.random()*100)+'%';s.style.bottom='-10px';var d=8+Math.random()*10;s.style.animationDuration=d+'s';s.style.animationDelay=(-Math.random()*d)+'s';s.style.opacity=String(.3+Math.random()*.5);s.style.transform='scale('+(.5+Math.random()*1.4)+')';p.appendChild(s);}})();
