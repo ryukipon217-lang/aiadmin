@@ -1682,6 +1682,47 @@ html[data-theme="night"] .aistrip .orb{border-color:rgba(160,200,230,.5) !import
 
 /* FAB: 48pxに降格(存在感を静かに) */
 [data-qa-fab]{width:48px !important;height:48px !important;}
+
+/* ==== MONET-V2-BESPOKE 誌面化=9点レイアウトへの骨格転換 (2026-08) ====
+   箱の氾濫をやめ、地の上のタイポグラフィと罫線・余白で構造を組む。
+   ①数字カード→罫線区切りの数字バンド ②AI帯→静かな注記行
+   ③ダッシュボードhero=濃紺の箱→地の上の見開き(ライトのみ。ナイトは面が要る) */
+
+/* ① 数字バンド: カードを脱ぎ、上下の罫線に挟まれた数字列(誌面のデータ帯) */
+html[data-theme="light"] .kpi-hero{gap:0;margin:2px 0 36px;border-top:1px solid rgba(53,97,143,.18);border-bottom:1px solid rgba(53,97,143,.18);}
+html[data-theme="light"] .kpi-hero .kh{background:none !important;border:0 !important;box-shadow:none !important;backdrop-filter:none !important;-webkit-backdrop-filter:none !important;border-radius:0 !important;padding:28px 30px 26px;border-left:1px solid rgba(53,97,143,.12) !important;}
+html[data-theme="light"] .kpi-hero .kh:first-child{border-left:0 !important;padding-left:2px;}
+.kpi-hero .kh .v{font-size:56px;}
+.kpi-hero .kh .l{font-size:10px;}
+
+/* ② AIストリップ/aibox: 箱→左罫線一本の静かな注記(コラム欄外注) */
+html[data-theme="light"] .aistrip{background:none !important;border:0 !important;border-left:2px solid rgba(53,97,143,.4) !important;border-radius:0 !important;box-shadow:none !important;padding:8px 0 8px 18px !important;}
+html[data-theme="light"] .aibox{background:none !important;border:0 !important;border-left:2px solid rgba(53,97,143,.4) !important;border-radius:0 !important;box-shadow:none !important;padding:10px 0 10px 18px !important;backdrop-filter:none !important;-webkit-backdrop-filter:none !important;}
+
+/* ③ ダッシュボードhero: 濃紺の箱→地の上の見開き(挨拶=インクの明朝、売上=特大Cormorant) */
+html[data-theme="light"] .tile.hero{background:none !important;border:0 !important;border-radius:0 !important;box-shadow:none !important;backdrop-filter:none !important;-webkit-backdrop-filter:none !important;--head:#22314a;color:var(--ink2);padding:14px 2px 30px;border-bottom:1px solid rgba(53,97,143,.18) !important;}
+html[data-theme="light"] .tile.hero h1{color:#22314a;font-size:31px;line-height:1.4;}
+html[data-theme="light"] .tile.hero .badge{background:rgba(53,97,143,.07) !important;color:rgba(53,97,143,.65) !important;}
+html[data-theme="light"] .hero .pcard{background:rgba(255,255,255,.55);border:1px solid rgba(53,97,143,.14);box-shadow:none;}
+html[data-theme="light"] .hero .pcard .pt{color:#22314a;}
+html[data-theme="light"] .hero .pcard .pw{color:var(--ink3);}
+html[data-theme="light"] .hero .pcard .pa{color:#35618f;}
+html[data-theme="light"] .hbig .v{color:#22314a;text-shadow:none;font-size:86px;letter-spacing:0;}
+html[data-theme="light"] .hbig .kick{color:var(--ink4) !important;}
+html[data-theme="light"] .hbig .l{color:var(--ink4);}
+html[data-theme="light"] .hero .scanl{display:none;}
+
+/* ④ ホームの扉日付=誌面の号数のように大きく */
+.eh-date{font-size:34px;}
+.eh-date span{font-size:15px;}
+
+/* ⑤ ゲージ/ミニKPIカードは面を残すが、影を弱め脇役に退かせる */
+html[data-theme="light"] .r4 .tile{box-shadow:inset 0 1px 0 rgba(255,255,255,.9), 0 8px 22px -14px rgba(34,49,74,.18) !important;}
+@media(max-width:640px){
+  .kpi-hero .kh .v{font-size:36px;}
+  html[data-theme="light"] .hbig .v{font-size:54px;}
+  .eh-date{font-size:26px;}
+}
 </style>
 <script>
 (function(){var p=document.getElementById('parts');if(!p)return;for(var i=0;i<16;i++){var s=document.createElement('i');s.style.left=(Math.random()*100)+'%';s.style.bottom='-10px';var d=8+Math.random()*10;s.style.animationDuration=d+'s';s.style.animationDelay=(-Math.random()*d)+'s';s.style.opacity=String(.3+Math.random()*.5);s.style.transform='scale('+(.5+Math.random()*1.4)+')';p.appendChild(s);}})();
