@@ -1576,6 +1576,60 @@ html[data-theme="night"] .kpi-hero .kh .v{
 .btn-pri::after{content:"";position:absolute;inset:0 0 55% 0;background:linear-gradient(180deg,rgba(255,255,255,.32),rgba(255,255,255,0));border-radius:inherit;pointer-events:none;}
 html[data-theme="light"] .tbl td{border-bottom-color:rgba(53,97,143,.10)}
 html[data-theme="light"] .pghd .tt{text-shadow:0 1px 0 rgba(255,255,255,.7)}
+
+/* ==== MONET-V2-EDITORIAL 高級レイアウト (2026-08) =================
+   余白のスケールを上げ・コンテンツは伸び切らせず中央に・見出しはエディトリアルに・
+   縦のリズムを一定に。詰め込みの"事務機"から、呼吸する誌面へ。 */
+
+/* 1) コンテンツ最大幅: 大画面で端から端まで伸び切らない(誌面の版面) */
+.main>*{max-width:1240px;margin-left:auto;margin-right:auto;}
+
+/* 2) ページの余白を拡大(呼吸) */
+.main{padding:34px clamp(22px,4.5vw,56px) 120px;}
+
+/* 3) ページヘッダ=エディトリアルな扉(大きなMincho見出し+気品の小書き+仕切り) */
+.pghd{margin:6px 0 34px;padding-bottom:24px;border-bottom:1px solid var(--line);align-items:flex-end;}
+.pghd .kick{font-size:10px;letter-spacing:.26em;color:var(--ink4);}
+.pghd .tt{font-size:36px;line-height:1.1;margin-top:8px;}
+.pghd .sb{font-size:13px;line-height:1.75;margin-top:10px;max-width:620px;}
+
+/* 4) 縦のリズム(セクション・カード群・数字) */
+.sec{margin-bottom:36px;}
+.sech{margin-bottom:14px;}
+.cardg{gap:18px;}
+.r2,.r2b,.r4{gap:18px;margin-bottom:18px;}
+.kpi-hero{gap:18px;margin:8px 0 28px;}
+.kpi-hero .kh{padding:24px 26px;}
+.kpi-hero .kh .l{letter-spacing:.16em;}
+.kpi-hero .kh .v{font-size:44px;margin-top:8px;}
+.tbar{margin-bottom:18px;}
+.aibox{margin-bottom:20px;}
+
+/* 5) ランチャー=余裕のあるタイル */
+.launch{margin-top:34px;}
+.launch-grp{margin-bottom:30px;}
+.launch-lab{margin-bottom:12px;letter-spacing:.2em;}
+.launch-tiles{gap:14px;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));}
+.launch-tile{padding:18px;gap:14px;}
+
+/* 6) 表=上品なヘッダ行(小さなキャップス) */
+.tbl th{font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--ink4);font-weight:700;padding-bottom:11px;}
+
+/* 7) モーダル/ドロワー=余白の品 */
+.modal .mb{padding:24px 28px;}
+.modal .mh{padding:20px 28px 14px;}
+.drawer .drbody{padding:24px 28px;}
+.drawer .drhd{padding:22px 28px 14px;}
+
+/* 8) 運営ホーム/統括ホームのカード内も同じリズム */
+.eh-card{padding:22px 24px;}
+.eh-head{margin-bottom:22px;}
+.eh-grid{gap:18px;}
+@media(max-width:900px){
+  .main{padding:18px 16px calc(100px + env(safe-area-inset-bottom,0px));}
+  .pghd .tt{font-size:27px;}
+  .kpi-hero .kh .v{font-size:34px;}
+}
 </style>
 <script>
 (function(){var p=document.getElementById('parts');if(!p)return;for(var i=0;i<16;i++){var s=document.createElement('i');s.style.left=(Math.random()*100)+'%';s.style.bottom='-10px';var d=8+Math.random()*10;s.style.animationDuration=d+'s';s.style.animationDelay=(-Math.random()*d)+'s';s.style.opacity=String(.3+Math.random()*.5);s.style.transform='scale('+(.5+Math.random()*1.4)+')';p.appendChild(s);}})();
