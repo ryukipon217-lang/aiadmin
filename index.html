@@ -1488,6 +1488,94 @@ html[data-theme="light"] ::selection{background:#cfe0d9;color:#20303a;}
 .pghd .acts .bsm.pri{box-shadow:0 8px 20px -8px var(--blue);font-weight:800}
 .pghd .acts .bsm:not(.pri):not(.amber):not(.go){opacity:.92}
 .mc{gap:20px}
+
+/* ==== MONET-V2-LUXE 高級感+透明感 (2026-08) =====================
+   紙カード→本物のすりガラスへ。背景の色ブロブをガラスが拾う Liquid Glass。
+   エッジの光(上辺ハイライト+白ボーダー)・多層の深い影・光沢ボタン。 */
+
+/* 1) 背景: 色ブロブを豊かに(ガラスが拾う色) */
+html[data-theme="light"] body{
+  background:
+    radial-gradient(900px 620px at 82% -8%, rgba(53,97,143,.16), transparent 55%),
+    radial-gradient(780px 580px at 2% 102%, rgba(58,145,127,.17), transparent 58%),
+    radial-gradient(640px 520px at 98% 48%, rgba(223,111,82,.11), transparent 60%),
+    radial-gradient(540px 440px at 28% 10%, rgba(199,154,53,.10), transparent 58%),
+    radial-gradient(420px 380px at 55% 85%, rgba(195,185,216,.12), transparent 60%),
+    linear-gradient(168deg,#f7f6f1 0%,#eef3f6 50%,#e6ecf1 100%) !important;
+  background-attachment:fixed !important;
+}
+
+/* 2) カードを本物のすりガラスに(半透明+blur+彩度=透明感) */
+html[data-theme="light"] .tile.glass,
+html[data-theme="light"] .card,
+html[data-theme="light"] .kpc,
+html[data-theme="light"] .kpi-hero .kh,
+html[data-theme="light"] .launch-tile,
+html[data-theme="light"] .eh-card,
+html[data-theme="light"] .kpi-disc{
+  background:linear-gradient(155deg,rgba(255,255,255,.68),rgba(255,255,255,.44)) !important;
+  backdrop-filter:blur(20px) saturate(1.75) !important;
+  -webkit-backdrop-filter:blur(20px) saturate(1.75) !important;
+  border:1px solid rgba(255,255,255,.78) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.95),
+    inset 0 -16px 34px rgba(255,255,255,.14),
+    0 20px 48px -22px rgba(34,49,74,.32),
+    0 4px 14px -8px rgba(34,49,74,.14) !important;
+}
+html[data-theme="light"] .card:hover,
+html[data-theme="light"] .kpc:hover,
+html[data-theme="light"] .launch-tile:hover{
+  border-color:rgba(255,255,255,.95) !important;
+  box-shadow:
+    inset 0 1px 0 #fff,
+    inset 0 -16px 34px rgba(255,255,255,.2),
+    0 26px 60px -24px rgba(34,49,74,.4),
+    0 6px 18px -8px rgba(53,97,143,.18) !important;
+}
+
+/* 3) ナイトも同じ透明言語(暗いガラス) */
+html[data-theme="night"] .tile.glass,
+html[data-theme="night"] .card,
+html[data-theme="night"] .kpc,
+html[data-theme="night"] .kpi-hero .kh,
+html[data-theme="night"] .launch-tile,
+html[data-theme="night"] .eh-card,
+html[data-theme="night"] .kpi-disc{
+  background:linear-gradient(155deg,rgba(26,40,58,.58),rgba(16,28,42,.4)) !important;
+  backdrop-filter:blur(22px) saturate(1.6) brightness(1.06) !important;
+  -webkit-backdrop-filter:blur(22px) saturate(1.6) brightness(1.06) !important;
+  border:1px solid rgba(185,215,240,.16) !important;
+  box-shadow:inset 0 1px 0 rgba(205,230,250,.13), 0 20px 48px -20px rgba(0,0,0,.55) !important;
+}
+
+/* 4) ヘッダ/検索ピル=浮遊ガラスの気品 */
+html[data-theme="light"] .top{
+  background:linear-gradient(180deg,rgba(255,255,255,.6),rgba(255,255,255,.34)) !important;
+  backdrop-filter:blur(26px) saturate(1.8) !important;-webkit-backdrop-filter:blur(26px) saturate(1.8) !important;
+  border-bottom:1px solid rgba(255,255,255,.7) !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9), 0 10px 30px -18px rgba(34,49,74,.2);
+}
+html[data-theme="light"] .cmd{
+  background:linear-gradient(150deg,rgba(255,255,255,.7),rgba(255,255,255,.46)) !important;
+  border:1px solid rgba(255,255,255,.85) !important;
+  box-shadow:inset 0 1px 0 #fff, 0 8px 22px -12px rgba(34,49,74,.22) !important;
+}
+
+/* 5) 高級ディテール: 大数字に深いインクのグラデ・ボタン光沢・罫線を繊細に */
+.kpi-hero .kh .v{
+  background:linear-gradient(160deg,#22314a 20%,#35618f 90%);
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+}
+html[data-theme="night"] .kpi-hero .kh .v{
+  background:linear-gradient(160deg,#f2f5f9 25%,#9cc0da 95%);
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+}
+.kpi-hero .kh .v[style*="color"]{ -webkit-text-fill-color:currentColor; background:none; }
+.btn-pri{position:relative;overflow:hidden;}
+.btn-pri::after{content:"";position:absolute;inset:0 0 55% 0;background:linear-gradient(180deg,rgba(255,255,255,.32),rgba(255,255,255,0));border-radius:inherit;pointer-events:none;}
+html[data-theme="light"] .tbl td{border-bottom-color:rgba(53,97,143,.10)}
+html[data-theme="light"] .pghd .tt{text-shadow:0 1px 0 rgba(255,255,255,.7)}
 </style>
 <script>
 (function(){var p=document.getElementById('parts');if(!p)return;for(var i=0;i<16;i++){var s=document.createElement('i');s.style.left=(Math.random()*100)+'%';s.style.bottom='-10px';var d=8+Math.random()*10;s.style.animationDuration=d+'s';s.style.animationDelay=(-Math.random()*d)+'s';s.style.opacity=String(.3+Math.random()*.5);s.style.transform='scale('+(.5+Math.random()*1.4)+')';p.appendChild(s);}})();
