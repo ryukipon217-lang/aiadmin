@@ -1103,6 +1103,382 @@ html[data-theme="light"] ::selection{background:#cfe0d9;color:#20303a;}
 .n-badge{background:var(--coral);box-shadow:0 0 9px color-mix(in srgb,var(--coral) 45%,transparent);}
 
 </style>
+<style id="monet-v2">/*MONET-V2 全画面Monet再設計(participant DNA)*/
+/* =====================================================================
+   ▚▚ MONET-V2 全画面再設計シート (monet-retheme の後に置く / 置換可) ▚▚
+   参加者Monetアプリのデザイン言語へ忠実に寄せる深化版。
+   ライトを既定基調・night も破綻しない上書きを併記。
+   触らない: .eh-* / .tt-*(Timetable) / .msym / .cormo / EventHome / 受付
+   ===================================================================== */
+
+/* ---- 0. Monet デザイントークン(全テーマ共通の基幹値) ---------------- */
+:root{
+  --mg-accent:#35618f; --mg-accent-deep:#274c73;
+  --mg-ink:#22314a; --mg-ink2:#2b3d57; --mg-ink3b:#4c6584; --mg-ink4:#5b7796; --mg-ink5:#8ba0b6;
+  --mg-cat-koryu:#df6f52; --mg-cat-bunka:#c79a35; --mg-cat-gengo:#3a917f;
+  --mg-cream1:rgba(250,243,215,.97); --mg-cream2:rgba(244,232,196,.94); --mg-cream-bd:rgba(233,208,106,.7);
+  --mg-tint:rgba(53,97,143,.07); --mg-tint-bd:rgba(53,97,143,.18);
+  /* 角丸(密度確保のため参加者値を上限に絞る) */
+  --mg-r-card:22px; --mg-r-card-lg:24px; --mg-r-btn:999px; --mg-r-chip:15px; --mg-r-field:14px;
+  /* 柔らかい多層影 + 内側白ハイライト */
+  --mg-sh-card:0 12px 30px -14px rgba(34,49,74,.22), 0 3px 10px -6px rgba(34,49,74,.14);
+  --mg-sh-card-hi:inset 0 1px 0 rgba(255,255,255,.85);
+  --mg-sh-glass:0 16px 40px -18px rgba(34,49,74,.24);
+  --mg-sh-btn:0 12px 26px -10px rgba(39,76,115,.42);
+  --mg-ease-tap:cubic-bezier(.2,.8,.2,1); --mg-ease-motion:cubic-bezier(.16,1,.3,1);
+}
+
+/* ---- 1. LIGHT(既定基調)トークン再定義 ------------------------------- */
+html[data-theme="light"]{
+  --head:#22314a; --ink:#22314a; --ink2:#2b3d57; --ink3:#4c6584; --ink4:#5b7796;
+  --blue:#35618f; --blue-deep:#274c73; --sky:#3a7fa8;
+  --coral:#df6f52; --orange:#df6f52; --rose:#c0506a; --pink:#b06496;
+  --amber:#c79a35; --yellow:#c79a35; --lime:#8a9330;
+  --teal:#3a917f; --green:#3a917f; --grass:#4aa593; --emerald:#3a917f; --cyan:#3a917f;
+  --violet:#6a5cc0; --indigo:#4f5eb0; --slate:#6a7e8c;
+  --line:rgba(53,97,143,.14); --line2:rgba(53,97,143,.24);
+  --glass:rgba(255,255,255,.9); --glassb:rgba(255,255,255,.9);
+  --grad:linear-gradient(122deg,#35618f 0%,#3a7f86 55%,#3a917f 100%);
+  --grad-blue:linear-gradient(95deg,#35618f,#3a917f);
+  --scrim:rgba(230,236,240,.55);
+  --sh1:0 4px 14px -8px rgba(34,49,74,.18);
+  --sh2:0 12px 30px -16px rgba(34,49,74,.20);
+  --sh3:0 24px 56px -28px rgba(34,49,74,.24);
+}
+html[data-theme="light"] body{
+  background:
+    radial-gradient(1200px 720px at 78% -12%,#ffffff,transparent 60%),
+    radial-gradient(820px 640px at 2% 108%,rgba(58,145,127,.10),transparent 58%),
+    radial-gradient(680px 560px at 100% 44%,rgba(223,111,82,.06),transparent 60%),
+    radial-gradient(520px 460px at 24% 6%,rgba(199,154,53,.05),transparent 58%),
+    linear-gradient(168deg,#fbfaf7 0%,#f5f8fa 55%,#eef3f5 100%);
+  background-attachment:fixed;
+}
+
+/* ---- 2. NIGHT(破綻しない上書き)トークン --------------------------- */
+html[data-theme="night"]{
+  --blue:#4a7bb0; --blue-deep:#2c5480; --sky:#5f97c9;
+  --coral:#df6f52; --orange:#df6f52; --rose:#d06a86; --pink:#c98fb8;
+  --amber:#d7ad4a; --yellow:#d7ad4a; --lime:#b7bd66;
+  --teal:#4aa593; --green:#4aa593; --grass:#5cb79f; --emerald:#4aa593; --cyan:#57b3a8;
+  --violet:#9a8fd6; --indigo:#7d8fce; --slate:#8ea4b6;
+  --head:#f2eee7; --ink:#e6ede6; --ink2:#b3c3c9; --ink3:#8ba0a6; --ink4:#748a90;
+  --line:rgba(120,170,190,.16); --line2:rgba(120,170,190,.30);
+  --glass:rgba(20,32,44,.44); --glassb:rgba(180,205,215,.22);
+  --grad:linear-gradient(122deg,#2c5480 0%,#35618f 32%,#3a7f86 60%,#3a917f 82%,#4aa593 100%);
+  --grad-blue:linear-gradient(95deg,#35618f,#3a917f);
+  --scrim:rgba(10,18,24,.66);
+}
+
+/* ---- 3. タイポ(見出し=Zen Old Mincho / 数字=Cormorant は retheme 継承) - */
+body{font-family:'Zen Kaku Gothic New','Hiragino Sans',var(--s);letter-spacing:.005em;}
+.pghd .tt,.modal .mh .h,.drhd .dt,.hero h1,.brand b,.navsys{
+  font-family:'Zen Old Mincho','Noto Serif JP',serif;font-weight:700;letter-spacing:.012em;}
+
+/* =====================================================================
+   ■ 枠(ページヘッダ)
+   ===================================================================== */
+.pghd .tt{font-size:26px;letter-spacing:-.01em;line-height:1.08;}
+.pghd .tt i{color:var(--teal);font-style:italic;}
+.pghd .sb{font-size:12.5px;color:var(--ink3);margin-top:5px;}
+.kick{color:var(--ink4);letter-spacing:.12em;}
+
+/* =====================================================================
+   ■ カード / タイル / ガラス面 (paper 白ガラス + 多層影 + 内側白ハイライト)
+   ===================================================================== */
+/* カード実体はブラー無し・多層影のみ(性能規約) */
+html[data-theme="light"] .tile.glass,
+html[data-theme="light"] .card,
+html[data-theme="light"] .kpc{
+  background:linear-gradient(155deg,rgba(255,255,255,.94),rgba(255,255,255,.82)) !important;
+  border:1px solid rgba(255,255,255,.9) !important;
+  backdrop-filter:none !important;-webkit-backdrop-filter:none !important;
+  box-shadow:var(--mg-sh-card-hi),var(--mg-sh-card) !important;
+}
+html[data-theme="night"] .tile.glass,
+html[data-theme="night"] .card,
+html[data-theme="night"] .kpc{
+  box-shadow:inset 0 1px 0 rgba(210,230,235,.12),var(--mg-sh-card) !important;
+}
+.tile{border-radius:var(--mg-r-card);}
+.card{border-radius:var(--mg-r-card);}
+.kpc{border-radius:18px;}
+/* 実ブラーを使うのは真のガラス面のみ(タブ/バー/フロスト) */
+html[data-theme="light"] .glass{
+  background:linear-gradient(150deg,rgba(255,255,255,.5),rgba(255,255,255,.24));
+  border:1px solid rgba(255,255,255,.6);
+  backdrop-filter:blur(30px) saturate(1.9);-webkit-backdrop-filter:blur(30px) saturate(1.9);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.85),var(--mg-sh-glass);
+}
+/* カード ホバー: 柔らかい浮上 */
+html[data-theme="light"] .card:hover,
+html[data-theme="light"] .tile.lift:hover,
+html[data-theme="light"] .kpc:hover{
+  border-color:color-mix(in srgb,var(--mg-accent) 30%,rgba(255,255,255,.9)) !important;
+  box-shadow:var(--mg-sh-card-hi),0 20px 44px -18px rgba(34,49,74,.26) !important;
+}
+.card:hover .edge{box-shadow:0 0 14px -2px var(--mg-accent);}
+
+/* =====================================================================
+   ■ ボタン (一次=ピル濃青グラデ / amber=クリーム寄り / go=teal / ai=violet→青)
+   ===================================================================== */
+.btn{border-radius:var(--mg-r-btn);height:44px;letter-spacing:.04em;}
+.btn-pri{
+  background:linear-gradient(150deg,rgba(53,97,143,.95),rgba(39,76,115,.98));
+  color:#f2f7fc;border:1px solid rgba(255,255,255,.32);
+  box-shadow:var(--mg-sh-btn),inset 0 1px 0 rgba(255,255,255,.28);
+}
+.btn-yellow{
+  background:linear-gradient(150deg,var(--mg-cream1),var(--mg-cream2));
+  color:#6b5212;border:1px solid var(--mg-cream-bd);
+  box-shadow:0 12px 26px -12px rgba(199,154,53,.4),inset 0 1px 0 rgba(255,255,255,.8);
+}
+.bsm{
+  height:38px;border-radius:var(--mg-r-btn);font-size:12.5px;letter-spacing:.02em;
+  border:1px solid var(--line2);
+  background:linear-gradient(150deg,rgba(255,255,255,.72),rgba(255,255,255,.42));
+  color:var(--ink);box-shadow:inset 0 1px 0 rgba(255,255,255,.7);
+}
+html[data-theme="night"] .bsm{
+  background:linear-gradient(150deg,rgba(120,170,190,.10),rgba(120,170,190,.05));
+}
+.bsm:hover{border-color:color-mix(in srgb,var(--mg-accent) 46%,transparent);color:var(--head);}
+.bsm.pri{
+  background:linear-gradient(150deg,rgba(53,97,143,.95),rgba(39,76,115,.98));
+  border:1px solid rgba(255,255,255,.3);color:#f2f7fc;
+  box-shadow:0 10px 22px -10px rgba(39,76,115,.45),inset 0 1px 0 rgba(255,255,255,.25);
+}
+.bsm.amber{
+  background:linear-gradient(150deg,var(--mg-cream1),var(--mg-cream2));
+  border:1px solid var(--mg-cream-bd);color:#6b5212;
+  box-shadow:0 8px 18px -10px rgba(199,154,53,.4),inset 0 1px 0 rgba(255,255,255,.8);
+}
+.bsm.go{
+  background:linear-gradient(150deg,var(--mg-cat-gengo),#4aa593);
+  border:0;color:#fbfcfd;box-shadow:0 8px 20px -9px rgba(58,145,127,.5);
+}
+.bsm.ai{
+  background:linear-gradient(150deg,var(--violet),var(--mg-accent));
+  border:0;color:#fbfcfd;box-shadow:0 8px 20px -9px rgba(106,92,192,.5);
+}
+.bsm.danger{
+  border-color:color-mix(in srgb,var(--coral) 50%,transparent);color:var(--coral);
+  background:linear-gradient(150deg,rgba(223,111,82,.10),rgba(223,111,82,.04));
+}
+/* 押下: 参加者アプリの scale(.965) を管理向けに軽く */
+.bsm:active,.btn:active{transform:scale(.975);filter:brightness(.97);}
+/* light の白文字維持(retheme/base 上書き) */
+html[data-theme="light"] .btn-pri,
+html[data-theme="light"] .bsm.pri,
+html[data-theme="light"] .bsm.ai,
+html[data-theme="light"] .bsm.go{color:#f2f7fc;}
+html[data-theme="light"] .btn-pri svg,
+html[data-theme="light"] .bsm.pri svg,
+html[data-theme="light"] .bsm.ai svg,
+html[data-theme="light"] .bsm.go svg{stroke:#f2f7fc;}
+
+/* =====================================================================
+   ■ 入力 (.fld) — field 14px / focus は accent / tint 面
+   ===================================================================== */
+.fld label{font-size:11px;letter-spacing:.14em;color:var(--ink4);font-weight:500;margin-bottom:6px;}
+.fld input,.fld select,.fld textarea{
+  border-radius:var(--mg-r-field);
+  background:var(--mg-tint);border:1px solid var(--mg-tint-bd);
+  color:var(--ink);
+  transition:border-color .25s ease,box-shadow .25s ease;
+}
+.fld input::placeholder,.fld textarea::placeholder{color:var(--mg-ink5);}
+.fld input:focus,.fld select:focus,.fld textarea:focus{
+  border-color:var(--mg-accent);
+  box-shadow:0 0 0 3px rgba(53,97,143,.12);
+}
+.fld input[aria-invalid="true"],.fld textarea[aria-invalid="true"],.fld .is-error{
+  border-color:rgba(179,69,63,.7);
+}
+input[type=checkbox],input[type=radio]{accent-color:var(--mg-accent);}
+
+/* =====================================================================
+   ■ KPI / 数字 — 色のみ(font は retheme の Cormorant italic を継承)
+   ===================================================================== */
+.kpc .kl{color:var(--ink2);}
+.kpc .kv{color:var(--mg-accent);}
+.kpc.amber .kv{color:var(--amber);}
+.kpc.coral .kv{color:var(--coral);}
+.kpc.green .kv{color:var(--teal);}
+.kpc.sky .kv{color:var(--sky);}
+.kpc.blue .kv{color:var(--mg-accent);}
+.kpc.teal .kv{color:var(--teal);}
+.kpc.violet .kv{color:var(--violet);}
+.kpc .kd{color:var(--ink4);}
+html[data-theme="light"] .gauge .gv,
+html[data-theme="light"] .kpi-mini .kv{
+  background:linear-gradient(120deg,#22314a,var(--mg-accent));
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+}
+html[data-theme="night"] .gauge .gv,
+html[data-theme="night"] .kpi-mini .kv{
+  background:linear-gradient(120deg,#eef4f2,#7fc0b0 110%);
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+}
+.kpi-hero .kh{
+  border-radius:18px;
+  background:linear-gradient(155deg,rgba(255,255,255,.9),rgba(255,255,255,.78));
+  border:1px solid rgba(255,255,255,.9);
+  box-shadow:var(--mg-sh-card-hi),var(--mg-sh-card);
+}
+html[data-theme="night"] .kpi-hero .kh{
+  background:var(--glass);border:1px solid var(--line);
+  box-shadow:inset 0 1px 0 rgba(210,230,235,.12),var(--mg-sh-card);
+}
+.kpi-hero .kh .v{color:var(--head);}
+
+/* =====================================================================
+   ■ チップ / セグメント / タブ (OFF=白ピル面 / ON=濃青グラデ)
+   ===================================================================== */
+.chipf{
+  border-radius:var(--mg-r-chip);height:32px;font-weight:500;letter-spacing:.03em;
+  background:linear-gradient(150deg,rgba(255,255,255,.72),rgba(255,255,255,.42));
+  border:1px solid rgba(255,255,255,.75);color:var(--ink2);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.7);
+}
+html[data-theme="night"] .chipf{
+  background:linear-gradient(150deg,rgba(120,170,190,.10),rgba(120,170,190,.05));
+  border-color:var(--line);
+}
+.chipf:hover{border-color:color-mix(in srgb,var(--mg-accent) 34%,transparent);color:var(--head);}
+.chipf.on{
+  background:linear-gradient(150deg,rgba(53,97,143,.93),rgba(39,76,115,.97)) !important;
+  color:#f2f7fc !important;border:1px solid rgba(255,255,255,.35) !important;
+  box-shadow:0 8px 18px -9px rgba(39,76,115,.42) !important;font-weight:600;
+}
+.chipf .c{opacity:.75;}
+.segs{
+  border-radius:13px;background:var(--mg-tint);border:1px solid var(--mg-tint-bd);
+}
+.seg{border-radius:9px;color:var(--ink3);}
+.seg:hover{color:var(--ink);}
+.seg.on{
+  background:linear-gradient(150deg,rgba(53,97,143,.93),rgba(39,76,115,.97)) !important;
+  color:#f2f7fc !important;font-weight:600;
+  box-shadow:0 6px 14px -8px rgba(39,76,115,.4);
+}
+.stab button{border-radius:9px;border:1px solid var(--line);color:var(--ink2);}
+.stab button.on{
+  background:linear-gradient(150deg,rgba(53,97,143,.93),rgba(39,76,115,.97)) !important;
+  color:#f2f7fc !important;border:0 !important;
+}
+
+/* =====================================================================
+   ■ テーブル — 可読な行区切り(密度維持)
+   ===================================================================== */
+.tblw{border-radius:16px;}
+.tbl th{
+  color:var(--ink4);letter-spacing:.08em;
+  border-bottom:1px solid var(--line2);
+}
+.tbl td{
+  border-bottom:1px solid var(--line);color:var(--ink2);
+}
+.tbl tbody tr:hover{background:rgba(53,97,143,.05);}
+.tbl tbody tr.sel{background:linear-gradient(90deg,rgba(199,154,53,.10),transparent);}
+.tbl .nm{color:var(--head);}
+
+/* =====================================================================
+   ■ バッジ (.badge/.b-* /.bd) — ピル + カテゴリ色ドット
+   ===================================================================== */
+.badge,.bd{border-radius:var(--mg-r-chip);letter-spacing:.04em;}
+.b-ok{background:color-mix(in srgb,var(--teal) 16%,transparent);color:color-mix(in srgb,var(--teal) 82%,var(--ink));}
+.b-warn{
+  background:linear-gradient(150deg,var(--mg-cream1),var(--mg-cream2));
+  color:#6b5212;border:1px solid var(--mg-cream-bd);
+}
+.b-info{background:color-mix(in srgb,var(--mg-accent) 16%,transparent);color:var(--mg-accent);}
+.b-mute{background:color-mix(in srgb,var(--ink4) 16%,transparent);color:var(--ink3);}
+
+/* =====================================================================
+   ■ ナビ / ヘッダー
+   ===================================================================== */
+html[data-theme="light"] .top.glass{
+  background:linear-gradient(180deg,rgba(255,255,255,.84),rgba(255,255,255,.66));
+  backdrop-filter:blur(38px) saturate(160%);-webkit-backdrop-filter:blur(38px) saturate(160%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.95),inset 0 -1px 0 rgba(255,255,255,.55);
+}
+.brand .mk{box-shadow:0 8px 24px -8px rgba(53,97,143,.5),inset 0 1px 0 rgba(255,255,255,.4);}
+.brand b i{color:var(--teal);}
+.rolechip{
+  color:var(--mg-accent);
+  background:color-mix(in srgb,var(--mg-accent) 12%,transparent);
+  border:1px solid color-mix(in srgb,var(--mg-accent) 30%,transparent);
+}
+.rolechip .rd{background:var(--mg-accent);box-shadow:0 0 8px var(--mg-accent);}
+.cmd .dot{background:var(--mg-accent);box-shadow:0 0 12px var(--teal);}
+.ni.on{
+  background:linear-gradient(100deg,color-mix(in srgb,var(--mg-accent) 14%,transparent),color-mix(in srgb,var(--teal) 10%,transparent));
+  box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--mg-accent) 26%,transparent);
+  color:var(--head);
+}
+.ni.on::before{background:var(--mg-accent);box-shadow:0 0 12px color-mix(in srgb,var(--mg-accent) 70%,transparent);}
+.ni.on svg{color:var(--mg-accent);}
+.ni .lk{color:var(--amber);background:color-mix(in srgb,var(--amber) 15%,transparent);border-color:color-mix(in srgb,var(--amber) 40%,transparent);}
+.n-badge{background:var(--coral);box-shadow:0 0 9px color-mix(in srgb,var(--coral) 45%,transparent);}
+
+/* =====================================================================
+   ■ ランチャー
+   ===================================================================== */
+.launch-lab{color:var(--ink4);letter-spacing:.14em;}
+.launch-tile{
+  border-radius:18px;
+  background:linear-gradient(155deg,rgba(255,255,255,.9),rgba(255,255,255,.78));
+  border:1px solid rgba(255,255,255,.9);
+  box-shadow:var(--mg-sh-card-hi),var(--mg-sh-card);
+  backdrop-filter:blur(18px) saturate(140%);-webkit-backdrop-filter:blur(18px) saturate(140%);
+}
+html[data-theme="night"] .launch-tile{
+  background:var(--glass);border-color:var(--line);
+  box-shadow:inset 0 1px 0 rgba(210,230,235,.10),var(--mg-sh-card);
+}
+.launch-tile:hover{
+  transform:translateY(-2px);
+  border-color:color-mix(in srgb,var(--mg-accent) 42%,rgba(255,255,255,.9));
+  box-shadow:var(--mg-sh-card-hi),0 16px 34px -16px rgba(34,49,74,.28);
+}
+.launch-tile .lt-lb{color:var(--head);}
+.launch-tile .lt-lk{color:var(--amber);}
+
+/* =====================================================================
+   ■ AI ボックス / プログレス
+   ===================================================================== */
+.aibox{
+  border-radius:16px;
+  border:1px solid color-mix(in srgb,var(--violet) 32%,var(--line));
+  background:linear-gradient(120deg,color-mix(in srgb,var(--violet) 11%,transparent),color-mix(in srgb,var(--teal) 6%,transparent));
+}
+.aibox::after{background:linear-gradient(180deg,var(--violet),var(--teal));}
+.pbar i{background:linear-gradient(90deg,var(--mg-accent),var(--teal));}
+.conf i{background:linear-gradient(90deg,var(--mg-accent),var(--teal));}
+.bootpg i{background:var(--grad-blue);box-shadow:0 0 8px var(--teal);}
+
+/* =====================================================================
+   ■ Modal / Drawer
+   ===================================================================== */
+.modal{border-radius:24px;}
+html[data-theme="light"] .modal,
+html[data-theme="light"] .drawer{
+  background:linear-gradient(180deg,rgba(255,255,255,.99),rgba(255,255,255,.95));
+  border-color:rgba(255,255,255,.9);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.95),var(--sh3) !important;
+}
+.modal .mh{border-bottom:1px solid var(--line);}
+.modal .mh .h{color:var(--head);}
+.drhd{background:var(--grad);color:#f2f7fc;}
+html[data-theme="light"] .drhd{--head:#f2f7fc;color:#f2f7fc;}
+
+/* =====================================================================
+   ■ 選択色
+   ===================================================================== */
+::selection{background:color-mix(in srgb,var(--mg-accent) 26%,transparent);color:var(--head);}
+html[data-theme="light"] ::selection{background:#cfe0d9;color:#20303a;}
+</style>
 <script>
 (function(){var p=document.getElementById('parts');if(!p)return;for(var i=0;i<16;i++){var s=document.createElement('i');s.style.left=(Math.random()*100)+'%';s.style.bottom='-10px';var d=8+Math.random()*10;s.style.animationDuration=d+'s';s.style.animationDelay=(-Math.random()*d)+'s';s.style.opacity=String(.3+Math.random()*.5);s.style.transform='scale('+(.5+Math.random()*1.4)+')';p.appendChild(s);}})();
 window.GAS=(function(){var URL='https://script.google.com/macros/s/AKfycbxLs1eXm39MHM0lSioBf9ghVFL8p8fIhIdYJpBBweBTCLOFDqWclPhoF66c0FgfrbHg/exec';
