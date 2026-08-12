@@ -2347,8 +2347,8 @@ window.GAS=(function(){var URL='https://script.google.com/macros/s/AKfycbxLs1eXm
   //   (本体4万行=ロード~3.4s に対し、軽量は数百行=cold start~1s)。失敗時は本体GASへ自動フォールバック=壊れない。
   //   デプロイ後にこの空文字を新URLへ差し替えるだけ(read-api.gs のヘッダ参照)。
   /* (2026-08-12 再建) 軽量読取API=新アカウントの別プロジェクト(scriptId 1wIRMvjwQ61V4SRUW8mLRqG8k9MQ9m50mmzZ0Ml7abNI6ZjMBGunF0jQ1)。
-     移行後は本体と同一URLを指していて実質無効だった。オーナー承認+AUTH_SECRET同期までは失敗→本体へ自動フォールバック(無害)。 */
-  var READ_API_URL='https://script.google.com/macros/s/AKfycbyVuaaP3yV2OFb4U-bc6Kktuj0ZKKyM77-nEHrGF-PoZfabACUwQwdN-yjx4ugZolUS/exec';
+     移行後は本体と同一URLを指していて実質無効だった。UI発行のWebアプリURL(API経由デプロイは/exec入口が紐付かない罠あり)。認証不一致時は本体へ自動フォールバック。 */
+  var READ_API_URL='https://script.google.com/macros/s/AKfycbxm-_IBapGbmilVQSzPhsLhL6cMwm8_bIwxyq8Wh8j3IxXjGjBz234EwEohFe18EAY/exec';
   var READ_API_ACTIONS={listEvents:1,listParticipants:1,listRegistrations:1,listTodos:1};
   function mid(){try{return localStorage.getItem('connecta.memberId')||'';}catch(e){return'';}}function tok(){try{return localStorage.getItem('connecta.token')||'';}catch(e){return'';}}
   function setSession(id,t){try{if(id)localStorage.setItem('connecta.memberId',id);if(t)localStorage.setItem('connecta.token',t);}catch(e){}}function clearSession(){try{localStorage.removeItem('connecta.memberId');localStorage.removeItem('connecta.token');localStorage.removeItem('gas_cache_v1');}catch(e){}}
