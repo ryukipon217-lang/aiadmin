@@ -2445,7 +2445,8 @@ window.GAS=(function(){var URL='https://script.google.com/macros/s/AKfycbxLs1eXm
     // (高速化) 対象readは軽量API優先(silent=認証不一致でもログアウトさせず本体へ委譲)。2回連続で不調なら以後は本体直行=無駄な往復(タックス)を打ち切る。
     if(READ_API_URL&&!__liteOff&&READ_API_ACTIONS[a]){
       try{ var _d=await _rawFetchAt(READ_API_URL,a,p,Math.min(timeoutMs||12000,5000),true); __liteFails=0; return _d; }
-      catch(e){ if(++__liteFails>=2){__liteOff=true;try{console.warn('[lite] 軽量API不調→本体GASに切替(AUTH_SECRET不一致の可能性)');}catch(_){}} }
+      catch(e){ if(++__liteFails>=2&&!__liteOff){__liteOff=true;try{console.warn('[lite] 軽量API不調→本体GASに切替(5分後に自動復帰)');}catch(_){}
+        setTimeout(function(){__liteOff=false;__liteFails=0;},300000); } }   // GAS混雑スパイクは数分で収まるため、恒久OFFにせず再挑戦する
     }
     // (2026-08 Load failed対策) 読取は冪等 → 一時的なネットワーク不調/5xx/404/タイムアウトは指数バックオフで自動リトライ(最大2回)。それでも駄目なら親切文言を投げる。
     //   404を含む理由: GASは並列GET時に応答リダイレクト先(script.googleusercontent.com/macros/echo)が一過性の404を返すことがある(再送で成功する)。
