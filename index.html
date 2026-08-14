@@ -35,7 +35,7 @@
 :root{--head:#20294a;--blue:#6E86E0;--blue-deep:#4F63C4;--sky:#7D92E8;--teal:#5AA6D8;--green:#5BB79A;--grass:#6FC29A;--yellow:#E8B94A;--coral:#EF8AA0;--violet:#9B8CE8;--cyan:#5FBEDC;--indigo:#6E86E0;--emerald:#5BB79A;--lime:#9BC46A;--amber:#E0A64A;--orange:#EF9A70;--rose:#EC8AA6;--pink:#DFA0E0;--slate:#7E8AB0;
   --ink:#2f3a58;--ink2:#4a5a80;--ink3:#7484a8;--ink4:#94a2c2;--line:rgba(70,90,170,.14);--line2:rgba(70,90,170,.26);
   --glass:rgba(255,255,255,.58);--glassb:rgba(255,255,255,.72);
-  --grad:linear-gradient(118deg,#8fa4ee 0%,#7789e7 32%,#8b81e1 62%,#bb8ed2 100%);--grad-blue:linear-gradient(122deg,#8fa4ee 0%,#7789e7 34%,#8b81e1 64%,#bb8ed2 100%);
+  --grad:linear-gradient(118deg,#8fb8f0 0%,#9db4ee 32%,#dcc0e2 62%,#f4cbd8 100%);--grad-blue:linear-gradient(122deg,#8fb8f0 0%,#9db4ee 34%,#dcc0e2 64%,#f4cbd8 100%);
   --d:'Outfit','Noto Sans JP',sans-serif;--s:'Inter Tight','Noto Sans JP',sans-serif;--m:'JetBrains Mono',monospace;
   /* (index パリティ) ヒーローオーバーレイ/記念スタンプ描画用。index.html と同じ定義。console 本体UI(--d/--s/--m)には未使用=見た目不変。 */
   --mono:'JetBrains Mono',monospace;--serif:'Fraunces','Noto Serif JP','Cormorant Garamond',serif;--serif-jp:'Noto Serif JP',serif;--serif-classic:'Cormorant Garamond','Noto Serif JP',Georgia,serif;--jp:'Zen Kaku Gothic New','Hiragino Sans',sans-serif;--sans:'Plus Jakarta Sans',system-ui,sans-serif;}
@@ -322,10 +322,10 @@ html[data-theme="light"] .bsm.pri,html[data-theme="light"] .bsm.ai,html[data-the
 html[data-theme="light"] .btn-yellow{--head:#241E14}
 html[data-theme="light"] .bsm.pri svg,html[data-theme="light"] .bsm.ai svg,html[data-theme="light"] .btn-pri svg{stroke:#fff}
 /* (パステル) 光沢ボタン: ペリウィンクル+藤の二重グロー+上端の白光沢。オーロラ地に映える。 */
-html[data-theme="light"] .btn-pri{box-shadow:0 12px 26px -12px rgba(123,131,224,.5),0 6px 16px -10px rgba(187,142,210,.4),inset 0 1px 0 rgba(255,255,255,.55)!important}
-html[data-theme="light"] .bsm.pri,html[data-theme="light"] .bsm.ai{box-shadow:0 10px 22px -11px rgba(123,131,224,.46),0 5px 14px -9px rgba(187,142,210,.34),inset 0 1px 0 rgba(255,255,255,.5)!important}
-html[data-theme="light"] .btn-pri:hover,html[data-theme="light"] .bsm.pri:hover{filter:brightness(1.04) saturate(1.05);box-shadow:0 14px 30px -12px rgba(123,131,224,.56),0 7px 18px -10px rgba(187,142,210,.44),inset 0 1px 0 rgba(255,255,255,.6)!important}
-html[data-theme="light"] [data-qa-fab]{box-shadow:0 16px 34px -12px rgba(123,131,224,.55),0 8px 20px -10px rgba(187,142,210,.44)!important}
+html[data-theme="light"] .btn-pri{box-shadow:0 12px 26px -12px rgba(123,131,224,.5),0 6px 16px -10px rgba(244,196,212,.4),inset 0 1px 0 rgba(255,255,255,.55)!important}
+html[data-theme="light"] .bsm.pri,html[data-theme="light"] .bsm.ai{box-shadow:0 10px 22px -11px rgba(123,131,224,.46),0 5px 14px -9px rgba(244,196,212,.34),inset 0 1px 0 rgba(255,255,255,.5)!important}
+html[data-theme="light"] .btn-pri:hover,html[data-theme="light"] .bsm.pri:hover{filter:brightness(1.04) saturate(1.05);box-shadow:0 14px 30px -12px rgba(123,131,224,.56),0 7px 18px -10px rgba(244,196,212,.44),inset 0 1px 0 rgba(255,255,255,.6)!important}
+html[data-theme="light"] [data-qa-fab]{box-shadow:0 16px 34px -12px rgba(123,131,224,.55),0 8px 20px -10px rgba(244,196,212,.44)!important}
 html[data-theme="light"] .btn-yellow{box-shadow:0 6px 16px -8px rgba(245,166,35,.42),inset 0 1px 0 rgba(255,255,255,.5)!important}
 /* モーダル/ドロワー/サイド/AIパネルを純白+光沢+軽い影に */
 html[data-theme="light"] .modal,html[data-theme="light"] .drawer,html[data-theme="light"] .aoi-panel{background:linear-gradient(180deg,rgba(255,255,255,.99),rgba(255,255,255,.95));border-color:var(--glassb);box-shadow:inset 0 1px 0 rgba(255,255,255,.95),var(--sh3)!important}
@@ -727,7 +727,7 @@ input[type=checkbox]:disabled,input[type=radio]:disabled{opacity:.45;cursor:not-
 .eh-date{font-size:24px;font-weight:700;position:relative;padding-bottom:7px}.eh-date span{color:#8695a8;font-weight:500;font-size:15px;margin-left:7px}
 .eh-date::after{content:"";position:absolute;left:1px;bottom:0;width:48px;height:3px;border-radius:3px;background:linear-gradient(90deg,var(--k),var(--bunka))}
 .eh-chip{display:inline-flex;align-items:center;gap:7px;font-weight:700;font-size:12.5px;padding:8px 15px;border-radius:999px;cursor:pointer;border:1px solid var(--gb)}
-.eh-chip .mi{font-size:16px}.eh-chip.prep{background:rgba(220,239,233,.7);color:#2c6f60}.eh-chip.livec{background:linear-gradient(120deg,#7789e7,#8b81e1 60%,#a98ed8);color:#fff}
+.eh-chip .mi{font-size:16px}.eh-chip.prep{background:rgba(220,239,233,.7);color:#2c6f60}.eh-chip.livec{background:linear-gradient(120deg,#9db4ee,#dcc0e2 60%,#f0cedb);color:#fff}
 /* (REFINE18 C6) 右レール=KPI帯の第4列頭に載せる: レール幅を「4列グリッドの1列分」に一致させ帯リズムを全画面で通す */
 .eh-grid{display:grid;grid-template-columns:minmax(0,1fr) calc((100% - 72px)/4);gap:24px}@media(max-width:1000px){.eh-grid{grid-template-columns:1fr}}
 .eh-card{background:var(--g);border:1px solid var(--gb);border-radius:22px;backdrop-filter:blur(24px) saturate(1.4);-webkit-backdrop-filter:blur(24px) saturate(1.4);box-shadow:0 18px 44px rgba(34,49,74,.12),inset 0 1px 0 rgba(255,255,255,.6)}
@@ -757,7 +757,7 @@ input[type=checkbox]:disabled,input[type=radio]:disabled{opacity:.45;cursor:not-
 .eh-b{display:flex;align-items:center;gap:13px;padding:16px 18px;border-radius:16px;cursor:pointer;background:rgba(255,255,255,.5);border:1px solid var(--gb);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
 .eh-b .ic{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center}.eh-b .ic .mi{font-size:23px}
 .eh-b .t{font-weight:700;font-size:15px}.eh-b .s{font-size:12px;color:#8695a8}
-.eh-b.prim{background:linear-gradient(122deg,#8fa4ee 0%,#7789e7 34%,#8b81e1 64%,#bb8ed2 100%);border:0;box-shadow:0 12px 26px -12px rgba(123,131,224,.5),0 6px 16px -10px rgba(187,142,210,.4)}.eh-b.prim .t,.eh-b.prim .s{color:#fff}.eh-b.prim .s{color:rgba(255,255,255,.85)}.eh-b.prim .ic{background:rgba(255,255,255,.22);color:#fff}
+.eh-b.prim{background:linear-gradient(122deg,#8fb8f0 0%,#9db4ee 34%,#dcc0e2 64%,#f4cbd8 100%);border:0;box-shadow:0 12px 26px -12px rgba(123,131,224,.5),0 6px 16px -10px rgba(244,196,212,.4)}.eh-b.prim .t,.eh-b.prim .s{color:#fff}.eh-b.prim .s{color:rgba(255,255,255,.85)}.eh-b.prim .ic{background:rgba(255,255,255,.22);color:#fff}
 .eh-count{padding:28px;text-align:center;border-top:4px solid var(--k)}
 .eh-count .big{display:flex;align-items:baseline;justify-content:center;gap:12px;margin-top:6px}.eh-count .big .n{font-size:120px;background:linear-gradient(165deg,#20304a,#3f5f86);-webkit-background-clip:text;background-clip:text;color:transparent}.eh-count .big .of{font-size:38px;color:#8695a8}
 .eh-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px}.eh-tile{padding:14px;text-align:center;border-radius:15px;background:rgba(255,255,255,.4);border:1px solid var(--gb)}.eh-tile .n{font-size:34px}.eh-tile .l{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:#8695a8;margin-top:4px}
@@ -2344,7 +2344,7 @@ html[data-theme="night"] .seg.on{background:transparent !important;color:#eaf1fb
 html[data-theme="night"] .chipf.on{background:none !important;color:#a9c6e8 !important;border-color:rgba(150,190,235,.4) !important;}
 /* (パステル/シャボン玉) ライトテーマのチップは虹彩フロスト。選択は淡いオーロラのピル+やわらかグロー。 */
 html[data-theme="light"] .chipf{background:linear-gradient(180deg,rgba(255,255,255,.62),rgba(255,255,255,.42)) !important;border-color:rgba(120,130,200,.22) !important;backdrop-filter:blur(10px) saturate(150%);-webkit-backdrop-filter:blur(10px) saturate(150%);color:var(--ink2) !important;}
-html[data-theme="light"] .chipf.on{background:linear-gradient(122deg,#93a6ef 0%,#8b82e2 58%,#bb8ed2 100%) !important;color:#fff !important;border-color:transparent !important;box-shadow:0 7px 16px -8px rgba(123,131,224,.5),0 3px 10px -6px rgba(187,142,210,.42),inset 0 1px 0 rgba(255,255,255,.5) !important;}
+html[data-theme="light"] .chipf.on{background:linear-gradient(122deg,#92b7f0 0%,#cdc0e6 58%,#f4cbd8 100%) !important;color:#fff !important;border-color:transparent !important;box-shadow:0 7px 16px -8px rgba(123,131,224,.5),0 3px 10px -6px rgba(244,196,212,.42),inset 0 1px 0 rgba(255,255,255,.5) !important;}
 html[data-theme="light"] .seg.on{background:linear-gradient(180deg,rgba(255,255,255,.9),rgba(255,255,255,.72)) !important;color:var(--head) !important;box-shadow:0 6px 14px -8px rgba(123,131,224,.4),inset 0 -2px 0 var(--blue),inset 0 1px 0 rgba(255,255,255,.9) !important;}
 
 </style>
