@@ -35,7 +35,7 @@
 :root{--head:#20294a;--blue:#6E86E0;--blue-deep:#4F63C4;--sky:#7D92E8;--teal:#5AA6D8;--green:#5BB79A;--grass:#6FC29A;--yellow:#E8B94A;--coral:#EF8AA0;--violet:#9B8CE8;--cyan:#5FBEDC;--indigo:#6E86E0;--emerald:#5BB79A;--lime:#9BC46A;--amber:#E0A64A;--orange:#EF9A70;--rose:#EC8AA6;--pink:#DFA0E0;--slate:#7E8AB0;
   --ink:#2f3a58;--ink2:#4a5a80;--ink3:#7484a8;--ink4:#94a2c2;--line:rgba(70,90,170,.14);--line2:rgba(70,90,170,.26);
   --glass:rgba(255,255,255,.58);--glassb:rgba(255,255,255,.72);
-  --grad:linear-gradient(118deg,#6E86E0 0%,#7D92E8 34%,#8f9fed 62%,#a6b0f0 100%);--grad-blue:linear-gradient(100deg,#6E86E0,#8393ea);
+  --grad:linear-gradient(118deg,#8fa4ee 0%,#7789e7 32%,#8b81e1 62%,#bb8ed2 100%);--grad-blue:linear-gradient(122deg,#8fa4ee 0%,#7789e7 34%,#8b81e1 64%,#bb8ed2 100%);
   --d:'Outfit','Noto Sans JP',sans-serif;--s:'Inter Tight','Noto Sans JP',sans-serif;--m:'JetBrains Mono',monospace;
   /* (index パリティ) ヒーローオーバーレイ/記念スタンプ描画用。index.html と同じ定義。console 本体UI(--d/--s/--m)には未使用=見た目不変。 */
   --mono:'JetBrains Mono',monospace;--serif:'Fraunces','Noto Serif JP','Cormorant Garamond',serif;--serif-jp:'Noto Serif JP',serif;--serif-classic:'Cormorant Garamond','Noto Serif JP',Georgia,serif;--jp:'Zen Kaku Gothic New','Hiragino Sans',sans-serif;--sans:'Plus Jakarta Sans',system-ui,sans-serif;}
@@ -321,9 +321,11 @@ html[data-theme="light"] .hero,html[data-theme="light"] [data-qa-fab],html[data-
 html[data-theme="light"] .bsm.pri,html[data-theme="light"] .bsm.ai,html[data-theme="light"] .btn-pri{color:#fff}
 html[data-theme="light"] .btn-yellow{--head:#241E14}
 html[data-theme="light"] .bsm.pri svg,html[data-theme="light"] .bsm.ai svg,html[data-theme="light"] .btn-pri svg{stroke:#fff}
-/* 光沢ボタン: 上端に白ハイライト・影は軽く */
-html[data-theme="light"] .btn-pri{box-shadow:0 6px 16px -8px rgba(12,111,168,.42),inset 0 1px 0 rgba(255,255,255,.4)!important}
-html[data-theme="light"] .bsm.pri,html[data-theme="light"] .bsm.ai{box-shadow:0 5px 14px -7px rgba(12,111,168,.38),inset 0 1px 0 rgba(255,255,255,.35)!important}
+/* (パステル) 光沢ボタン: ペリウィンクル+藤の二重グロー+上端の白光沢。オーロラ地に映える。 */
+html[data-theme="light"] .btn-pri{box-shadow:0 12px 26px -12px rgba(123,131,224,.5),0 6px 16px -10px rgba(187,142,210,.4),inset 0 1px 0 rgba(255,255,255,.55)!important}
+html[data-theme="light"] .bsm.pri,html[data-theme="light"] .bsm.ai{box-shadow:0 10px 22px -11px rgba(123,131,224,.46),0 5px 14px -9px rgba(187,142,210,.34),inset 0 1px 0 rgba(255,255,255,.5)!important}
+html[data-theme="light"] .btn-pri:hover,html[data-theme="light"] .bsm.pri:hover{filter:brightness(1.04) saturate(1.05);box-shadow:0 14px 30px -12px rgba(123,131,224,.56),0 7px 18px -10px rgba(187,142,210,.44),inset 0 1px 0 rgba(255,255,255,.6)!important}
+html[data-theme="light"] [data-qa-fab]{box-shadow:0 16px 34px -12px rgba(123,131,224,.55),0 8px 20px -10px rgba(187,142,210,.44)!important}
 html[data-theme="light"] .btn-yellow{box-shadow:0 6px 16px -8px rgba(245,166,35,.42),inset 0 1px 0 rgba(255,255,255,.5)!important}
 /* モーダル/ドロワー/サイド/AIパネルを純白+光沢+軽い影に */
 html[data-theme="light"] .modal,html[data-theme="light"] .drawer,html[data-theme="light"] .aoi-panel{background:linear-gradient(180deg,rgba(255,255,255,.99),rgba(255,255,255,.95));border-color:var(--glassb);box-shadow:inset 0 1px 0 rgba(255,255,255,.95),var(--sh3)!important}
@@ -725,7 +727,7 @@ input[type=checkbox]:disabled,input[type=radio]:disabled{opacity:.45;cursor:not-
 .eh-date{font-size:24px;font-weight:700;position:relative;padding-bottom:7px}.eh-date span{color:#8695a8;font-weight:500;font-size:15px;margin-left:7px}
 .eh-date::after{content:"";position:absolute;left:1px;bottom:0;width:48px;height:3px;border-radius:3px;background:linear-gradient(90deg,var(--k),var(--bunka))}
 .eh-chip{display:inline-flex;align-items:center;gap:7px;font-weight:700;font-size:12.5px;padding:8px 15px;border-radius:999px;cursor:pointer;border:1px solid var(--gb)}
-.eh-chip .mi{font-size:16px}.eh-chip.prep{background:rgba(220,239,233,.7);color:#2c6f60}.eh-chip.livec{background:linear-gradient(120deg,#20304a,#2c3f5e);color:#f2e8df}
+.eh-chip .mi{font-size:16px}.eh-chip.prep{background:rgba(220,239,233,.7);color:#2c6f60}.eh-chip.livec{background:linear-gradient(120deg,#7789e7,#8b81e1 60%,#a98ed8);color:#fff}
 /* (REFINE18 C6) 右レール=KPI帯の第4列頭に載せる: レール幅を「4列グリッドの1列分」に一致させ帯リズムを全画面で通す */
 .eh-grid{display:grid;grid-template-columns:minmax(0,1fr) calc((100% - 72px)/4);gap:24px}@media(max-width:1000px){.eh-grid{grid-template-columns:1fr}}
 .eh-card{background:var(--g);border:1px solid var(--gb);border-radius:22px;backdrop-filter:blur(24px) saturate(1.4);-webkit-backdrop-filter:blur(24px) saturate(1.4);box-shadow:0 18px 44px rgba(34,49,74,.12),inset 0 1px 0 rgba(255,255,255,.6)}
@@ -755,12 +757,12 @@ input[type=checkbox]:disabled,input[type=radio]:disabled{opacity:.45;cursor:not-
 .eh-b{display:flex;align-items:center;gap:13px;padding:16px 18px;border-radius:16px;cursor:pointer;background:rgba(255,255,255,.5);border:1px solid var(--gb);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
 .eh-b .ic{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center}.eh-b .ic .mi{font-size:23px}
 .eh-b .t{font-weight:700;font-size:15px}.eh-b .s{font-size:12px;color:#8695a8}
-.eh-b.prim{background:linear-gradient(145deg,#3a6796,#264a72);border:0}.eh-b.prim .t,.eh-b.prim .s{color:#eaf2fb}.eh-b.prim .ic{background:rgba(255,255,255,.18);color:#fff}
+.eh-b.prim{background:linear-gradient(122deg,#8fa4ee 0%,#7789e7 34%,#8b81e1 64%,#bb8ed2 100%);border:0;box-shadow:0 12px 26px -12px rgba(123,131,224,.5),0 6px 16px -10px rgba(187,142,210,.4)}.eh-b.prim .t,.eh-b.prim .s{color:#fff}.eh-b.prim .s{color:rgba(255,255,255,.85)}.eh-b.prim .ic{background:rgba(255,255,255,.22);color:#fff}
 .eh-count{padding:28px;text-align:center;border-top:4px solid var(--k)}
 .eh-count .big{display:flex;align-items:baseline;justify-content:center;gap:12px;margin-top:6px}.eh-count .big .n{font-size:120px;background:linear-gradient(165deg,#20304a,#3f5f86);-webkit-background-clip:text;background-clip:text;color:transparent}.eh-count .big .of{font-size:38px;color:#8695a8}
 .eh-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px}.eh-tile{padding:14px;text-align:center;border-radius:15px;background:rgba(255,255,255,.4);border:1px solid var(--gb)}.eh-tile .n{font-size:34px}.eh-tile .l{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:#8695a8;margin-top:4px}
 .eh-tile.teal{background:rgba(220,239,233,.55)}.eh-tile.teal .n,.eh-tile.teal .l{color:#2c6f60}.eh-tile.warn{background:rgba(247,234,208,.65)}.eh-tile.warn .n,.eh-tile.warn .l{color:var(--cream-tx)}.eh-tile.blue{background:rgba(234,241,248,.5)}
-.eh-qr{margin-top:14px;display:flex;align-items:center;gap:16px;padding:22px 24px;border-radius:18px;cursor:pointer;background:linear-gradient(135deg,#df6f52,#c05a86 52%,#35618f);color:#fff;box-shadow:0 18px 40px rgba(192,90,110,.3)}
+.eh-qr{margin-top:14px;display:flex;align-items:center;gap:16px;padding:22px 24px;border-radius:18px;cursor:pointer;background:linear-gradient(128deg,#f0a6b8 0%,#c99ad8 48%,#8b8fe6 100%);color:#fff;box-shadow:0 16px 34px -14px rgba(150,120,210,.4),0 8px 20px -12px rgba(240,166,184,.4)}
 .eh-qr .ic{width:56px;height:56px;border-radius:16px;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center}.eh-qr .ic .mi{font-size:34px}.eh-qr .t{font-size:20px;font-weight:700}.eh-qr .s{font-size:12.5px;color:rgba(255,255,255,.85)}.eh-qr .go{margin-left:auto;font-size:26px;opacity:.85}
 .eh-empty{padding:44px 16px;text-align:center;color:#8695a8;line-height:1.9}
 .msym{font-family:'Material Symbols Rounded';font-weight:400;font-style:normal;line-height:1;vertical-align:middle;-webkit-font-feature-settings:'liga';font-feature-settings:'liga'}
