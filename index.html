@@ -917,6 +917,7 @@ html[data-theme="light"] .bd.i{color:var(--indigo)}
 </head>
 <body>
 <div class="field"></div><div class="grid"></div><div class="parts" id="parts"></div>
+<div class="mg-bubbles" aria-hidden="true"><span class="mg-bubble b1"></span><span class="mg-bubble b2"></span><span class="mg-bubble b3"></span><span class="mg-bubble b4"></span></div>
 <div id="root"><div id="bootldg" style="position:fixed;inset:0;display:grid;place-items:center;z-index:1;background:transparent"><div style="text-align:center"><div style="width:46px;height:46px;margin:0 auto;border-radius:50%;border:3px solid rgba(120,180,235,.18);border-top-color:#33B4E8;animation:bspin .8s linear infinite"></div><div style="margin-top:16px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.22em;color:#7fa6c8">CONNEC+A 起動中…</div></div></div></div>
 <style>@keyframes bspin{to{transform:rotate(360deg)}}</style>
 <style id="monet-retheme">/*MONET-RETHEME*/
@@ -2425,6 +2426,32 @@ html[data-theme="light"] .kpi-mini.attn .kv{color:var(--yellow) !important;-webk
 html[data-theme="light"] .badge{background:rgba(110,134,224,.12) !important;color:#5a6dd0 !important;border:1px solid rgba(110,134,224,.26) !important}
 /* セクション見出しの細罫・kickをやわらかく */
 html[data-theme="light"] .kick{color:#7a86c0 !important}
+
+/* ============================================================================
+   (2026-08-15) Monetベース: 参加者アプリのシャボン玉＆余白を移植。
+   参加者(_ShellBubbles/.mg-bubble @01-design.css)と同じ淡い虹彩のもや4玉を
+   背景に固定配置。ライトのみ(夜は誌面モノクロを維持)。カード隙間に透ける。
+   ============================================================================ */
+@keyframes mgBubble{0%{transform:translate3d(0,0,0) scale(1)}50%{transform:translate3d(10px,-20px,0) scale(1.05)}100%{transform:translate3d(0,0,0) scale(1)}}
+.mg-bubbles{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;opacity:.9}
+.mg-bubble{position:absolute;border-radius:50%;pointer-events:none;will-change:transform;
+  background:radial-gradient(closest-side, rgba(255,203,226,.62), rgba(200,214,255,.4) 44%, rgba(198,236,214,.2) 66%, rgba(255,255,255,0) 82%);
+  filter:blur(30px);opacity:.72}
+.mg-bubble.b1{width:340px;height:340px;left:-10%;top:2%;animation:mgBubble 26s ease-in-out 0s infinite}
+.mg-bubble.b2{width:420px;height:420px;left:64%;top:26%;animation:mgBubble 30s ease-in-out -11s infinite}
+.mg-bubble.b3{width:300px;height:300px;left:14%;top:62%;animation:mgBubble 28s ease-in-out -6s infinite}
+.mg-bubble.b4{width:360px;height:360px;left:76%;top:78%;animation:mgBubble 32s ease-in-out -16s infinite}
+.mg-bubble.b2{background:radial-gradient(closest-side, rgba(200,214,255,.6), rgba(214,235,255,.34) 46%, rgba(255,255,255,0) 80%)}
+.mg-bubble.b3{background:radial-gradient(closest-side, rgba(206,238,216,.5), rgba(214,224,255,.3) 48%, rgba(255,255,255,0) 80%)}
+html[data-theme="night"] .mg-bubbles{display:none !important}
+@media (prefers-reduced-motion:reduce){.mg-bubble{animation:none !important}}
+
+/* ---- 余白: 全体の版面をゆったりと(参加者の"余裕"に寄せる) ---- */
+html[data-theme="light"] .main{padding-top:28px}
+html[data-theme="light"] .pghd{margin-bottom:26px}
+html[data-theme="light"] .pg>.sec{margin-bottom:34px}
+html[data-theme="light"] .tile.glass{padding:20px}
+html[data-theme="light"] .sech{margin-bottom:16px}
 
 </style>
 <script>
