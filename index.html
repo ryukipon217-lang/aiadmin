@@ -2386,6 +2386,24 @@ html[data-theme="light"] .aoi-chip:hover{border-color:var(--blue) !important;col
 /* seg/chipf の非選択も一貫フロストに(選択=ライトは既にオーロラ) */
 html[data-theme="light"] .chipf:not(.on){background:rgba(255,255,255,.5) !important;border-color:rgba(110,134,224,.2) !important}
 
+/* ============================================================================
+   (2026-08-15) 運営/統括ホームを「誌面モノクロ」→「参加者カラフル水彩」へ。
+   指標の数字に色を、ナビを帯→多色パステルのカードグリッドに。
+   ============================================================================ */
+html[data-theme="light"] .kpi-hero .kh .v:not([style*="color"]){color:var(--blue) !important;-webkit-text-fill-color:var(--blue) !important;background:none !important}
+html[data-theme="light"] .kpi-hero .kh{background:linear-gradient(150deg,rgba(206,220,255,.34),rgba(255,214,236,.24)) !important;border:1px solid rgba(255,255,255,.9) !important}
+/* ナビ: 帯(!important)を解除してカラフルなカードグリッドへ */
+html[data-theme="light"] .launch-tiles{grid-template-columns:repeat(auto-fill,minmax(158px,1fr)) !important;gap:12px !important}
+html[data-theme="light"] .launch-tile{background:rgba(255,255,255,.64) !important;border:1px solid rgba(255,255,255,.88) !important;border-radius:20px !important;box-shadow:0 10px 24px -14px rgba(60,72,150,.18) !important}
+html[data-theme="light"] .launch-tile:hover{transform:translateY(-2px) !important;box-shadow:0 16px 32px -16px rgba(60,72,150,.28) !important}
+/* アイコンチップを多色パステルにローテーション(グループ順で色替え) */
+html[data-theme="light"] .launch-tile .lt-ic{background:linear-gradient(145deg,rgba(123,166,236,.24),rgba(230,166,198,.14)) !important;color:#5a6dd0 !important}
+html[data-theme="light"] .launch-grp:nth-child(4n+2) .launch-tile .lt-ic{background:linear-gradient(145deg,rgba(120,196,150,.26),rgba(150,210,170,.12)) !important;color:#2f9d6f !important}
+html[data-theme="light"] .launch-grp:nth-child(4n+3) .launch-tile .lt-ic{background:linear-gradient(145deg,rgba(232,180,90,.26),rgba(240,200,120,.12)) !important;color:#c07a1e !important}
+html[data-theme="light"] .launch-grp:nth-child(4n) .launch-tile .lt-ic{background:linear-gradient(145deg,rgba(230,140,175,.26),rgba(238,170,190,.12)) !important;color:#c8618f !important}
+/* ホームの帯パネルもやわらかカードに */
+html[data-theme="light"] .eh-card.eh-pan{background:rgba(255,255,255,.6) !important;border:1px solid rgba(255,255,255,.85) !important;border-radius:20px !important}
+
 </style>
 <script>
 (function(){var p=document.getElementById('parts');if(!p)return;for(var i=0;i<16;i++){var s=document.createElement('i');s.style.left=(Math.random()*100)+'%';s.style.bottom='-10px';var d=8+Math.random()*10;s.style.animationDuration=d+'s';s.style.animationDelay=(-Math.random()*d)+'s';s.style.opacity=String(.3+Math.random()*.5);s.style.transform='scale('+(.5+Math.random()*1.4)+')';p.appendChild(s);}})();
