@@ -2391,16 +2391,15 @@ html[data-theme="light"] .chipf:not(.on){background:rgba(255,255,255,.5) !import
    指標の数字に色を、ナビを帯→多色パステルのカードグリッドに。
    ============================================================================ */
 html[data-theme="light"] .kpi-hero .kh .v:not([style*="color"]){color:var(--blue) !important;-webkit-text-fill-color:var(--blue) !important;background:none !important}
-html[data-theme="light"] .kpi-hero .kh{background:linear-gradient(150deg,rgba(206,220,255,.34),rgba(255,214,236,.24)) !important;border:1px solid rgba(255,255,255,.9) !important}
-/* ナビ: 帯(!important)を解除してカラフルなカードグリッドへ */
-html[data-theme="light"] .launch-tiles{grid-template-columns:repeat(auto-fill,minmax(158px,1fr)) !important;gap:12px !important}
-html[data-theme="light"] .launch-tile{background:rgba(255,255,255,.64) !important;border:1px solid rgba(255,255,255,.88) !important;border-radius:20px !important;box-shadow:0 10px 24px -14px rgba(60,72,150,.18) !important}
-html[data-theme="light"] .launch-tile:hover{transform:translateY(-2px) !important;box-shadow:0 16px 32px -16px rgba(60,72,150,.28) !important}
-/* アイコンチップを多色パステルにローテーション(グループ順で色替え) */
-html[data-theme="light"] .launch-tile .lt-ic{background:linear-gradient(145deg,rgba(123,166,236,.24),rgba(230,166,198,.14)) !important;color:#5a6dd0 !important}
-html[data-theme="light"] .launch-grp:nth-child(4n+2) .launch-tile .lt-ic{background:linear-gradient(145deg,rgba(120,196,150,.26),rgba(150,210,170,.12)) !important;color:#2f9d6f !important}
-html[data-theme="light"] .launch-grp:nth-child(4n+3) .launch-tile .lt-ic{background:linear-gradient(145deg,rgba(232,180,90,.26),rgba(240,200,120,.12)) !important;color:#c07a1e !important}
-html[data-theme="light"] .launch-grp:nth-child(4n) .launch-tile .lt-ic{background:linear-gradient(145deg,rgba(230,140,175,.26),rgba(238,170,190,.12)) !important;color:#c8618f !important}
+html[data-theme="light"] .kpi-hero{gap:16px !important}
+html[data-theme="light"] .kpi-hero .kh{background:linear-gradient(150deg,rgba(206,220,255,.2),rgba(255,214,236,.13)) !important;border:1px solid rgba(255,255,255,.9) !important;padding:20px 22px !important}
+/* ナビ: 余白を広く・静かに。単色ペリウィンクルの落ち着いたチップ(多色乱舞はやめる) */
+html[data-theme="light"] .launch-tiles{grid-template-columns:repeat(auto-fill,minmax(182px,1fr)) !important;gap:15px !important}
+html[data-theme="light"] .launch-grp{margin-bottom:30px !important}
+html[data-theme="light"] .launch-lab{margin:0 2px 15px !important;font-size:10.5px;letter-spacing:.2em}
+html[data-theme="light"] .launch-tile{background:rgba(255,255,255,.58) !important;border:1px solid rgba(255,255,255,.85) !important;border-radius:20px !important;padding:18px !important;gap:14px !important;box-shadow:0 8px 22px -15px rgba(60,72,150,.14) !important}
+html[data-theme="light"] .launch-tile:hover{transform:translateY(-2px) !important;box-shadow:0 14px 30px -16px rgba(60,72,150,.22) !important;border-color:rgba(110,134,224,.38) !important}
+html[data-theme="light"] .launch-tile .lt-ic{width:42px;height:42px;border-radius:13px;background:rgba(110,134,224,.12) !important;color:#6E86E0 !important}
 /* ホームの帯パネルもやわらかカードに */
 html[data-theme="light"] .eh-card.eh-pan{background:rgba(255,255,255,.6) !important;border:1px solid rgba(255,255,255,.85) !important;border-radius:20px !important}
 
@@ -2410,8 +2409,22 @@ html[data-theme="light"] .eh-chip.prep,html[data-theme="light"] .eh-chip.prep .m
 html[data-theme="light"] .eh-chip.livec{background:linear-gradient(122deg,#7ba6ec,#cdadd9 60%,#ecabc6) !important;color:#fff !important;border-color:transparent !important}
 /* ---- 枠(誌面の細罫バンド)→やわらかフロストのパステルカード ---- */
 html[data-theme="light"] .r4{gap:12px !important}
-html[data-theme="light"] .r4 > *{background:linear-gradient(150deg,rgba(206,220,255,.3),rgba(255,214,236,.2)) !important;border:1px solid rgba(255,255,255,.85) !important;border-radius:18px !important;padding:15px 16px !important;box-shadow:0 10px 24px -16px rgba(60,72,150,.16) !important}
+html[data-theme="light"] .r4 > *{background:linear-gradient(150deg,rgba(206,220,255,.18),rgba(255,214,236,.12)) !important;border:1px solid rgba(255,255,255,.85) !important;border-radius:20px !important;padding:18px 18px !important;box-shadow:0 10px 24px -16px rgba(60,72,150,.14) !important}
 html[data-theme="light"] .r4 .gauge .gv,html[data-theme="light"] .r4 .kv{color:var(--blue) !important;-webkit-text-fill-color:var(--blue) !important;background:none !important}
+
+/* ============================================================================
+   (2026-08-15) Monetベース仕上げ: スパイ風ノイズを全撤去し、誌面の暗い数字を色へ。
+   ============================================================================ */
+.scanl{display:none !important}
+.kpc::after,.tile.glass.rise::before,.tile.glass.rise::after,.tile.rise::before,.tile.rise::after{content:none !important;animation:none !important;background:none !important}
+/* ダッシュボードのヒーロー¥や見出し数字を参加者トーンの色に(意味色inlineは尊重) */
+html[data-theme="light"] .hbig .v:not([style*="color"]),html[data-theme="light"] .hero .v:not([style*="color"]),html[data-theme="light"] .kpi-mini:not(.attn) .kv:not([style*="color"]),html[data-theme="light"] .gauge:not(.attn) .gv:not([style*="color"]){color:var(--blue-deep) !important;-webkit-text-fill-color:var(--blue-deep) !important;background:none !important}
+/* 意味色(注意=amber)は保持 */
+html[data-theme="light"] .kpi-mini.attn .kv{color:var(--yellow) !important;-webkit-text-fill-color:var(--yellow) !important;background:none !important}
+/* AI BRIEFING等のbadge=パステルピル */
+html[data-theme="light"] .badge{background:rgba(110,134,224,.12) !important;color:#5a6dd0 !important;border:1px solid rgba(110,134,224,.26) !important}
+/* セクション見出しの細罫・kickをやわらかく */
+html[data-theme="light"] .kick{color:#7a86c0 !important}
 
 </style>
 <script>
