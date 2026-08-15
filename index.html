@@ -2347,6 +2347,29 @@ html[data-theme="light"] .chipf{background:linear-gradient(180deg,rgba(255,255,2
 html[data-theme="light"] .chipf.on{background:linear-gradient(122deg,#80a8ec 0%,#bfabdf 58%,#ecabc6 100%) !important;color:#fff !important;border-color:transparent !important;box-shadow:0 7px 16px -8px rgba(123,131,224,.5),0 3px 10px -6px rgba(244,196,212,.42),inset 0 1px 0 rgba(255,255,255,.5) !important;}
 html[data-theme="light"] .seg.on{background:linear-gradient(180deg,rgba(255,255,255,.9),rgba(255,255,255,.72)) !important;color:var(--head) !important;box-shadow:0 6px 14px -8px rgba(123,131,224,.4),inset 0 -2px 0 var(--blue),inset 0 1px 0 rgba(255,255,255,.9) !important;}
 
+/* ============================================================================
+   (2026-08-15) KPIクリーン化 pass1 — 参加者トーンの水彩ホワイト＋余白。
+   走査線/グリッドのノイズ撤去・カードを大きくやわらかく・密度を下げ視認性を上げる。
+   ============================================================================ */
+.kpc::after{display:none !important}
+.tile.glass.rise::before,.tile.glass.rise::after{animation:none !important}
+.kpis{grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:26px}
+.kpc{border-radius:20px;padding:18px 18px 16px}
+.kpc .kl{font-size:11px;letter-spacing:.02em}
+.kpc .kv{font-size:27px;margin-top:10px}
+html[data-theme="light"] .kpc{background:var(--glassb);border:1px solid rgba(255,255,255,.9);box-shadow:0 12px 26px -16px rgba(60,72,150,.16)}
+html[data-theme="light"] .kpc:hover{transform:translateY(-2px);box-shadow:0 18px 34px -18px rgba(60,72,150,.24)}
+.kpi-hero{gap:18px;margin:10px 0 30px}
+.kpi-hero .kh{padding:20px 22px;border-radius:24px}
+html[data-theme="light"] .kpi-hero .kh{background:var(--glassb);border:1px solid rgba(255,255,255,.9);box-shadow:0 16px 34px -18px rgba(60,72,150,.16)}
+.kpi-hero .kh .l{letter-spacing:.14em}
+.kpisum-g{gap:14px 40px}
+.kpi-disc{border-radius:24px;margin:18px 0}
+html[data-theme="light"] .kpi-disc{background:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.85)}
+.kpi-disc-b{padding:6px 20px 20px}
+.sec{margin-bottom:30px}
+.sech .h{font-size:17px}
+
 </style>
 <script>
 (function(){var p=document.getElementById('parts');if(!p)return;for(var i=0;i<16;i++){var s=document.createElement('i');s.style.left=(Math.random()*100)+'%';s.style.bottom='-10px';var d=8+Math.random()*10;s.style.animationDuration=d+'s';s.style.animationDelay=(-Math.random()*d)+'s';s.style.opacity=String(.3+Math.random()*.5);s.style.transform='scale('+(.5+Math.random()*1.4)+')';p.appendChild(s);}})();
