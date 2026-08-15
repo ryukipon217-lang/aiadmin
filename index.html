@@ -2404,6 +2404,15 @@ html[data-theme="light"] .launch-grp:nth-child(4n) .launch-tile .lt-ic{backgroun
 /* ホームの帯パネルもやわらかカードに */
 html[data-theme="light"] .eh-card.eh-pan{background:rgba(255,255,255,.6) !important;border:1px solid rgba(255,255,255,.85) !important;border-radius:20px !important}
 
+/* ---- チップ: ティール撤去→ペリウィンクル。選択はオーロラ ---- */
+html[data-theme="light"] .eh-chip{background:rgba(255,255,255,.66) !important;border:1px solid rgba(110,134,224,.3) !important;color:var(--ink2) !important}
+html[data-theme="light"] .eh-chip.prep,html[data-theme="light"] .eh-chip.prep .mi{background:rgba(110,134,224,.14) !important;color:#5a6dd0 !important;border-color:rgba(110,134,224,.3) !important}
+html[data-theme="light"] .eh-chip.livec{background:linear-gradient(122deg,#7ba6ec,#cdadd9 60%,#ecabc6) !important;color:#fff !important;border-color:transparent !important}
+/* ---- 枠(誌面の細罫バンド)→やわらかフロストのパステルカード ---- */
+html[data-theme="light"] .r4{gap:12px !important}
+html[data-theme="light"] .r4 > *{background:linear-gradient(150deg,rgba(206,220,255,.3),rgba(255,214,236,.2)) !important;border:1px solid rgba(255,255,255,.85) !important;border-radius:18px !important;padding:15px 16px !important;box-shadow:0 10px 24px -16px rgba(60,72,150,.16) !important}
+html[data-theme="light"] .r4 .gauge .gv,html[data-theme="light"] .r4 .kv{color:var(--blue) !important;-webkit-text-fill-color:var(--blue) !important;background:none !important}
+
 </style>
 <script>
 (function(){var p=document.getElementById('parts');if(!p)return;for(var i=0;i<16;i++){var s=document.createElement('i');s.style.left=(Math.random()*100)+'%';s.style.bottom='-10px';var d=8+Math.random()*10;s.style.animationDuration=d+'s';s.style.animationDelay=(-Math.random()*d)+'s';s.style.opacity=String(.3+Math.random()*.5);s.style.transform='scale('+(.5+Math.random()*1.4)+')';p.appendChild(s);}})();
