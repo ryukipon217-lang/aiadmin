@@ -2370,6 +2370,22 @@ html[data-theme="light"] .kpi-disc{background:rgba(255,255,255,.5);border:1px so
 .sec{margin-bottom:30px}
 .sech .h{font-size:17px}
 
+/* ============================================================================
+   (2026-08-15) Monet統一 pass1 — 全画面のボタンを参加者トーンへ。
+   旧「フロストガラス+ハードコード紺」世代(.eh-b/.eh-nav/.aoi-*)を、
+   白フロスト＋ペリウィンクル(#6E86E0)の一貫スタイルに。primaryの勾配は:not(.prim)で保護。
+   ============================================================================ */
+html[data-theme="light"] .eh-b:not(.prim){background:rgba(255,255,255,.74) !important;border:1px solid rgba(110,134,224,.26) !important;color:var(--ink2) !important;box-shadow:0 7px 18px -11px rgba(60,72,150,.18) !important;transition:border-color .18s,box-shadow .18s,color .18s,transform .18s}
+html[data-theme="light"] .eh-b:not(.prim):hover{border-color:var(--blue) !important;color:var(--head) !important;box-shadow:0 12px 26px -12px rgba(60,72,150,.28) !important;transform:translateY(-1px)}
+html[data-theme="light"] .eh-b:not(.prim) .t{color:inherit !important}
+html[data-theme="light"] .eh-nav{background:rgba(255,255,255,.74) !important;border:1px solid rgba(110,134,224,.26) !important;color:var(--blue) !important;box-shadow:0 7px 18px -10px rgba(60,72,150,.2) !important}
+html[data-theme="light"] .eh-nav:hover{border-color:var(--blue) !important;box-shadow:0 12px 26px -12px rgba(60,72,150,.3) !important;transform:translateY(-1px)}
+html[data-theme="light"] .aoi-x{background:rgba(255,255,255,.72) !important;border:1px solid rgba(110,134,224,.22) !important;color:var(--ink2) !important}
+html[data-theme="light"] .aoi-chip{background:rgba(255,255,255,.62) !important;border:1px solid rgba(110,134,224,.24) !important;color:var(--ink2) !important}
+html[data-theme="light"] .aoi-chip:hover{border-color:var(--blue) !important;color:var(--head) !important}
+/* seg/chipf の非選択も一貫フロストに(選択=ライトは既にオーロラ) */
+html[data-theme="light"] .chipf:not(.on){background:rgba(255,255,255,.5) !important;border-color:rgba(110,134,224,.2) !important}
+
 </style>
 <script>
 (function(){var p=document.getElementById('parts');if(!p)return;for(var i=0;i<16;i++){var s=document.createElement('i');s.style.left=(Math.random()*100)+'%';s.style.bottom='-10px';var d=8+Math.random()*10;s.style.animationDuration=d+'s';s.style.animationDelay=(-Math.random()*d)+'s';s.style.opacity=String(.3+Math.random()*.5);s.style.transform='scale('+(.5+Math.random()*1.4)+')';p.appendChild(s);}})();
