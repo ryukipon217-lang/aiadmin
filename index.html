@@ -2399,11 +2399,13 @@ html[data-theme="light"] .kpi-hero .kh{background:linear-gradient(150deg,rgba(20
 html[data-theme="light"] .launch-tiles{grid-template-columns:repeat(auto-fill,minmax(182px,1fr)) !important;gap:15px !important}
 html[data-theme="light"] .launch-grp{margin-bottom:30px !important}
 html[data-theme="light"] .launch-lab{margin:0 2px 15px !important;font-size:10.5px;letter-spacing:.2em}
-html[data-theme="light"] .launch-tile{background:rgba(255,255,255,.58) !important;border:1px solid rgba(255,255,255,.85) !important;border-radius:20px !important;padding:18px !important;gap:14px !important;box-shadow:0 8px 22px -15px rgba(60,72,150,.14) !important}
-html[data-theme="light"] .launch-tile:hover{transform:translateY(-2px) !important;box-shadow:0 14px 30px -16px rgba(60,72,150,.22) !important;border-color:rgba(110,134,224,.38) !important}
-html[data-theme="light"] .launch-tile .lt-ic{width:42px;height:42px;border-radius:13px;background:rgba(110,134,224,.12) !important;color:#6E86E0 !important}
-/* ホームの帯パネルもやわらかカードに */
-html[data-theme="light"] .eh-card.eh-pan{background:rgba(255,255,255,.6) !important;border:1px solid rgba(255,255,255,.85) !important;border-radius:20px !important}
+/* (2026-08-19) 統括ホーム=夜の「誌面(エディトリアル)の枠」をライトへそのまま移植:
+   白いパステル箱を廃し、上罫+余白の"欄"に(骨格は夜と同一・色だけライト/要件2やり直し) */
+html[data-theme="light"] .launch-tile{background:transparent !important;border:0 !important;border-radius:0 !important;box-shadow:none !important;padding:13px 4px !important;gap:13px !important;transition:background .16s !important}
+html[data-theme="light"] .launch-tile:hover{transform:none !important;background:rgba(110,134,224,.08) !important;border:0 !important;border-radius:13px !important;box-shadow:none !important}
+html[data-theme="light"] .launch-tile .lt-ic{width:38px;height:38px;border-radius:11px;background:rgba(110,134,224,.1) !important;border:1px solid rgba(110,134,224,.16) !important;color:#5a6dd0 !important}
+/* ホームの帯パネル=誌面の欄(上罫のみ)へ。夜(.eh-card L1859)と同じ骨格 */
+html[data-theme="light"] .eh-card.eh-pan{background:transparent !important;border:0 !important;border-top:1px solid var(--line) !important;border-radius:0 !important;box-shadow:none !important;backdrop-filter:none !important;-webkit-backdrop-filter:none !important;padding:18px 0 22px !important}
 
 /* ---- チップ: ティール撤去→ペリウィンクル。選択はオーロラ ---- */
 html[data-theme="light"] .eh-chip{background:rgba(255,255,255,.66) !important;border:1px solid rgba(110,134,224,.3) !important;color:var(--ink2) !important}
@@ -2560,14 +2562,6 @@ html[data-theme="light"] .launch-tile .lt-lk{color:#7a5512 !important;background
 html[data-theme="light"] .eh-chip.prep{color:#4d59a0 !important}
 /* 回収キュー等のcream(琥珀)文字トークンをライトでAAへ(色相=琥珀を維持) */
 html[data-theme="light"] .eh{--cream-tx:#7a5512}
-/* (2026-08-19) 写真を濃く(.06→.14)した分、統括ホームの薄い子カードが写真で濁らないよう
-   少し不透明に締めて"明快な影/罫"に=夜の設計言語(くっきりした分離)をライトへ移植・色はライト維持(要件2) */
-html[data-theme="light"] .eh-pill{background:rgba(255,255,255,.68) !important;border:1px solid rgba(110,134,224,.2) !important}
-html[data-theme="light"] .eh-pill.paid{background:rgba(255,255,255,.66) !important}
-html[data-theme="light"] .eh-tile{background:rgba(255,255,255,.62) !important;border:1px solid rgba(110,134,224,.18) !important}
-html[data-theme="light"] .eh-pill.warn{background:rgba(248,240,222,.8) !important;border-color:rgba(224,166,74,.28) !important}
-html[data-theme="light"] .eh-tile.warn{background:rgba(248,240,222,.72) !important;border-color:rgba(224,166,74,.26) !important}
-html[data-theme="light"] .eh-b:not(.prim){box-shadow:0 9px 22px -12px rgba(60,72,150,.22),inset 0 1px 0 rgba(255,255,255,.72) !important}
 
 /* ============================================================================
    (2026-08-18) Monetチップ 第2波: 主グラデを紺→"深ペリウィンクル"へ一本化。
