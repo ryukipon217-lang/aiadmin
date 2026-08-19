@@ -2474,9 +2474,9 @@ html[data-hero-preview="on"][data-theme="light"] .kpc{
   padding:18px 22px !important;margin-bottom:18px !important;
   box-shadow:0 20px 50px -28px rgba(34,49,74,.34),inset 0 1px 0 rgba(255,255,255,.78) !important;
 }
-/* ヒーロー背景時: ステータス/フィルタ帯の"白い地"を撤去(パネル/写真が透ける)。いろんな画面のSegs/chipfに共通。 */
-html[data-hero-preview="on"][data-theme="light"] .segs{background:transparent !important;border:0 !important;box-shadow:none !important;padding:0 !important}
-html[data-hero-preview="on"][data-theme="light"] .chipf{background:transparent !important;backdrop-filter:none !important;-webkit-backdrop-filter:none !important;border:1px solid rgba(110,134,224,.28) !important}
+/* ヒーロー背景時: ステータス/フィルタ帯の"白い地"を撤去し、パネルと同じ"フロストガラス"に差し替え。いろんな画面のSegs/chipf共通。 */
+html[data-hero-preview="on"][data-theme="light"] .segs{background:rgba(255,255,255,.38) !important;backdrop-filter:blur(20px) saturate(1.6) !important;-webkit-backdrop-filter:blur(20px) saturate(1.6) !important;border:1px solid rgba(255,255,255,.55) !important;box-shadow:inset 0 1px 0 rgba(255,255,255,.6) !important;padding:3px !important}
+html[data-hero-preview="on"][data-theme="light"] .chipf{background:rgba(255,255,255,.34) !important;backdrop-filter:blur(16px) saturate(1.5) !important;-webkit-backdrop-filter:blur(16px) saturate(1.5) !important;border:1px solid rgba(255,255,255,.5) !important;color:var(--ink2) !important}
 @media (prefers-reduced-motion:no-preference){.mg-photo{will-change:auto}}
 .mg-bubbles{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;opacity:.9}
 .mg-bubble{position:absolute;border-radius:50%;pointer-events:none;will-change:transform;
