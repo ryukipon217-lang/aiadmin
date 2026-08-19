@@ -2395,17 +2395,12 @@ html[data-theme="light"] .chipf:not(.on){background:rgba(255,255,255,.5) !import
 html[data-theme="light"] .kpi-hero .kh .v:not([style*="color"]){color:var(--blue) !important;-webkit-text-fill-color:var(--blue) !important;background:none !important}
 html[data-theme="light"] .kpi-hero{gap:16px !important}
 html[data-theme="light"] .kpi-hero .kh{background:linear-gradient(150deg,rgba(206,220,255,.2),rgba(255,214,236,.13)) !important;border:1px solid rgba(255,255,255,.9) !important;padding:20px 22px !important}
-/* ナビ: 余白を広く・静かに。単色ペリウィンクルの落ち着いたチップ(多色乱舞はやめる) */
-html[data-theme="light"] .launch-tiles{grid-template-columns:repeat(auto-fill,minmax(182px,1fr)) !important;gap:15px !important}
-html[data-theme="light"] .launch-grp{margin-bottom:30px !important}
-html[data-theme="light"] .launch-lab{margin:0 2px 15px !important;font-size:10.5px;letter-spacing:.2em}
-/* (2026-08-19) 統括ホーム=夜の「誌面(エディトリアル)の枠」をライトへそのまま移植:
-   白いパステル箱を廃し、上罫+余白の"欄"に(骨格は夜と同一・色だけライト/要件2やり直し) */
-html[data-theme="light"] .launch-tile{background:transparent !important;border:0 !important;border-radius:0 !important;box-shadow:none !important;padding:13px 4px !important;gap:13px !important;transition:background .16s !important}
-html[data-theme="light"] .launch-tile:hover{transform:none !important;background:rgba(110,134,224,.08) !important;border:0 !important;border-radius:13px !important;box-shadow:none !important}
-html[data-theme="light"] .launch-tile .lt-ic{width:38px;height:38px;border-radius:11px;background:rgba(110,134,224,.1) !important;border:1px solid rgba(110,134,224,.16) !important;color:#5a6dd0 !important}
-/* ホームの帯パネル=誌面の欄(上罫のみ)へ。夜(.eh-card L1859)と同じ骨格 */
-html[data-theme="light"] .eh-card.eh-pan{background:transparent !important;border:0 !important;border-top:1px solid var(--line) !important;border-radius:0 !important;box-shadow:none !important;backdrop-filter:none !important;-webkit-backdrop-filter:none !important;padding:18px 0 22px !important}
+/* (2026-08-19) 統括ホーム=夜と"完全に等しい"誌面フレームへ。以前ここにあったライト専用の
+   ランチャー独自グリッド(minmax182/gap15)・箱化・38pxペリ受け皿アイコン、および eh-pan の
+   ライト上書きを全撤去 → ライトも夜と同じ共有エディトリアル規則に委譲:
+     .launch-tile 骨格=console.html:1920-1931(上罫+余白の行・24px罫なしink3アイコン・grid minmax200/gap0 40)
+     .eh-card/.eh-pan 骨格=console.html:1859(上罫のみの"欄")
+   両テーマで骨格・寸法は同一。差はテーマ色トークン(--line/--ink3/--accent…)のみ。 */
 
 /* ---- チップ: ティール撤去→ペリウィンクル。選択はオーロラ ---- */
 html[data-theme="light"] .eh-chip{background:rgba(255,255,255,.66) !important;border:1px solid rgba(110,134,224,.3) !important;color:var(--ink2) !important}
