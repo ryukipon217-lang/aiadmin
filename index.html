@@ -2444,39 +2444,19 @@ html[data-theme="night"] .mg-photo{display:none !important}
 html[data-hero-preview="on"][data-theme="light"] .mg-photo{display:block !important;background-image:var(--mg-hero-preview) !important;background-position:center center !important;background-size:cover !important;background-repeat:no-repeat !important;opacity:.6 !important;filter:none !important;transform:scale(1.03) !important;transition:opacity 1.1s ease !important}
 
 /* ============================================================================
-   (2026-08-19) ヒーロー背景の上でも読めるよう、白/透明だった主要面を"ガラスチップ"化。
-   透過は下げず(写真はbold)・可読性はフロストガラスで担保。data-hero-preview 時のみ・ライトのみ。
+   (2026-08-19 rev) ヒーロー背景の上でも"整って"読めるよう、コンテンツ領域(.main)を
+   1枚の大きなガラスパネルにまとめる。内側は既存の広い余白(.main padding 34px/clamp22-56)で
+   文字が縁に触れない・左端は版面グリッドで揃う・写真はパネルの外(上バー/左右/下の余白)に見える。
+   個別要素のバラ箱化はやめる(=前版の窮屈チップを撤去)。data-hero-preview 時のみ・ライトのみ。
    ============================================================================ */
-html[data-hero-preview="on"][data-theme="light"] .eh-card,
-html[data-hero-preview="on"][data-theme="light"] .eh-card.eh-pan,
-html[data-hero-preview="on"][data-theme="light"] .eh-b:not(.prim),
-html[data-hero-preview="on"][data-theme="light"] .eh-pill,
-html[data-hero-preview="on"][data-theme="light"] .eh-tile,
-html[data-hero-preview="on"][data-theme="light"] .launch-tile,
-html[data-hero-preview="on"][data-theme="light"] .r4 > *,
-html[data-hero-preview="on"][data-theme="light"] .sech,
-html[data-hero-preview="on"][data-theme="light"] .aistrip,
-html[data-hero-preview="on"][data-theme="light"] .aih,
-html[data-hero-preview="on"][data-theme="light"] .hbig,
-html[data-hero-preview="on"][data-theme="light"] .kh,
-html[data-hero-preview="on"][data-theme="light"] .kpc,
-html[data-hero-preview="on"][data-theme="light"] .gauge,
-html[data-hero-preview="on"][data-theme="light"] .cal-hd,
-html[data-hero-preview="on"][data-theme="light"] .cal-cell{
-  background:rgba(255,255,255,.62) !important;
-  backdrop-filter:blur(20px) saturate(1.6) !important;-webkit-backdrop-filter:blur(20px) saturate(1.6) !important;
-  border:1px solid rgba(255,255,255,.72) !important;border-radius:16px !important;
-  box-shadow:0 10px 30px -16px rgba(34,49,74,.28),inset 0 1px 0 rgba(255,255,255,.85) !important;
+html[data-hero-preview="on"][data-theme="light"] .main{
+  margin:16px 22px 22px !important;
+  border-radius:26px !important;
+  background:rgba(255,255,255,.66) !important;
+  backdrop-filter:blur(28px) saturate(1.5) !important;-webkit-backdrop-filter:blur(28px) saturate(1.5) !important;
+  border:1px solid rgba(255,255,255,.72) !important;
+  box-shadow:0 30px 70px -36px rgba(34,49,74,.44),inset 0 1px 0 rgba(255,255,255,.92) !important;
 }
-/* 欄(誌面)だった帯パネル/ランチャーはパディングを足してチップの体裁に */
-html[data-hero-preview="on"][data-theme="light"] .eh-card.eh-pan{padding:16px 18px !important;border-top:1px solid rgba(255,255,255,.72) !important}
-html[data-hero-preview="on"][data-theme="light"] .launch-tile{padding:12px 12px !important;border-radius:14px !important}
-html[data-hero-preview="on"][data-theme="light"] .launch-tile .lt-ic{background:rgba(110,134,224,.12) !important;border:1px solid rgba(110,134,224,.18) !important;color:#5a6dd0 !important;width:34px !important;height:34px !important;border-radius:10px !important}
-/* 見出し/本文が地に直接載る箇所へ薄いガラスの下敷き(セクション見出し・大数字ラベル) */
-html[data-hero-preview="on"][data-theme="light"] .launch-lab{background:rgba(255,255,255,.5) !important;-webkit-backdrop-filter:blur(10px) !important;backdrop-filter:blur(10px) !important;display:inline-block;padding:3px 10px !important;border-radius:999px !important}
-/* 可読性フロア: チップ化を漏らした本文(挨拶ヒーロー等)も最低限読めるよう、コンテンツ領域に薄いフロスト。
-   写真は上バー/サイド/フロスト越しに引き続きboldに見える。 */
-html[data-hero-preview="on"][data-theme="light"] .main{background:linear-gradient(180deg,rgba(248,249,253,.42),rgba(248,249,253,.34)) !important;backdrop-filter:blur(7px) saturate(1.05) !important;-webkit-backdrop-filter:blur(7px) saturate(1.05) !important}
 @media (prefers-reduced-motion:no-preference){.mg-photo{will-change:auto}}
 .mg-bubbles{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;opacity:.9}
 .mg-bubble{position:absolute;border-radius:50%;pointer-events:none;will-change:transform;
