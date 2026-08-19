@@ -2444,7 +2444,7 @@ html[data-theme="night"] .mg-photo{display:none !important}
    コンソール装飾のMonet写真が"参加者の背景プレビュー"と混同されるため非表示。ホーム等では維持。 */
 /* (2026-08-19) admin全画面のヒーロー背景: 設定済みヒーロー画像を10秒巡回で敷く(個別画面はその画像を優先)。
    透過は下げず(bold)・可読性は各面のガラス化で担保。data-hero-preview 時はMonet/夜の非表示より優先。 */
-html[data-hero-preview="on"][data-theme="light"] .mg-photo{display:block !important;background-image:none !important;opacity:.16 !important;filter:blur(2.5px) saturate(.95) !important;transform:scale(1.05) !important}
+html[data-hero-preview="on"][data-theme="light"] .mg-photo{display:block !important;background-image:none !important;opacity:.16 !important;filter:blur(1px) saturate(.95) !important;transform:scale(1.03) !important}
 /* 2枚レイヤーのクロスフェード=画像切替をゆっくり(2.6s) */
 html[data-hero-preview="on"][data-theme="light"] .mg-photo::before,
 html[data-hero-preview="on"][data-theme="light"] .mg-photo::after{content:"";position:absolute;inset:0;background-position:center center;background-size:cover;background-repeat:no-repeat;opacity:0;transform:scale(1.03);transition:opacity 2.6s ease}
