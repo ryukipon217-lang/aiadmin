@@ -2460,6 +2460,16 @@ html[data-hero-layer="b"][data-theme="light"] .mg-photo::after{opacity:1}
    → 前版の継ぎ接ぎ(.main/.mc透明+個別要素を.6パネル化+segs/chipfガラス)は全撤去。
      写真が淡いので地に直乗りの見出し/表/カードもそのまま読める=混在解消。data-hero-preview時のみ。
    ============================================================================ */
+/* (2026-08-19 rev4) コンテンツを"大きな白ぼかし矩形"にのせる=写真(.25)の上でも安定して読める。
+   .main を1枚の大きなフロスト白矩形に(控えめな角・写真はその外周=上バー/左右/下の余白に見える)。 */
+html[data-hero-preview="on"][data-theme="light"] .main{
+  margin:16px 20px 20px !important;
+  border-radius:16px !important;
+  background:rgba(255,255,255,.58) !important;
+  backdrop-filter:blur(22px) saturate(1.4) !important;-webkit-backdrop-filter:blur(22px) saturate(1.4) !important;
+  border:1px solid rgba(255,255,255,.66) !important;
+  box-shadow:0 24px 60px -32px rgba(34,49,74,.36) !important;
+}
 @media (prefers-reduced-motion:no-preference){.mg-photo{will-change:auto}}
 .mg-bubbles{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;opacity:.9}
 .mg-bubble{position:absolute;border-radius:50%;pointer-events:none;will-change:transform;
