@@ -1573,8 +1573,6 @@ html[data-theme="light"] .cmd{
 /* (2026-08-19) 検索ボックス=大きく+角ばって(中身がゆったり収まる・丸みを戻す) */
 .cmd{height:48px !important;max-width:720px !important;border-radius:8px !important}
 .cmd input{font-size:14px !important}
-/* メニューバー(サイト切替 .sitesw)をテーマ=透けるフロストガラスに沿わせる(hero-preview時) */
-html[data-hero-preview="on"][data-theme="light"] .sitesw{background:rgba(255,255,255,.42) !important;backdrop-filter:blur(18px) saturate(1.5) !important;-webkit-backdrop-filter:blur(18px) saturate(1.5) !important;border:1px solid rgba(255,255,255,.5) !important}
 
 /* 5) 高級ディテール: 大数字に深いインクのグラデ・ボタン光沢・罫線を繊細に */
 .kpi-hero .kh .v{
@@ -2446,7 +2444,7 @@ html[data-theme="night"] .mg-photo{display:none !important}
    コンソール装飾のMonet写真が"参加者の背景プレビュー"と混同されるため非表示。ホーム等では維持。 */
 /* (2026-08-19) admin全画面のヒーロー背景: 設定済みヒーロー画像を10秒巡回で敷く(個別画面はその画像を優先)。
    透過は下げず(bold)・可読性は各面のガラス化で担保。data-hero-preview 時はMonet/夜の非表示より優先。 */
-html[data-hero-preview="on"][data-theme="light"] .mg-photo{display:block !important;background-image:none !important;opacity:.6 !important;filter:none !important;transform:none !important}
+html[data-hero-preview="on"][data-theme="light"] .mg-photo{display:block !important;background-image:none !important;opacity:.16 !important;filter:blur(2.5px) saturate(.95) !important;transform:scale(1.05) !important}
 /* 2枚レイヤーのクロスフェード=画像切替をゆっくり(2.6s) */
 html[data-hero-preview="on"][data-theme="light"] .mg-photo::before,
 html[data-hero-preview="on"][data-theme="light"] .mg-photo::after{content:"";position:absolute;inset:0;background-position:center center;background-size:cover;background-repeat:no-repeat;opacity:0;transform:scale(1.03);transition:opacity 2.6s ease}
@@ -2457,31 +2455,11 @@ html[data-hero-layer="b"][data-theme="light"] .mg-photo::after{opacity:1}
 @media(prefers-reduced-motion:reduce){html .mg-photo::before,html .mg-photo::after{transition:none !important}}
 
 /* ============================================================================
-   (2026-08-19 rev2) 複数の"透けるフロストガラス"パネルに分割。パネルの間・周囲・
-   パネル越し(強blur)に写真が見える。各パネルは内側にたっぷり余白=文字が縁に触れない。
-   .main/.mc は透明にしてパネルが写真の上に浮く。data-hero-preview 時のみ・ライトのみ。
+   (2026-08-19 rev3) 方針転換=写真は淡いウォッシュに落とし(上の .mg-photo opacity.16+blur)、
+   コンテンツは"コンソール本来のクリーンなガラス/水彩テーマ"(=参加者アプリと同質)に一本化する。
+   → 前版の継ぎ接ぎ(.main/.mc透明+個別要素を.6パネル化+segs/chipfガラス)は全撤去。
+     写真が淡いので地に直乗りの見出し/表/カードもそのまま読める=混在解消。data-hero-preview時のみ。
    ============================================================================ */
-html[data-hero-preview="on"][data-theme="light"] .main,
-html[data-hero-preview="on"][data-theme="light"] .mc{
-  background:transparent !important;backdrop-filter:none !important;-webkit-backdrop-filter:none !important;
-  border:0 !important;box-shadow:none !important;border-radius:0 !important;
-}
-html[data-hero-preview="on"][data-theme="light"] .eh-head,
-html[data-hero-preview="on"][data-theme="light"] .eh-grid,
-html[data-hero-preview="on"][data-theme="light"] .launch-grp,
-html[data-hero-preview="on"][data-theme="light"] .tile,
-html[data-hero-preview="on"][data-theme="light"] .card,
-html[data-hero-preview="on"][data-theme="light"] .glass,
-html[data-hero-preview="on"][data-theme="light"] .kpc{
-  background:rgba(255,255,255,.6) !important;
-  backdrop-filter:blur(30px) saturate(1.7) !important;-webkit-backdrop-filter:blur(30px) saturate(1.7) !important;
-  border:1px solid rgba(255,255,255,.7) !important;border-radius:22px !important;
-  padding:18px 22px !important;margin-bottom:18px !important;
-  box-shadow:0 20px 50px -28px rgba(34,49,74,.34),inset 0 1px 0 rgba(255,255,255,.78) !important;
-}
-/* ヒーロー背景時: ステータス/フィルタ帯の"白い地"を撤去し、パネルと同じ"フロストガラス"に差し替え。いろんな画面のSegs/chipf共通。 */
-html[data-hero-preview="on"][data-theme="light"] .segs{background:rgba(255,255,255,.38) !important;backdrop-filter:blur(20px) saturate(1.6) !important;-webkit-backdrop-filter:blur(20px) saturate(1.6) !important;border:1px solid rgba(255,255,255,.55) !important;box-shadow:inset 0 1px 0 rgba(255,255,255,.6) !important;padding:3px !important}
-html[data-hero-preview="on"][data-theme="light"] .chipf{background:rgba(255,255,255,.34) !important;backdrop-filter:blur(16px) saturate(1.5) !important;-webkit-backdrop-filter:blur(16px) saturate(1.5) !important;border:1px solid rgba(255,255,255,.5) !important;color:var(--ink2) !important}
 @media (prefers-reduced-motion:no-preference){.mg-photo{will-change:auto}}
 .mg-bubbles{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;opacity:.9}
 .mg-bubble{position:absolute;border-radius:50%;pointer-events:none;will-change:transform;
