@@ -1,1612 +1,748 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ja">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta name="robots" content="noindex,nofollow"/>
-<title>Recruit · 採用オペレーション</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>採用管理 | connec+a</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..0&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&family=Zen+Old+Mincho:wght@400;500;600;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
 <style>
 :root{
-  --nav:#1b2239; --nav2:#222b47; --nav-hi:#2c3757; --nav-tx:#9aa4c0; --nav-tx2:#eef1f8; --nav-line:rgba(255,255,255,.08);
-  --bg:#f4f6fb;
-  --card:#ffffff; --line:#e7eaf1; --line2:#dce1ec;
-  --ink:#1d2542; --ink2:#495375; --ink3:#78829f; --ink4:#a1abc1;
-  --blue:#3a5bd9; --blueh:#2f4bc0; --blue-soft:#eef1fd; --blue-bd:#d3dbf7;
-  --green:#1f9d63; --green-soft:#e8f6ef; --green-bd:#bfe6d1;
-  --amber:#c58a1c; --amber-soft:#fbf3e1; --amber-bd:#eeddb0;
-  --red:#d94f5c; --red-soft:#fdedef; --red-bd:#f5ccd1;
-  --violet:#7a5bd0; --violet-soft:#f0ecfb; --violet-bd:#ddd2f4;
-  --teal:#2b8fb8; --teal-soft:#e6f3f9; --teal-bd:#c3e2ef;
-  --slate:#64708f; --slate-soft:#eef1f6; --slate-bd:#dbe1ec;
-  --sh:0 1px 2px rgba(24,34,64,.04),0 1px 3px rgba(24,34,64,.05);
-  --sh2:0 6px 18px -6px rgba(24,34,64,.14);
-  --r:12px; --r2:9px;
-  --s:'Inter','Noto Sans JP',sans-serif;
-  --m:'JetBrains Mono',monospace;
-  --side:224px;
+  --ink:#1a1c22; --ink2:#5a6272; --ink3:#8b96a6;
+  --blue:#1E50A2; --azure:#2E6BE6; --blue-deep:#12356f;
+  --soft:#F1F5FA; --line:#E3E9F1;
+  --ok:#3f8a3f; --ok-bg:#f2f9f2; --warn:#b07f3e; --warn-bg:#fdf8f0; --bad:#b0453e; --bad-bg:#fdf4f3;
+  --gothic:'Zen Kaku Gothic New',sans-serif;
+  --serif:'Zen Old Mincho',serif;
+  --latin:'DM Sans','Zen Kaku Gothic New',sans-serif;
+  --maxw:1120px;
 }
 *{box-sizing:border-box}
-html,body{margin:0;min-height:100%}
-body{font-family:var(--s);color:var(--ink);background:var(--bg);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
-.msym{font-family:'Material Symbols Rounded';font-weight:400;line-height:1;font-style:normal;vertical-align:-3px;font-size:20px}
-.mono{font-family:var(--m);font-variant-numeric:tabular-nums}
-::-webkit-scrollbar{width:11px;height:11px}
-::-webkit-scrollbar-thumb{background:#cdd4e2;border-radius:20px;border:3px solid var(--bg);background-clip:content-box}
-a{color:inherit}
+html,body{margin:0;padding:0}
+body{font-family:var(--gothic);color:var(--ink);background:#fff;-webkit-font-smoothing:antialiased;line-height:1.75}
+a{color:var(--blue)}
+button{font-family:inherit}
 
-/* ---------- shell ---------- */
-.shell{display:grid;grid-template-columns:var(--side) 1fr;min-height:100vh}
-.side{position:sticky;top:0;height:100vh;background:var(--nav);display:flex;flex-direction:column;padding:14px 12px}
-.brand{display:flex;align-items:center;gap:10px;padding:8px 8px 16px}
-.brand .lg{width:32px;height:32px;border-radius:9px;display:grid;place-items:center;background:linear-gradient(135deg,#4d6ff0,#3a5bd9);color:#fff}
-.brand .lg .msym{font-size:20px}
-.brand .bt{font-weight:800;color:#fff;font-size:16.5px;letter-spacing:.02em}
-.navsec{font-size:10px;letter-spacing:.11em;text-transform:uppercase;color:#5f6a89;font-weight:700;padding:14px 12px 6px}
-.navi{display:flex;align-items:center;gap:12px;padding:9px 12px;border-radius:9px;color:var(--nav-tx);cursor:pointer;font-weight:500;font-size:13.5px;position:relative;transition:.13s;margin-bottom:1px}
-.navi:hover{background:var(--nav2);color:var(--nav-tx2)}
-.navi.on{background:var(--nav-hi);color:#fff;font-weight:600}
-.navi.on::before{content:'';position:absolute;left:-12px;top:8px;bottom:8px;width:3px;border-radius:3px;background:#5b7bf5}
-.navi .msym{font-size:20px;opacity:.9}
-.navi .ct{margin-left:auto;font-size:11px;font-weight:700;padding:1px 7px;border-radius:9px;background:rgba(255,255,255,.1);color:var(--nav-tx2)}
-.sidefoot{margin-top:auto;padding:12px;border-top:1px solid var(--nav-line);font-size:11px;color:#6b7699;line-height:1.55}
-.sidefoot b{color:#9aa6c8}
+/* ===== chrome ===== */
+.topbar{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.94);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.tb-in{max-width:var(--maxw);margin:0 auto;padding:0 22px;display:flex;align-items:center;gap:26px;height:60px}
+.brand{font-weight:900;font-size:19px;color:var(--ink);text-decoration:none;letter-spacing:.02em;flex:none}
+.brand small{font-family:var(--serif);font-weight:600;font-size:12px;color:var(--ink2);margin-left:12px;letter-spacing:.2em}
+nav.tabs{display:flex;gap:2px;overflow-x:auto;flex:1;-webkit-overflow-scrolling:touch}
+nav.tabs a{flex:none;text-decoration:none;color:var(--ink2);font-size:13px;font-weight:700;letter-spacing:.06em;padding:8px 14px;border-radius:999px;transition:color .15s,background .15s}
+nav.tabs a:hover{color:var(--ink);background:var(--soft)}
+nav.tabs a.on{color:#fff;background:var(--blue-deep)}
+.tb-user{flex:none;display:flex;align-items:center;gap:12px;font-size:12px;color:var(--ink2)}
+.tb-user button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:5px 13px;font-size:11.5px;color:var(--ink2);cursor:pointer}
+.tb-user button:hover{border-color:var(--ink3);color:var(--ink)}
+@media(max-width:760px){
+  .tb-in{flex-wrap:wrap;height:auto;padding:10px 14px 8px;gap:8px 12px}
+  .brand{order:1}.tb-user{order:2;margin-left:auto}
+  nav.tabs{order:3;flex-basis:100%;margin:0 -4px}
+  .rowline{flex-wrap:wrap;gap:6px 10px;padding:12px 4px}
+  .rowline .nm{min-width:0}
+  .rowline .meta{margin-left:auto}
+}
 
-.main{min-width:0;display:flex;flex-direction:column}
-.topbar{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.9);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:14px;padding:0 24px;height:58px}
-.crumb{display:flex;align-items:center;gap:7px;font-size:13px;color:var(--ink3);font-weight:500}
-.crumb b{color:var(--ink);font-weight:600}
-.crumb .msym{font-size:16px;color:var(--ink4)}
-.spacer{flex:1}
-.search{display:flex;align-items:center;gap:8px;padding:7px 12px;border-radius:9px;background:var(--bg);border:1px solid var(--line);min-width:260px}
-.search input{border:0;background:transparent;outline:none;font-family:var(--s);font-size:13px;color:var(--ink);width:100%}
-.search .msym{color:var(--ink4);font-size:18px}
-.iconbtn{width:38px;height:38px;border-radius:9px;display:grid;place-items:center;color:var(--ink2);cursor:pointer;position:relative}
-.iconbtn:hover{background:var(--bg)}
-.iconbtn .badge{position:absolute;top:5px;right:6px;min-width:16px;height:16px;padding:0 4px;border-radius:9px;background:var(--red);color:#fff;font-size:10px;font-weight:700;display:grid;place-items:center;border:2px solid #fff}
-.me{display:flex;align-items:center;gap:9px;padding:5px 8px 5px 5px;border-radius:10px;cursor:pointer}
-.me:hover{background:var(--bg)}
-.me .mn{font-size:12.5px;line-height:1.25}
-.me .mn small{display:block;color:var(--ink3);font-size:10.5px}
-.me .mn b{color:var(--ink);font-weight:600}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:38px 22px 100px}
+.eyebrow{display:inline-flex;align-items:center;gap:10px;font-family:var(--latin);font-weight:600;font-size:10.5px;letter-spacing:.24em;color:var(--azure);text-transform:uppercase;margin:0 0 8px}
+.eyebrow::before{content:"";width:24px;height:1px;background:var(--azure)}
+h1.pg{font-family:var(--serif);font-weight:600;font-size:clamp(24px,4vw,32px);line-height:1.4;letter-spacing:.05em;margin:0 0 6px}
+.pg-lede{color:var(--ink2);font-size:13.5px;margin:0 0 30px}
 
-.page{padding:22px 24px 56px}
-.ph{display:flex;align-items:flex-end;gap:12px;margin-bottom:18px}
-.ph h1{font-size:21px;font-weight:800;color:var(--ink);margin:0;letter-spacing:-.01em}
-.ph .psub{font-size:13px;color:var(--ink3);margin-left:2px}
+.sect-h{font-family:var(--serif);font-weight:600;font-size:17px;letter-spacing:.08em;margin:34px 0 4px;display:flex;align-items:baseline;gap:12px}
+.sect-h .cnt{font-family:var(--latin);font-size:12px;color:var(--ink3)}
+.sect-rule{height:1px;background:linear-gradient(to right,var(--line),transparent);margin:8px 0 16px}
 
-/* ---------- cards ---------- */
-.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh)}
-.pad{padding:18px}
-.grid{display:grid;gap:16px}
-.ch{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:700;color:var(--ink);margin:0 0 14px}
-.ch .msym{font-size:19px;color:var(--blue)}
-.ch .more{margin-left:auto;font-size:12px;font-weight:600;color:var(--blue);cursor:pointer}
-.ch .more:hover{text-decoration:underline}
-.muted{color:var(--ink3)}
-.hr{height:1px;background:var(--line);border:0;margin:14px 0}
+/* ===== cards / stats ===== */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin:6px 0 8px}
+.stat{border:1px solid var(--line);border-radius:14px;padding:16px 18px 13px;background:#fff}
+.stat .n{font-family:var(--serif);font-weight:600;font-size:32px;line-height:1;color:var(--ink)}
+.stat .l{font-size:11.5px;color:var(--ink2);margin-top:7px;letter-spacing:.05em}
+.stat.hot{background:linear-gradient(180deg,#f6f9fe,#fff);border-color:#cddcf2}
+.stat.hot .n{color:var(--blue-deep)}
+.stat.warn{border-color:#ecdcc4;background:var(--warn-bg)}
+.stat.warn .n{color:var(--warn)}
 
-/* ---------- chips ---------- */
-.chip{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:7px;font-size:11.5px;font-weight:600;line-height:1.5;white-space:nowrap;border:1px solid transparent}
-.chip .dot{width:6px;height:6px;border-radius:50%}
-.c-blue{background:var(--blue-soft);color:var(--blueh);border-color:var(--blue-bd)} .c-blue .dot{background:var(--blue)}
-.c-green{background:var(--green-soft);color:#177a4c;border-color:var(--green-bd)} .c-green .dot{background:var(--green)}
-.c-amber{background:var(--amber-soft);color:#9a6c14;border-color:var(--amber-bd)} .c-amber .dot{background:var(--amber)}
-.c-red{background:var(--red-soft);color:#c13c49;border-color:var(--red-bd)} .c-red .dot{background:var(--red)}
-.c-rose{background:var(--red-soft);color:#c13c49;border-color:var(--red-bd)} .c-rose .dot{background:var(--red)}
-.c-violet{background:var(--violet-soft);color:#6446bd;border-color:var(--violet-bd)} .c-violet .dot{background:var(--violet)}
-.c-teal{background:var(--teal-soft);color:#227699;border-color:var(--teal-bd)} .c-teal .dot{background:var(--teal)}
-.c-slate{background:var(--slate-soft);color:#515c78;border-color:var(--slate-bd)} .c-slate .dot{background:var(--slate)}
-.tag{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600;background:var(--bg);border:1px solid var(--line);color:var(--ink2)}
+.card{border:1px solid var(--line);border-radius:14px;background:#fff;padding:20px 22px;margin:0 0 14px}
+.rowline{display:flex;align-items:center;gap:14px;padding:11px 4px;border-bottom:1px solid var(--soft);cursor:pointer;border-radius:8px;transition:background .15s}
+.rowline:hover{background:var(--soft)}
+.rowline:last-child{border-bottom:none}
+.rowline .nm{font-weight:700;font-size:14px;min-width:9em}
+.rowline .cd{font-family:var(--latin);font-size:11px;color:var(--ink3);min-width:5.5em}
+.rowline .meta{font-size:12px;color:var(--ink2);margin-left:auto;text-align:right;flex:none}
+.empty{color:var(--ink3);font-size:12.5px;padding:14px 4px}
 
-/* ---------- buttons ---------- */
-.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:9px;font-family:var(--s);font-weight:600;font-size:13px;cursor:pointer;border:1px solid var(--line2);background:#fff;color:var(--ink2);transition:.13s;white-space:nowrap}
-.btn:hover{border-color:var(--blue);color:var(--blue)}
-.btn .msym{font-size:17px}
-.btn.prim{background:var(--blue);border-color:var(--blue);color:#fff}
-.btn.prim:hover{background:var(--blueh);border-color:var(--blueh);color:#fff}
-.btn.sm{padding:6px 10px;font-size:12px;border-radius:8px}
-.btn.ghost{border-color:transparent;background:transparent;color:var(--blue)}
-.btn.ghost:hover{background:var(--blue-soft)}
-.btn.danger{color:var(--red);border-color:var(--red-bd)} .btn.danger:hover{background:var(--red-soft);border-color:var(--red)}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;letter-spacing:.04em;border-radius:999px;padding:3px 11px;background:var(--soft);color:var(--ink2);white-space:nowrap}
+.chip.b{background:#e8effb;color:var(--blue-deep)}
+.chip.g{background:var(--ok-bg);color:var(--ok)}
+.chip.y{background:var(--warn-bg);color:var(--warn)}
+.chip.r{background:var(--bad-bg);color:var(--bad)}
+.chip.dir{background:#0e1b2e;color:#dfe9fb}
 
-/* ---------- avatar ---------- */
-.av{border-radius:50%;object-fit:cover;flex:none;background:#dfe4ee;display:grid;place-items:center;color:#fff;font-weight:700;overflow:hidden}
-.av.sq{border-radius:10px}
+.banner{border-radius:14px;padding:16px 20px;margin:0 0 16px;font-size:13.5px;line-height:1.8}
+.banner.warn{border:1px solid #ecdcc4;background:var(--warn-bg);color:#7a5626}
+.banner.ok{border:1px solid #cfe3cf;background:var(--ok-bg);color:#2f5e2f}
+.banner.bad{border:1px solid #e6c3c3;background:var(--bad-bg);color:#7d3535}
+.banner b{letter-spacing:.04em}
 
-/* ---------- KPI ---------- */
-.kpi{padding:16px;border-radius:var(--r);background:#fff;border:1px solid var(--line);box-shadow:var(--sh);cursor:pointer;transition:.13s}
-.kpi:hover{box-shadow:var(--sh2);transform:translateY(-1px);border-color:var(--line2)}
-.kpi .ki{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;margin-bottom:11px}
-.kpi .ki .msym{font-size:19px}
-.kpi .kv{font-size:26px;font-weight:800;color:var(--ink);line-height:1}
-.kpi .kl{font-size:12px;color:var(--ink3);font-weight:500;margin-top:5px}
+/* ===== forms ===== */
+.fld{margin:0 0 15px}
+.fld label{display:block;font-size:12px;font-weight:700;letter-spacing:.06em;margin-bottom:6px;color:var(--ink)}
+.fld label .opt{color:var(--ink3);font-size:10px;font-weight:500;margin-left:7px}
+.fld input[type=text],.fld input[type=email],.fld input[type=password],.fld input[type=url],.fld input[type=datetime-local],.fld select,.fld textarea{
+  width:100%;font-family:inherit;font-size:14px;color:var(--ink);
+  border:1px solid var(--line);border-radius:8px;background:#fff;padding:10px 12px;outline:none;
+  transition:border-color .18s,box-shadow .18s;-webkit-appearance:none;appearance:none}
+.fld select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238b96a6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 13px center}
+.fld textarea{min-height:150px;line-height:1.8;resize:vertical}
+.fld input:focus,.fld select:focus,.fld textarea:focus{border-color:var(--azure);box-shadow:0 0 0 3px rgba(46,107,230,.12)}
+.fld .hint{font-size:11px;color:var(--ink3);margin-top:4px;line-height:1.6}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 16px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0 16px}
+@media(max-width:640px){.grid2,.grid3{grid-template-columns:1fr}}
 
-/* ---------- table ---------- */
-.tbl{width:100%;border-collapse:collapse}
-.tbl th{font-size:11px;letter-spacing:.03em;color:var(--ink3);font-weight:600;text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);background:#fbfcfe}
-.tbl td{padding:12px 14px;border-bottom:1px solid var(--line);font-size:13px;color:var(--ink2);vertical-align:middle}
-.trow{cursor:pointer;transition:.1s}
-.trow:hover td{background:#f7f9fd}
-.tbl tr:last-child td{border-bottom:0}
-.nm{display:flex;align-items:center;gap:11px}
-.nm b{color:var(--ink);font-weight:600;font-size:13.5px}
-.nm .mt{font-size:11.5px;color:var(--ink3);margin-top:1px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-weight:700;font-size:13px;letter-spacing:.08em;
+  color:#fff;background:var(--blue-deep);border:none;border-radius:999px;padding:11px 24px;cursor:pointer;transition:background .2s}
+.btn:hover{background:var(--blue)}
+.btn:disabled{background:#b9c4d6;cursor:default}
+.btn.ghost{background:#fff;color:var(--blue-deep);border:1px solid #c9d6e8}
+.btn.ghost:hover{background:var(--soft)}
+.btn.danger{background:#fff;color:var(--bad);border:1px solid #e6c3c3}
+.btn.danger:hover{background:var(--bad-bg)}
+.btn.sm{padding:7px 16px;font-size:12px}
+.btnrow{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:8px}
 
-/* ---------- overview blocks ---------- */
-.kv{display:grid;grid-template-columns:96px 1fr;gap:9px 12px;font-size:13px}
-.kv .k{color:var(--ink3);font-weight:500}
-.kv .v{color:var(--ink);font-weight:500}
-.duebar{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-top:1px solid var(--line);font-size:13px}
-.duebar:first-of-type{border-top:0}
-.duebar .dl{color:var(--ink2);font-weight:500}
-.duebar .dd{display:flex;align-items:center;gap:9px}
-.duebar .dv{color:var(--ink);font-weight:600}
+.err{display:none;border:1px solid #e6c3c3;background:var(--bad-bgd,#fdf5f5);color:#8a2f2f;border-radius:10px;padding:11px 14px;font-size:12.5px;margin:12px 0;line-height:1.7}
+.err.on{display:block}
+.note{font-size:11.5px;color:var(--ink3);line-height:1.7}
 
-.recrow{display:flex;align-items:center;gap:11px;padding:11px 0;border-top:1px solid var(--line)}
-.recrow:first-of-type{border-top:0}
-.recrow .rt{font-weight:600;color:var(--ink);font-size:13px}
-.recrow .rs{font-size:11.5px;color:var(--ink3);margin-top:2px}
+/* ===== login ===== */
+.login{max-width:400px;margin:0 auto;padding:80px 22px}
+.login .mark{text-align:center;margin-bottom:30px}
+.login .mark .b{font-weight:900;font-size:24px}
+.login .mark .s{font-family:var(--serif);font-size:13px;color:var(--ink2);letter-spacing:.28em;margin-top:6px}
 
-/* ---------- status box ---------- */
-.statusbox{border-radius:10px;padding:14px 16px;text-align:center;font-weight:800;font-size:18px;letter-spacing:.01em}
-.labelwrap{display:flex;flex-wrap:wrap;gap:7px}
+/* ===== detail ===== */
+.dhead{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin:0 0 4px}
+.dhead h1{font-family:var(--serif);font-weight:600;font-size:26px;letter-spacing:.05em;margin:0}
+.dhead .code{font-family:var(--latin);font-size:12px;color:var(--ink3);letter-spacing:.08em}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 22px}
+.kv{display:grid;grid-template-columns:9em 1fr;gap:6px 14px;font-size:13px}
+.kv dt{color:var(--ink3);font-size:11.5px;letter-spacing:.05em;padding-top:2px}
+.kv dd{margin:0;color:var(--ink);word-break:break-word}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}
+@media(max-width:860px){.two{grid-template-columns:1fr}}
+.tl{list-style:none;margin:0;padding:0}
+.tl li{position:relative;padding:0 0 14px 22px;border-left:1px solid var(--line);margin-left:6px}
+.tl li::before{content:"";position:absolute;left:-4px;top:7px;width:7px;height:7px;border-radius:50%;background:var(--azure)}
+.tl li:last-child{border-left-color:transparent}
+.tl .t{font-size:13px;font-weight:700}
+.tl .d{font-size:11px;color:var(--ink3);font-family:var(--latin)}
+.tl .r{font-size:12px;color:var(--ink2)}
+.msg{border-bottom:1px solid var(--soft);padding:10px 2px}
+.msg:last-child{border-bottom:none}
+.msg .s{font-size:13px;font-weight:700}
+.msg .m{font-size:11px;color:var(--ink3);font-family:var(--latin)}
+.linkbox{display:flex;gap:8px;align-items:center;border:1px solid var(--line);border-radius:10px;background:var(--soft);padding:9px 12px;margin:8px 0}
+.linkbox input{flex:1;border:none;background:transparent;font-family:var(--latin);font-size:11.5px;color:var(--ink2);outline:none}
 
-/* ---------- timeline ---------- */
-.tl{display:flex;flex-direction:column}
-.tlr{display:grid;grid-template-columns:64px 26px 1fr auto;gap:0 8px;align-items:start;padding:0}
-.tlr .tt{padding:2px 0 18px}
-.tlr:last-child .tt,.tlr:last-child .tc,.tlr:last-child .tm{padding-bottom:2px}
-.tlr .td{font-size:11.5px;color:var(--ink3);font-weight:600;text-align:right;padding-top:1px;line-height:1.35}
-.tlr .td small{display:block;color:var(--ink4);font-weight:500;font-size:10.5px}
-.tlr .tk{position:relative;display:flex;justify-content:center}
-.tlr .nd{width:12px;height:12px;border-radius:50%;margin-top:3px;z-index:1;border:2.5px solid #fff;box-shadow:0 0 0 1.5px var(--line2)}
-.tlr .ln{position:absolute;top:12px;bottom:-6px;width:2px;background:var(--line);left:50%;margin-left:-1px}
-.tlr:last-child .ln{display:none}
-.tlr .tc{padding:0 0 18px}
-.tlr .tt2{font-weight:600;color:var(--ink);font-size:13.5px}
-.tlr .tx{font-size:12.5px;color:var(--ink3);margin-top:2px;line-height:1.45}
-.tlr .tm{display:flex;align-items:center;gap:9px;padding:1px 0 18px;white-space:nowrap}
-.tlr .who{font-size:12px;color:var(--ink3);font-weight:500}
+/* ===== issue steps ===== */
+.steps{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin:4px 0 26px}
+@media(max-width:720px){.steps{grid-template-columns:1fr}}
+.step{border:1px solid var(--line);border-radius:14px;padding:18px}
+.step .sn{font-family:var(--latin);font-size:11px;letter-spacing:.2em;color:var(--azure)}
+.step .st{font-family:var(--serif);font-weight:600;font-size:15.5px;letter-spacing:.05em;margin:6px 0 6px}
+.step .sd{font-size:12px;color:var(--ink2);line-height:1.75}
 
-/* ---------- eval bars ---------- */
-.evbar{display:grid;grid-template-columns:78px 34px 1fr;gap:10px;align-items:center;margin-bottom:9px}
-.evbar .el{font-size:12.5px;font-weight:600}
-.evbar .ec{font-size:12.5px;color:var(--ink2);font-weight:600}
-.track{height:8px;border-radius:5px;background:var(--bg);overflow:hidden}
-.track .fill{height:100%;border-radius:5px}
-.notebox{display:flex;gap:9px;padding:11px 12px;border-radius:9px;font-size:12px;line-height:1.5;margin-top:12px}
-.notebox.warn{background:var(--amber-soft);color:#8a6112} .notebox.warn .msym{color:var(--amber)}
-.notebox.info{background:var(--blue-soft);color:#33469c} .notebox.info .msym{color:var(--blue)}
-.notebox .msym{flex:none;font-size:18px}
+/* ===== mail templates ===== */
+.tplh{display:flex;align-items:center;gap:12px;cursor:pointer;padding:14px 4px}
+.tplh .tt{font-weight:700;font-size:14px}
+.tplh .arrow{margin-left:auto;color:var(--ink3);transition:transform .2s;flex:none}
+.tpl.open .tplh .arrow{transform:rotate(180deg)}
+.tpl .tplb{display:none;padding:4px 4px 18px}
+.tpl.open .tplb{display:block}
+.tpl{border-bottom:1px solid var(--soft)}
+.tpl:last-child{border-bottom:none}
+.vars{font-family:var(--latin);font-size:11px;color:var(--ink3);margin:4px 0 12px}
+.vars code{background:var(--soft);border-radius:5px;padding:1px 7px;margin-right:6px;font-size:10.5px;cursor:pointer}
 
-/* ---------- activity / rail rows ---------- */
-.arow{display:flex;align-items:flex-start;gap:10px;padding:11px 0;border-top:1px solid var(--line)}
-.arow:first-of-type{border-top:0}
-.arow .ai{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;flex:none}
-.arow .ai .msym{font-size:17px}
-.arow .an{font-weight:600;color:var(--ink);font-size:12.5px}
-.arow .as{font-size:11.5px;color:var(--ink3);margin-top:2px}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 16px;align-items:center}
+.fpill{border:1px solid var(--line);background:#fff;border-radius:999px;padding:6px 15px;font-size:12px;font-weight:700;color:var(--ink2);cursor:pointer;transition:all .15s}
+.fpill:hover{border-color:#c9d6e8}
+.fpill.on{background:var(--blue-deep);border-color:var(--blue-deep);color:#fff}
+.search{margin-left:auto}
+.search input{border:1px solid var(--line);border-radius:999px;padding:7px 16px;font-family:inherit;font-size:12.5px;outline:none;width:190px}
+.search input:focus{border-color:var(--azure)}
 
-/* ---------- flow diff ---------- */
-.flow{display:grid;grid-template-columns:150px 1fr;gap:12px 14px;align-items:center}
-.flowlbl{font-size:12.5px;font-weight:600;color:var(--ink2)}
-.chain{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
-.fstep{display:inline-flex;align-items:center;padding:5px 11px;border-radius:7px;font-size:12px;font-weight:600;background:var(--bg);border:1px solid var(--line);color:var(--ink2)}
-.fstep.done{background:var(--green-soft);border-color:var(--green-bd);color:#177a4c}
-.fstep.now{background:var(--amber-soft);border-color:var(--amber-bd);color:#9a6c14}
-.fstep.off{background:var(--violet-soft);border-color:var(--violet-bd);color:#6446bd}
-.farr{color:var(--ink4);font-size:14px;font-weight:700}
+.toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(80px);background:var(--ink);color:#fff;font-size:12.5px;letter-spacing:.05em;border-radius:999px;padding:11px 24px;z-index:300;opacity:0;transition:all .3s ease;pointer-events:none;max-width:88vw}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
 
-/* ---------- tabs ---------- */
-.tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);margin-bottom:18px;overflow-x:auto}
-.tab{padding:11px 15px;font-size:13px;font-weight:600;color:var(--ink3);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:.12s}
-.tab:hover{color:var(--ink)}
-.tab.on{color:var(--blue);border-bottom-color:var(--blue)}
-
-.seg{display:inline-flex;background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:3px;gap:2px}
-.seg b{padding:6px 13px;border-radius:6px;font-size:12.5px;font-weight:600;color:var(--ink3);cursor:pointer}
-.seg b.on{background:#fff;color:var(--ink);box-shadow:var(--sh)}
-
-.evalcard{border:1px solid var(--line);border-radius:10px;padding:12px 13px;margin-bottom:9px;background:#fff}
-.emptyx{text-align:center;padding:34px 20px;color:var(--ink3);font-size:13px}
-.emptyx .msym{font-size:32px;color:var(--ink4);display:block;margin-bottom:8px}
-.link{color:var(--blue);font-weight:600;cursor:pointer}
-.link:hover{text-decoration:underline}
-.stars{color:var(--amber);letter-spacing:1px;font-size:13px}
-
-/* ---------- modal ---------- */
-.overlay{position:fixed;inset:0;background:rgba(20,28,54,.42);display:grid;place-items:center;z-index:80;padding:20px;animation:fade .16s}
-@keyframes fade{from{opacity:0}}
-.modal{width:min(540px,96vw);max-height:88vh;overflow:auto;background:#fff;border-radius:14px;box-shadow:0 24px 60px -12px rgba(20,28,54,.4);animation:pop .18s ease-out}
-@keyframes pop{from{transform:translateY(10px);opacity:.6}}
-.modal .mhd{padding:18px 20px;border-bottom:1px solid var(--line)}
-.modal .mt{font-size:16px;font-weight:800;color:var(--ink)}
-.modal .mx{font-size:12.5px;color:var(--ink3);margin-top:3px;line-height:1.5}
-.modal .mbd{padding:18px 20px}
-.opt{display:flex;align-items:center;gap:12px;padding:11px 13px;border-radius:10px;border:1px solid var(--line);cursor:pointer;transition:.12s;margin-bottom:8px}
-.opt:hover{border-color:var(--blue);background:var(--blue-soft)}
-.opt .oi{width:32px;height:32px;border-radius:8px;display:grid;place-items:center;flex:none}
-.opt .ot{font-weight:600;color:var(--ink);font-size:13.5px}
-.opt .os{font-size:11.5px;color:var(--ink3);margin-top:1px}
-.field{width:100%;padding:10px 12px;border-radius:9px;border:1px solid var(--line2);background:#fff;font-family:var(--s);font-size:13px;color:var(--ink);outline:none}
-.field:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-soft)}
-textarea.field{line-height:1.55}
-select.field{appearance:auto;-webkit-appearance:auto}
-
-/* ---------- forms ---------- */
-.modal.lg{width:min(700px,96vw)}
-.mbd.scroll{max-height:62vh;overflow:auto}
-.frow{margin-bottom:15px}
-.flbl{font-size:12px;font-weight:600;color:var(--ink2);margin-bottom:7px;display:flex;align-items:center;gap:6px}
-.flbl .req{color:var(--red);font-size:10.5px;font-weight:700}
-.fhint{font-size:11px;color:var(--ink4);font-weight:500}
-.selrow{display:flex;flex-wrap:wrap;gap:7px}
-.selchip{display:inline-flex;align-items:center;gap:5px;padding:7px 12px;border-radius:8px;border:1px solid var(--line);background:#fff;font-size:12.5px;font-weight:600;color:var(--ink3);cursor:pointer;transition:.12s}
-.selchip:hover{border-color:var(--blue-bd);color:var(--ink2)}
-.selchip.on{border-color:var(--blue);background:var(--blue-soft);color:var(--blueh)}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.sess-item{display:flex;align-items:center;gap:8px;margin-bottom:7px}
-.mfoot{padding:14px 20px;border-top:1px solid var(--line);display:flex;gap:9px;justify-content:flex-end;position:sticky;bottom:0;background:#fff;border-radius:0 0 14px 14px}
-.check{display:flex;align-items:center;gap:9px;cursor:pointer;font-size:12.5px;color:var(--ink2)}
-.check input{width:16px;height:16px;accent-color:var(--blue)}
-
-/* ---------- interview room ---------- */
-@keyframes wv{0%,100%{transform:scaleY(.25)}50%{transform:scaleY(1)}}
-.wv{display:flex;align-items:flex-end;gap:3px;height:26px}
-.wv i{width:3px;height:100%;background:var(--blue);border-radius:2px;transform-origin:center;animation:wv 1s ease-in-out infinite}
-@keyframes pls{0%,100%{opacity:1}50%{opacity:.25}}
-.recdot{width:10px;height:10px;border-radius:50%;background:var(--red);animation:pls 1.1s infinite;flex:none}
-.recbtn{width:54px;height:54px;border-radius:50%;border:none;cursor:pointer;display:grid;place-items:center;box-shadow:var(--sh);transition:.12s}
-.recbtn:hover{transform:scale(1.04)}
-.chkbox{width:19px;height:19px;border-radius:5px;display:grid;place-items:center;flex:none;transition:.12s}
-.sw{width:38px;height:22px;border-radius:12px;position:relative;cursor:pointer;transition:.15s;flex:none}
-.sw i{position:absolute;top:2px;width:18px;height:18px;border-radius:50%;background:#fff;transition:.15s;box-shadow:0 1px 2px rgba(0,0,0,.25)}
-.sw.on{background:var(--blue)} .sw.on i{left:18px}
-.sw.off{background:var(--line2)} .sw.off i{left:2px}
-.notif{position:absolute;top:52px;right:64px;width:380px;max-height:72vh;overflow:auto;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:var(--sh2);z-index:60}
-.notif .nrow{display:flex;gap:10px;padding:11px 14px;border-top:1px solid var(--line);cursor:pointer}
-.notif .nrow:hover{background:var(--bg)}
-.notif .nrow.unread{background:var(--blue-soft)}
-.notif .nrow.unread:hover{background:#e5ebfc}
-
-@media(max-width:1120px){.ov-top{grid-template-columns:1fr!important}.ov-body{grid-template-columns:1fr!important}.grid2{grid-template-columns:1fr}}
+.loading{padding:90px 20px;text-align:center;color:var(--ink3);font-size:12.5px;letter-spacing:.14em}
+.loading .ring{width:30px;height:30px;border-radius:50%;border:2px solid var(--line);border-top-color:var(--azure);margin:0 auto 16px;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.reveal{opacity:0;transform:translateY(8px);transition:opacity .5s ease,transform .5s ease}
+.reveal.on{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}.loading .ring{animation:none}.toast{transition:opacity .2s}}
 </style>
 </head>
 <body>
-<div id="root"></div>
 
-<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin></script>
-<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin></script>
-
-<script type="text/plain" id="appsrc">
-const {useState, useMemo, useCallback, useEffect, Fragment} = React;
-
-/* ============================================================================
-   Recruit — 採用オペレーションシステム (設計プロトタイプ)
-   固定ステージ型ATSではなく「実際に起きた採用プロセスをそのまま記録する」思想。
-   Applicant/Application分離・順序制約なしSelectionActivity・独立Decision履歴・
-   決定論的 Operational Status・Timeline/NextAction中心UI。モックは§95 Case1〜25網羅。
-   ============================================================================ */
-
-const NOW = new Date('2026-08-29T10:00:00+09:00');
-const MS = {h:36e5, d:864e5};
-const iso = (o)=>new Date(NOW.getTime()+o).toISOString();
-const dOf = (n)=>new Date(NOW.getTime()+n*MS.d).toISOString();
-
-const U = {
-  rep:{id:'rep', name:'代表 / 三好', role:'Super Admin'},
-  hr :{id:'hr',  name:'採用 / 岡田', role:'Recruitment Admin'},
-  r1 :{id:'r1',  name:'広報 / 西村', role:'Recruiter'},
-  r2 :{id:'r2',  name:'運営 / 森本', role:'Recruiter'},
-  iv1:{id:'iv1', name:'面接官 / 高杉', role:'Interviewer'},
-  iv2:{id:'iv2', name:'面接官 / 白石', role:'Interviewer'},
-  sys:{id:'sys', name:'システム自動', role:'System'},
-};
-const uname = id => (Object.values(U).find(u=>u.id===id)||{name:id}).name;
-
-const ATYPES = [
-  {key:'INTERVIEW', label:'面接', icon:'groups', color:'#3a5bd9'},
-  {key:'CASUAL_CHAT', label:'カジュアル面談', icon:'coffee', color:'#2b8fb8'},
-  {key:'TASK', label:'課題', icon:'assignment', color:'#7a5bd0'},
-  {key:'DOCUMENT_REVIEW', label:'書類確認', icon:'description', color:'#2b8fb8'},
-  {key:'REFERENCE_CHECK', label:'リファレンス', icon:'contacts', color:'#1f9d63'},
-  {key:'TRIAL_PARTICIPATION', label:'体験参加', icon:'volunteer_activism', color:'#c58a1c'},
-  {key:'PHONE_CALL', label:'電話', icon:'call', color:'#3a5bd9'},
-  {key:'FINAL_CONFIRMATION', label:'最終確認', icon:'verified', color:'#1f9d63'},
-  {key:'ASSIGNMENT_DISCUSSION', label:'配属面談', icon:'hub', color:'#7a5bd0'},
-  {key:'CONDITION_CONFIRMATION', label:'条件確認', icon:'fact_check', color:'#2b8fb8'},
-  {key:'ONBOARDING_MEETING', label:'オンボーディング', icon:'diversity_3', color:'#1f9d63'},
-  {key:'REP_CHECK', label:'代表確認', icon:'stars', color:'#c58a1c', custom:true},
-  {key:'OTHER', label:'その他', icon:'more_horiz', color:'#64708f'},
-];
-const atype = k => ATYPES.find(a=>a.key===k)||ATYPES[ATYPES.length-1];
-
-const AST = {
-  draft:{l:'下書き',t:'slate'}, planned:{l:'予定',t:'blue'}, scheduled:{l:'予定済み',t:'blue'},
-  in_progress:{l:'進行中',t:'teal'}, partially_completed:{l:'一部完了',t:'amber'}, completed:{l:'完了',t:'green'},
-  rescheduled:{l:'再調整',t:'amber'}, cancelled_by_applicant:{l:'本人都合中止',t:'red'},
-  cancelled_by_organization:{l:'運営都合中止',t:'red'}, no_show:{l:'無断欠席',t:'red'},
-  skipped:{l:'スキップ',t:'slate'}, not_required:{l:'不要',t:'slate'}, incomplete:{l:'未了',t:'amber'},
-  paused:{l:'保留',t:'violet'}, void:{l:'無効',t:'slate'}, archived:{l:'アーカイブ',t:'slate'},
-};
-const DONE_ST = ['completed','not_required','skipped'];
-const OPEN_ST = ['draft','planned','scheduled','in_progress','partially_completed','rescheduled','incomplete'];
-const RELN = {primary:{l:'主',t:'blue'}, candidate:{l:'候補',t:'slate'}, suggested:{l:'提案中',t:'amber'}, accepted:{l:'採用',t:'green'}, rejected:{l:'見送り',t:'red'}};
-
-let SEQ = 100; const nid = p => `${p}_${++SEQ}`;
-
-const applicants = [];
-const findAp = id => applicants.find(a=>a.id===id);
-
-const applications = [];
-const findApp = id => applications.find(a=>a.id===id);
-
-const appRoles = [];
-const roleHistory = [];
-
-const activities = [];
-
-const sessions = [];
-
-const evals = [];
-
-const decisions = [];
-
-const tasks = [];
-
-const comms = [];
-
-const ai = [];
-
-const templates = {
-  tmpl_std_v3:{position:'イベント運営', ver:'v3', steps:['応募','書類確認','代表面談','採用']},
-  tmpl_std_v2:{position:'標準', ver:'v2(旧)', steps:['応募','代表面談','採用']},
-};
-
-/* 組織の共通設定(GAS RecruitmentSettings 相当)。Zoomリンクは固定値で、面接案内の自動送信メールに差し込まれる。 */
-const RECRUIT_SETTINGS = {
-  zoomUrl:'https://zoom.us/j/89012345678',
-  zoomMeetingId:'890 1234 5678',
-  zoomPasscode:'connecta',
-  notifyEmail:'recruit@connecta.example',
-  autoMailEnabled:true,
-};
-/* Member作成タイミング(§35): hire_decision | membership_confirmed | manual。推奨初期値=membership_confirmed */
-const ORG_SETTINGS = {memberCreationTiming:'membership_confirmed'};
-const members = [];
-
-/* 自動化 (§52-60) */
-const AUTOMATIONS=[
-  {id:'au_recv',name:'応募受付メール',trigger:'応募受付後 即時',approval:false,enabled:true},
-  {id:'au_rem24',name:'面接24時間前リマインド',trigger:'面接24h前',approval:false,enabled:true},
-  {id:'au_day',name:'面接当日通知',trigger:'面接2h前',approval:false,enabled:true},
-  {id:'au_thanks',name:'面接後お礼メール',trigger:'面接完了後',approval:false,enabled:true},
-  {id:'au_evalrem',name:'評価未入力リマインド',trigger:'面接後24h・評価なし → 面接官',approval:false,enabled:true},
-  {id:'au_follow',name:'返信なしフォローアップ',trigger:'応募者返信なし3日',approval:false,enabled:true},
-  {id:'au_accept',name:'採用連絡',trigger:'採用決定',approval:true,enabled:true},
-  {id:'au_reject',name:'不採用連絡',trigger:'不採用決定',approval:true,enabled:false},
-  {id:'au_cond',name:'条件提示',trigger:'条件確認前',approval:true,enabled:true},
-  {id:'au_joinrem',name:'加入情報リマインド',trigger:'加入情報未入力3日',approval:false,enabled:true},
-];
-const autoState={stopped:false};
-const AUTO_EXEC=[];
-const NOTIFICATIONS=[];
-
-const auditSeed = [];
-
-/* ---- selectors (決定論的 状態算出) ---- */
-const listBy = (arr, appId) => arr.filter(x=>x.applicationId===appId);
-function activitySummary(acts){
-  const byType={}; acts.forEach(a=>{(byType[a.name]=byType[a.name]||[]).push(a);});
-  return Object.entries(byType).map(([label,list])=>{const open=list.find(a=>OPEN_ST.includes(a.status));const st=open?open.status:list[list.length-1].status;return {label,status:st};});
-}
-function latestDecision(appId){const ds=listBy(decisions,appId).slice().sort((a,b)=>new Date(a.at)-new Date(b.at));return ds.length?ds[ds.length-1]:null;}
-function overdueActions(appId){return listBy(tasks,appId).filter(t=>t.status==='open'&&t.kind!=='wait'&&new Date(t.dueAt)<NOW);}
-function operationalStatus(app){
-  const acts=listBy(activities,app.id), dec=latestDecision(app.id), labels=[];
-  if(app.lifecycle==='paused'){labels.push({text:`停止中 · ${app.pause?.holdReason||'保留'}`,tone:'violet'});return {labels,primary:'停止中',ptone:'violet'};}
-  if(app.lifecycle==='closed'||app.lifecycle==='archived'){
-    if(dec?.type==='reject'){labels.push({text:'不採用',tone:'red'});return {labels,primary:'不採用',ptone:'red'};}
-    if(dec?.type==='withdrawn'){labels.push({text:'本人辞退',tone:'red'});return {labels,primary:'本人辞退',ptone:'red'};}
-    labels.push({text:'終了',tone:'slate'});return {labels,primary:'終了',ptone:'slate'};
-  }
-  if(app.lifecycle==='post_decision') labels.push({text: dec?.type==='hire'?'採用 · 加入手続中':'手続中',tone:'teal'});
-  if(app.lifecycle==='active') labels.push({text:'選考中',tone:'blue'});
-  const summary=activitySummary(acts.filter(a=>a.type==='INTERVIEW'));
-  summary.forEach(s=>{
-    if(s.status==='partially_completed') labels.push({text:`${s.label} 一部完了`,tone:'blue'});
-    else if(s.status==='completed') labels.push({text:`${s.label} 完了`,tone:'blue'});
-    else if(s.status==='no_show') labels.push({text:`${s.label} 無断欠席`,tone:'red'});
-  });
-  const repc=acts.find(a=>a.type==='REP_CHECK');
-  if(repc&&repc.status==='not_required') labels.push({text:'代表確認 未実施',tone:'red'});
-  if(app.lifecycle==='decision_pending') labels.push({text:'採用判断待ち',tone:'amber'});
-  if(app.responseDueAt) labels.push({text:'本人回答待ち',tone:'blue'});
-  if(overdueActions(app.id).length) labels.push({text:'期限超過',tone:'red'});
-  if(!labels.length) labels.push({text:'選考中',tone:'blue'});
-  const prim = app.lifecycle==='post_decision'?labels[0].text:'選考中';
-  return {labels, primary:prim, ptone: app.lifecycle==='post_decision'?'teal':'green'};
-}
-function nextActionOf(app){
-  const ts=listBy(tasks,app.id).filter(t=>t.status==='open').sort((a,b)=>new Date(a.dueAt)-new Date(b.dueAt));
-  if(ts.length) return ts[0];
-  const up=listBy(activities,app.id).filter(a=>a.plannedAt&&OPEN_ST.includes(a.status)&&new Date(a.plannedAt)>=NOW).sort((a,b)=>new Date(a.plannedAt)-new Date(b.plannedAt))[0];
-  if(up) return {title:up.name,assignee:up.owner,dueAt:up.plannedAt,kind:'activity'};
-  return null;
-}
-function buildTimeline(appId){
-  const ev=[], app=findApp(appId);
-  ev.push({at:app.createdAt,title:'応募受付',tx:'応募フォームからのエントリー',tone:'green',tag:'応募',who:'システム'});
-  listBy(activities,appId).forEach(a=>{
-    const ty=atype(a.type), tag=a.type==='INTERVIEW'?'面接':a.type==='REP_CHECK'?'判断':atype(a.type).label;
-    if(a.plannedAt&&!a.completedAt&&OPEN_ST.includes(a.status)) ev.push({at:a.plannedAt,title:`${a.name} を設定`,tx:`${fmt(a.plannedAt)} に設定`,tone:'blue',tag,who:uname(a.owner)});
-    else if(a.plannedAt&&a.completedAt&&new Date(a.plannedAt)<new Date(a.completedAt)) ev.push({at:a.plannedAt,title:`${a.name} を設定`,tx:`${fmt(a.completedAt)} に実施`,tone:'blue',tag,who:uname(a.createdBy)});
-    if(a.completedAt){const done=AST[a.status]?.l||'完了';ev.push({at:a.completedAt,title:`${a.name} ${a.status==='completed'?'実施':done}`,tx:a.notes||'',tone:DONE_ST.includes(a.status)?'green':a.status==='no_show'?'red':'blue',tag,who:uname(a.owner)});}
-  });
-  listBy(evals,appId).forEach(e=>ev.push({at:e.at,title:`面接官評価 (${uname(e.by)})`,tx:`${recLabel(e.rec)} · ${'★'.repeat(e.score)}${'☆'.repeat(5-e.score)}`,tone:'violet',tag:'評価',who:uname(e.by)}));
-  ai.filter(a=>a.applicationId===appId).forEach(a=>ev.push({at:a.at,title:`AI分析生成 (Version ${a.version})`,tx:'新しい録音を追加して再生成しました。',tone:'blue',tag:'AI分析',who:'システム'}));
-  listBy(decisions,appId).forEach(d=>ev.push({at:d.at,title:d.type==='hire'?'採用決定':d.type==='reject'?'不採用決定':d.type==='reopen'?'採用判断 取消':d.type==='withdrawn'?'本人辞退':decLabel(d.type),tx:`${d.reason}`,tone:d.type==='hire'?'green':d.type==='reject'||d.type==='withdrawn'?'red':'amber',tag:'判断',who:uname(d.by)}));
-  listBy(roleHistory,appId).forEach(r=>ev.push({at:r.at,title:`ポジション変更: ${r.from} → ${r.to}`,tx:`${r.reason} · 本人同意${r.consent?'あり':'なし'}`,tone:'teal',tag:'変更',who:uname(r.by)}));
-  return ev.sort((a,b)=>new Date(b.at)-new Date(a.at));
-}
-
-const srcLabel = s => ({FORM:'通常応募',MEMBER_REFERRAL:'メンバー紹介',SCOUT:'スカウト',EVENT:'イベント',PAST_APPLICANT:'過去応募者',DIRECT:'直接採用',OTHER:'その他'}[s]||s);
-const recLabel = r => ({hire:'採用推奨',hold:'保留',reject:'不採用推奨'}[r]||r);
-const decLabel = d => ({hire:'採用',reject:'不採用',hold:'保留',withdrawn:'本人辞退',cancelled:'取消',reopen:'判断取消・再選考'}[d]||d);
-const pad=n=>String(n).padStart(2,'0');
-function fmt(d){const x=new Date(d);return `${x.getMonth()+1}月${x.getDate()}日 ${pad(x.getHours())}:${pad(x.getMinutes())}`;}
-function fmtDate(d){const x=new Date(d);return `${x.getFullYear()}年${x.getMonth()+1}月${x.getDate()}日`;}
-function fmtMD(d){const x=new Date(d);return `${x.getMonth()+1}/${x.getDate()}`;}
-function rel(d){const diff=new Date(d)-NOW,ad=Math.abs(diff)/MS.d;if(ad<1){const h=Math.max(1,Math.round(Math.abs(diff)/MS.h));return diff<0?`${h}時間前`:`あと${h}時間`;}const n=Math.round(ad);return diff<0?`${n}日超過`:`あと${n}日`;}
-function ageOf(b){if(!b)return null;const d=new Date(b);let a=NOW.getFullYear()-d.getFullYear();const m=NOW.getMonth()-d.getMonth();if(m<0||(m===0&&NOW.getDate()<d.getDate()))a--;return a;}
-
-/* ============================================================================ COMPONENTS */
-function Sym({i,s}){return <span className="msym" style={s}>{i}</span>;}
-function Chip({tone='blue',children,dot=true}){return <span className={`chip c-${tone}`}>{dot&&<span className="dot"/>}{children}</span>;}
-function Avatar({ap,size=40,photo=false}){
-  const [err,setErr]=useState(false);
-  const st={width:size,height:size,fontSize:size*0.4};
-  if(photo&&!err) return <img className="av" style={st} src={`https://i.pravatar.cc/${size*2}?u=${ap.id}`} onError={()=>setErr(true)} alt=""/>;
-  return <div className="av" style={{...st,background:ap.color}}>{ap.name[0]}</div>;
-}
-
-/* ---------- Dashboard ---------- */
-function Dashboard({go, audit}){
-  const newApps=applications.filter(a=>new Date(a.createdAt)>dOf(-2));
-  const todayIv=activities.filter(a=>a.type==='INTERVIEW'&&a.plannedAt&&OPEN_ST.includes(a.status)&&Math.abs(new Date(a.plannedAt)-NOW)<MS.d);
-  const weekIv=activities.filter(a=>a.type==='INTERVIEW'&&a.plannedAt&&OPEN_ST.includes(a.status)&&new Date(a.plannedAt)>=NOW&&new Date(a.plannedAt)<dOf(7));
-  const decPending=applications.filter(a=>a.lifecycle==='decision_pending');
-  const overdue=applications.filter(a=>overdueActions(a.id).length);
-  const noEval=tasks.filter(t=>t.kind==='eval'&&t.status==='open');
-  const scheduledSends=comms.filter(c=>c.status==='scheduled');
-  const failedSends=comms.filter(c=>c.status==='failed');
-  const dups=applications.filter(a=>a.dupOf);
-  const joining=applications.filter(a=>a.lifecycle==='post_decision');
-  const waiting=applications.filter(a=>a.responseDueAt);
-  const cards=[
-    {l:'新規応募',v:newApps.length,tone:'blue',icon:'person_add'},
-    {l:'本日の面接',v:todayIv.length,tone:'teal',icon:'today'},
-    {l:'今週の面接',v:weekIv.length,tone:'blue',icon:'date_range'},
-    {l:'採用判断待ち',v:decPending.length,tone:'amber',icon:'gavel'},
-    {l:'期限超過',v:overdue.length,tone:'red',icon:'schedule'},
-    {l:'回答待ち',v:waiting.length,tone:'blue',icon:'mark_email_unread'},
-    {l:'評価未入力',v:noEval.length,tone:'violet',icon:'rate_review'},
-    {l:'重複候補',v:dups.length,tone:'amber',icon:'join_inner'},
-    {l:'自動送信予定',v:scheduledSends.length,tone:'teal',icon:'send'},
-    {l:'送信失敗',v:failedSends.length,tone:'red',icon:'error'},
-    {l:'加入手続中',v:joining.length,tone:'green',icon:'diversity_3'},
-    {l:'最近の採用',v:decisions.filter(d=>d.type==='hire').length,tone:'green',icon:'celebration'},
-  ];
-  const tone=t=>({blue:'--blue',teal:'--teal',amber:'--amber',red:'--red',violet:'--violet',green:'--green',slate:'--slate'}[t]);
-  const tsoft=t=>({blue:'--blue-soft',teal:'--teal-soft',amber:'--amber-soft',red:'--red-soft',violet:'--violet-soft',green:'--green-soft',slate:'--slate-soft'}[t]);
-  return (
-    <div>
-      <div className="grid" style={{gridTemplateColumns:'repeat(4,1fr)',marginBottom:16}}>
-        {cards.map((c,i)=>(
-          <div key={i} className="kpi" onClick={()=>go('list')}>
-            <div className="ki" style={{background:`var(${tsoft(c.tone)})`}}><Sym i={c.icon} s={{color:`var(${tone(c.tone)})`}}/></div>
-            <div className="kv">{c.v}</div><div className="kl">{c.l}</div>
-          </div>
-        ))}
-      </div>
-      <div className="grid" style={{gridTemplateColumns:'1.5fr 1fr'}}>
-        <div className="card pad">
-          <div className="ch"><Sym i="bolt"/>いま対応すべきこと<span className="more">すべて表示</span></div>
-          {tasks.filter(t=>t.status==='open'&&t.kind!=='wait').sort((a,b)=>new Date(a.dueAt)-new Date(b.dueAt)).slice(0,7).map(t=>{
-            const app=findApp(t.applicationId),ap=findAp(app.applicantId),od=new Date(t.dueAt)<NOW;
-            return <div key={t.id} className="arow" onClick={()=>go('detail',app.id)} style={{cursor:'pointer'}}>
-              <Avatar ap={ap} size={34} photo/>
-              <div style={{flex:1,minWidth:0}}><div className="an">{t.title}</div><div className="as">{ap.name} · {app.position} · 担当 {uname(t.assignee)}</div></div>
-              <Chip tone={od?'red':'slate'} dot={false}>{rel(t.dueAt)}</Chip>
-            </div>;
-          })}
-        </div>
-        <div className="card pad">
-          <div className="ch"><Sym i="history"/>監査ログ<span className="more">§43</span></div>
-          {audit.slice(0,4).map(a=>(
-            <div key={a.id} className="arow" style={{cursor:'default'}}>
-              <div className="ai" style={{background:'var(--bg)'}}><Sym i={a.action.includes('HIRE')?'how_to_reg':a.action.includes('REVERSE')?'undo':a.action.includes('ROLE')?'swap_horiz':'edit_note'} s={{color:'var(--ink3)',fontSize:16}}/></div>
-              <div style={{flex:1}}><div className="an">{auditLabel(a.action)}</div><div className="as">{uname(a.actor)} · {a.reason}</div></div>
-              <div className="as mono">{rel(a.at)}</div>
-            </div>
-          ))}
-          <div className="ch" style={{marginTop:18}}><Sym i="celebration"/>最近の採否</div>
-          {[...decisions].filter(d=>['hire','reject','withdrawn'].includes(d.type)).sort((a,b)=>new Date(b.at)-new Date(a.at)).slice(0,3).map(d=>{
-            const app=findApp(d.applicationId),ap=findAp(app.applicantId);
-            return <div key={d.id} className="arow" onClick={()=>go('detail',app.id)} style={{cursor:'pointer'}}>
-              <Avatar ap={ap} size={30} photo/><div style={{flex:1}}><div className="an">{ap.name}</div><div className="as">{app.position}</div></div>
-              <Chip tone={d.type==='hire'?'green':'red'}>{decLabel(d.type)}</Chip>
-            </div>;
-          })}
-        </div>
-      </div>
-    </div>
-  );
-}
-const auditLabel = a => ({DIRECT_HIRE:'直接採用を記録',DECISION_REVERSE:'採用判断を取消',ROLE_CHANGE:'ポジション変更',CREATE_ACTIVITY:'アクティビティ作成',EDIT_ACTIVITY:'アクティビティ編集',MAKE_DECISION:'採用判断を確定',EVAL_SUBMIT:'面接評価を提出',INTERVIEW_COMPLETE:'面接を完了',SEND_COMM:'メール送信',CREATE_APPLICATION:'応募を登録',ACTIVITY_STATUS:'アクティビティ状態変更',RESCHEDULE:'日程を再調整',CREATE_TASK:'タスク作成',PAUSE:'選考を停止',RESUME:'選考を再開',ADD_ROLE:'ロール追加',MEMBER_CREATE:'メンバー作成',MERGE:'応募者を統合',JOIN_INFO:'加入情報を確認',MEMBERSHIP:'加入を確定',KILL_SWITCH:'自動送信の一括制御',CANCEL_SEND:'予約送信を取消',BULK:'一括操作',SETTINGS:'設定を変更',ANON:'個人情報を匿名化'}[a]||a);
-
-/* ---------- List ---------- */
-const SAVED_VIEWS=[
-  ['week','今週対応',a=>overdueActions(a.id).length||(nextActionOf(a)&&new Date(nextActionOf(a).dueAt)<dOf(7))],
-  ['stalled','3日以上停滞',a=>a.lifecycle==='active'&&!listBy(activities,a.id).some(x=>x.completedAt&&new Date(x.completedAt)>dOf(-3))&&new Date(a.createdAt)<dOf(-3)],
-  ['reply','返信待ち',a=>!!a.responseDueAt],
-  ['join','加入手続中',a=>a.lifecycle==='post_decision'],
-];
-function ListView({go, query, dispatch}){
-  const [filter,setFilter]=useState('all');
-  const [saved,setSaved]=useState('');
-  const [fSource,setFSource]=useState(''),[fOwner,setFOwner]=useState(''),[showF,setShowF]=useState(false);
-  const [sel,setSel]=useState({});
-  const views=[['all','すべて'],['active','選考中'],['decision','採用判断待ち'],['overdue','期限超過'],['paused','停止中'],['post','加入手続中'],['closed','終了']];
-  let rows=applications.filter(app=>{
-    if(filter==='active')return app.lifecycle==='active';
-    if(filter==='decision')return app.lifecycle==='decision_pending';
-    if(filter==='overdue')return overdueActions(app.id).length;
-    if(filter==='paused')return app.lifecycle==='paused';
-    if(filter==='post')return app.lifecycle==='post_decision';
-    if(filter==='closed')return ['closed','archived'].includes(app.lifecycle);
-    return true;
-  });
-  if(saved){const f=SAVED_VIEWS.find(s=>s[0]===saved);if(f)rows=rows.filter(f[2]);}
-  if(fSource)rows=rows.filter(a=>a.source===fSource);
-  if(fOwner)rows=rows.filter(a=>a.owner===fOwner);
-  if(query){const q=query.toLowerCase();rows=rows.filter(app=>{const ap=findAp(app.applicantId);return (ap.name+ap.kana+app.position+ap.email+(app.tags||[]).join('')).toLowerCase().includes(q);});}
-  const selIds=Object.keys(sel).filter(k=>sel[k]&&rows.some(r=>r.id===k));
-  const allSel=rows.length>0&&rows.every(r=>sel[r.id]);
-  const clearSel=()=>setSel({});
-  return (
-    <div>
-      <div style={{display:'flex',gap:8,alignItems:'center',marginBottom:12,flexWrap:'wrap'}}>
-        <div className="seg">{views.map(([k,l])=>(<b key={k} className={filter===k?'on':''} onClick={()=>setFilter(k)}>{l}</b>))}</div>
-        <div style={{flex:1}}/><button className={`btn sm ${showF?'prim':''}`} onClick={()=>setShowF(v=>!v)}><Sym i="filter_list" s={{fontSize:16}}/>絞り込み</button>
-      </div>
-      <div style={{display:'flex',gap:7,alignItems:'center',marginBottom:12,flexWrap:'wrap'}}>
-        <span className="muted" style={{fontSize:12}}>保存ビュー (§78):</span>
-        {SAVED_VIEWS.map(([k,l])=>(<span key={k} className={`selchip ${saved===k?'on':''}`} style={{padding:'5px 11px',fontSize:12}} onClick={()=>setSaved(saved===k?'':k)}>{l}</span>))}
-      </div>
-      {showF&&<div className="card pad" style={{marginBottom:12,display:'flex',gap:14,alignItems:'center',flexWrap:'wrap'}}>
-        <div style={{display:'flex',alignItems:'center',gap:8}}><span className="flbl" style={{margin:0}}>応募経路</span><select className="field" style={{width:'auto',padding:'6px 9px'}} value={fSource} onChange={e=>setFSource(e.target.value)}><option value="">すべて</option>{SOURCES.map(([k,l])=><option key={k} value={k}>{l}</option>)}</select></div>
-        <div style={{display:'flex',alignItems:'center',gap:8}}><span className="flbl" style={{margin:0}}>担当</span><select className="field" style={{width:'auto',padding:'6px 9px'}} value={fOwner} onChange={e=>setFOwner(e.target.value)}><option value="">すべて</option>{['hr','r1','r2','rep'].map(u=><option key={u} value={u}>{uname(u)}</option>)}</select></div>
-        <span className="muted" style={{fontSize:12}}>該当 {rows.length}件</span>
-        {(fSource||fOwner)&&<button className="btn sm ghost" onClick={()=>{setFSource('');setFOwner('');}}>クリア</button>}
-      </div>}
-      {selIds.length>0&&<div className="card pad" style={{marginBottom:12,display:'flex',alignItems:'center',gap:10,flexWrap:'wrap',background:'var(--blue-soft)',border:'1px solid var(--blue-bd)'}}>
-        <b style={{fontSize:13,color:'var(--blueh)'}}>{selIds.length}件を選択中</b>
-        <select className="field" style={{width:'auto',padding:'6px 9px'}} value="" onChange={e=>{if(e.target.value){dispatch({type:'bulkAssign',ids:selIds,owner:e.target.value});clearSel();}}}><option value="">担当を変更…</option>{['hr','r1','r2','rep'].map(u=><option key={u} value={u}>{uname(u)}</option>)}</select>
-        <button className="btn sm" onClick={()=>{dispatch({type:'bulkTag',ids:selIds,tag:'要対応'});clearSel();}}><Sym i="label" s={{fontSize:15}}/>タグ「要対応」</button>
-        <button className="btn sm" onClick={()=>{dispatch({type:'bulkRemind',ids:selIds});clearSel();}}><Sym i="send" s={{fontSize:15}}/>リマインド送信</button>
-        <span className="fhint">採用・不採用の一括操作は追加確認が必要です (§79)</span>
-        <div style={{flex:1}}/><button className="btn sm ghost" onClick={clearSel}>選択解除</button>
-      </div>}
-      <div className="card" style={{overflow:'hidden'}}>
-        <table className="tbl">
-          <thead><tr><th style={{width:34}}><span className="chkbox" style={{border:`1.5px solid ${allSel?'var(--blue)':'var(--line2)'}`,background:allSel?'var(--blue)':'#fff',cursor:'pointer'}} onClick={()=>{if(allSel)clearSel();else{const n={};rows.forEach(r=>n[r.id]=true);setSel(n);}}}>{allSel&&<Sym i="check" s={{fontSize:13,color:'#fff'}}/>}</span></th><th>応募者 / 人物</th><th>応募ポジション</th><th>状況ラベル</th><th>次のアクション</th><th>担当</th><th>採用判断</th></tr></thead>
-          <tbody>
-            {rows.map(app=>{
-              const ap=findAp(app.applicantId),st=operationalStatus(app),na=nextActionOf(app),dec=latestDecision(app.id);
-              const other=applications.filter(x=>x.applicantId===app.applicantId&&x.id!==app.id).length, on=!!sel[app.id];
-              return <tr key={app.id} className="trow" onClick={()=>go('detail',app.id)}>
-                <td onClick={e=>{e.stopPropagation();setSel(s=>({...s,[app.id]:!s[app.id]}));}}><span className="chkbox" style={{border:`1.5px solid ${on?'var(--blue)':'var(--line2)'}`,background:on?'var(--blue)':'#fff',cursor:'pointer'}}>{on&&<Sym i="check" s={{fontSize:13,color:'#fff'}}/>}</span></td>
-                <td><div className="nm"><Avatar ap={ap} size={36} photo/><div><b>{ap.name}</b>{other>0&&<span className="tag" style={{marginLeft:6,fontSize:10}}>他{other}件</span>}{(app.tags||[]).filter(t=>t==='要対応').map(t=><span key={t} className="tag" style={{marginLeft:5,fontSize:10,background:'var(--amber-soft)',borderColor:'var(--amber-bd)',color:'#9a6c14'}}>🏷 {t}</span>)}<div className="mt">{srcLabel(app.source)}{app.dupOf&&' · ⚠ 重複候補'}</div></div></div></td>
-                <td style={{color:'var(--ink)',fontWeight:500}}>{app.position}<div className="mt mono" style={{color:'var(--ink4)'}}>#{app.code}</div></td>
-                <td><div className="labelwrap">{st.labels.slice(0,3).map((l,i)=><Chip key={i} tone={l.tone} dot={false}>{l.text}</Chip>)}</div></td>
-                <td>{na?<div><div style={{fontWeight:500,color:'var(--ink)'}}>{na.title}</div><div className="mt" style={{color:new Date(na.dueAt)<NOW?'var(--red)':'var(--ink3)'}}>{rel(na.dueAt)}</div></div>:<span className="muted">—</span>}</td>
-                <td><span className="tag">{uname(app.owner)}</span></td>
-                <td>{dec?<Chip tone={dec.type==='hire'?'green':dec.type==='reject'||dec.type==='withdrawn'?'red':dec.type==='reopen'?'amber':'slate'}>{decLabel(dec.type)}</Chip>:<span className="muted">未</span>}</td>
-              </tr>;
-            })}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
-}
-
-/* ---------- Detail ---------- */
-function Detail({appId, go, dispatch, viewerRole}){
-  const [tab,setTab]=useState('overview');
-  const [modal,setModal]=useState(null);
-  const [editAct,setEditAct]=useState(null);
-  const [actTarget,setActTarget]=useState(null);
-  const [dupDismiss,setDupDismiss]=useState(false);
-  const [aiOn,setAiOn]=useState(true);
-  const app=findApp(appId),ap=findAp(app.applicantId);
-  const st=operationalStatus(app),dec=latestDecision(app.id);
-  const acts=listBy(activities,app.id).slice().sort((a,b)=>b.seq-a.seq);
-  const roles=listBy(appRoles,app.id);
-  const myEvals=listBy(evals,app.id);
-  const myAi=ai.filter(a=>a.applicationId===app.id).sort((a,b)=>b.version-a.version)[0];
-  const tl=buildTimeline(app.id);
-  const otherApps=applications.filter(x=>x.applicantId===app.applicantId&&x.id!==app.id);
-  const openTasks=listBy(tasks,app.id).filter(t=>t.status==='open');
-  const upcoming=acts.filter(a=>a.plannedAt&&OPEN_ST.includes(a.status)).sort((a,b)=>new Date(a.plannedAt)-new Date(b.plannedAt));
-  const inProg=acts.filter(a=>OPEN_ST.includes(a.status));
-  const tmpl=templates[app.templateVer];
-  const recCounts={hire:0,hold:0,reject:0}; myEvals.forEach(e=>recCounts[e.rec]!=null&&recCounts[e.rec]++);
-  const split=new Set(myEvals.map(e=>e.rec)).size>1;
-  const age=ageOf(ap.birth);
-  const elapsed=Math.round((NOW-new Date(app.createdAt))/MS.d);
-  const isHired=dec?.type==='hire'||app.lifecycle==='post_decision';
-  const maskPII=['interviewer','viewer'].includes(viewerRole);
-  const canRecruit=['super','radmin','recruiter'].includes(viewerRole);
-  const canDecide=['super','radmin'].includes(viewerRole);
-
-  const tone=t=>({blue:'--blue',teal:'--teal',amber:'--amber',red:'--red',violet:'--violet',green:'--green',slate:'--slate'}[t]);
-
-  const TL = ({rows})=>(
-    <div className="tl">
-      {rows.map((e,i)=>(
-        <div key={i} className="tlr">
-          <div className="td tt">{fmtMD(e.at).replace('/','月')+'日'}<small>{pad(new Date(e.at).getHours())}:{pad(new Date(e.at).getMinutes())}</small></div>
-          <div className="tk tt"><span className="nd" style={{background:`var(${tone(e.tone)})`}}/><span className="ln"/></div>
-          <div className="tc"><div className="tt2">{e.title}</div>{e.tx&&(!aiOn&&e.tag==='AI分析'?null:<div className="tx">{e.tx}</div>)}</div>
-          <div className="tm"><Chip tone={e.tone==='green'?'green':e.tag==='面接'?'blue':e.tag==='判断'?'amber':e.tag==='AI分析'?'blue':e.tag==='評価'?'violet':'slate'} dot={false}>{e.tag}</Chip><span className="who">{e.who}</span></div>
-        </div>
-      ))}
-    </div>
-  );
-
-  return (
-    <div>
-      {/* Header */}
-      <div className="card pad" style={{marginBottom:16}}>
-        <div style={{display:'grid',gridTemplateColumns:'1fr 300px 260px',gap:20,alignItems:'start'}} className="ov-top">
-          <div style={{display:'flex',gap:16}}>
-            <Avatar ap={ap} size={78} photo/>
-            <div style={{minWidth:0}}>
-              <div style={{display:'flex',alignItems:'center',gap:9,flexWrap:'wrap'}}>
-                <h1 style={{fontSize:24,fontWeight:800,margin:0,color:'var(--ink)'}}>{ap.name}</h1>
-                {age&&<span className="tag" style={{fontSize:12}}>{age}歳</span>}
-                {app.tags[0]&&<Chip tone="blue" dot={false}>{app.tags[0]}</Chip>}
-              </div>
-              <div className="muted" style={{fontSize:13,marginTop:2}}>{ap.kana}</div>
-              <div style={{display:'flex',gap:16,flexWrap:'wrap',marginTop:10,fontSize:12.5,color:'var(--ink2)'}}>
-                <span><Sym i="mail" s={{fontSize:15,color:'var(--ink4)'}}/> {maskPII?'●●●●●●@●●●●':(ap.email||'—')}</span>
-                <span><Sym i="call" s={{fontSize:15,color:'var(--ink4)'}}/> {maskPII?'●●●-●●●●-●●●●':(ap.phone||'—')}</span>
-                {maskPII&&<Chip tone="slate" dot={false}><Sym i="lock" s={{fontSize:13}}/> PIIマスク中</Chip>}
-              </div>
-              <div style={{display:'flex',gap:16,flexWrap:'wrap',marginTop:6,fontSize:12.5,color:'var(--ink2)'}}>
-                <span><Sym i="location_on" s={{fontSize:15,color:'var(--ink4)'}}/> {ap.pref}</span>
-                {otherApps.length>0&&canRecruit&&<span className="link" onClick={()=>go('detail',otherApps[0].id)} style={{fontSize:12.5}}><Sym i="group" s={{fontSize:15}}/> この人物の応募 全{otherApps.length+1}件</span>}
-              </div>
-            </div>
-          </div>
-          <div>
-            <div className="muted" style={{fontSize:12,fontWeight:600,marginBottom:7}}>この応募の総合状況</div>
-            <div className="statusbox" style={{background:`var(--${st.ptone==='green'?'green':st.ptone}-soft)`,color:`var(${tone(st.ptone)})`}}>{st.primary}</div>
-            <div style={{display:'flex',justifyContent:'space-between',marginTop:12,fontSize:12}}>
-              <div><div className="muted">応募日</div><div style={{fontWeight:600,marginTop:2}}>{fmtDate(app.createdAt)}</div></div>
-              <div style={{textAlign:'right'}}><div className="muted">経過日数</div><div style={{fontWeight:600,marginTop:2}}>{elapsed}日</div></div>
-            </div>
-          </div>
-          <div>
-            <div style={{display:'flex',alignItems:'center',marginBottom:7}}><span className="muted" style={{fontSize:12,fontWeight:600}}>候補者メモ</span><span className="link" style={{marginLeft:'auto',fontSize:11.5}}><Sym i="edit" s={{fontSize:13}}/> 編集</span></div>
-            <div style={{fontSize:12.5,color:'var(--ink2)',lineHeight:1.6,background:'var(--bg)',borderRadius:9,padding:'11px 13px',minHeight:74}}>{app.memo||'コミュニケーション能力が高く、意欲的。'}</div>
-            <div style={{display:'flex',gap:7,marginTop:10}}>
-              {canDecide?<button className="btn prim" style={{flex:1,justifyContent:'center'}} onClick={()=>setModal('decision')}><Sym i="gavel" s={{fontSize:16}}/>採用判断</button>:<button className="btn" style={{flex:1,justifyContent:'center',opacity:.6,cursor:'not-allowed'}} title="採用権限が必要です (§68)"><Sym i="lock" s={{fontSize:15}}/>採用判断</button>}
-              {canRecruit&&<button className="btn" title="アクティビティを追加" onClick={()=>{setEditAct(null);setModal('activity');}}><Sym i="add"/></button>}
-              {canRecruit&&<button className="btn" title="その他の操作" onClick={()=>setModal('more')}><Sym i="more_vert"/></button>}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* 重複候補バナー (§38/39) */}
-      {app.dupOf&&!dupDismiss&&(()=>{const other=findAp(app.dupOf);return (
-        <div className="card pad" style={{marginBottom:16,border:'1px solid var(--amber-bd)',background:'var(--amber-soft)'}}>
-          <div style={{display:'flex',alignItems:'center',gap:12,flexWrap:'wrap'}}>
-            <Sym i="join_inner" s={{fontSize:22,color:'var(--amber)'}}/>
-            <div style={{flex:1,minWidth:200}}><div style={{fontWeight:700,color:'var(--ink)'}}>同一人物の可能性があります</div><div style={{fontSize:12.5,color:'var(--ink2)',marginTop:2}}>{other?`「${other.name}（${other.email||'—'}）」と一致。自動統合はしません — 対応を選んでください (§38/39)。`:''}</div></div>
-            <button className="btn prim" onClick={()=>setModal('merge')}><Sym i="merge" s={{fontSize:16}}/>統合する</button>
-            <button className="btn" onClick={()=>dispatch({type:'keepSeparate',appId:app.id})}>別人として維持</button>
-            <button className="btn ghost" onClick={()=>setDupDismiss(true)}>後で確認</button>
-          </div>
-        </div>);})()}
-
-      {/* Tabs */}
-      <div className="tabs">
-        {[['overview','概要'],['timeline','選考タイムライン'],['activities','選考アクティビティ'],['evals','評価・分析'],['flow','標準ルートとの差分'],['roles','ロール'],['decisions','判断履歴'],['comm','連絡'],...(isHired?[['membership','加入手続']]:[])].map(([k,l])=>(
-          <div key={k} className={`tab ${tab===k?'on':''}`} onClick={()=>setTab(k)}>{l}</div>
-        ))}
-      </div>
-
-      {tab==='overview' && (
-        <div>
-          {/* row 1 */}
-          <div className="grid ov-top" style={{gridTemplateColumns:'1fr 1fr 1fr',marginBottom:16}}>
-            <div className="card pad">
-              <div className="ch"><Sym i="badge"/>応募情報</div>
-              <div className="kv">
-                <div className="k">Application</div><div className="v mono">#{app.code}</div>
-                <div className="k">応募ポジション</div><div className="v">{app.position}</div>
-                <div className="k">応募経路</div><div className="v">{srcLabel(app.source)}</div>
-                <div className="k">現在の担当</div><div className="v">{uname(app.owner)}</div>
-                <div className="k">応募メモ</div><div className="v" style={{color:'var(--ink2)'}}>{app.memo||'—'}</div>
-              </div>
-            </div>
-            <div className="card pad">
-              <div className="ch"><Sym i="label"/>現在の状態ラベル</div>
-              <div className="labelwrap" style={{marginBottom:16}}>{st.labels.map((l,i)=><Chip key={i} tone={l.tone} dot={false}>{l.text}</Chip>)}</div>
-              <div className="ch" style={{marginBottom:8}}><Sym i="event"/>選考期限</div>
-              {[['次回アクション期限',nextActionOf(app)?.dueAt],['選考判断期限',app.decisionDueAt],['本人回答期限',app.responseDueAt]].filter(x=>x[1]).map(([l,d],i)=>{
-                const od=new Date(d)<NOW, soon=new Date(d)-NOW<3*MS.d;
-                return <div key={i} className="duebar"><span className="dl">{l}</span><span className="dd"><span className="dv" style={{color:od?'var(--red)':'var(--ink)'}}>{fmtDate(d)}</span><Chip tone={od?'red':soon?'amber':'slate'} dot={false}>{rel(d)}</Chip></span></div>;
-              })}
-            </div>
-            <div className="card pad">
-              <div className="ch"><Sym i="bolt"/>次の推奨アクション</div>
-              {openTasks.slice(0,4).map(t=>{
-                const isCand=t.kind==='wait'; const who=isCand?ap:{id:t.assignee,name:uname(t.assignee),color:'#64708f'};
-                const od=new Date(t.dueAt)<NOW;
-                return <div key={t.id} className="recrow">
-                  <Avatar ap={who} size={32} photo={isCand}/>
-                  <div style={{flex:1,minWidth:0}}><div className="rt">{t.actorName||uname(t.assignee)} さん</div><div className="rs">{t.title}</div></div>
-                  <div style={{textAlign:'right'}}><Chip tone={t.prio==='高'?'red':'amber'} dot={false}>{t.prio}</Chip><div className="rs" style={{color:od?'var(--red)':'var(--ink3)',marginTop:4}}>{fmtDate(t.dueAt)}</div></div>
-                  {!isCand&&<button className="btn sm" title="完了にする" onClick={()=>dispatch({type:'completeTask',taskId:t.id})}><Sym i="check" s={{fontSize:15}}/></button>}
-                </div>;
-              })}
-              {!openTasks.length&&<div className="muted" style={{fontSize:12.5,padding:'6px 0'}}>未完了のタスクはありません</div>}
-              <button className="btn sm" style={{width:'100%',justifyContent:'center',marginTop:12}} onClick={()=>setModal('task')}><Sym i="add" s={{fontSize:15}}/>タスクを追加</button>
-            </div>
-          </div>
-          {/* row 2 */}
-          <div className="grid ov-body" style={{gridTemplateColumns:'1fr 340px',marginBottom:16}}>
-            <div className="card pad">
-              <div className="ch"><Sym i="timeline"/>選考タイムライン
-                <span style={{marginLeft:'auto',display:'flex',alignItems:'center',gap:8}}>
-                  <span className="muted" style={{fontSize:12}}>AI要約を表示</span>
-                  <span onClick={()=>setAiOn(v=>!v)} style={{width:36,height:20,borderRadius:12,background:aiOn?'var(--blue)':'var(--line2)',position:'relative',cursor:'pointer',transition:'.15s'}}><span style={{position:'absolute',top:2,left:aiOn?18:2,width:16,height:16,borderRadius:'50%',background:'#fff',transition:'.15s'}}/></span>
-                </span>
-              </div>
-              <TL rows={tl.slice(0,9)}/>
-              <button className="btn sm" style={{width:'100%',justifyContent:'center',marginTop:6}} onClick={()=>setTab('timeline')}>すべてのイベントを表示 <Sym i="arrow_forward" s={{fontSize:15}}/></button>
-            </div>
-            <div style={{display:'flex',flexDirection:'column',gap:16}}>
-              <div className="card pad">
-                <div className="ch"><Sym i="pending_actions"/>進行中のアクティビティ<span className="more" onClick={()=>setTab('activities')}>すべて表示</span></div>
-                {inProg.slice(0,4).map(a=>(<div key={a.id} className="arow"><div className="ai" style={{background:atype(a.type).color+'18'}}><Sym i={atype(a.type).icon} s={{color:atype(a.type).color}}/></div><div style={{flex:1,minWidth:0}}><div className="an">{a.name} <Chip tone={AST[a.status].t} dot={false}>{AST[a.status].l}</Chip></div><div className="as">{a.plannedAt?fmt(a.plannedAt):'未設定'}</div></div>{(a.type==='INTERVIEW'||a.type==='REP_CHECK')&&<button className="btn sm" onClick={()=>go('room',a.id)}><Sym i="meeting_room" s={{fontSize:14}}/>開く</button>}</div>))}
-                {!inProg.length&&<div className="muted" style={{fontSize:12.5}}>進行中のアクティビティはありません</div>}
-              </div>
-              <div className="card pad">
-                <div className="ch"><Sym i="reviews"/>面接官の評価サマリー<span className="more" onClick={()=>setTab('evals')}>詳細を見る</span></div>
-                {[['採用推奨','hire','green'],['保留','hold','amber'],['不採用推奨','reject','red']].map(([l,k,c])=>(
-                  <div key={k} className="evbar"><span className="el" style={{color:`var(--${c})`}}>{l}</span><span className="ec">{recCounts[k]}名</span><div className="track"><div className="fill" style={{width:`${Math.max(6,(recCounts[k]/Math.max(1,myEvals.length))*100)}%`,background:`var(--${c})`}}/></div></div>
-                ))}
-                {split&&<div className="notebox warn"><Sym i="balance"/><div><b>意見が分かれています</b><br/>最終判断は採用担当者が行ってください。</div></div>}
-              </div>
-              {myAi&&canRecruit&&(
-                <div className="card pad">
-                  <div className="ch"><Sym i="auto_awesome"/>AI分析<span className="muted" style={{fontSize:11,fontWeight:500,marginLeft:8}}>最新: Version {myAi.version}</span><span className="more" onClick={()=>setTab('evals')}>詳細を見る</span></div>
-                  <div style={{display:'flex',alignItems:'center',gap:7,marginBottom:8}}><Sym i="verified" s={{fontSize:17,color:'var(--green)'}}/><b style={{color:'var(--ink)',fontSize:13.5}}>総合評価: {myAi.verdict}</b></div>
-                  <div style={{fontSize:12.5,color:'var(--ink2)',lineHeight:1.6}}>{myAi.summary}</div>
-                  <button className="btn sm" style={{width:'100%',justifyContent:'center',marginTop:12}}>AI分析を表示</button>
-                </div>
-              )}
-            </div>
-          </div>
-          {/* row 3 */}
-          <FlowDiff app={app} acts={acts} tmpl={tmpl}/>
-        </div>
-      )}
-
-      {tab==='timeline' && <div className="card pad"><div className="ch"><Sym i="timeline"/>選考タイムライン<span className="muted" style={{fontSize:11.5,fontWeight:500,marginLeft:'auto'}}>人が状況を理解するための履歴 (§42)</span></div><TL rows={tl}/></div>}
-
-      {tab==='activities' && (
-        <div className="card pad">
-          <div className="ch"><Sym i="event_list"/>選考アクティビティ<button className="btn sm prim" style={{marginLeft:'auto'}} onClick={()=>{setEditAct(null);setModal('activity');}}><Sym i="add" s={{fontSize:15}}/>アクティビティを追加</button></div>
-          <div className="muted" style={{fontSize:12,marginBottom:14}}>順序制約なし・種類は自由に追加可能 (§10/11)。同じ種類の面接を何度でも実施できます。</div>
-          {acts.map(a=>{const ty=atype(a.type),meta=AST[a.status],asess=sessions.filter(s=>s.activityId===a.id);
-            return <div key={a.id} className="evalcard">
-              <div style={{display:'flex',alignItems:'center',gap:10}}>
-                <div className="ai" style={{width:32,height:32,background:ty.color+'18'}}><Sym i={ty.icon} s={{color:ty.color,fontSize:17}}/></div>
-                <div style={{flex:1}}><div style={{fontWeight:600,color:'var(--ink)',fontSize:13.5}}>{a.name} {a.seq&&<span className="tag" style={{marginLeft:4,fontSize:10}}>実施#{a.seq}</span>}</div><div style={{fontSize:11.5,color:'var(--ink3)',marginTop:2}}>{a.plannedAt?`予定 ${fmt(a.plannedAt)}`:''}{a.completedAt?` · ${fmtMD(a.completedAt)} 実施`:''} · 担当 {uname(a.owner)}{a.type==='INTERVIEW'&&(a.rec?' · 🎙 録音あり':' · 録音なし')}</div></div>
-                {(a.type==='INTERVIEW'||a.type==='REP_CHECK')&&<button className="btn sm" onClick={()=>go('room',a.id)}><Sym i="meeting_room" s={{fontSize:15}}/>面接ルーム</button>}
-                <button className="btn sm" title="編集" onClick={()=>{setEditAct(a);setModal('activity');}}><Sym i="edit" s={{fontSize:15}}/></button>
-                <button className="btn sm" title="状態を変更" onClick={()=>{setActTarget(a);setModal('actaction');}}><Sym i="more_vert" s={{fontSize:15}}/></button>
-                <Chip tone={meta.t}>{meta.l}</Chip>
-              </div>
-              {a.notes&&<div style={{fontSize:12.5,color:'var(--ink2)',marginTop:8,paddingLeft:42}}>{a.notes}</div>}
-              {a.skipReason&&<div style={{fontSize:12,color:'var(--ink3)',marginTop:4,paddingLeft:42}}>スキップ理由: {a.skipReason}</div>}
-              {asess.length>0&&<div style={{paddingLeft:42,marginTop:8}}><div style={{fontSize:10.5,fontWeight:700,color:'var(--ink4)',marginBottom:5}}>セッション分割 (§21)</div>{asess.map(s=>(<div key={s.id} style={{display:'flex',alignItems:'center',gap:7,fontSize:12,marginBottom:3}}><Chip tone={AST[s.status]?.t||'slate'} dot={false}>{AST[s.status]?.l}</Chip><span style={{color:'var(--ink2)'}}>{s.topic}</span></div>))}</div>}
-            </div>;
-          })}
-        </div>
-      )}
-
-      {tab==='evals' && !canRecruit && <div className="card pad"><div className="emptyx"><Sym i="lock"/>評価・AI分析の閲覧には採用権限が必要です。面接官は自分が担当した面接の情報のみ閲覧できます (§69/70)。</div></div>}
-      {tab==='evals' && canRecruit && (
-        <div className="grid" style={{gridTemplateColumns:'1fr 1fr'}}>
-          <div className="card pad">
-            <div className="ch"><Sym i="reviews"/>面接官ごとの評価 (§24/25)</div>
-            {split&&<div className="notebox warn" style={{marginBottom:12}}><Sym i="balance"/><div>評価が分かれています。多数決では決めません — 採用判断は独立プロセスです。</div></div>}
-            {myEvals.map(e=>(<div key={e.id} className="evalcard"><div style={{display:'flex',alignItems:'center',gap:8}}><b style={{color:'var(--ink)',fontSize:13}}>{uname(e.by)}</b><Chip tone={e.rec==='hire'?'green':e.rec==='reject'?'red':'amber'} dot={false}>{recLabel(e.rec)}</Chip><span className="stars" style={{marginLeft:'auto'}}>{'★'.repeat(e.score)}{'☆'.repeat(5-e.score)}</span></div><div style={{fontSize:12.5,color:'var(--ink2)',marginTop:6,lineHeight:1.5}}>{e.comment}</div></div>))}
-            {!myEvals.length&&<div className="emptyx"><Sym i="reviews"/>評価未入力</div>}
-          </div>
-          <div className="card pad">
-            <div className="ch"><Sym i="auto_awesome"/>AI分析 (Version管理 §64/65)</div>
-            {myAi?<div>
-              <div style={{display:'flex',alignItems:'center',gap:7,marginBottom:8}}><Sym i="verified" s={{fontSize:18,color:'var(--green)'}}/><b style={{fontSize:14}}>総合評価: {myAi.verdict}</b><span className="tag" style={{marginLeft:'auto'}}>v{myAi.version}</span></div>
-              <div style={{fontSize:12.5,color:'var(--ink2)',lineHeight:1.6}}>{myAi.summary}</div>
-              <div style={{marginTop:10,display:'flex',flexWrap:'wrap',gap:6}}>{myAi.flags.map((f,i)=><span key={i} className="tag" style={{fontSize:11}}>⚠ {f}</span>)}</div>
-              <div className="notebox info" style={{marginTop:12}}><Sym i="info"/><div>入力: {myAi.inputs.join(' / ')} · {myAi.model}。AIは事実を説明するだけで、採否は人間が確定します (§46/66)。</div></div>
-            </div>:<div className="emptyx"><Sym i="auto_awesome"/>AI分析なし</div>}
-          </div>
-        </div>
-      )}
-
-      {tab==='flow' && <FlowDiff app={app} acts={acts} tmpl={tmpl} full/>}
-
-      {tab==='roles' && (
-        <div className="card pad">
-          <div className="ch"><Sym i="badge"/>応募ロール (§6/7)<button className="btn sm" style={{marginLeft:'auto'}} onClick={()=>setModal('changerole')}><Sym i="swap_horiz" s={{fontSize:15}}/>ポジション変更</button><button className="btn sm" onClick={()=>setModal('addrole')}><Sym i="add" s={{fontSize:15}}/>ロール追加</button></div>
-          {roles.length?roles.map(r=>(<div key={r.id} className="evalcard" style={{display:'flex',alignItems:'center',gap:10}}><div style={{flex:1,fontWeight:600,color:'var(--ink)',fontSize:13.5}}>{r.role}</div><select className="field" style={{width:'auto',padding:'5px 9px',fontSize:12}} value={r.reln} onChange={e=>dispatch({type:'setRoleReln',roleId:r.id,reln:e.target.value})}>{Object.entries(RELN).map(([k,v])=><option key={k} value={k}>{v.l}</option>)}</select></div>)):<div className="emptyx"><Sym i="badge"/>ロール未設定</div>}
-          {listBy(roleHistory,app.id).length>0&&<div style={{marginTop:14}}><div style={{fontSize:12,fontWeight:700,color:'var(--ink3)',marginBottom:8}}>ポジション変更履歴 (§7)</div>{listBy(roleHistory,app.id).map(r=>(<div key={r.id} className="arow"><div className="ai" style={{background:'var(--teal-soft)'}}><Sym i="swap_horiz" s={{color:'var(--teal)'}}/></div><div style={{flex:1}}><div className="an">{r.from} → {r.to}</div><div className="as">{fmtMD(r.at)} · {uname(r.by)} · {r.reason} · 本人同意{r.consent?'あり':'なし'}</div></div></div>))}</div>}
-        </div>
-      )}
-
-      {tab==='decisions' && !canRecruit && <div className="card pad"><div className="emptyx"><Sym i="lock"/>採用判断の履歴は採用権限を持つユーザーのみ閲覧できます (§69)。</div></div>}
-      {tab==='decisions' && canRecruit && (
-        <div className="card pad">
-          <div className="ch"><Sym i="gavel"/>採用判断の履歴 (§26/27)<span className="muted" style={{fontSize:11.5,fontWeight:500,marginLeft:'auto'}}>上書きせず履歴として保持</span></div>
-          {listBy(decisions,app.id).slice().sort((a,b)=>new Date(b.at)-new Date(a.at)).map(d=>(<div key={d.id} className="evalcard"><div style={{display:'flex',alignItems:'center',gap:9}}><Chip tone={d.type==='hire'?'green':d.type==='reject'||d.type==='withdrawn'?'red':'amber'}>{decLabel(d.type)}</Chip><span className="muted" style={{fontSize:12}}>{fmt(d.at)} · {uname(d.by)}</span>{d.supersedes&&<span className="tag" style={{fontSize:10}}>前判断を更新</span>}</div><div style={{fontSize:12.5,color:'var(--ink2)',marginTop:6}}>{d.reason}{d.comment&&` — ${d.comment}`}</div></div>))}
-          {!listBy(decisions,app.id).length&&<div className="emptyx"><Sym i="gavel"/>まだ判断はありません。判断は面接ステータスとは独立したプロセスです。</div>}
-        </div>
-      )}
-
-      {tab==='comm' && (
-        <div className="card pad">
-          <div className="ch"><Sym i="forum"/>連絡履歴 (§51)<button className="btn sm prim" style={{marginLeft:'auto'}} onClick={()=>setModal('compose')}><Sym i="edit" s={{fontSize:15}}/>メール作成</button></div>
-          {listBy(comms,app.id).length?listBy(comms,app.id).sort((a,b)=>new Date(b.at)-new Date(a.at)).map(c=>(<div key={c.id} className="arow"><div className="ai" style={{background:c.dir==='in'?'var(--green-soft)':'var(--blue-soft)'}}><Sym i={c.dir==='in'?'call_received':'send'} s={{color:c.dir==='in'?'var(--green)':'var(--blue)'}}/></div><div style={{flex:1}}><div className="an">{c.subject}</div><div className="as">{c.dir==='in'?'受信':'送信'} · {c.autoId?'自動':'手動'} · {fmt(c.at)}</div></div><Chip tone={c.status==='sent'||c.status==='received'?'green':c.status==='scheduled'?'blue':c.status==='failed'?'red':'slate'} dot={false}>{c.status==='sent'?'送信済':c.status==='received'?'受信':c.status==='scheduled'?'送信予定':c.status==='failed'?'送信失敗':c.status}</Chip></div>)):<div className="emptyx"><Sym i="forum"/>連絡履歴なし</div>}
-          {listBy(comms,app.id).some(c=>c.status==='failed')&&<div className="notebox warn" style={{marginTop:8}}><Sym i="error"/><div>送信に失敗した連絡があります。再送できます(内部エラーはユーザーに表示しません §91)。</div></div>}
-        </div>
-      )}
-
-      {tab==='membership' && <MembershipPanel app={app} dispatch={dispatch}/>}
-
-      {modal==='activity'&&<ActivityForm app={app} editAct={editAct} onClose={()=>{setModal(null);setEditAct(null);}} dispatch={dispatch}/>}
-      {modal==='decision'&&<DecisionModal app={app} split={split} onClose={()=>setModal(null)} dispatch={dispatch}/>}
-      {modal==='compose'&&<ComposeForm app={app} onClose={()=>setModal(null)} dispatch={dispatch}/>}
-      {modal==='more'&&<MoreMenu app={app} onClose={()=>setModal(null)} onPick={k=>setModal(k)} dispatch={dispatch}/>}
-      {modal==='pause'&&<PauseModal app={app} onClose={()=>setModal(null)} dispatch={dispatch}/>}
-      {modal==='changerole'&&<ChangeRoleModal app={app} onClose={()=>setModal(null)} dispatch={dispatch}/>}
-      {modal==='addrole'&&<AddRoleModal app={app} onClose={()=>setModal(null)} dispatch={dispatch}/>}
-      {modal==='task'&&<TaskForm app={app} onClose={()=>setModal(null)} dispatch={dispatch}/>}
-      {modal==='actaction'&&actTarget&&<ActivityActionModal act={actTarget} onClose={()=>{setModal(null);setActTarget(null);}} onReschedule={()=>{setEditAct(actTarget);setModal('activity');}} dispatch={dispatch}/>}
-      {modal==='merge'&&app.dupOf&&<MergeModal app={app} onClose={()=>setModal(null)} dispatch={dispatch}/>}
-    </div>
-  );
-}
-
-function FlowDiff({app, acts, tmpl, full}){
-  return (
-    <div className="card pad">
-      <div className="ch"><Sym i="alt_route"/>標準ルートとの差分{full&&<span className="muted" style={{fontSize:11.5,fontWeight:500,marginLeft:8}}>標準から外れることはエラーではありません (§47)</span>}<span className="more">詳細を見る</span></div>
-      <div className="flow">
-        <div className="flowlbl">標準ルート（{tmpl.position}）</div>
-        <div className="chain">{tmpl.steps.map((s,i)=>(<Fragment key={i}>{i>0&&<span className="farr">›</span>}<span className="fstep">{s}</span></Fragment>))}<span className="tag" style={{marginLeft:4}}>{tmpl.ver}</span></div>
-        <div className="flowlbl">実際のルート（この応募者）</div>
-        <div className="chain">{acts.slice().reverse().map((a,i)=>{const done=DONE_ST.includes(a.status),now=['in_progress','partially_completed','scheduled','planned'].includes(a.status);const inTmpl=tmpl.steps.some(s=>a.name.includes(s.slice(0,2)));return <Fragment key={a.id}>{i>0&&<span className="farr">›</span>}<span className={`fstep ${done?'done':''} ${now?'now':''} ${!inTmpl?'off':''}`}>{a.name}</span></Fragment>;})}</div>
-      </div>
-    </div>
-  );
-}
-
-/* ---------- Activity / Interview scheduling form (§80/81 — 入力画面) ---------- */
-function ActivityForm({app, editAct, onClose, dispatch}){
-  const editing=!!editAct;
-  const [type,setType]=useState(editAct?editAct.type:'INTERVIEW');
-  const [name,setName]=useState(editAct?editAct.name:'代表面談');
-  const itype='REP';
-  const [ivs,setIvs]=useState(editAct?.interviewers||['iv1']);
-  const [mode,setMode]=useState(editAct?.mode||'online');
-  const [url,setUrl]=useState(editAct?.url||RECRUIT_SETTINGS.zoomUrl);
-  const [comp,setComp]=useState(editAct?.completionMode||'all_sessions');
-  const [sessList,setSessList]=useState(editing?[]:['人物・志望理由','活動条件']);
-  const [willRec,setWillRec]=useState(editAct?editAct.rec:true);
-  const dd=editAct?.plannedAt?new Date(editAct.plannedAt):null;
-  const [date,setDate]=useState(dd?dd.toISOString().slice(0,10):'2026-08-31');
-  const [time,setTime]=useState(dd?`${pad(dd.getHours())}:${pad(dd.getMinutes())}`:'18:00');
-  const [owner,setOwner]=useState(editAct?editAct.owner:'hr');
-  const [dep,setDep]=useState(editAct?.depId||'');
-  const [notes,setNotes]=useState(editAct?editAct.notes||'':'');
-  const isIv=type==='INTERVIEW';
-  const existing=listBy(activities,app.id).filter(a=>!editAct||a.id!==editAct.id);
-  const chooseType=k=>{setType(k);if(!editing)setName(k==='INTERVIEW'?'代表面談':atype(k).label);};
-  const submit=()=>{
-    dispatch({type:'createActivity',appId:app.id,editId:editAct?.id,payload:{
-      type,name,itype:isIv?itype:null,owner,plannedAt:new Date(`${date}T${time}:00+09:00`).toISOString(),
-      interviewers:isIv?ivs:[],mode:isIv?mode:null,url,completionMode:isIv?comp:null,
-      sessions:isIv?sessList.filter(s=>s.trim()):[],willRec:isIv?willRec:false,dep,notes}});
-    onClose();
-  };
-  return (
-    <div className="overlay" onClick={onClose}>
-      <div className="modal lg" onClick={e=>e.stopPropagation()}>
-        <div className="mhd"><div className="mt">{editing?'アクティビティを編集':'アクティビティを追加'}</div><div className="mx">標準フローに無い活動も自由に追加できます。ここで入力した内容がタイムライン・監査・自動化に反映されます (§80/81)。</div></div>
-        <div className="mbd scroll">
-          <div className="frow"><div className="flbl">種類</div>
-            <div className="selrow">{ATYPES.filter(a=>a.key!=='OTHER').map(a=>(<span key={a.key} className={`selchip ${type===a.key?'on':''}`} onClick={()=>chooseType(a.key)}><Sym i={a.icon} s={{fontSize:15,color:a.color}}/>{a.label}{a.custom&&<span className="tag" style={{fontSize:9.5,marginLeft:2}}>カスタム</span>}</span>))}</div>
-          </div>
-          <div className="frow"><div className="flbl">名称 <span className="req">必須</span></div><input className="field" value={name} onChange={e=>setName(e.target.value)} placeholder="例: 代表面談"/></div>
-          {isIv&&<Fragment>
-            <div className="grid2">
-              <div className="frow"><div className="flbl">完了条件 (§22)</div>
-                <select className="field" value={comp} onChange={e=>setComp(e.target.value)}><option value="all_sessions">全セッション完了で自動完了</option><option value="minimum">必要セッション完了で完了</option><option value="manual">手動で完了</option></select></div>
-            </div>
-            <div className="frow"><div className="flbl">面接官（複数可・評価は各自独立 §24）</div>
-              <div className="selrow">{['iv1','iv2','rep','hr'].map(u=>(<span key={u} className={`selchip ${ivs.includes(u)?'on':''}`} onClick={()=>setIvs(v=>v.includes(u)?v.filter(x=>x!==u):[...v,u])}>{ivs.includes(u)&&<Sym i="check" s={{fontSize:14}}/>}{uname(u)}</span>))}</div></div>
-            <div className="grid2">
-              <div className="frow"><div className="flbl">実施方法</div><div className="selrow"><span className={`selchip ${mode==='online'?'on':''}`} onClick={()=>setMode('online')}><Sym i="videocam" s={{fontSize:15}}/>オンライン</span><span className={`selchip ${mode==='onsite'?'on':''}`} onClick={()=>setMode('onsite')}><Sym i="location_on" s={{fontSize:15}}/>対面</span></div></div>
-              <div className="frow"><div className="flbl">{mode==='online'?'会議URL':'場所'}{mode==='online'&&<span className="fhint">共通Zoom（設定で管理）</span>}</div><input className="field" value={url} onChange={e=>setUrl(e.target.value)} placeholder={mode==='online'?'https://zoom.us/j/…':'渋谷オフィス 3F'}/>{mode==='online'&&<div className="fhint" style={{marginTop:4}}><Sym i="link" s={{fontSize:13}}/> この共通Zoomリンク・ID・パスコードは面接案内の自動送信メールにも差し込まれます (§55)。</div>}</div>
-            </div>
-            <div className="frow"><div className="flbl">セッション分割（任意 §21）</div>
-              {sessList.map((s,i)=>(<div key={i} className="sess-item"><span className="mono" style={{fontSize:11,color:'var(--ink4)',width:66,flex:'none'}}>Session {i+1}</span><input className="field" value={s} onChange={e=>setSessList(l=>l.map((x,j)=>j===i?e.target.value:x))} placeholder="トピック（例: 活動条件）"/><button className="btn sm" onClick={()=>setSessList(l=>l.filter((_,j)=>j!==i))}><Sym i="close" s={{fontSize:15}}/></button></div>))}
-              <button className="btn sm" onClick={()=>setSessList(l=>[...l,''])}><Sym i="add" s={{fontSize:15}}/>セッションを追加</button>
-            </div>
-            <div className="frow"><label className="check"><input type="checkbox" checked={willRec} onChange={e=>setWillRec(e.target.checked)}/>録音を予定する（任意 §61）</label></div>
-          </Fragment>}
-          <div className="grid2">
-            <div className="frow"><div className="flbl">予定日</div><input className="field" type="date" value={date} onChange={e=>setDate(e.target.value)}/></div>
-            <div className="frow"><div className="flbl">時刻</div><input className="field" type="time" value={time} onChange={e=>setTime(e.target.value)}/></div>
-          </div>
-          <div className="grid2">
-            <div className="frow"><div className="flbl">担当</div><select className="field" value={owner} onChange={e=>setOwner(e.target.value)}>{['hr','r1','r2','rep','iv1','iv2'].map(u=><option key={u} value={u}>{uname(u)}</option>)}</select></div>
-            <div className="frow"><div className="flbl">依存（任意 §16）</div><select className="field" value={dep} onChange={e=>setDep(e.target.value)}><option value="">なし</option>{existing.map(a=><option key={a.id} value={a.id}>{a.name} の完了後</option>)}</select></div>
-          </div>
-          <div className="frow"><div className="flbl">メモ</div><textarea className="field" value={notes} onChange={e=>setNotes(e.target.value)} style={{minHeight:64,resize:'vertical',fontFamily:'var(--s)'}} placeholder="補足・目的など"/></div>
-        </div>
-        <div className="mfoot"><button className="btn" onClick={onClose}>キャンセル</button><button className="btn prim" onClick={submit} disabled={!name.trim()}><Sym i={editing?'save':'add'} s={{fontSize:16}}/>{editing?'保存':'この内容で作成'}</button></div>
-      </div>
-    </div>
-  );
-}
-
-/* ---------- Email compose (§51/56/59 — 入力画面) ---------- */
-function ComposeForm({app, onClose, dispatch}){
-  const ap=findAp(app.applicantId);
-  const zoomBlock=`実施方法: オンライン（Zoom）\nURL: ${RECRUIT_SETTINGS.zoomUrl}\nミーティングID: ${RECRUIT_SETTINGS.zoomMeetingId} ／ パスコード: ${RECRUIT_SETTINGS.zoomPasscode}`;
-  const TPL={interview:['代表面談のご案内',`${ap.name} 様\n\nこの度はご応募ありがとうございます。代表面談の日程をご案内いたします。\n\n日時: 〇月〇日 〇〇:〇〇\n${zoomBlock}\n\nご不明点がございましたらお気軽にご連絡ください。`],thanks:['面接のお礼',`${ap.name} 様\n\n本日は面接のお時間をいただき、誠にありがとうございました。\n選考結果は追ってご連絡いたします。`],accept:['採用のご連絡',`${ap.name} 様\n\nこの度は選考の結果、採用が決定いたしましたのでご連絡いたします。\n今後の加入手続きについて、改めてご案内いたします。`],reject:['選考結果のご連絡',`${ap.name} 様\n\nこの度は選考にご参加いただきありがとうございました。\n慎重に検討いたしました結果、今回はご期待に沿えない結果となりました。`]};
-  const [tpl,setTpl]=useState('');
-  const [subject,setSubject]=useState('');
-  const [body,setBody]=useState('');
-  const [when,setWhen]=useState('now');
-  const [delay,setDelay]=useState('5');
-  const apply=k=>{setTpl(k);if(TPL[k]){setSubject(TPL[k][0]);setBody(TPL[k][1]);}};
-  const needAppr=['accept','reject'].includes(tpl);
-  const submit=()=>{dispatch({type:'sendComm',appId:app.id,subject:subject||'(件名なし)',when,delay});onClose();};
-  return (
-    <div className="overlay" onClick={onClose}>
-      <div className="modal lg" onClick={e=>e.stopPropagation()}>
-        <div className="mhd"><div className="mt">メールを作成</div><div className="mx">応募者への連絡はApplicationに紐付き、履歴として残ります (§51)。</div></div>
-        <div className="mbd scroll">
-          <div className="frow"><div className="flbl">宛先</div><input className="field" value={`${ap.name} <${ap.email}>`} readOnly style={{color:'var(--ink3)'}}/></div>
-          <div className="frow"><div className="flbl">テンプレート</div>
-            <div className="selrow">{[['interview','面接案内'],['thanks','お礼'],['accept','採用連絡'],['reject','不採用連絡']].map(([k,l])=>(<span key={k} className={`selchip ${tpl===k?'on':''}`} onClick={()=>apply(k)}>{l}</span>))}</div></div>
-          <div className="frow"><div className="flbl">件名 <span className="req">必須</span></div><input className="field" value={subject} onChange={e=>setSubject(e.target.value)} placeholder="件名"/></div>
-          <div className="frow"><div className="flbl">本文</div><textarea className="field" value={body} onChange={e=>setBody(e.target.value)} style={{minHeight:180,resize:'vertical',fontFamily:'var(--s)'}} placeholder="本文を入力…"/></div>
-          <div className="frow"><div className="flbl">送信タイミング</div>
-            <div className="selrow"><span className={`selchip ${when==='now'?'on':''}`} onClick={()=>setWhen('now')}>すぐ送信</span><span className={`selchip ${when==='schedule'?'on':''}`} onClick={()=>setWhen('schedule')}>予約送信</span>
-              {when==='now'&&<span style={{display:'flex',alignItems:'center',gap:6,fontSize:12,color:'var(--ink3)'}}><Sym i="undo" s={{fontSize:15}}/>送信取消の猶予 <select className="field" style={{width:'auto',padding:'6px 8px'}} value={delay} onChange={e=>setDelay(e.target.value)}><option value="0">なし</option><option value="5">5分</option><option value="30">30分</option></select> (§59)</span>}</div></div>
-          {needAppr&&<div className="notebox warn"><Sym i="verified_user"/><div><b>この種別は承認が必要です (§56)</b><br/>採用・不採用連絡は自動送信されず、承認者の確認後に送信されます。</div></div>}
-        </div>
-        <div className="mfoot"><button className="btn" onClick={onClose}>キャンセル</button><button className="btn prim" onClick={submit} disabled={!subject.trim()}><Sym i={when==='schedule'?'schedule_send':'send'} s={{fontSize:16}}/>{needAppr?'承認へ送る':when==='schedule'?'予約する':'送信'}</button></div>
-      </div>
-    </div>
-  );
-}
-
-/* ---------- Interview Room (面接当日の実務画面) ---------- */
-const IV_GUIDES = {
-  REP:{label:'代表面談', mode:'必要セッション完了で完了', sessions:[
-    {key:'s1',name:'Session 1 · 人物・志望理由',status:'planned',guide:['自己紹介と、これまでの活動','志望動機 — connec+aで実現したいこと','大切にしている価値観','チームでの協働経験'],check:['志望動機が明確か','カルチャーフィット','コミュニケーション力','主体性・熱意']},
-    {key:'s2',name:'Session 2 · 活動条件',status:'planned',guide:['稼働可能な時間・曜日','活動を開始できる時期','学業/仕事との両立','対応可能な役割範囲'],check:['稼働可能時間を確認','活動開始時期を確認','継続性の見込み']},
-    {key:'s3',name:'Session 3 · 意思・配属確認',status:'planned',guide:['希望ポジション・配属イメージ','これまでのスキルの棚卸し','活動への本気度・覚悟','懸念・不安の有無','条件面の最終確認'],check:['希望ポジション確認','入会意思の確認','条件合意','懸念点の解消']},
-  ]},
-};
-const ROOM_ME='iv1';
-function fmtClock(s){const m=Math.floor(s/60),ss=s%60;return `${pad(m)}:${pad(ss)}`;}
-
-function InterviewRoom({actId, go, dispatch}){
-  const act=activities.find(a=>a.id===actId);
-  const app=act?findApp(act.applicationId):null;
-  const ap=app?findAp(app.applicantId):null;
-  const G=IV_GUIDES.REP;
-  const [started,setStarted]=useState(false);
-  const [sec,setSec]=useState(0);
-  const [rec,setRec]=useState(false);
-  const [recSec,setRecSec]=useState(0);
-  const [recordings,setRecordings]=useState(act&&act.rec?[{name:'録音 1',dur:1830,tr:'完了'}]:[]);
-  const [curS,setCurS]=useState(G.sessions[0].key);
-  const [checked,setChecked]=useState({});
-  const [notes,setNotes]=useState([]);
-  const [nt,setNt]=useState('');
-  const [ntTag,setNtTag]=useState('note');
-  const [memo,setMemo]=useState(act?act.notes||'':'');
-  const [evRec,setEvRec]=useState(null);
-  const [evScore,setEvScore]=useState(0);
-  const [evComment,setEvComment]=useState('');
-  const [evSaved,setEvSaved]=useState(false);
-  useEffect(()=>{if(!started)return;const iv=setInterval(()=>setSec(s=>s+1),1000);return ()=>clearInterval(iv);},[started]);
-  useEffect(()=>{if(!rec)return;const iv=setInterval(()=>setRecSec(s=>s+1),1000);return ()=>clearInterval(iv);},[rec]);
-  if(!act) return <div className="page">面接が見つかりません。<span className="link" onClick={()=>go('dashboard')}>戻る</span></div>;
-  const sess=G.sessions.find(s=>s.key===curS)||G.sessions[0];
-  const sc=checked[curS]||{};
-  const scDone=sess.check.filter((_,i)=>sc[i]).length;
-  const toggleCheck=i=>setChecked(c=>({...c,[curS]:{...(c[curS]||{}),[i]:!(c[curS]||{})[i]}}));
-  const startStopRec=()=>{if(rec){setRec(false);setRecordings(r=>[...r,{name:`録音 ${r.length+1}`,dur:recSec,tr:'処理待ち'}]);setRecSec(0);}else{setRec(true);if(!started)setStarted(true);}};
-  const addNote=()=>{if(!nt.trim())return;setNotes(n=>[...n,{t:rec?fmtClock(recSec):fmtClock(sec),tag:ntTag,text:nt.trim()}]);setNt('');};
-  const endInterview=()=>{dispatch({type:'completeInterview',activityId:act.id});go('detail',app.id);};
-  const saveEval=()=>{if(!evRec)return;dispatch({type:'saveEval',appId:app.id,activityId:act.id,rec:evRec,score:evScore||3,comment:evComment});setEvSaved(true);};
-  const TAGS={note:{l:'メモ',ic:'notes'},good:{l:'良い',ic:'thumb_up'},concern:{l:'懸念',ic:'warning'},check:{l:'要確認',ic:'help'}};
-  return (
-    <div style={{minHeight:'100vh',background:'var(--bg)'}}>
-      <div className="topbar" style={{padding:'0 22px',gap:12}}>
-        <div onClick={()=>go('detail',app.id)} style={{display:'flex',alignItems:'center',gap:6,cursor:'pointer',fontWeight:600,color:'var(--ink2)',fontSize:13}}><Sym i="arrow_back" s={{fontSize:18}}/>候補者へ戻る</div>
-        <div style={{width:1,height:24,background:'var(--line)'}}/>
-        <Avatar ap={ap} size={30} photo/>
-        <div><div style={{fontWeight:700,color:'var(--ink)',fontSize:14,lineHeight:1.2}}>{ap.name}</div><div style={{fontSize:11,color:'var(--ink3)'}}>{app.position}</div></div>
-        <Chip tone="blue" dot={false}>{act.name}</Chip>
-        {act.plannedAt&&<span className="muted" style={{fontSize:12}}><Sym i="schedule" s={{fontSize:14}}/> {fmt(act.plannedAt)}</span>}
-        <div style={{flex:1}}/>
-        <div style={{display:'flex',alignItems:'center',gap:8,padding:'6px 10px',borderRadius:9,background:started?'var(--blue-soft)':'var(--bg)',border:'1px solid var(--line)'}}>
-          <Sym i="timer" s={{fontSize:17,color:'var(--blue)'}}/><span className="mono" style={{fontWeight:700,fontSize:15,color:'var(--ink)'}}>{fmtClock(sec)}</span>
-          <button className="btn sm" onClick={()=>setStarted(s=>!s)}>{started?'一時停止':'面接開始'}</button>
-        </div>
-        <button className="btn" onClick={()=>window.open(RECRUIT_SETTINGS.zoomUrl,'_blank')} title={`ID ${RECRUIT_SETTINGS.zoomMeetingId} / パス ${RECRUIT_SETTINGS.zoomPasscode}`}><Sym i="videocam" s={{fontSize:16}}/>Zoomを開く</button>
-        <button className="btn prim" onClick={endInterview}><Sym i="check" s={{fontSize:16}}/>面接を終了</button>
-      </div>
-      <div style={{padding:'20px 22px',display:'grid',gridTemplateColumns:'1fr 360px',gap:18,alignItems:'start'}} className="ov-body">
-        <div style={{display:'flex',flexDirection:'column',gap:16}}>
-          <div className="card pad">
-            <div className="ch"><Sym i="mic"/>録音<span className="muted" style={{fontSize:11.5,fontWeight:500,marginLeft:8}}>任意・複数可 (§61/62)</span></div>
-            <div style={{display:'flex',alignItems:'center',gap:14}}>
-              <button className="recbtn" onClick={startStopRec} style={{background:rec?'var(--red-soft)':'var(--blue)'}}>{rec?<span style={{width:16,height:16,borderRadius:3,background:'var(--red)'}}/>:<Sym i="mic" s={{color:'#fff',fontSize:24}}/>}</button>
-              <div style={{flex:1}}>{rec?<div style={{display:'flex',alignItems:'center',gap:10}}><span className="recdot"/><span className="mono" style={{fontWeight:700,fontSize:18}}>{fmtClock(recSec)}</span><div className="wv">{[0,1,2,3,4,5,6,7,8].map(i=><i key={i} style={{animationDelay:`${i*0.09}s`}}/>)}</div></div>:<div className="muted" style={{fontSize:13}}>録音を開始（またはファイルをアップロード）</div>}</div>
-              <label className="btn" style={{cursor:'pointer'}}><Sym i="upload_file" s={{fontSize:16}}/>アップロード<input type="file" accept="audio/*,video/*" style={{display:'none'}} onChange={e=>{const f=e.target.files[0];if(f)setRecordings(r=>[...r,{name:f.name,dur:null,tr:'処理待ち'}]);}}/></label>
-            </div>
-            {recordings.length>0&&<div style={{marginTop:12}}>{recordings.map((r,i)=>(<div key={i} className="arow"><div className="ai" style={{background:'var(--blue-soft)'}}><Sym i="graphic_eq" s={{color:'var(--blue)'}}/></div><div style={{flex:1}}><div className="an">{r.name}</div><div className="as">{r.dur!=null?fmtClock(r.dur):'アップロード済'} · 文字起こし: {r.tr}</div></div><Chip tone={r.tr==='完了'?'green':'slate'} dot={false}>{r.tr}</Chip></div>))}</div>}
-          </div>
-          <div className="card pad">
-            <div className="ch"><Sym i="edit_note"/>面接メモ<span className="muted" style={{fontSize:11.5,fontWeight:500,marginLeft:'auto'}}>自動保存</span></div>
-            <div className="selrow" style={{marginBottom:9}}>{Object.entries(TAGS).map(([k,v])=>(<span key={k} className={`selchip ${ntTag===k?'on':''}`} onClick={()=>setNtTag(k)}><Sym i={v.ic} s={{fontSize:14}}/>{v.l}</span>))}</div>
-            <div style={{display:'flex',gap:8}}><input className="field" placeholder="発言・気づきを記録（Enterで追加）" value={nt} onChange={e=>setNt(e.target.value)} onKeyDown={e=>{if(e.key==='Enter')addNote();}}/><button className="btn" onClick={addNote}>{rec?<><Sym i="fiber_manual_record" s={{fontSize:14,color:'var(--red)'}}/>{fmtClock(recSec)}</>:'追加'}</button></div>
-            <div style={{marginTop:10}}>{notes.length===0?<div className="muted" style={{fontSize:12.5}}>タイムスタンプ付きでメモを残せます。録音中は録音位置が記録され、後から頭出しできます。</div>:notes.slice().reverse().map((n,i)=>(<div key={i} style={{display:'flex',gap:9,alignItems:'flex-start',padding:'7px 0',borderTop:i>0?'1px solid var(--line)':'0'}}><span className="mono" style={{fontSize:11.5,color:'var(--blue)',fontWeight:600,flex:'none',width:42}}>{n.t}</span><Sym i={TAGS[n.tag].ic} s={{fontSize:14,color:'var(--ink4)',flex:'none',marginTop:1}}/><span style={{fontSize:12.5,color:'var(--ink2)'}}>{n.text}</span></div>))}</div>
-            <textarea className="field" placeholder="自由記述メモ…" value={memo} onChange={e=>setMemo(e.target.value)} style={{marginTop:12,minHeight:88,resize:'vertical',fontFamily:'var(--s)'}}/>
-          </div>
-        </div>
-        <div style={{display:'flex',flexDirection:'column',gap:16}}>
-          <div className="card pad">
-            <div className="ch"><Sym i="splitscreen"/>セッション<span className="muted" style={{fontSize:11,fontWeight:500,marginLeft:'auto'}}>{G.mode}</span></div>
-            <div style={{display:'flex',flexDirection:'column',gap:6}}>{G.sessions.map(s=>{const done=(checked[s.key]&&Object.values(checked[s.key]).filter(Boolean).length)||0;const on=s.key===curS;return (
-              <div key={s.key} onClick={()=>setCurS(s.key)} style={{padding:'9px 11px',borderRadius:9,border:`1px solid ${on?'var(--blue)':'var(--line)'}`,background:on?'var(--blue-soft)':'#fff',cursor:'pointer'}}>
-                <div style={{display:'flex',alignItems:'center',gap:8}}><span style={{fontWeight:600,fontSize:12.5,color:'var(--ink)'}}>{s.name}</span><Chip tone={s.status==='completed'?'green':s.status==='not_required'?'slate':'blue'} dot={false}>{AST[s.status]?.l||'予定'}</Chip></div>
-                <div style={{fontSize:11,color:'var(--ink3)',marginTop:3}}>確認 {done}/{s.check.length}</div></div>);})}</div>
-          </div>
-          <div className="card pad">
-            <div className="ch"><Sym i="checklist"/>質問ガイド・確認事項<span className="muted" style={{fontSize:11,fontWeight:500,marginLeft:'auto'}}>{scDone}/{sess.check.length}</span></div>
-            <div style={{fontSize:11,fontWeight:700,color:'var(--ink4)',marginBottom:5}}>聞くこと</div>
-            {sess.guide.map((g,i)=>(<div key={i} style={{display:'flex',gap:8,padding:'5px 0',fontSize:12.5,color:'var(--ink2)'}}><Sym i="chat_bubble" s={{fontSize:14,color:'var(--blue)',marginTop:2,flex:'none'}}/>{g}</div>))}
-            <div style={{fontSize:11,fontWeight:700,color:'var(--ink4)',margin:'11px 0 5px'}}>確認チェックリスト</div>
-            {sess.check.map((c,i)=>(<div key={i} onClick={()=>toggleCheck(i)} style={{display:'flex',alignItems:'center',gap:9,padding:'6px 0',cursor:'pointer'}}><span className="chkbox" style={{border:`1.5px solid ${sc[i]?'var(--green)':'var(--line2)'}`,background:sc[i]?'var(--green)':'#fff'}}>{sc[i]&&<Sym i="check" s={{fontSize:13,color:'#fff'}}/>}</span><span style={{fontSize:12.5,color:sc[i]?'var(--ink4)':'var(--ink)',textDecoration:sc[i]?'line-through':'none'}}>{c}</span></div>))}
-          </div>
-          <div className="card pad">
-            <div className="ch"><Sym i="grade"/>あなたの評価<span className="muted" style={{fontSize:11,fontWeight:500,marginLeft:8}}>{uname(ROOM_ME)}</span></div>
-            <div className="notebox info" style={{marginBottom:12}}><Sym i="lock"/><div>評価は面接官ごとに独立保存され、他の面接官の評価は判断確定まで見えません (§24/25/70)。</div></div>
-            <div style={{display:'flex',gap:6,marginBottom:12}}>{[['hire','採用','green'],['hold','保留','amber'],['reject','不採用','red']].map(([k,l,c])=>(<div key={k} onClick={()=>setEvRec(k)} style={{flex:1,textAlign:'center',padding:'8px 0',borderRadius:9,cursor:'pointer',fontSize:12.5,fontWeight:700,border:`1px solid ${evRec===k?`var(--${c})`:'var(--line)'}`,background:evRec===k?`var(--${c}-soft)`:'#fff',color:evRec===k?`var(--${c})`:'var(--ink3)'}}>{l}</div>))}</div>
-            <div style={{display:'flex',alignItems:'center',gap:3,marginBottom:12}}><span className="muted" style={{fontSize:12,marginRight:6}}>スコア</span>{[1,2,3,4,5].map(n=>(<span key={n} onClick={()=>setEvScore(n)} style={{cursor:'pointer',fontSize:22,color:n<=evScore?'var(--amber)':'var(--line2)'}}>{n<=evScore?'★':'☆'}</span>))}</div>
-            <textarea className="field" placeholder="所見・コメント" value={evComment} onChange={e=>setEvComment(e.target.value)} style={{minHeight:66,resize:'vertical',fontFamily:'var(--s)'}}/>
-            <button className="btn prim" style={{width:'100%',justifyContent:'center',marginTop:10,opacity:evRec?1:.5}} onClick={saveEval} disabled={!evRec}>{evSaved?<><Sym i="check_circle" s={{fontSize:16}}/>保存しました（変更可）</>:'評価を保存'}</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function DecisionModal({app, split, onClose, dispatch}){
-  const [dtype,setDtype]=useState(null);
-  const [reason,setReason]=useState('');
-  const [comment,setComment]=useState('');
-  const [notify,setNotify]=useState(true);
-  const dec=latestDecision(app.id);
-  const opts=[['hire','採用','how_to_reg','green'],['reject','不採用','do_not_disturb_on','red'],['hold','保留','pause_circle','amber'],['reopen','判断を取消して再選考','undo','violet']];
-  const submit=()=>{if(!dtype||!reason.trim())return;dispatch({type:'makeDecision',appId:app.id,dtype,reason});onClose();};
-  return (
-    <div className="overlay" onClick={onClose}>
-      <div className="modal" onClick={e=>e.stopPropagation()}>
-        <div className="mhd"><div className="mt">採用判断</div><div className="mx">判断は面接のステータスとは独立し、履歴として保存されます。過去の判断は上書きされません (§26/27)。</div></div>
-        <div className="mbd">
-          {split&&<div className="notebox warn" style={{marginBottom:12}}><Sym i="balance"/><div>面接官評価が分かれています。多数決ではなく、人が最終判断してください (§25)。</div></div>}
-          {dec&&<div style={{fontSize:12.5,color:'var(--ink3)',marginBottom:12}}>現在の判断: <Chip tone={dec.type==='hire'?'green':'amber'}>{decLabel(dec.type)}</Chip>（{uname(dec.by)}, {fmtMD(dec.at)}）</div>}
-          <div className="frow"><div className="flbl">判断 <span className="req">必須</span></div><div className="selrow">{opts.map(([k,l,ic,c])=>(<span key={k} className={`selchip ${dtype===k?'on':''}`} onClick={()=>setDtype(k)}><Sym i={ic} s={{fontSize:15,color:`var(--${c})`}}/>{l}</span>))}</div></div>
-          <div className="frow"><div className="flbl">理由 <span className="req">必須</span></div><input className="field" placeholder="監査ログに記録されます" value={reason} onChange={e=>setReason(e.target.value)}/></div>
-          <div className="frow"><div className="flbl">詳細コメント</div><textarea className="field" value={comment} onChange={e=>setComment(e.target.value)} style={{minHeight:58,resize:'vertical',fontFamily:'var(--s)'}} placeholder="任意"/></div>
-          <label className="check"><input type="checkbox" checked={notify} onChange={e=>setNotify(e.target.checked)}/>応募者へ連絡メールを準備する{['hire','reject'].includes(dtype)&&<span className="fhint">（採用・不採用連絡は承認後に送信 §56）</span>}</label>
-          <div className="fhint" style={{marginTop:10}}>採用しても直ちにメンバーは作成されません。加入情報確認→加入確定→メンバー作成の順です (§34/35)。</div>
-        </div>
-        <div className="mfoot"><button className="btn" onClick={onClose}>キャンセル</button><button className="btn prim" onClick={submit} disabled={!dtype||!reason.trim()}><Sym i="check" s={{fontSize:16}}/>判断を確定</button></div>
-      </div>
-    </div>
-  );
-}
-
-function Automation({dispatch, go}){
-  const stopped=autoState.stopped;
-  const scheduled=comms.filter(c=>c.status==='scheduled');
-  return (
-    <div>
-      <div className="card pad" style={{marginBottom:16,display:'flex',alignItems:'center',gap:14,flexWrap:'wrap',border:stopped?'1px solid var(--red-bd)':'1px solid var(--line)',background:stopped?'var(--red-soft)':'#fff'}}>
-        <div style={{flex:1}}><div className="ch" style={{margin:0}}><Sym i="smart_toy"/>自動送信エンジン {stopped&&<Chip tone="red" dot={false}>全停止中</Chip>}</div><div className="muted" style={{fontSize:12.5,marginTop:5}}>SelectionActivityに送信ロジックを埋め込まず独立動作 (§52)。冪等キーで二重送信防止 (§57)、Transactional Outboxで整合性担保 (§58)。</div></div>
-        <button className={stopped?'btn prim':'btn danger'} onClick={()=>dispatch({type:'killAll'})}><Sym i="power_settings_new" s={{fontSize:17}}/>{stopped?'自動送信を再開':'全自動送信を停止（Kill Switch §60）'}</button>
-      </div>
-      <div className="card pad" style={{marginBottom:16}}>
-        <div className="ch"><Sym i="videocam"/>共通Zoom設定<span className="muted" style={{fontSize:11.5,fontWeight:500,marginLeft:8}}>面接案内メールに自動差し込み (§55)</span><span className="link" style={{marginLeft:'auto',fontSize:12}}><Sym i="edit" s={{fontSize:14}}/>編集</span></div>
-        <div className="muted" style={{fontSize:12.5,marginBottom:12}}>Zoomリンクは組織で固定。面接アクティビティの既定URLとなり、面接案内・リマインドの自動送信メールに <span className="mono" style={{fontSize:11.5,color:'var(--blue-deep)'}}>{'{{zoomUrl}}'}</span> として差し込まれます。</div>
-        <div className="grid" style={{gridTemplateColumns:'2fr 1fr 1fr',gap:12}}>
-          <div><div className="flbl">会議URL</div><div className="field mono" style={{fontSize:12.5}}>{RECRUIT_SETTINGS.zoomUrl}</div></div>
-          <div><div className="flbl">ミーティングID</div><div className="field mono" style={{fontSize:12.5}}>{RECRUIT_SETTINGS.zoomMeetingId}</div></div>
-          <div><div className="flbl">パスコード</div><div className="field mono" style={{fontSize:12.5}}>{RECRUIT_SETTINGS.zoomPasscode}</div></div>
-        </div>
-      </div>
-      <div className="card" style={{overflow:'hidden',marginBottom:16}}>
-        <table className="tbl"><thead><tr><th>Automation</th><th>トリガー (§54)</th><th>承認 (§56)</th><th style={{textAlign:'center'}}>有効</th></tr></thead>
-          <tbody>{AUTOMATIONS.map(a=>{const eff=a.enabled&&!stopped;return (<tr key={a.id}><td style={{fontWeight:600,color:'var(--ink)'}}>{a.name}</td><td className="muted">{a.trigger}</td>
-            <td><span className={`selchip ${a.approval?'on':''}`} style={{padding:'4px 9px',fontSize:11.5}} onClick={()=>dispatch({type:'toggleApproval',id:a.id})}>{a.approval?'承認必須':'自動可'}</span></td>
-            <td style={{textAlign:'center'}}><span className={`sw ${eff?'on':'off'}`} title={stopped?'全停止中':''} onClick={()=>dispatch({type:'toggleAutomation',id:a.id})} style={{display:'inline-block',opacity:stopped?.5:1}}><i/></span></td></tr>);})}</tbody>
-        </table>
-      </div>
-      <div className="grid" style={{gridTemplateColumns:'1fr 1fr'}}>
-        <div className="card pad">
-          <div className="ch"><Sym i="schedule_send"/>予約送信キュー (§59)<span className="ch-more muted" style={{fontSize:11,fontWeight:500,marginLeft:'auto'}}>{scheduled.length}件</span></div>
-          {scheduled.length?scheduled.map(c=>{const app=findApp(c.applicationId),ap=findAp(app.applicantId);const mins=Math.max(0,Math.round((new Date(c.at)-NOW)/60000));return (
-            <div key={c.id} className="arow"><div className="ai" style={{background:'var(--blue-soft)'}}><Sym i="mail" s={{color:'var(--blue)'}}/></div><div style={{flex:1,cursor:'pointer'}} onClick={()=>go('detail',app.id)}><div className="an">{c.subject}</div><div className="as">{ap.name} · 送信まで約{mins}分（取消猶予内）</div></div><button className="btn sm danger" onClick={()=>dispatch({type:'cancelScheduled',commId:c.id})}><Sym i="undo" s={{fontSize:15}}/>取消</button></div>);}):<div className="muted" style={{fontSize:12.5}}>予約中の送信はありません</div>}
-        </div>
-        <div className="card pad">
-          <div className="ch"><Sym i="monitoring"/>実行ログ (§89)</div>
-          {AUTO_EXEC.map(e=>(<div key={e.id} className="arow"><div className="ai" style={{background:e.status==='成功'?'var(--green-soft)':e.status==='失敗'?'var(--red-soft)':'var(--amber-soft)'}}><Sym i={e.status==='成功'?'check':e.status==='失敗'?'close':'sync'} s={{color:e.status==='成功'?'var(--green)':e.status==='失敗'?'var(--red)':'var(--amber)'}}/></div><div style={{flex:1}}><div className="an">{e.name}</div><div className="as">{e.app} · {e.ms}ms · {rel(e.at)}{e.err?` · ${e.err}`:''}</div></div><Chip tone={e.status==='成功'?'green':e.status==='失敗'?'red':'amber'} dot={false}>{e.status}</Chip></div>))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ---------- Cluster 1: 候補者を動かす基本操作 ---------- */
-const HOLD_REASONS=['本人回答待ち','内部判断待ち','ポジション空き待ち','活動開始時期待ち','他候補比較中','追加情報待ち','将来再検討','その他'];
-const SOURCES=[['SCOUT','スカウト'],['MEMBER_REFERRAL','メンバー紹介'],['EVENT','イベント'],['PAST_APPLICANT','過去応募者'],['DIRECT','直接採用'],['FORM','応募フォーム'],['OTHER','その他']];
-const POSITIONS=['広報スタッフ','イベント運営','コミュニティマネージャー','デザイン','エンジニア','マーケティング','OMアシスタント','アドバイザー'];
-
-function NewApplicant({go, dispatch}){
-  const [name,setName]=useState(''),[kana,setKana]=useState(''),[email,setEmail]=useState(''),[phone,setPhone]=useState('');
-  const [pref,setPref]=useState('東京都'),[birth,setBirth]=useState(''),[position,setPosition]=useState('');
-  const [source,setSource]=useState('SCOUT'),[owner,setOwner]=useState('hr'),[memo,setMemo]=useState(''),[directReason,setDirectReason]=useState('');
-  const dups=applicants.filter(a=>(a.email&&email&&a.email.toLowerCase()===email.toLowerCase())||(a.name&&name&&a.name.replace(/\s/g,'')===name.replace(/\s/g,'')&&name.replace(/\s/g,'').length>1));
-  const uniqDup=dups.filter((a,i)=>dups.findIndex(x=>x.name===a.name)===i);
-  const canSave=name.trim()&&position.trim()&&(source!=='DIRECT'||directReason.trim());
-  const save=existingId=>dispatch({type:'createApplicant',existingApplicantId:existingId,payload:{name,kana,email,phone,pref,birth,position,source,owner,directReason,memo:memo||(source==='DIRECT'?`直接採用: ${directReason}`:'')},onDone:id=>go('detail',id)});
-  return (
-    <div style={{maxWidth:820,margin:'0 auto'}}>
-      <div onClick={()=>go('list')} style={{display:'flex',alignItems:'center',gap:6,cursor:'pointer',fontWeight:600,color:'var(--ink2)',fontSize:13,marginBottom:14}}><Sym i="arrow_back" s={{fontSize:18}}/>一覧へ戻る</div>
-      <div className="card pad">
-        <div className="ch"><Sym i="person_add"/>応募者・応募を新規作成<span className="muted" style={{fontSize:11.5,fontWeight:500,marginLeft:8}}>直接採用・スカウト・紹介も記録 (§40)</span></div>
-        {uniqDup.length>0&&<div className="notebox warn" style={{marginBottom:14}}><Sym i="join_inner"/><div><b>同一人物の可能性があります（{uniqDup.length}件）</b><br/>{uniqDup.map(d=>d.name+'（'+(d.email||'—')+'）').join(' / ')}。自動統合はしません — 既存の人物に紐付けるか、別人として作成するか選べます (§38)。</div></div>}
-        <div style={{fontSize:11,fontWeight:700,color:'var(--ink4)',margin:'4px 0 10px'}}>人物情報</div>
-        <div className="grid2"><div className="frow"><div className="flbl">氏名 <span className="req">必須</span></div><input className="field" value={name} onChange={e=>setName(e.target.value)} placeholder="山田 太郎"/></div><div className="frow"><div className="flbl">ふりがな</div><input className="field" value={kana} onChange={e=>setKana(e.target.value)} placeholder="やまだ たろう"/></div></div>
-        <div className="grid2"><div className="frow"><div className="flbl">メール</div><input className="field" value={email} onChange={e=>setEmail(e.target.value)} placeholder="example@example.com"/></div><div className="frow"><div className="flbl">電話</div><input className="field" value={phone} onChange={e=>setPhone(e.target.value)} placeholder="090-0000-0000"/></div></div>
-        <div className="grid2"><div className="frow"><div className="flbl">都道府県</div><input className="field" value={pref} onChange={e=>setPref(e.target.value)}/></div><div className="frow"><div className="flbl">生年月日</div><input className="field" type="date" value={birth} onChange={e=>setBirth(e.target.value)}/></div></div>
-        <hr className="hr"/>
-        <div style={{fontSize:11,fontWeight:700,color:'var(--ink4)',margin:'4px 0 10px'}}>応募情報</div>
-        <div className="frow"><div className="flbl">応募ポジション <span className="req">必須</span></div><input className="field" value={position} onChange={e=>setPosition(e.target.value)} placeholder="例: イベント運営" list="poslist"/><datalist id="poslist">{POSITIONS.map(p=><option key={p} value={p}/>)}</datalist></div>
-        <div className="frow"><div className="flbl">応募経路 <span className="req">必須</span></div><div className="selrow">{SOURCES.map(([k,l])=>(<span key={k} className={`selchip ${source===k?'on':''}`} onClick={()=>setSource(k)}>{l}</span>))}</div></div>
-        {source==='DIRECT'&&<div className="notebox warn"><Sym i="bolt"/><div>直接採用は<strong>誰が・いつ・なぜ</strong>を必ず記録します (§40)。作成時点で採用決定として登録され、加入手続へ進みます。</div></div>}
-        {source==='DIRECT'&&<div className="frow"><div className="flbl">直接採用の理由 <span className="req">必須</span></div><input className="field" value={directReason} onChange={e=>setDirectReason(e.target.value)} placeholder="例: 既知の人物・実績を確認済み"/></div>}
-        <div className="frow"><div className="flbl">担当</div><select className="field" value={owner} onChange={e=>setOwner(e.target.value)}>{['hr','r1','r2','rep'].map(u=><option key={u} value={u}>{uname(u)}</option>)}</select></div>
-        <div className="frow"><div className="flbl">メモ</div><textarea className="field" value={memo} onChange={e=>setMemo(e.target.value)} style={{minHeight:60,resize:'vertical',fontFamily:'var(--s)'}}/></div>
-        <div style={{display:'flex',gap:9,justifyContent:'flex-end',marginTop:6}}>
-          <button className="btn" onClick={()=>go('list')}>キャンセル</button>
-          {uniqDup.length>0&&<button className="btn" onClick={()=>save(uniqDup[0].id)}><Sym i="link" s={{fontSize:16}}/>この人物に応募を追加</button>}
-          <button className="btn prim" disabled={!canSave} onClick={()=>save(null)}><Sym i="check" s={{fontSize:16}}/>{uniqDup.length>0?'別人として作成':'作成'}</button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* アクティビティの状態遷移 (§14/15) */
-function ActivityActionModal({act, onClose, onReschedule, dispatch}){
-  const [sub,setSub]=useState(null); const [reason,setReason]=useState('');
-  const ACTIONS=[
-    {k:'completed',l:'完了にする',ic:'check_circle',c:'green'},
-    {k:'reschedule',l:'日程を変更',ic:'event_repeat',c:'blue'},
-    {k:'no_show',l:'無断欠席（No Show）',ic:'person_off',c:'red'},
-    {k:'cancelled_by_applicant',l:'中止（本人都合）',ic:'cancel',c:'red',reason:true},
-    {k:'cancelled_by_organization',l:'中止（運営都合）',ic:'cancel',c:'red',reason:true},
-    {k:'skipped',l:'スキップ',ic:'skip_next',c:'slate',reason:true},
-    {k:'not_required',l:'不要にする',ic:'block',c:'slate'},
-  ];
-  const pick=a=>{if(a.k==='reschedule'){onClose();onReschedule();return;}if(a.reason){setSub(a);return;}dispatch({type:'changeActivityStatus',activityId:act.id,status:a.k});onClose();};
-  return (
-    <div className="overlay" onClick={onClose}>
-      <div className="modal" onClick={e=>e.stopPropagation()}>
-        <div className="mhd"><div className="mt">{act.name}</div><div className="mx">状態を変更します。理由はタイムライン・監査に記録されます (§14/15/81)。</div></div>
-        <div className="mbd">
-          {!sub?ACTIONS.map(a=>(<div key={a.k} className="opt" onClick={()=>pick(a)}><div className="oi" style={{background:`var(--${a.c}-soft)`}}><Sym i={a.ic} s={{color:`var(--${a.c})`,fontSize:18}}/></div><div style={{flex:1}}><div className="ot">{a.l}</div></div><Sym i="chevron_right" s={{color:'var(--ink4)'}}/></div>)):
-          <div><div className="flbl">{sub.l}の理由 <span className="req">必須</span></div><input className="field" autoFocus value={reason} onChange={e=>setReason(e.target.value)} placeholder="理由を入力"/><div style={{display:'flex',gap:9,justifyContent:'flex-end',marginTop:14}}><button className="btn" onClick={()=>setSub(null)}>戻る</button><button className="btn prim" disabled={!reason.trim()} onClick={()=>{dispatch({type:'changeActivityStatus',activityId:act.id,status:sub.k,reason});onClose();}}>確定</button></div></div>}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function TaskForm({app, onClose, dispatch}){
-  const [title,setTitle]=useState(''),[assignee,setAssignee]=useState('hr'),[date,setDate]=useState('2026-08-31'),[prio,setPrio]=useState('中');
-  return (
-    <div className="overlay" onClick={onClose}><div className="modal" onClick={e=>e.stopPropagation()}>
-      <div className="mhd"><div className="mt">タスクを追加</div><div className="mx">面接などのSelectionActivityとは別の内部タスクです (§32)。</div></div>
-      <div className="mbd">
-        <div className="frow"><div className="flbl">内容 <span className="req">必須</span></div><input className="field" autoFocus value={title} onChange={e=>setTitle(e.target.value)} placeholder="例: 面接官へ評価入力を依頼"/></div>
-        <div className="grid2"><div className="frow"><div className="flbl">担当</div><select className="field" value={assignee} onChange={e=>setAssignee(e.target.value)}>{['hr','r1','r2','rep','iv1','iv2'].map(u=><option key={u} value={u}>{uname(u)}</option>)}</select></div><div className="frow"><div className="flbl">期限</div><input className="field" type="date" value={date} onChange={e=>setDate(e.target.value)}/></div></div>
-        <div className="frow"><div className="flbl">優先度</div><div className="selrow">{['高','中','低'].map(p=>(<span key={p} className={`selchip ${prio===p?'on':''}`} onClick={()=>setPrio(p)}>{p}</span>))}</div></div>
-      </div>
-      <div className="mfoot"><button className="btn" onClick={onClose}>キャンセル</button><button className="btn prim" disabled={!title.trim()} onClick={()=>{dispatch({type:'createTask',appId:app.id,title,assignee,dueAt:new Date(`${date}T18:00:00+09:00`).toISOString(),prio});onClose();}}>追加</button></div>
-    </div></div>
-  );
-}
-
-function PauseModal({app, onClose, dispatch}){
-  const [reason,setReason]=useState(HOLD_REASONS[0]),[date,setDate]=useState('2026-11-30');
-  return (
-    <div className="overlay" onClick={onClose}><div className="modal" onClick={e=>e.stopPropagation()}>
-      <div className="mhd"><div className="mt">選考を停止</div><div className="mx">Application自体を保留にします。再開時に履歴を保存します (§29)。</div></div>
-      <div className="mbd">
-        <div className="frow"><div className="flbl">保留理由 (§28)</div><select className="field" value={reason} onChange={e=>setReason(e.target.value)}>{HOLD_REASONS.map(r=><option key={r} value={r}>{r}</option>)}</select></div>
-        <div className="frow"><div className="flbl">再開予定日</div><input className="field" type="date" value={date} onChange={e=>setDate(e.target.value)}/></div>
-      </div>
-      <div className="mfoot"><button className="btn" onClick={onClose}>キャンセル</button><button className="btn prim" onClick={()=>{dispatch({type:'pauseApp',appId:app.id,reason,resumeAt:new Date(`${date}T00:00:00+09:00`).toISOString()});onClose();}}><Sym i="pause_circle" s={{fontSize:16}}/>停止する</button></div>
-    </div></div>
-  );
-}
-
-function ChangeRoleModal({app, onClose, dispatch}){
-  const [to,setTo]=useState(''),[reason,setReason]=useState(''),[consent,setConsent]=useState(true);
-  return (
-    <div className="overlay" onClick={onClose}><div className="modal" onClick={e=>e.stopPropagation()}>
-      <div className="mhd"><div className="mt">応募ポジションを変更</div><div className="mx">元の応募は上書きせず、変更履歴として保存します (§7)。</div></div>
-      <div className="mbd">
-        <div className="frow"><div className="flbl">変更前</div><input className="field" value={app.position} readOnly style={{color:'var(--ink3)'}}/></div>
-        <div className="frow"><div className="flbl">変更後 <span className="req">必須</span></div><input className="field" value={to} onChange={e=>setTo(e.target.value)} placeholder="例: イベント運営リード" list="poslist2"/><datalist id="poslist2">{POSITIONS.map(p=><option key={p} value={p}/>)}</datalist></div>
-        <div className="frow"><div className="flbl">理由 <span className="req">必須</span></div><input className="field" value={reason} onChange={e=>setReason(e.target.value)} placeholder="例: 面談で運営適性が高いと判断"/></div>
-        <label className="check"><input type="checkbox" checked={consent} onChange={e=>setConsent(e.target.checked)}/>本人の同意を得ている</label>
-      </div>
-      <div className="mfoot"><button className="btn" onClick={onClose}>キャンセル</button><button className="btn prim" disabled={!to.trim()||!reason.trim()} onClick={()=>{dispatch({type:'changeRole',appId:app.id,from:app.position,to,reason,consent});onClose();}}><Sym i="swap_horiz" s={{fontSize:16}}/>変更する</button></div>
-    </div></div>
-  );
-}
-
-function AddRoleModal({app, onClose, dispatch}){
-  const [role,setRole]=useState(''),[reln,setReln]=useState('candidate');
-  return (
-    <div className="overlay" onClick={onClose}><div className="modal" onClick={e=>e.stopPropagation()}>
-      <div className="mhd"><div className="mt">候補ロールを追加</div><div className="mx">1つの応募で複数の候補ロールを管理できます (§6)。</div></div>
-      <div className="mbd">
-        <div className="frow"><div className="flbl">ロール名 <span className="req">必須</span></div><input className="field" value={role} onChange={e=>setRole(e.target.value)} placeholder="例: メンター" list="poslist3"/><datalist id="poslist3">{POSITIONS.map(p=><option key={p} value={p}/>)}</datalist></div>
-        <div className="frow"><div className="flbl">関係</div><div className="selrow">{Object.entries(RELN).map(([k,v])=>(<span key={k} className={`selchip ${reln===k?'on':''}`} onClick={()=>setReln(k)}>{v.l}</span>))}</div></div>
-      </div>
-      <div className="mfoot"><button className="btn" onClick={onClose}>キャンセル</button><button className="btn prim" disabled={!role.trim()} onClick={()=>{dispatch({type:'addRole',appId:app.id,role,reln});onClose();}}>追加</button></div>
-    </div></div>
-  );
-}
-
-/* ---------- Cluster 2: 加入手続(メンバー化) + 重複統合 ---------- */
-function MembershipPanel({app, dispatch}){
-  const ap=findAp(app.applicantId), ph=app.postHire||{}, member=members.find(m=>m.applicantId===app.applicantId);
-  const timingLabel={hire_decision:'採用決定時',membership_confirmed:'加入確定時',manual:'手動'}[ORG_SETTINGS.memberCreationTiming];
-  const steps=[
-    {k:'decision',l:'採用決定',done:true,desc:'採用が確定しています'},
-    {k:'info',l:'加入情報の確認',done:!!ph.infoConfirmed,desc:'氏名・連絡先・加入日などを確認',action:()=>dispatch({type:'confirmJoinInfo',appId:app.id}),btn:'加入情報を確認'},
-    {k:'confirm',l:'加入確定',done:!!ph.membershipConfirmed,enabled:!!ph.infoConfirmed,desc:'本人の加入意思を最終確認',action:()=>dispatch({type:'confirmMembership',appId:app.id}),btn:'加入を確定'},
-    {k:'member',l:'メンバー作成',done:!!member,enabled:!!ph.membershipConfirmed||ORG_SETTINGS.memberCreationTiming==='manual',desc:'メンバー名簿へ登録',action:()=>dispatch({type:'createMember',appId:app.id}),btn:'メンバーを作成'},
-  ];
-  return (
-    <div className="card pad">
-      <div className="ch"><Sym i="diversity_3"/>加入手続<span className="muted" style={{fontSize:11.5,fontWeight:500,marginLeft:8}}>採用ボタンで即メンバー化しない (§34)。Member作成タイミング: <b>{timingLabel}</b> (§35)</span></div>
-      {steps.map((s,i)=>(
-        <div key={s.k} style={{display:'flex',alignItems:'center',gap:12,padding:'12px 0',borderTop:i>0?'1px solid var(--line)':'0'}}>
-          <span className="chkbox" style={{width:26,height:26,borderRadius:'50%',background:s.done?'var(--green)':'#fff',border:`2px solid ${s.done?'var(--green)':'var(--line2)'}`}}>{s.done?<Sym i="check" s={{fontSize:16,color:'#fff'}}/>:<span style={{fontWeight:700,color:'var(--ink4)',fontSize:12}}>{i+1}</span>}</span>
-          <div style={{flex:1}}><div style={{fontWeight:600,color:'var(--ink)',fontSize:13.5}}>{s.l}</div>{s.desc&&<div style={{fontSize:11.5,color:'var(--ink3)'}}>{s.desc}</div>}</div>
-          {!s.done&&s.action&&<button className="btn sm prim" disabled={s.enabled===false} onClick={s.action}>{s.btn}</button>}
-          {s.done&&<Chip tone="green" dot={false}>完了</Chip>}
-        </div>
-      ))}
-      {member&&<div className="notebox info" style={{marginTop:12}}><Sym i="badge"/><div><b>メンバー作成済み</b> — {member.name} / {member.role} / 参加日 {fmtMD(member.joinedAt)}。同じApplicantからの二重作成は冪等に防止されます (§37)。</div></div>}
-      <div className="notebox warn" style={{marginTop:10}}><Sym i="lightbulb"/><div>採用後も選考はロックしません。配属面談・条件確認・オンボーディング面談を「アクティビティを追加」から足せます (§33)。</div></div>
-    </div>
-  );
-}
-
-function MergeModal({app, onClose, dispatch}){
-  const a1=findAp(app.applicantId), a2=findAp(app.dupOf);
-  const [primary,setPrimary]=useState(app.applicantId);
-  const cnt=id=>({apps:applications.filter(x=>x.applicantId===id).length});
-  const c1=cnt(a1.id), c2=cnt(a2.id);
-  return (
-    <div className="overlay" onClick={onClose}><div className="modal" onClick={e=>e.stopPropagation()}>
-      <div className="mhd"><div className="mt">応募者を統合</div><div className="mx">応募・活動・面接・評価・判断・連絡・監査はすべて保持されます。どちらを主（Primary）にするか選んでください (§39)。</div></div>
-      <div className="mbd">
-        {[[a1,c1],[a2,c2]].map(([a,c])=>(
-          <div key={a.id} onClick={()=>setPrimary(a.id)} style={{display:'flex',alignItems:'center',gap:11,padding:'11px 12px',borderRadius:10,border:`1px solid ${primary===a.id?'var(--blue)':'var(--line)'}`,background:primary===a.id?'var(--blue-soft)':'#fff',cursor:'pointer',marginBottom:8}}>
-            <Avatar ap={a} size={38} photo/><div style={{flex:1}}><div style={{fontWeight:600,color:'var(--ink)'}}>{a.name} {primary===a.id&&<Chip tone="blue" dot={false}>主</Chip>}</div><div style={{fontSize:11.5,color:'var(--ink3)'}}>{a.email||'—'} · 応募 {c.apps}件</div></div>
-          </div>))}
-        <div className="notebox info"><Sym i="info"/><div>統合後、{c1.apps+c2.apps}件の応募が1人物に集約されます。どちらが主になったかを監査ログに記録します。取り消しはできません (§39/41)。</div></div>
-      </div>
-      <div className="mfoot"><button className="btn" onClick={onClose}>キャンセル</button><button className="btn prim" onClick={()=>{dispatch({type:'mergeApplicants',primaryId:primary,mergeId:primary===a1.id?a2.id:a1.id});onClose();}}><Sym i="merge" s={{fontSize:16}}/>統合する</button></div>
-    </div></div>
-  );
-}
-
-function MoreMenu({app, onClose, onPick, dispatch}){
-  const items=[];
-  if(app.lifecycle==='paused') items.push(['resume','選考を再開','play_circle']); else items.push(['pause','選考を停止','pause_circle']);
-  items.push(['changerole','応募ポジションを変更','swap_horiz'],['task','タスクを追加','add_task'],['anon','個人情報を匿名化','privacy_tip']);
-  return (
-    <div className="overlay" onClick={onClose}><div className="modal" style={{width:'min(400px,94vw)'}} onClick={e=>e.stopPropagation()}>
-      <div className="mhd"><div className="mt">操作</div></div>
-      <div className="mbd">{items.map(([k,l,ic])=>(<div key={k} className="opt" onClick={()=>{if(k==='resume'){dispatch({type:'resumeApp',appId:app.id});onClose();}else if(k==='anon'){if(window.confirm('この応募者の個人情報を匿名化します。取り消せません。よろしいですか？')){dispatch({type:'anonymize',applicantId:app.applicantId});onClose();}}else onPick(k);}}><div className="oi" style={{background:k==='anon'?'var(--red-soft)':'var(--blue-soft)'}}><Sym i={ic} s={{color:k==='anon'?'var(--red)':'var(--blue)',fontSize:18}}/></div><div style={{flex:1}}><div className="ot">{l}</div></div><Sym i="chevron_right" s={{color:'var(--ink4)'}}/></div>))}</div>
-    </div></div>
-  );
-}
-
-/* ---------- Cluster 4: 管理画面 ---------- */
-function PositionsView(){
-  const posMap={}; applications.forEach(a=>{if(!['closed','archived'].includes(a.lifecycle))posMap[a.position]=(posMap[a.position]||0)+1;});
-  const allPos=[...new Set([...POSITIONS,...applications.map(a=>a.position)])];
-  return (
-    <div>
-      <div className="muted" style={{fontSize:12.5,marginBottom:12}}>募集ポジションごとに標準選考ルートを設定できます。これは推奨テンプレートで、応募者を拘束しません (§8/86)。</div>
-      <div className="card" style={{overflow:'hidden'}}>
-        <table className="tbl"><thead><tr><th>募集ポジション</th><th>選考中</th><th>標準フロー</th><th style={{textAlign:'right'}}></th></tr></thead>
-        <tbody>{allPos.map(p=>(<tr key={p} className="trow" style={{cursor:'default'}}><td style={{fontWeight:600,color:'var(--ink)'}}>{p}</td><td>{posMap[p]?<Chip tone="blue" dot={false}>{posMap[p]}名</Chip>:<span className="muted">—</span>}</td><td className="muted">標準フロー v3</td><td style={{textAlign:'right'}}><button className="btn sm">編集</button></td></tr>))}</tbody></table>
-      </div>
-    </div>
-  );
-}
-function FlowTemplatesView(){
-  return (
-    <div className="grid" style={{gridTemplateColumns:'1fr'}}>
-      {Object.entries(templates).map(([id,t])=>(
-        <div key={id} className="card pad">
-          <div className="ch"><Sym i="account_tree"/>{t.position} <Chip tone={t.ver.includes('旧')?'slate':'blue'} dot={false}>{t.ver}</Chip><span className="muted" style={{fontSize:11.5,fontWeight:500,marginLeft:'auto'}}>使用中: {applications.filter(a=>a.templateVer===id).length}件</span></div>
-          <div className="chain">{t.steps.map((s,i)=>(<Fragment key={i}>{i>0&&<span className="farr">›</span>}<span className="fstep">{s}</span></Fragment>))}</div>
-        </div>
-      ))}
-      <div className="notebox info"><Sym i="info"/><div>テンプレートは推奨ルート。編集は<b>新バージョン</b>を作成し、過去のApplicationには自動反映しません（作成時のVersionを保持 §8/9）。Application作成時に使用したTemplate Versionを記録しています。</div></div>
-    </div>
-  );
-}
-function SettingsView({viewerRole, setViewerRole, dispatch}){
-  const timings=[['hire_decision','採用決定時'],['membership_confirmed','加入確定時（推奨）'],['manual','手動']];
-  const ROLECOLS=['Super','R.Admin','Recruiter','Interviewer','Viewer'];
-  const CAPS=[['候補者・評価・AIの閲覧','○','○','○','担当のみ','×'],['採用判断','○','○','×','×','×'],['直接採用','○','○','×','×','×'],['自動化・設定変更','○','○','×','×','×'],['個人情報フル閲覧','○','○','○','マスク','マスク'],['一括操作','○','○','○','×','×']];
-  return (
-    <div className="grid" style={{gridTemplateColumns:'1fr'}}>
-      <div className="card pad">
-        <div className="ch"><Sym i="visibility"/>表示ロール（プレビュー）<span className="muted" style={{fontSize:11.5,fontWeight:500,marginLeft:8}}>権限による閲覧制御を確認 (§68-71)</span></div>
-        <div className="selrow">{[['radmin','Recruitment Admin'],['recruiter','Recruiter'],['interviewer','Interviewer'],['viewer','Viewer']].map(([k,l])=>(<span key={k} className={`selchip ${viewerRole===k?'on':''}`} onClick={()=>setViewerRole(k)}>{l}</span>))}</div>
-        <div className="fhint" style={{marginTop:8}}><Sym i="lightbulb" s={{fontSize:13}}/> Interviewer / Viewer に切り替えると、応募者詳細で個人情報がマスクされ、評価・AI・判断が制限されます (§69-71)。</div>
-      </div>
-      <div className="card pad">
-        <div className="ch"><Sym i="how_to_reg"/>Member作成タイミング (§35)</div>
-        <div className="muted" style={{fontSize:12.5,marginBottom:10}}>採用ボタンで即メンバー化しません。いつMemberを作成するかを選べます。</div>
-        <div className="selrow">{timings.map(([k,l])=>(<span key={k} className={`selchip ${ORG_SETTINGS.memberCreationTiming===k?'on':''}`} onClick={()=>dispatch({type:'setTiming',value:k})}>{l}</span>))}</div>
-      </div>
-      <div className="card" style={{overflow:'hidden'}}>
-        <div className="ch" style={{padding:'16px 16px 0'}}><Sym i="admin_panel_settings"/>権限マトリクス (§68-71)</div>
-        <table className="tbl" style={{marginTop:8}}><thead><tr><th>権限</th>{ROLECOLS.map(c=><th key={c} style={{textAlign:'center'}}>{c}</th>)}</tr></thead>
-        <tbody>{CAPS.map((r,i)=>(<tr key={i}><td style={{fontWeight:600,color:'var(--ink)'}}>{r[0]}</td>{r.slice(1).map((v,j)=>(<td key={j} style={{textAlign:'center'}}>{v==='○'?<Sym i="check" s={{color:'var(--green)',fontSize:17}}/>:v==='×'?<Sym i="remove" s={{color:'var(--ink4)',fontSize:16}}/>:<span style={{fontSize:11,color:'var(--amber)',fontWeight:600}}>{v}</span>}</td>))}</tr>))}</tbody></table>
-      </div>
-      <div className="card pad">
-        <div className="ch"><Sym i="privacy_tip"/>データ保持・匿名化 (§41)</div>
-        <div className="muted" style={{fontSize:12.5,marginBottom:10}}>採用データは物理削除しません（void / archived / cancelled で無効化）。個人情報保護の削除要求には<b>匿名化</b>で対応し、選考の統計・監査記録は保持します。</div>
-        <div className="notebox info"><Sym i="info"/><div>匿名化は応募者詳細の「その他の操作」から実行します。氏名・連絡先を不可逆にマスクします。</div></div>
-      </div>
-    </div>
-  );
-}
-
-/* 通知センター (§76) */
-function NotifPanel({go, dispatch, onClose}){
-  const unread=NOTIFICATIONS.filter(n=>!n.read).length;
-  return (
-    <div className="notif" onClick={e=>e.stopPropagation()}>
-      <div style={{display:'flex',alignItems:'center',gap:8,padding:'12px 14px',borderBottom:'1px solid var(--line)',position:'sticky',top:0,background:'#fff'}}>
-        <b style={{fontSize:14,color:'var(--ink)'}}>通知</b>{unread>0&&<Chip tone="blue" dot={false}>{unread}件未読</Chip>}<span className="link" style={{marginLeft:'auto',fontSize:12}} onClick={()=>dispatch({type:'readAllNotif'})}>すべて既読</span>
-      </div>
-      {NOTIFICATIONS.slice().sort((a,b)=>new Date(b.at)-new Date(a.at)).map(n=>(
-        <div key={n.id} className={`nrow ${n.read?'':'unread'}`} onClick={()=>{dispatch({type:'readNotif',id:n.id});onClose();go('detail',n.appId);}}>
-          <div style={{width:30,height:30,borderRadius:8,background:'var(--bg)',display:'grid',placeItems:'center',flex:'none'}}><Sym i={n.icon} s={{fontSize:16,color:n.type==='失敗'?'var(--red)':n.type==='期限'?'var(--amber)':'var(--blue)'}}/></div>
-          <div style={{flex:1}}><div style={{fontSize:12.5,color:'var(--ink)',fontWeight:n.read?500:600}}>{n.text}</div><div style={{fontSize:11,color:'var(--ink3)',marginTop:2}}>{n.type} · {rel(n.at)}</div></div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-/* ---------- Cluster 5: 公開 応募フォーム（別リンク #apply） ---------- */
-function ApplyForm({dispatch, go}){
-  const [pos,setPos]=useState(''),[name,setName]=useState(''),[kana,setKana]=useState(''),[email,setEmail]=useState(''),[phone,setPhone]=useState('');
-  const [pref,setPref]=useState('東京都'),[city,setCity]=useState(''),[grade,setGrade]=useState(''),[activity,setActivity]=useState(''),[motive,setMotive]=useState(''),[preq,setPreq]=useState('');
-  const [submitted,setSubmitted]=useState(false),[code,setCode]=useState('');
-  const canSend=name.trim()&&email.trim()&&pos.trim()&&motive.trim();
-  const submit=()=>dispatch({type:'createApplicant',payload:{name,kana,email,phone,pref,position:pos,source:'FORM',owner:'r1',memo:`【志望動機】${motive}${activity?`\n【現在の活動】${activity}`:''}${preq?`\n【事前質問】${preq}`:''}`,tags:['新規','フォーム']},onDone:id=>{setCode(findApp(id).code);setSubmitted(true);window.scrollTo(0,0);}});
-  const bg={minHeight:'100vh',background:'radial-gradient(60% 40% at 15% 5%,#e7edfb 0%,rgba(231,237,251,0) 60%),radial-gradient(50% 40% at 90% 8%,#eef1fd 0%,rgba(238,241,253,0) 60%),linear-gradient(180deg,#f7f9fe,#eef2fb)',padding:'0 20px 60px'};
-  const topbar=(<div style={{maxWidth:720,margin:'0 auto',display:'flex',alignItems:'center',padding:'20px 0'}}><div className="brand" style={{padding:0}}><div className="lg"><Sym i="hub"/></div><div><div className="bt" style={{color:'var(--ink)'}}>connec+a</div><div style={{fontSize:11,color:'var(--ink3)'}}>採用エントリー</div></div></div><div style={{flex:1}}/><span className="link" style={{fontSize:12}} onClick={()=>go('dashboard')}>管理画面へ（プレビュー）</span></div>);
-  if(submitted) return (
-    <div style={bg}>{topbar}
-      <div style={{maxWidth:560,margin:'40px auto 0'}} className="card pad">
-        <div style={{textAlign:'center',padding:'20px 10px'}}>
-          <div style={{width:64,height:64,borderRadius:'50%',background:'var(--green-soft)',display:'grid',placeItems:'center',margin:'0 auto 16px'}}><Sym i="check" s={{fontSize:34,color:'var(--green)'}}/></div>
-          <h2 style={{fontSize:20,fontWeight:800,color:'var(--ink)',margin:'0 0 8px'}}>エントリーを受け付けました</h2>
-          <div style={{fontSize:13.5,color:'var(--ink2)',lineHeight:1.7}}>{name} 様、ご応募ありがとうございます。<br/>受付番号 <b className="mono">#{code}</b><br/>確認メールをお送りしました。担当者より数日以内にご連絡します。</div>
-          <div className="notebox info" style={{marginTop:18,textAlign:'left'}}><Sym i="info"/><div>この応募は管理側の「応募者一覧」に新規追加され、選考タイムラインが自動で開始します（応募受付 → 自動受付メール §53）。</div></div>
-        </div>
-      </div>
-    </div>
-  );
-  return (
-    <div style={bg}>{topbar}
-      <div style={{maxWidth:720,margin:'0 auto'}}>
-        <div style={{textAlign:'center',margin:'8px 0 22px'}}>
-          <h1 style={{fontSize:26,fontWeight:800,color:'var(--ink)',margin:'0 0 6px'}}>connec+a に応募する</h1>
-          <div style={{fontSize:13.5,color:'var(--ink3)'}}>一緒に活動する仲間を募集しています。まずは気軽にエントリーしてください。</div>
-        </div>
-        <div className="card pad">
-          <div style={{fontSize:12,fontWeight:700,color:'var(--ink4)',marginBottom:10}}>希望ポジション</div>
-          <div className="frow"><div className="selrow">{POSITIONS.map(p=>(<span key={p} className={`selchip ${pos===p?'on':''}`} onClick={()=>setPos(p)}>{p}</span>))}</div></div>
-          <hr className="hr"/>
-          <div style={{fontSize:12,fontWeight:700,color:'var(--ink4)',margin:'2px 0 10px'}}>基本情報</div>
-          <div className="grid2"><div className="frow"><div className="flbl">お名前 <span className="req">必須</span></div><input className="field" value={name} onChange={e=>setName(e.target.value)} placeholder="山田 太郎"/></div><div className="frow"><div className="flbl">ふりがな</div><input className="field" value={kana} onChange={e=>setKana(e.target.value)} placeholder="やまだ たろう"/></div></div>
-          <div className="grid2"><div className="frow"><div className="flbl">メール <span className="req">必須</span></div><input className="field" value={email} onChange={e=>setEmail(e.target.value)} placeholder="example@example.com"/></div><div className="frow"><div className="flbl">電話</div><input className="field" value={phone} onChange={e=>setPhone(e.target.value)} placeholder="090-0000-0000"/></div></div>
-          <div className="grid2"><div className="frow"><div className="flbl">都道府県</div><input className="field" value={pref} onChange={e=>setPref(e.target.value)}/></div><div className="frow"><div className="flbl">市区町村（任意）</div><input className="field" value={city} onChange={e=>setCity(e.target.value)} placeholder="渋谷区"/></div></div>
-          <div className="frow"><div className="flbl">学年・所属（任意）</div><input className="field" value={grade} onChange={e=>setGrade(e.target.value)} placeholder="例: 大学2年 / 社会人"/></div>
-          <hr className="hr"/>
-          <div style={{fontSize:12,fontWeight:700,color:'var(--ink4)',margin:'2px 0 10px'}}>プロフィール</div>
-          <div className="frow"><div className="flbl">現在の活動（任意）</div><textarea className="field" value={activity} onChange={e=>setActivity(e.target.value)} style={{minHeight:56,resize:'vertical',fontFamily:'var(--s)'}} placeholder="サークル・アルバイト・これまでの経験など"/></div>
-          <div className="frow"><div className="flbl">志望動機 <span className="req">必須</span></div><textarea className="field" value={motive} onChange={e=>setMotive(e.target.value)} style={{minHeight:96,resize:'vertical',fontFamily:'var(--s)'}} placeholder="connec+aで実現したいこと・興味を持った理由など"/></div>
-          <div className="frow"><div className="flbl">事前に聞きたいこと（任意）</div><textarea className="field" value={preq} onChange={e=>setPreq(e.target.value)} style={{minHeight:56,resize:'vertical',fontFamily:'var(--s)'}}/></div>
-          <button className="btn prim" style={{width:'100%',justifyContent:'center',padding:'12px',fontSize:14,marginTop:6}} disabled={!canSend} onClick={submit}><Sym i="send" s={{fontSize:17}}/>エントリーする</button>
-          <div className="fhint" style={{textAlign:'center',marginTop:10}}>送信内容は選考のためにのみ利用します。</div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ---------- App shell ---------- */
-function App(){
-  const [route,setRoute]=useState(((location.hash||'').replace('#','')==='apply')?{view:'apply',id:null}:{view:'dashboard',id:null});
-  const [query,setQuery]=useState('');
-  const [audit,setAudit]=useState(auditSeed);
-  const [notifOpen,setNotifOpen]=useState(false);
-  const [viewerRole,setViewerRole]=useState('radmin');
-  const [,force]=useState(0);
-  const go=useCallback((view,id=null)=>{setRoute({view,id});window.scrollTo(0,0);},[]);
-  const dispatch=useCallback((cmd)=>{
-    if(cmd.type==='createActivity'){const p=cmd.payload;
-      if(cmd.editId){const a=activities.find(x=>x.id===cmd.editId);if(a)Object.assign(a,{type:p.type,name:p.name,itype:p.itype,owner:p.owner,plannedAt:p.plannedAt,notes:p.notes,rec:p.willRec,interviewers:p.interviewers,mode:p.mode,url:p.url,completionMode:p.completionMode,depId:p.dep});setAudit(a2=>[{id:nid('al'),actor:'hr',action:'EDIT_ACTIVITY',entity:cmd.appId,at:iso(0),reason:`${p.name} を編集`},...a2]);}
-      else{const id=nid('ac');activities.push({id,applicationId:cmd.appId,type:p.type,name:p.name,itype:p.itype,status:'scheduled',plannedAt:p.plannedAt,completedAt:null,seq:listBy(activities,cmd.appId).length+1,createdBy:'hr',owner:p.owner,notes:p.notes,rec:p.willRec,interviewers:p.interviewers,mode:p.mode,url:p.url,completionMode:p.completionMode,depId:p.dep});(p.sessions||[]).forEach(topic=>sessions.push({id:nid('se'),activityId:id,topic,status:'planned',completedAt:null}));setAudit(a=>[{id:nid('al'),actor:'hr',action:'CREATE_ACTIVITY',entity:cmd.appId,at:iso(0),reason:`${p.name} を作成`},...a]);}}
-    if(cmd.type==='saveEval'){evals.push({id:nid('ev'),applicationId:cmd.appId,activityId:cmd.activityId,by:ROOM_ME,rec:cmd.rec,score:cmd.score,comment:cmd.comment,at:iso(0)});setAudit(a=>[{id:nid('al'),actor:ROOM_ME,action:'EVAL_SUBMIT',entity:cmd.appId,at:iso(0),reason:`面接評価 ${recLabel(cmd.rec)}`},...a]);}
-    if(cmd.type==='completeInterview'){const a2=activities.find(x=>x.id===cmd.activityId);if(a2){a2.status='completed';a2.completedAt=iso(0);}setAudit(a=>[{id:nid('al'),actor:ROOM_ME,action:'INTERVIEW_COMPLETE',entity:a2?a2.applicationId:'',at:iso(0),reason:`${a2?a2.name:'面接'} を完了`},...a]);}
-    if(cmd.type==='sendComm'){comms.push({id:nid('cm'),applicationId:cmd.appId,channel:'email',dir:'out',subject:cmd.subject,status:cmd.when==='schedule'?'scheduled':'sent',at:iso(cmd.when==='schedule'?(parseInt(cmd.delay)||5)*60000:0),autoId:null});setAudit(a=>[{id:nid('al'),actor:'hr',action:'SEND_COMM',entity:cmd.appId,at:iso(0),reason:`メール「${cmd.subject}」`},...a]);}
-    if(cmd.type==='makeDecision'){const prev=latestDecision(cmd.appId);decisions.push({id:nid('de'),applicationId:cmd.appId,type:cmd.dtype,by:'hr',at:iso(0),reason:cmd.reason,comment:'',supersedes:prev?prev.id:null});const app=findApp(cmd.appId);if(cmd.dtype==='hire')app.lifecycle='post_decision';else if(cmd.dtype==='reject')app.lifecycle='closed';else if(cmd.dtype==='reopen')app.lifecycle='active';setAudit(a=>[{id:nid('al'),actor:'hr',action:cmd.dtype==='reopen'?'DECISION_REVERSE':'MAKE_DECISION',entity:cmd.appId,at:iso(0),reason:`${decLabel(cmd.dtype)} — ${cmd.reason}`},...a]);}
-    if(cmd.type==='createApplicant'){const p=cmd.payload;let apId=cmd.existingApplicantId;if(!apId){apId=nid('ap');applicants.push({id:apId,name:p.name,kana:p.kana,email:p.email,phone:p.phone,pref:p.pref,birth:p.birth,color:'#3a5bd9'});}const appId=nid('app');applications.push({id:appId,applicantId:apId,position:p.position,code:'A0'+(applications.length+20),source:p.source,owner:p.owner,lifecycle:p.source==='DIRECT'?'post_decision':'active',createdAt:iso(0),templateVer:'tmpl_std_v3',memo:p.memo,tags:p.tags||[]});activities.push({id:nid('ac'),applicationId:appId,type:'DOCUMENT_REVIEW',name:'応募受付',status:'completed',plannedAt:iso(0),completedAt:iso(0),seq:1,createdBy:'hr',owner:p.owner,notes:p.source==='DIRECT'?'直接採用として登録':'手動登録',rec:false});appRoles.push({id:nid('rl'),applicationId:appId,role:p.position,reln:p.source==='DIRECT'?'accepted':'primary'});if(p.source==='DIRECT')decisions.push({id:nid('de'),applicationId:appId,type:'hire',by:'hr',at:iso(0),reason:p.directReason||'直接採用',comment:'',supersedes:null});setAudit(a=>[{id:nid('al'),actor:'hr',action:p.source==='DIRECT'?'DIRECT_HIRE':'CREATE_APPLICATION',entity:appId,at:iso(0),reason:`${p.name} / ${p.position}（${srcLabel(p.source)}）`},...a]);cmd.onDone&&cmd.onDone(appId);}
-    if(cmd.type==='changeActivityStatus'){const a=activities.find(x=>x.id===cmd.activityId);if(a){a.status=cmd.status;if(DONE_ST.includes(cmd.status)||cmd.status==='no_show'||cmd.status.indexOf('cancelled')===0)a.completedAt=a.completedAt||iso(0);if(cmd.reason){if(cmd.status==='skipped'||cmd.status==='not_required')a.skipReason=cmd.reason;else a.cancelReason=cmd.reason;}setAudit(al=>[{id:nid('al'),actor:'hr',action:'ACTIVITY_STATUS',entity:a.applicationId,at:iso(0),reason:`${a.name}: ${AST[cmd.status]?.l||cmd.status}${cmd.reason?` — ${cmd.reason}`:''}`},...al]);}}
-    if(cmd.type==='rescheduleActivity'){const a=activities.find(x=>x.id===cmd.activityId);if(a){a.plannedAt=cmd.plannedAt;a.status='scheduled';setAudit(al=>[{id:nid('al'),actor:'hr',action:'RESCHEDULE',entity:a.applicationId,at:iso(0),reason:`${a.name} を ${fmt(cmd.plannedAt)} に再調整`},...al]);}}
-    if(cmd.type==='createTask'){tasks.push({id:nid('tk'),applicationId:cmd.appId,title:cmd.title,assignee:cmd.assignee,dueAt:cmd.dueAt,status:'open',kind:cmd.kind||'todo',prio:cmd.prio||'中'});setAudit(a=>[{id:nid('al'),actor:'hr',action:'CREATE_TASK',entity:cmd.appId,at:iso(0),reason:`タスク「${cmd.title}」`},...a]);}
-    if(cmd.type==='completeTask'){const t=tasks.find(x=>x.id===cmd.taskId);if(t)t.status='done';}
-    if(cmd.type==='pauseApp'){const app=findApp(cmd.appId);if(app){app.lifecycle='paused';app.pause={at:iso(0),by:'hr',holdReason:cmd.reason,resumePlannedAt:cmd.resumeAt};setAudit(a=>[{id:nid('al'),actor:'hr',action:'PAUSE',entity:cmd.appId,at:iso(0),reason:`停止: ${cmd.reason}`},...a]);}}
-    if(cmd.type==='resumeApp'){const app=findApp(cmd.appId);if(app){app.lifecycle='active';app.pause=null;setAudit(a=>[{id:nid('al'),actor:'hr',action:'RESUME',entity:cmd.appId,at:iso(0),reason:'選考を再開'},...a]);}}
-    if(cmd.type==='addRole'){appRoles.push({id:nid('rl'),applicationId:cmd.appId,role:cmd.role,reln:cmd.reln||'candidate'});setAudit(a=>[{id:nid('al'),actor:'hr',action:'ADD_ROLE',entity:cmd.appId,at:iso(0),reason:`ロール追加: ${cmd.role}`},...a]);}
-    if(cmd.type==='setRoleReln'){const r=appRoles.find(x=>x.id===cmd.roleId);if(r)r.reln=cmd.reln;}
-    if(cmd.type==='changeRole'){const cur=listBy(appRoles,cmd.appId).find(r=>r.reln==='primary');if(cur)cur.reln='rejected';appRoles.push({id:nid('rl'),applicationId:cmd.appId,role:cmd.to,reln:'primary'});const app=findApp(cmd.appId);if(app)app.position=cmd.to;roleHistory.push({id:nid('rh'),applicationId:cmd.appId,from:cmd.from,to:cmd.to,at:iso(0),by:'hr',reason:cmd.reason,consent:cmd.consent});setAudit(a=>[{id:nid('al'),actor:'hr',action:'ROLE_CHANGE',entity:cmd.appId,at:iso(0),reason:`${cmd.from} → ${cmd.to}`},...a]);}
-    if(cmd.type==='confirmJoinInfo'){const app=findApp(cmd.appId);if(app){app.postHire={...(app.postHire||{}),infoConfirmed:true,state:'joining_process'};setAudit(a=>[{id:nid('al'),actor:'hr',action:'JOIN_INFO',entity:cmd.appId,at:iso(0),reason:'加入情報を確認'},...a]);}}
-    if(cmd.type==='confirmMembership'){const app=findApp(cmd.appId);if(app){app.postHire={...(app.postHire||{}),membershipConfirmed:true,state:'confirmed'};setAudit(a=>[{id:nid('al'),actor:'hr',action:'MEMBERSHIP',entity:cmd.appId,at:iso(0),reason:'加入を確定'},...a]);}}
-    if(cmd.type==='createMember'){const app=findApp(cmd.appId);if(app){const ap=findAp(app.applicantId);const existing=members.find(m=>m.applicantId===app.applicantId);if(!existing){members.push({id:nid('mb'),applicantId:app.applicantId,name:ap.name,role:app.position,joinedAt:iso(0),applicationId:app.id});setAudit(a=>[{id:nid('al'),actor:'hr',action:'MEMBER_CREATE',entity:cmd.appId,at:iso(0),reason:`${ap.name} をメンバー作成`},...a]);}app.postHire={...(app.postHire||{}),memberId:'created',state:'joined'};}}
-    if(cmd.type==='mergeApplicants'){const {primaryId,mergeId}=cmd;applications.forEach(a=>{if(a.applicantId===mergeId)a.applicantId=primaryId;if(a.applicantId===primaryId)delete a.dupOf;});const m=findAp(mergeId);if(m)m.mergedInto=primaryId;const p=findAp(primaryId);setAudit(a=>[{id:nid('al'),actor:'hr',action:'MERGE',entity:primaryId,at:iso(0),reason:`統合: 主=${p?p.name:primaryId}（被統合レコードは全保持）`},...a]);}
-    if(cmd.type==='keepSeparate'){const app=findApp(cmd.appId);if(app)delete app.dupOf;setAudit(a=>[{id:nid('al'),actor:'hr',action:'MERGE',entity:cmd.appId,at:iso(0),reason:'別人として維持'},...a]);}
-    if(cmd.type==='toggleAutomation'){const a=AUTOMATIONS.find(x=>x.id===cmd.id);if(a)a.enabled=!a.enabled;}
-    if(cmd.type==='toggleApproval'){const a=AUTOMATIONS.find(x=>x.id===cmd.id);if(a)a.approval=!a.approval;}
-    if(cmd.type==='killAll'){autoState.stopped=!autoState.stopped;setAudit(al=>[{id:nid('al'),actor:'hr',action:'KILL_SWITCH',entity:'',at:iso(0),reason:autoState.stopped?'全自動送信を停止':'自動送信を再開'},...al]);}
-    if(cmd.type==='cancelScheduled'){const c=comms.find(x=>x.id===cmd.commId);if(c){c.status='cancelled';setAudit(al=>[{id:nid('al'),actor:'hr',action:'CANCEL_SEND',entity:c.applicationId,at:iso(0),reason:`予約送信を取消「${c.subject}」`},...al]);}}
-    if(cmd.type==='readNotif'){const n=NOTIFICATIONS.find(x=>x.id===cmd.id);if(n)n.read=true;}
-    if(cmd.type==='readAllNotif'){NOTIFICATIONS.forEach(n=>n.read=true);}
-    if(cmd.type==='bulkAssign'){cmd.ids.forEach(id=>{const a=findApp(id);if(a)a.owner=cmd.owner;});setAudit(al=>[{id:nid('al'),actor:'hr',action:'BULK',entity:'',at:iso(0),reason:`${cmd.ids.length}件の担当を${uname(cmd.owner)}へ`},...al]);}
-    if(cmd.type==='bulkTag'){cmd.ids.forEach(id=>{const a=findApp(id);if(a&&!(a.tags||[]).includes(cmd.tag))a.tags=[...(a.tags||[]),cmd.tag];});setAudit(al=>[{id:nid('al'),actor:'hr',action:'BULK',entity:'',at:iso(0),reason:`${cmd.ids.length}件にタグ「${cmd.tag}」`},...al]);}
-    if(cmd.type==='bulkRemind'){cmd.ids.forEach(id=>comms.push({id:nid('cm'),applicationId:id,channel:'email',dir:'out',subject:'リマインド',status:'scheduled',at:iso(5*60000),autoId:'au_bulk'}));setAudit(al=>[{id:nid('al'),actor:'hr',action:'BULK',entity:'',at:iso(0),reason:`${cmd.ids.length}件へリマインド予約`},...al]);}
-    if(cmd.type==='setTiming'){ORG_SETTINGS.memberCreationTiming=cmd.value;setAudit(al=>[{id:nid('al'),actor:'hr',action:'SETTINGS',entity:'',at:iso(0),reason:`Member作成タイミングを${cmd.value}に変更`},...al]);}
-    if(cmd.type==='anonymize'){const ap=findAp(cmd.applicantId);if(ap){ap.name='（匿名化済み）';ap.email='';ap.phone='';ap.kana='';ap.anon=true;}setAudit(al=>[{id:nid('al'),actor:'hr',action:'ANON',entity:cmd.applicantId,at:iso(0),reason:'個人情報を匿名化 (§41)'},...al]);}
-    force(x=>x+1);
-  },[]);
-  const nav=[{sec:'運用'},{k:'dashboard',l:'ダッシュボード',i:'space_dashboard'},{k:'list',l:'応募者一覧',i:'groups',ct:applications.filter(a=>!['closed','archived'].includes(a.lifecycle)).length},{k:'new',l:'応募者を追加',i:'person_add'},{k:'positions',l:'募集ポジション',i:'work'},{sec:'仕組み'},{k:'flowtmpl',l:'選考フローテンプレート',i:'account_tree'},{k:'automation',l:'自動化・通知',i:'smart_toy'},{k:'apply',l:'申込フォーム（公開）',i:'assignment_ind'},{k:'settings',l:'設定',i:'settings'}];
-  const titles={dashboard:['ダッシュボード','いま採用チームが対応すべきことを一望'],list:['応募者一覧','人物と応募機会を分離して管理 (§5)'],detail:['',''],'new':['',''],automation:['自動化・通知','独立したAutomation Engine (§52-60)'],positions:['募集ポジション','標準選考ルートを管理 (§86)'],flowtmpl:['選考フローテンプレート','推奨ルート・Version管理 (§8/9)'],settings:['設定','権限・Member作成・データ保持 (§35/68-71/41)']};
-  const [tt,ts]=titles[route.view]||['',''];
-  const curApp=route.view==='detail'?findApp(route.id):null;
-  const curAp=curApp?findAp(curApp.applicantId):null;
-  const roleLabel={super:'Super Admin',radmin:'Recruitment Admin',recruiter:'Recruiter',interviewer:'Interviewer',viewer:'Viewer'}[viewerRole];
-  if(route.view==='room') return <InterviewRoom actId={route.id} go={go} dispatch={dispatch}/>;
-  if(route.view==='apply') return <ApplyForm dispatch={dispatch} go={go}/>;
-  return (
-    <div className="shell">
-      <aside className="side">
-        <div className="brand"><div className="lg"><Sym i="hub"/></div><div className="bt">Recruit</div></div>
-        {nav.map((n,i)=>n.sec?<div key={i} className="navsec">{n.sec}</div>:<div key={n.k} className={`navi ${route.view===n.k||(n.k==='list'&&route.view==='detail')?'on':''}`} onClick={()=>go(n.k)}><Sym i={n.i}/>{n.l}{n.ct!=null&&<span className="ct">{n.ct}</span>}</div>)}
-        <div className="sidefoot"><b>設計プロトタイプ</b><br/>固定ステージ型ATSではなく、実際の採用プロセスをそのまま記録する Recruitment Operations System。admin の新リンク案。</div>
-      </aside>
-      <main className="main">
-        <div className="topbar">
-          {route.view==='detail'&&curApp?
-            <div className="crumb"><span className="link" onClick={()=>go('list')}>応募者一覧</span><Sym i="chevron_right"/><b>{curAp.name}</b><Sym i="chevron_right"/><span>{curApp.position}（Application #{curApp.code}）</span></div>
-            :<div className="crumb"><Sym i="tune" s={{color:'var(--ink4)'}}/><span>採用オペレーション</span></div>}
-          <div style={{flex:1}}/>
-          <div className="search"><Sym i="search"/><input placeholder="応募者・メモを検索…" value={query} onChange={e=>{setQuery(e.target.value);if(route.view!=='list'&&route.view!=='detail')go('list');}}/></div>
-          <div className="iconbtn" onClick={()=>setNotifOpen(v=>!v)}><Sym i="notifications"/>{NOTIFICATIONS.filter(n=>!n.read).length>0&&<span className="badge">{NOTIFICATIONS.filter(n=>!n.read).length}</span>}</div>
-          <div className="me" onClick={()=>go('settings')} title="設定でロールを切替"><Avatar ap={U.hr} size={32} photo/><div className="mn"><small>{roleLabel}</small><b>{U.hr.name.split(' / ')[1]||U.hr.name}</b></div><Sym i="expand_more" s={{fontSize:18,color:'var(--ink4)'}}/></div>
-          {notifOpen&&<div style={{position:'fixed',inset:0,zIndex:59}} onClick={()=>setNotifOpen(false)}/>}
-          {notifOpen&&<NotifPanel go={go} dispatch={dispatch} onClose={()=>setNotifOpen(false)}/>}
-        </div>
-        <div className="page">
-          {route.view!=='detail'&&(tt||ts)&&<div className="ph"><h1>{tt}</h1><span className="psub">{ts}</span></div>}
-          {route.view==='dashboard'&&<Dashboard go={go} audit={audit}/>}
-          {route.view==='list'&&<ListView go={go} query={query} dispatch={dispatch}/>}
-          {route.view==='new'&&<NewApplicant go={go} dispatch={dispatch}/>}
-          {route.view==='detail'&&<Detail appId={route.id} go={go} dispatch={dispatch} viewerRole={viewerRole}/>}
-          {route.view==='automation'&&<Automation dispatch={dispatch} go={go}/>}
-          {route.view==='positions'&&<PositionsView/>}
-          {route.view==='flowtmpl'&&<FlowTemplatesView/>}
-          {route.view==='settings'&&<SettingsView viewerRole={viewerRole} setViewerRole={setViewerRole} dispatch={dispatch}/>}
-        </div>
-      </main>
-    </div>
-  );
-}
-
-ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
-</script>
+<header class="topbar" id="chrome" style="display:none">
+  <div class="tb-in">
+    <a class="brand" href="#home">connec+a<small>採用管理</small></a>
+    <nav class="tabs" id="navtabs">
+      <a href="#home" data-r="home">ダッシュボード</a>
+      <a href="#list" data-r="list">候補者</a>
+      <a href="#issue" data-r="issue">面談なし採用</a>
+      <a href="#mail" data-r="mail">メール・設定</a>
+    </nav>
+    <div class="tb-user"><span id="uname"></span><button id="logoutBtn">ログアウト</button></div>
+  </div>
+</header>
+
+<div id="app"><div class="loading"><div class="ring"></div>読み込んでいます</div></div>
+<div class="toast" id="toast"></div>
 
 <script>
-(function(){
-  var EL=document.getElementById('appsrc'); var SRC=EL?(EL.textContent||''):''; if(!SRC)return;
-  var BABEL='https://unpkg.com/@babel/standalone@7.25.6/babel.min.js';
-  function exec(code){var s=document.createElement('script');s.textContent=code;document.body.appendChild(s);}
-  function compile(){
-    function run(){try{var code=window.Babel.transform(SRC,{presets:['react'],sourceType:'script'}).code;exec(code);}catch(e){if(window.console)console.error('[boot] compile failed',e);}}
-    if(window.Babel){run();return;}
-    var s=document.createElement('script');s.src=BABEL;s.crossOrigin='anonymous';s.onload=run;s.onerror=function(){if(window.console)console.error('[boot] babel load failed');};document.head.appendChild(s);
+var GAS='https://script.google.com/macros/s/AKfycbxLs1eXm39MHM0lSioBf9ghVFL8p8fIhIdYJpBBweBTCLOFDqWclPhoF66c0FgfrbHg/exec';
+var SKEY='recruitSession-v2';
+var S=null; try{S=JSON.parse(localStorage.getItem(SKEY)||'null')}catch(e){}
+var CACHE={bundle:null,bundleAt:0,templates:null};
+
+function el(id){return document.getElementById(id)}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function toast(m){var t=el('toast');t.textContent=m;t.classList.add('on');clearTimeout(t._h);t._h=setTimeout(function(){t.classList.remove('on')},2600)}
+function fmtDt(v){if(!v)return '';var d=new Date(v);if(isNaN(d.getTime()))return String(v);return (d.getMonth()+1)+'/'+d.getDate()+' '+('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2)}
+function fmtD(v){if(!v)return '';var d=new Date(v);if(isNaN(d.getTime()))return String(v);return d.getFullYear()+'/'+(d.getMonth()+1)+'/'+d.getDate()}
+function opts(arr,sel,ph){return '<option value="">'+esc(ph||'選択してください')+'</option>'+ (arr||[]).map(function(v){var val=typeof v==='string'?v:v.id,lab=typeof v==='string'?v:v.name;return '<option value="'+esc(val)+'"'+(String(sel)===String(val)?' selected':'')+'>'+esc(lab)+'</option>'}).join('')}
+function copyText(v){try{navigator.clipboard.writeText(v).then(function(){toast('コピーしました')})}catch(e){var i=document.createElement('input');i.value=v;document.body.appendChild(i);i.select();document.execCommand('copy');i.remove();toast('コピーしました')}}
+window.__copy=copyText;
+
+async function apiGet(action,params){
+  var q=GAS+'?action='+encodeURIComponent(action)+'&params='+encodeURIComponent(JSON.stringify(params||{}))+'&memberId='+encodeURIComponent(S?S.memberId:'')+'&token='+encodeURIComponent(S?S.token:'');
+  var r=await fetch(q);
+  if(!r.ok)throw new Error('HTTP '+r.status);
+  var j=await r.json();
+  if(j&&j.unauthorized){logout();throw new Error('セッションの有効期限が切れました。もう一度ログインしてください')}
+  if(!j.ok)throw new Error(j.error||'読み込みに失敗しました');
+  return j.data;
+}
+async function apiPost(action,payload){
+  var r=await fetch(GAS,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:action,payload:payload||{},memberId:S?S.memberId:'',token:S?S.token:''})});
+  if(!r.ok)throw new Error('HTTP '+r.status);
+  var j=await r.json();
+  if(j&&j.unauthorized){logout();throw new Error('セッションの有効期限が切れました。もう一度ログインしてください')}
+  if(!j.ok)throw new Error(j.error||'処理に失敗しました');
+  return j.data;
+}
+function logout(){S=null;localStorage.removeItem(SKEY);CACHE={bundle:null,bundleAt:0,templates:null};location.hash='#login';route()}
+
+async function loadBundle(force){
+  if(!force&&CACHE.bundle&&Date.now()-CACHE.bundleAt<45000)return CACHE.bundle;
+  var b=await apiGet('getRecruitConsoleBundle',{});
+  CACHE.bundle=b;CACHE.bundleAt=Date.now();
+  return b;
+}
+
+/* ============ 状態表示 ============ */
+function stateChips(a){
+  var out=[];
+  var rs=a.resultStatus||a['resultStatus']||'active';
+  var phase=a.currentPhase||'',task=a.currentTask||'',na=a.nextActor||'';
+  if(rs==='registered')out.push('<span class="chip g">登録完了</span>');
+  else if(rs==='rejected')out.push('<span class="chip r">不採用</span>');
+  else if(rs==='withdrawn')out.push('<span class="chip">辞退</span>');
+  else{
+    out.push('<span class="chip b">'+esc(phase+(task?' · '+task:''))+'</span>');
+    if(na==='admin')out.push('<span class="chip y">運営の対応待ち</span>');
+    else if(na==='candidate')out.push('<span class="chip">ご本人待ち</span>');
+    else if(na==='guardian')out.push('<span class="chip">保護者待ち</span>');
   }
-  function ready(){return window.React&&window.ReactDOM;}
-  if(ready())compile(); else {var t=0,iv=setInterval(function(){if(ready()||++t>200){clearInterval(iv);compile();}},20);}
-})();
+  if((a.source||'')==='direct_entry')out.push('<span class="chip dir">面談なし採用</span>');
+  return out.join('');
+}
+function needsDeptWarning(a){
+  return (a.currentPhase==='登録'&&a.currentTask==='承認待ち'&&!(a.finalDepartmentId||''));
+}
+
+/* ============ router ============ */
+function route(){
+  var h=(location.hash||'#home').replace(/^#/,'');
+  var m=h.split('?')[0],q=new URLSearchParams(h.indexOf('?')>=0?h.slice(h.indexOf('?')+1):'');
+  if(!S&&m!=='login'){location.hash='#login';return}
+  if(S&&m==='login'){location.hash='#home';return}
+  el('chrome').style.display=S?'':'none';
+  if(S){el('uname').textContent=(S.name||'')+(S.role?'（'+S.role+'）':'');
+    document.querySelectorAll('#navtabs a').forEach(function(a){a.classList.toggle('on',a.dataset.r===m)})}
+  if(m==='login')vLogin();
+  else if(m==='list')vList();
+  else if(m==='issue')vIssue();
+  else if(m==='mail')vMail();
+  else if(m==='detail')vDetail(q.get('id')||'');
+  else vHome();
+}
+window.addEventListener('hashchange',route);
+el('logoutBtn')&&document.addEventListener('click',function(e){if(e.target&&e.target.id==='logoutBtn')logout()});
+
+function shell(html){el('app').innerHTML='<main class="wrap reveal" id="rv">'+html+'</main>';requestAnimationFrame(function(){var rv=el('rv');if(rv)rv.classList.add('on')})}
+function spin(msg){el('app').innerHTML='<div class="loading"><div class="ring"></div>'+esc(msg||'読み込んでいます')+'</div>'}
+function errView(e,retry){shell('<p class="eyebrow">Error</p><h1 class="pg">読み込みに失敗しました</h1><p class="pg-lede">'+esc(String(e&&e.message||e))+'</p><button class="btn ghost" onclick="'+(retry||'route()')+'">再読み込み</button>')}
+
+/* ============ login ============ */
+function vLogin(){
+  el('app').innerHTML=
+  '<div class="login reveal" id="rv">'+
+    '<div class="mark"><div class="b">connec+a</div><div class="s">採用管理</div></div>'+
+    '<div class="card">'+
+      '<div class="fld"><label>メールアドレス / メンバーコード</label><input type="text" id="l_id" autocomplete="username"></div>'+
+      '<div class="fld"><label>パスワード</label><input type="password" id="l_pw" autocomplete="current-password"></div>'+
+      '<div class="err" id="l_err"></div>'+
+      '<button class="btn" id="l_go" style="width:100%">ログイン</button>'+
+      '<p class="note" style="margin-top:14px">コンソールと同じアカウントでログインできます（マネージャー以上）。</p>'+
+    '</div>'+
+  '</div>';
+  requestAnimationFrame(function(){el('rv').classList.add('on')});
+  function go(){
+    var e=el('l_err');e.classList.remove('on');
+    var id=el('l_id').value.trim(),pw=el('l_pw').value;
+    if(!id||!pw){e.textContent='メールアドレスとパスワードを入力してください';e.classList.add('on');return}
+    el('l_go').disabled=true;el('l_go').textContent='確認しています…';
+    apiPost('authenticate',{identifier:id,password:pw}).then(function(r){
+      if(r&&r.ok===false||!r.token){throw new Error((r&&r.error)||(r&&r.needsPasswordSet?'パスワードが未設定です。コンソールで初回パスワードを設定してください':'ログインに失敗しました'))}
+      var u=r.user||{};
+      S={memberId:(u.member&&u.member.id)||u.memberId||'',token:r.token,name:(u.member&&u.member.name)||'',role:u.highestRole||''};
+      localStorage.setItem(SKEY,JSON.stringify(S));
+      location.hash='#home';route();
+    }).catch(function(ex){
+      el('l_go').disabled=false;el('l_go').textContent='ログイン';
+      e.textContent=String(ex&&ex.message||ex);e.classList.add('on');
+    });
+  }
+  el('l_go').addEventListener('click',go);
+  el('l_pw').addEventListener('keydown',function(ev){if(ev.key==='Enter')go()});
+}
+
+/* ============ dashboard ============ */
+var BUCKETS=[
+  ['todayFirstInterview','本日の一次面談'],['needDateSelect','一次面談の日時選択'],['needFirstInterview','一次面談の実施'],
+  ['needFirstDecision','一次通過の判断'],['needSecondSchedule','二次面談の日程設定'],['needSecondInterview','二次面談の実施'],
+  ['needFinalDecision','合否の判断'],['needRegistration','本登録の承認'],
+];
+function rowHtml(s,extra){
+  return '<div class="rowline" onclick="location.hash=\'#detail?id='+esc(s.id)+'\'">'+
+    '<span class="nm">'+esc(s.name||'（無名）')+'</span><span class="cd">'+esc(s.candidateCode||s.id)+'</span>'+
+    stateChips(s)+(extra||'')+
+    '<span class="meta">'+(s.ageDays!=null?esc(s.ageDays)+'日経過':'')+'</span></div>';
+}
+async function vHome(){
+  spin();
+  var b;try{b=await loadBundle()}catch(e){return errView(e)}
+  var d=b.dashboard||{},c=d.counts||{},bk=d.buckets||{},ex=d.exceptions||[];
+  var appById={};(b.applications||[]).forEach(function(a){appById[a.id]=a});
+  var need='';
+  BUCKETS.forEach(function(def){
+    var arr=bk[def[0]]||[];if(!arr.length)return;
+    need+='<h2 class="sect-h">'+esc(def[1])+'<span class="cnt">'+arr.length+'件</span></h2><div class="sect-rule"></div><div class="card">'+
+      arr.map(function(s){
+        var a=appById[s.id]||s;
+        var warn=(def[0]==='needRegistration'&&needsDeptWarning(a))?'<span class="chip r">部署未定 — 承認が必要</span>':'';
+        return rowHtml(Object.assign({},s,{source:a.source,finalDepartmentId:a.finalDepartmentId}),warn);
+      }).join('')+'</div>';
+  });
+  if(!need)need='<h2 class="sect-h">対応が必要な候補者</h2><div class="sect-rule"></div><div class="card"><div class="empty">今、運営の対応が必要な候補者はいません。手続きは自動で進行しています。</div></div>';
+  var waiting='';
+  [['waitingCandidate','ご本人の入力待ち'],['waitingGuardian','保護者の同意待ち'],['stalled','停滞（追いかけ推奨）']].forEach(function(def){
+    var arr=bk[def[0]]||[];if(!arr.length)return;
+    waiting+='<h2 class="sect-h">'+esc(def[1])+'<span class="cnt">'+arr.length+'件</span></h2><div class="sect-rule"></div><div class="card">'+arr.map(function(s){return rowHtml(s)}).join('')+'</div>';
+  });
+  var exh='';
+  if(ex.length){
+    exh='<h2 class="sect-h">例外・要確認<span class="cnt">'+ex.length+'件</span></h2><div class="sect-rule"></div><div class="card">'+
+      ex.map(function(x){return '<div class="rowline" onclick="location.hash=\'#detail?id='+esc(x.appId)+'\'"><span class="nm">'+esc(x.name||x.appId)+'</span><span class="chip r">'+esc(x.title||x.exceptionType)+'</span><span class="meta">'+esc(fmtDt(x.createdAt))+'</span></div>'}).join('')+'</div>';
+  }
+  shell(
+    '<p class="eyebrow">Recruitment Operations</p><h1 class="pg">採用ダッシュボード</h1>'+
+    '<p class="pg-lede">応募から構成員登録までを自動で進め、判断が必要なところだけお知らせします。<button class="btn ghost sm" style="margin-left:14px" onclick="CACHE.bundleAt=0;route()">最新に更新</button></p>'+
+    '<div class="stats">'+
+      '<div class="stat hot"><div class="n">'+(c.needAdmin||0)+'</div><div class="l">要対応</div></div>'+
+      '<div class="stat"><div class="n">'+(c.active||0)+'</div><div class="l">進行中</div></div>'+
+      '<div class="stat"><div class="n">'+(c.waitingCandidate||0)+'</div><div class="l">ご本人待ち</div></div>'+
+      '<div class="stat"><div class="n">'+(c.waitingGuardian||0)+'</div><div class="l">保護者待ち</div></div>'+
+      '<div class="stat'+(c.stalled?' warn':'')+'"><div class="n">'+(c.stalled||0)+'</div><div class="l">停滞</div></div>'+
+      '<div class="stat"><div class="n">'+(c.registered||0)+'</div><div class="l">登録完了</div></div>'+
+    '</div>'+need+waiting+exh);
+}
+
+/* ============ list ============ */
+var LIST_FILTER={ph:'',q:''};
+async function vList(){
+  spin();
+  var b;try{b=await loadBundle()}catch(e){return errView(e)}
+  var apps=b.applications||[];
+  function render(){
+    var f=apps.filter(function(a){
+      if(LIST_FILTER.ph==='direct'&&a.source!=='direct_entry')return false;
+      if(LIST_FILTER.ph&&LIST_FILTER.ph!=='direct'&&a.currentPhase!==LIST_FILTER.ph)return false;
+      if(LIST_FILTER.q){var q=LIST_FILTER.q.toLowerCase();if(String(a.name||'').toLowerCase().indexOf(q)<0&&String(a.candidateCode||'').toLowerCase().indexOf(q)<0&&String(a.email||'').toLowerCase().indexOf(q)<0)return false}
+      return true;
+    });
+    el('listbody').innerHTML=f.length?f.map(function(a){
+      var warn=needsDeptWarning(a)?'<span class="chip r">部署未定</span>':'';
+      var dept=a.finalDepartmentName?'<span class="chip">'+esc(a.finalDepartmentName)+'</span>':'';
+      return rowHtml(a,dept+warn);
+    }).join(''):'<div class="empty">該当する候補者がいません。</div>';
+    el('listcnt').textContent=f.length+'名';
+  }
+  var phases=['','応募','一次選考','二次選考','採用後','登録','完了','終了','direct'];
+  var labels={'':'すべて','direct':'面談なし採用'};
+  shell(
+    '<p class="eyebrow">Candidates</p><h1 class="pg">候補者一覧</h1><p class="pg-lede">クリックで詳細・操作へ。</p>'+
+    '<div class="filters">'+phases.map(function(p){return '<button class="fpill'+(LIST_FILTER.ph===p?' on':'')+'" data-ph="'+esc(p)+'">'+esc(labels[p]!==undefined?labels[p]:p)+'</button>'}).join('')+
+    '<span class="search"><input type="text" id="lq" placeholder="名前・コード・メールで検索" value="'+esc(LIST_FILTER.q)+'"></span></div>'+
+    '<h2 class="sect-h">候補者<span class="cnt" id="listcnt"></span></h2><div class="sect-rule"></div>'+
+    '<div class="card" id="listbody"></div>');
+  document.querySelectorAll('.fpill').forEach(function(bt){bt.addEventListener('click',function(){LIST_FILTER.ph=this.dataset.ph;document.querySelectorAll('.fpill').forEach(function(x){x.classList.toggle('on',x.dataset.ph===LIST_FILTER.ph)});render()})});
+  el('lq').addEventListener('input',function(){LIST_FILTER.q=this.value.trim();render()});
+  render();
+}
+
+/* ============ detail ============ */
+async function vDetail(appId){
+  if(!appId){location.hash='#list';return}
+  spin();
+  var d;try{d=await apiGet('getRecruitDetailBundle',{appId:appId})}catch(e){return errView(e)}
+  var A=d.application||{},app=A.application||{},reg=A.registrationForm,gc=A.guardian,hist=A.statusHistory||[],msgs=A.messages||[];
+  var depts=d.departments||[],interviewers=d.interviewers||[];
+  var phase=app.currentPhase||'',task=app.currentTask||'',rs=app.resultStatus||'active';
+  var isDirect=(app.source||'')==='direct_entry';
+  var deptMapId={};depts.forEach(function(x){deptMapId[x.id]=x.name});
+  var finalDept=app.final_department_id?(deptMapId[app.final_department_id]||app.final_department_id):'';
+
+  /* --- 次のアクション パネル --- */
+  var act='';
+  if(rs==='active'){
+    if(phase==='登録'&&task==='承認待ち'){
+      var missDept=!(app.final_department_id||(reg&&reg.final_department_id));
+      act='<div class="banner '+(missDept?'warn':'ok')+'"><b>'+(missDept?'所属部署が未確定のため、自動登録を保留しています。':'本登録の承認待ちです。')+'</b><br>'+
+        (missDept?'部署を選択して承認すると、構成員登録が完了します。':'必要事項は揃っています。承認すると構成員登録が完了します（通常は自動で完了します。ここに残っている場合は下の承認で完了してください）。')+'</div>'+
+        '<div class="card"><div class="grid2">'+
+        '<div class="fld"><label>所属部署'+(missDept?'':'<span class="opt">確定済み: '+esc(finalDept)+'</span>')+'</label><select id="ap_dept">'+opts(depts,app.final_department_id||(reg&&reg.final_department_id)||'')+'</select></div>'+
+        '<div class="fld"><label>初期役職</label><select id="ap_role">'+['メンバー','アシマネ'].map(function(r){return '<option'+(String(app.initial_role||'メンバー')===r?' selected':'')+'>'+r+'</option>'}).join('')+'</select></div>'+
+        '</div><div class="err" id="ap_err"></div><div class="btnrow"><button class="btn" id="ap_go">承認して構成員登録する</button></div></div>';
+    }else if(phase==='一次選考'&&task==='日時選択待ち'){
+      act='<div class="banner warn"><b>一次面談の日時を確定してください。</b><br>希望時間帯: '+esc(String(app.primaryAvailableSlots||'未入力').replace(/\n/g,' / '))+'</div>'+
+        '<div class="card"><div class="grid3">'+
+        '<div class="fld"><label>日時</label><input type="datetime-local" id="iv_dt"></div>'+
+        '<div class="fld"><label>担当者</label><select id="iv_who">'+opts(interviewers)+'</select></div>'+
+        '<div class="fld"><label>Zoom URL<span class="opt">空欄で既定</span></label><input type="url" id="iv_url" placeholder="既定のZoomを使用"></div>'+
+        '</div><div class="err" id="iv_err"></div><div class="btnrow"><button class="btn" id="iv_go">日時を確定して案内を自動送信</button></div></div>';
+    }else if(phase==='一次選考'&&task==='判断待ち'){
+      act='<div class="banner warn"><b>一次面談の通過可否を判断してください。</b></div>'+
+        '<div class="card"><div class="err" id="dc_err"></div><div class="btnrow">'+
+        '<button class="btn" id="dc_pass">一次通過（二次へ進める）</button>'+
+        '<button class="btn danger" id="dc_rej">不採用にする</button></div>'+
+        '<p class="note" style="margin-top:10px">通過で二次入力の依頼、不採用で不採用連絡が自動送信されます。</p></div>';
+    }else if(phase==='二次選考'&&task==='日程調整待ち'){
+      act='<div class="banner warn"><b>二次面談の日程リンクを設定してください。</b></div>'+
+        '<div class="card"><div class="fld"><label>外部日程調整リンク（TimeRex等）</label><input type="url" id="sl_url" value="'+esc((d.settings&&d.settings.second_interview_booking_url)||'')+'"></div>'+
+        '<div class="err" id="sl_err"></div><div class="btnrow"><button class="btn" id="sl_go">設定して案内を自動送信</button></div></div>';
+    }else if(phase==='二次選考'&&task==='判断待ち'){
+      act='<div class="banner warn"><b>最終合否を判断してください。</b>採用には所属部署の確定が必要です。</div>'+
+        '<div class="card"><div class="grid2">'+
+        '<div class="fld"><label>所属部署（採用時 必須）</label><select id="fd_dept">'+opts(depts,(A.desiredDepartmentNames&&A.desiredDepartmentNames[0]&&A.desiredDepartmentNames[0].id)||'')+'</select></div>'+
+        '<div class="fld"><label>初期役職</label><select id="fd_role"><option>メンバー</option><option>アシマネ</option></select></div>'+
+        '</div><div class="err" id="fd_err"></div><div class="btnrow">'+
+        '<button class="btn" id="fd_accept">採用する</button><button class="btn danger" id="fd_rej">不採用にする</button></div>'+
+        '<p class="note" style="margin-top:10px">採用すると内定通知が自動送信され、以降（意思確認→追加情報→未成年は保護者同意→登録）は自動で進みます。</p></div>';
+    }else if(phase==='採用後'&&task==='入力待ち'&&isDirect){
+      act='<div class="banner ok"><b>ご本人の入力待ちです（面談なし採用）。</b><br>入力が完了すると自動で登録まで進みます。リンクの有効期限は発行から72時間です。</div>'+
+        '<div class="card"><div class="btnrow">'+
+        '<button class="btn ghost" id="de_reissue">新しいリンクを発行してコピー</button>'+
+        '<button class="btn ghost" id="de_remail">新しいリンクをメールで再送</button>'+
+        '</div><div class="linkbox" id="de_box" style="display:none"><input readonly id="de_url"><button class="btn sm ghost" onclick="__copy(el(\'de_url\').value)">コピー</button></div>'+
+        '<div class="err" id="de_err"></div></div>';
+    }else if(task==='同意待ち'){
+      act='<div class="banner ok"><b>保護者の同意待ちです。</b>同意のご案内は自動送信済みです。同意が確認されると自動で登録まで進みます。'+(gc?'<br>保護者: '+esc(gc.guardian_name||'')+'（'+esc(gc.guardian_email||'')+'）· 状態: '+esc(gc.consent_status||''):'')+'</div>';
+    }else if(app.nextActor==='candidate'){
+      act='<div class="banner ok"><b>ご本人の対応待ちです。</b>依頼と追いかけの連絡は自動で送信されます。</div>';
+    }
+  }else if(rs==='registered'){
+    act='<div class="banner ok"><b>構成員登録が完了しています。</b>会員: '+esc(app.member_id||'')+' · '+esc(app.registrationStatus||'')+'</div>';
+  }
+
+  /* --- プロフィール --- */
+  function kv(label,val){return val?'<dt>'+esc(label)+'</dt><dd>'+esc(val)+'</dd>':''}
+  var prof='<dl class="kv">'+
+    kv('メール',app.email)+kv('フリガナ',app.name_kana)+kv('学年',app.grade)+kv('学校・所属',app.school_name||app.affiliation)+
+    kv('在住',[app.residence_prefecture,(reg&&reg.residence_country)].filter(Boolean).join(' / '))+
+    kv('希望部署',(A.desiredDepartmentNames||[]).map(function(x){return x.name}).join('、'))+
+    kv('確定部署',finalDept)+kv('初期役職',app.initial_role)+
+    kv('紹介者',app.referrer_name)+kv('応募経路',isDirect?'面談なし採用（リンク発行）':(app.source||''))+
+    kv('応募日',fmtD(app.created_at))+kv('会員ID',app.member_id)+
+    '</dl>';
+  var regH='';
+  if(reg){
+    regH='<h2 class="sect-h">本人入力（追加情報）</h2><div class="sect-rule"></div><div class="card"><dl class="kv">'+
+      kv('参加開始月',reg.join_date)+kv('緊急連絡先',reg.emergency_contact)+kv('フルリモート',reg.remote_available)+
+      kv('保護者同意',reg.guardian_required==='はい'?((gc&&gc.consent_status)||'必要'):'不要（成人）')+
+      kv('入力日時',fmtDt(reg.submitted_at))+'</dl></div>';
+  }
+
+  /* --- タイムライン + メール --- */
+  var tlH=hist.length?'<ul class="tl">'+hist.map(function(h){
+    return '<li><div class="t">'+esc(h.after_status||'')+'</div><div class="d">'+esc(fmtDt(h.created_at))+' · '+esc(h.changedByName||'')+'</div>'+(h.reason?'<div class="r">'+esc(h.reason)+'</div>':'')+'</li>'}).join('')+'</ul>':'<div class="empty">履歴はまだありません。</div>';
+  var msgH=msgs.length?msgs.slice(0,12).map(function(m){
+    return '<div class="msg"><div class="s">'+esc(m.subject||m.message_type||'')+'</div><div class="m">'+esc(m.to_email||'')+' · '+esc(fmtDt(m.sent_at||m.created_at))+'</div></div>'}).join(''):'<div class="empty">送信履歴はまだありません。</div>';
+
+  shell(
+    '<p class="eyebrow"><a href="#list" style="color:inherit;text-decoration:none">← 候補者一覧</a></p>'+
+    '<div class="dhead"><h1>'+esc(app.name||'（無名）')+'</h1><span class="code">'+esc(app.candidate_code||app.id||'')+'</span></div>'+
+    '<div class="chips">'+stateChips({currentPhase:phase,currentTask:task,nextActor:app.nextActor,resultStatus:rs,source:app.source})+'</div>'+
+    act+
+    '<div class="two"><div>'+
+      '<h2 class="sect-h">プロフィール</h2><div class="sect-rule"></div><div class="card">'+prof+'</div>'+regH+
+      '<h2 class="sect-h">メール</h2><div class="sect-rule"></div><div class="card">'+
+        '<div class="fld"><label>定型文から作成</label><select id="mc_tpl"><option value="">定型文を選択…</option></select></div>'+
+        '<div id="mc_edit" style="display:none">'+
+          '<div class="fld"><label>宛先</label><input type="email" id="mc_to" value="'+esc(app.email||'')+'"></div>'+
+          '<div class="fld"><label>件名</label><input type="text" id="mc_sub"></div>'+
+          '<div class="fld"><label>本文</label><textarea id="mc_body"></textarea></div>'+
+          '<div class="btnrow"><button class="btn" id="mc_send">送信する</button></div>'+
+        '</div><div class="err" id="mc_err"></div>'+
+        '<h2 class="sect-h" style="margin-top:20px">送信履歴</h2><div class="sect-rule"></div>'+msgH+
+      '</div>'+
+    '</div><div>'+
+      '<h2 class="sect-h">経過</h2><div class="sect-rule"></div><div class="card">'+tlH+'</div>'+
+    '</div></div>');
+
+  /* --- handlers --- */
+  function busy(btn,label){btn.disabled=true;btn.dataset.t=btn.textContent;btn.textContent=label||'処理中…'}
+  function unbusy(btn){btn.disabled=false;btn.textContent=btn.dataset.t}
+  function reload(){CACHE.bundleAt=0;vDetail(appId)}
+  function showErr(id,ex){var e=el(id);if(!e)return alert(String(ex&&ex.message||ex));e.textContent=String(ex&&ex.message||ex);e.classList.add('on')}
+
+  if(el('ap_go'))el('ap_go').addEventListener('click',async function(){
+    var deptId=el('ap_dept').value,role=el('ap_role').value;
+    if(!deptId){showErr('ap_err',new Error('所属部署を選択してください'));return}
+    busy(this);
+    try{
+      var r=await apiPost('registerAcceptedCandidate',{appId:appId,deptId:deptId,role:role});
+      if(r&&r.ok===false&&r.duplicate){
+        if(confirm(r.error+'\n\n既存の構成員（'+r.existingMemberId+'）に紐づけて完了しますか？')){
+          r=await apiPost('registerAcceptedCandidate',{appId:appId,deptId:deptId,role:role,confirmDuplicate:true});
+        }else{unbusy(this);return}
+      }
+      if(r&&r.ok===false)throw new Error(r.error||'承認に失敗しました');
+      toast('構成員登録が完了しました（'+(r.memberCode||r.memberId||'')+'）');reload();
+    }catch(ex){unbusy(this);showErr('ap_err',ex)}
+  });
+  if(el('iv_go'))el('iv_go').addEventListener('click',async function(){
+    var dt=el('iv_dt').value,who=el('iv_who').value;
+    if(!dt||!who){showErr('iv_err',new Error('日時と担当者を入力してください'));return}
+    busy(this);
+    try{var r=await apiPost('adminConfirmPrimaryInterview',{appId:appId,datetime:dt.replace('T',' '),interviewer:who,url:el('iv_url').value.trim()});
+      if(r&&r.ok===false)throw new Error(r.error||'確定に失敗しました');
+      toast('一次面談を確定し、案内を送信しました');reload();
+    }catch(ex){unbusy(this);showErr('iv_err',ex)}
+  });
+  if(el('dc_pass'))el('dc_pass').addEventListener('click',async function(){
+    if(!confirm('一次通過にします。二次入力の依頼が自動送信されます。よろしいですか？'))return;
+    busy(this);try{var r=await apiPost('adminRecruitDecision',{appId:appId,decision:'pass_primary'});if(r&&r.ok===false)throw new Error(r.error);toast('一次通過にしました');reload()}catch(ex){unbusy(this);showErr('dc_err',ex)}
+  });
+  if(el('dc_rej'))el('dc_rej').addEventListener('click',async function(){
+    if(!confirm('不採用にします。不採用連絡が自動送信されます。よろしいですか？'))return;
+    busy(this);try{var r=await apiPost('adminRecruitDecision',{appId:appId,decision:'reject_primary'});if(r&&r.ok===false)throw new Error(r.error);toast('不採用にしました');reload()}catch(ex){unbusy(this);showErr('dc_err',ex)}
+  });
+  if(el('sl_go'))el('sl_go').addEventListener('click',async function(){
+    var u=el('sl_url').value.trim();if(!u){showErr('sl_err',new Error('リンクを入力してください'));return}
+    busy(this);try{var r=await apiPost('adminSetSecondInterviewLink',{appId:appId,link:u});if(r&&r.ok===false)throw new Error(r.error);toast('日程リンクを設定しました');reload()}catch(ex){unbusy(this);showErr('sl_err',ex)}
+  });
+  if(el('fd_accept'))el('fd_accept').addEventListener('click',async function(){
+    var deptId=el('fd_dept').value;if(!deptId){showErr('fd_err',new Error('採用には所属部署の選択が必要です'));return}
+    if(!confirm('採用します。内定通知が自動送信され、以降は自動で進みます。よろしいですか？'))return;
+    busy(this);try{var r=await apiPost('adminRecruitDecision',{appId:appId,decision:'accept_final',finalDeptId:deptId,initialRole:el('fd_role').value});if(r&&r.ok===false)throw new Error(r.error);toast('採用にしました');reload()}catch(ex){unbusy(this);showErr('fd_err',ex)}
+  });
+  if(el('fd_rej'))el('fd_rej').addEventListener('click',async function(){
+    if(!confirm('不採用にします。不採用連絡が自動送信されます。よろしいですか？'))return;
+    busy(this);try{var r=await apiPost('adminRecruitDecision',{appId:appId,decision:'reject_final'});if(r&&r.ok===false)throw new Error(r.error);toast('不採用にしました');reload()}catch(ex){unbusy(this);showErr('fd_err',ex)}
+  });
+  async function reissue(sendMail,btn){
+    busy(btn);
+    try{var r=await apiPost('recruitIssueDirectEntry',{appId:appId,sendMail:sendMail});
+      if(r&&r.ok===false)throw new Error(r.error||'再発行に失敗しました');
+      el('de_box').style.display='';el('de_url').value=r.url||'';
+      if(!sendMail)copyText(r.url||'');
+      toast(sendMail?(r.mailSent?'新しいリンクをメールで送信しました':'リンクを再発行しました（メール送信は行われませんでした）'):'新しいリンクを発行しました');
+      unbusy(btn);
+    }catch(ex){unbusy(btn);showErr('de_err',ex)}
+  }
+  if(el('de_reissue'))el('de_reissue').addEventListener('click',function(){reissue(false,this)});
+  if(el('de_remail'))el('de_remail').addEventListener('click',function(){reissue(true,this)});
+
+  /* mail composer */
+  (async function(){
+    try{
+      if(!CACHE.templates)CACHE.templates=await apiGet('listRecruitMailTemplates',{});
+      var sel=el('mc_tpl');if(!sel)return;
+      (CACHE.templates.templates||[]).forEach(function(t){var o=document.createElement('option');o.value=t.key;o.textContent=t.label;sel.appendChild(o)});
+      sel.addEventListener('change',async function(){
+        if(!this.value){el('mc_edit').style.display='none';return}
+        el('mc_edit').style.display='';el('mc_sub').value='読み込んでいます…';el('mc_body').value='';
+        try{
+          var r=await apiGet('getRecruitMessageDraft',{appId:appId,messageType:this.value});
+          if(r&&r.ok===false)throw new Error(r.error);
+          el('mc_sub').value=r.subject||'';el('mc_body').value=r.body||'';
+          if(r.toEmail)el('mc_to').value=r.toEmail;
+        }catch(ex){showErr('mc_err',ex)}
+      });
+      el('mc_send').addEventListener('click',async function(){
+        var e=el('mc_err');e.classList.remove('on');
+        var to=el('mc_to').value.trim(),sub=el('mc_sub').value.trim(),body=el('mc_body').value;
+        if(!to||!sub){showErr('mc_err',new Error('宛先と件名を入力してください'));return}
+        if(!confirm(to+' 宛にメールを送信します。よろしいですか？'))return;
+        busy(this);
+        try{var r=await apiPost('sendRecruitMessage',{appId:appId,to:to,subject:sub,body:body,messageType:el('mc_tpl').value||'manual'});
+          if(r&&r.ok===false)throw new Error(r.error);toast('送信しました');reload();
+        }catch(ex){unbusy(this);showErr('mc_err',ex)}
+      });
+    }catch(e){}
+  })();
+}
+
+/* ============ 面談なし採用 ============ */
+async function vIssue(){
+  spin();
+  var b;try{b=await loadBundle()}catch(e){return errView(e)}
+  var depts=[];try{depts=await apiGet('listRecruitDepartments',{})}catch(e){}
+  var directs=(b.applications||[]).filter(function(a){return a.source==='direct_entry'});
+  shell(
+    '<p class="eyebrow">Direct Entry</p><h1 class="pg">面談なし採用</h1>'+
+    '<p class="pg-lede">採用が決まっている方に、基本情報から保護者同意までを一括で入力できる専用リンクを発行します。入力完了後は自動で構成員登録まで進みます。</p>'+
+    '<div class="steps">'+
+      '<div class="step"><div class="sn">STEP 01</div><div class="st">リンクを発行</div><div class="sd">氏名と（あれば）部署を指定して発行。メール自動送信もできます。有効期限は72時間です。</div></div>'+
+      '<div class="step"><div class="sn">STEP 02</div><div class="st">ご本人が入力</div><div class="sd">公式サイト上のフォームで基本情報〜同意を一括入力。未成年の場合は保護者へ同意依頼が自動送信されます。</div></div>'+
+      '<div class="step"><div class="sn">STEP 03</div><div class="st">自動で登録完了</div><div class="sd">入力（と保護者同意）が揃った瞬間に構成員登録が自動で完了し、歓迎メールが送られます。部署未定のときだけ承認が必要です。</div></div>'+
+    '</div>'+
+    '<h2 class="sect-h">リンクを発行する</h2><div class="sect-rule"></div>'+
+    '<div class="card"><div class="grid2">'+
+      '<div class="fld"><label>氏名（必須）</label><input type="text" id="ie_name" placeholder="山田 太郎"></div>'+
+      '<div class="fld"><label>メールアドレス<span class="opt">自動送信する場合は必須</span></label><input type="email" id="ie_mail" placeholder="taro@gmail.com"></div>'+
+      '<div class="fld"><label>所属部署<span class="opt">推奨</span></label><select id="ie_dept">'+opts(depts,'','未定（あとで承認が必要になります）')+'</select><div class="hint">ここで指定しておくと、入力完了と同時に登録まで全自動で完了します。</div></div>'+
+      '<div class="fld"><label>初期役職</label><select id="ie_role"><option>メンバー</option><option>アシマネ</option></select></div>'+
+    '</div>'+
+    '<label style="display:flex;align-items:center;gap:9px;font-size:13px;margin:2px 0 14px;cursor:pointer"><input type="checkbox" id="ie_send" checked style="accent-color:var(--blue);width:15px;height:15px">案内メールを自動送信する</label>'+
+    '<div class="err" id="ie_err"></div>'+
+    '<div class="btnrow"><button class="btn" id="ie_go">リンクを発行する</button></div>'+
+    '<div id="ie_done" style="display:none;margin-top:16px">'+
+      '<div class="banner ok" id="ie_msg"></div>'+
+      '<div class="linkbox"><input readonly id="ie_url"><button class="btn sm ghost" onclick="__copy(el(\'ie_url\').value)">コピー</button></div>'+
+    '</div></div>'+
+    '<h2 class="sect-h">面談なし採用の候補者<span class="cnt">'+directs.length+'名</span></h2><div class="sect-rule"></div>'+
+    '<div class="card">'+(directs.length?directs.map(function(a){
+      var warn=needsDeptWarning(a)?'<span class="chip r">部署未定 — 承認が必要</span>':'';
+      return rowHtml(a,warn);
+    }).join(''):'<div class="empty">まだ発行していません。</div>')+'</div>');
+
+  el('ie_go').addEventListener('click',async function(){
+    var e=el('ie_err');e.classList.remove('on');
+    var name=el('ie_name').value.trim(),mail=el('ie_mail').value.trim(),send=el('ie_send').checked;
+    if(!name){e.textContent='氏名を入力してください';e.classList.add('on');return}
+    if(send&&!mail){e.textContent='メールを自動送信する場合は、メールアドレスを入力してください';e.classList.add('on');return}
+    var btn=this;btn.disabled=true;btn.textContent='発行しています…';
+    try{
+      var r=await apiPost('recruitIssueDirectEntry',{name:name,email:mail,deptId:el('ie_dept').value,role:el('ie_role').value,sendMail:send});
+      if(r&&r.ok===false)throw new Error(r.error||'発行に失敗しました');
+      el('ie_done').style.display='';el('ie_url').value=r.url||'';
+      var expTxt=r.expiresAt?fmtDt(r.expiresAt):'';
+      el('ie_msg').innerHTML='<b>リンクを発行しました（'+esc(r.candidateCode||r.appId)+'）。</b> 有効期限: '+esc(expTxt)+'（72時間）'+
+        (send?(r.mailSent?'<br>案内メールを自動送信しました。':'<br>メール送信は行われませんでした'+(r.mailReason?'（'+esc(r.mailReason)+'）':'')+'。リンクをコピーして直接お送りください。'):'<br>リンクをコピーしてご本人にお送りください。');
+      CACHE.bundleAt=0;
+      btn.disabled=false;btn.textContent='リンクを発行する';
+      toast('発行しました');
+    }catch(ex){
+      btn.disabled=false;btn.textContent='リンクを発行する';
+      e.textContent=String(ex&&ex.message||ex);e.classList.add('on');
+    }
+  });
+}
+
+/* ============ メール・設定 ============ */
+async function vMail(){
+  spin();
+  var t,s;
+  try{
+    if(!CACHE.templates)CACHE.templates=await apiGet('listRecruitMailTemplates',{});
+    t=CACHE.templates;
+    var b=await loadBundle();s=b.settings||{};
+  }catch(e){return errView(e)}
+  var auto=String(s.auto_mail_enabled)!=='false';
+  shell(
+    '<p class="eyebrow">Mail & Settings</p><h1 class="pg">メール・設定</h1>'+
+    '<p class="pg-lede">自動メールの文面と送信設定を管理します。文面の変更は次の送信から反映されます。</p>'+
+    '<h2 class="sect-h">自動メール設定</h2><div class="sect-rule"></div>'+
+    '<div class="card">'+
+      '<label style="display:flex;align-items:center;gap:10px;font-size:13.5px;font-weight:700;cursor:pointer;margin-bottom:14px"><input type="checkbox" id="st_auto" '+(auto?'checked':'')+' style="accent-color:var(--blue);width:16px;height:16px">自動メールを有効にする<span class="note" style="font-weight:400">（案内・追いかけ・運営通知の自動送信）</span></label>'+
+      '<div class="grid2">'+
+      '<div class="fld"><label>運営通知の宛先</label><input type="email" id="st_notify" value="'+esc(s.notify_email||'')+'"><div class="hint">新規応募・承認依頼・自動登録完了などの通知が届きます。</div></div>'+
+      '<div class="fld"><label>二次面談の日程調整リンク（既定）</label><input type="url" id="st_book" value="'+esc(s.second_interview_booking_url||'')+'"></div>'+
+      '<div class="fld"><label>Zoom URL（既定）</label><input type="url" id="st_zoom" value="'+esc(s.zoom_url||'')+'"></div>'+
+      '<div class="fld"><label>ミーティングID / パスコード</label><div class="grid2" style="gap:0 8px"><input type="text" id="st_zid" value="'+esc(s.zoom_meeting_id||'')+'" style="width:100%;font-family:inherit;font-size:14px;border:1px solid var(--line);border-radius:8px;padding:10px 12px"><input type="text" id="st_zpw" value="'+esc(s.zoom_passcode||'')+'" style="width:100%;font-family:inherit;font-size:14px;border:1px solid var(--line);border-radius:8px;padding:10px 12px"></div></div>'+
+      '</div><div class="err" id="st_err"></div><div class="btnrow"><button class="btn" id="st_save">設定を保存</button><span class="note">設定の編集は代表・人事のみ可能です。</span></div>'+
+    '</div>'+
+    '<h2 class="sect-h">メール定型文<span class="cnt">'+(t.templates||[]).length+'種</span></h2><div class="sect-rule"></div>'+
+    '<div class="card" id="tplList">'+(t.templates||[]).map(function(tp,i){
+      return '<div class="tpl" data-k="'+esc(tp.key)+'"><div class="tplh"><span class="tt">'+esc(tp.label)+'</span>'+(tp.overridden?'<span class="chip b">カスタム</span>':'<span class="chip">既定</span>')+'<span class="arrow">▾</span></div>'+
+      '<div class="tplb">'+
+        '<div class="vars">差し込み: '+(tp.vars||[]).map(function(v){return '<code title="クリックで本文へ挿入">{{'+esc(v)+'}}</code>'}).join('')+'</div>'+
+        '<div class="fld"><label>件名</label><input type="text" class="tp_sub" value="'+esc(tp.subject)+'"></div>'+
+        '<div class="fld"><label>本文</label><textarea class="tp_body">'+esc(tp.body)+'</textarea></div>'+
+        '<div class="err tp_err"></div>'+
+        '<div class="btnrow"><button class="btn sm tp_save">保存</button>'+(tp.overridden?'<button class="btn sm ghost tp_reset">既定に戻す</button>':'')+'</div>'+
+      '</div></div>';
+    }).join('')+'</div>');
+
+  el('st_save').addEventListener('click',async function(){
+    var e=el('st_err');e.classList.remove('on');
+    this.disabled=true;this.textContent='保存しています…';
+    try{
+      var r=await apiPost('updateRecruitmentSettings',{auto_mail_enabled:el('st_auto').checked?'true':'false',notify_email:el('st_notify').value.trim(),second_interview_booking_url:el('st_book').value.trim(),zoom_url:el('st_zoom').value.trim(),zoom_meeting_id:el('st_zid').value.trim(),zoom_passcode:el('st_zpw').value.trim()});
+      if(r&&r.ok===false)throw new Error(r.error);
+      CACHE.bundleAt=0;toast('設定を保存しました');
+    }catch(ex){e.textContent=String(ex&&ex.message||ex);e.classList.add('on')}
+    this.disabled=false;this.textContent='設定を保存';
+  });
+  document.querySelectorAll('.tpl').forEach(function(box){
+    box.querySelector('.tplh').addEventListener('click',function(){box.classList.toggle('open')});
+    box.querySelectorAll('.vars code').forEach(function(cd){cd.addEventListener('click',function(){
+      var ta=box.querySelector('.tp_body');var v=this.textContent;
+      var st=ta.selectionStart||0;ta.value=ta.value.slice(0,st)+v+ta.value.slice(ta.selectionEnd||st);ta.focus();
+    })});
+    var key=box.dataset.k;
+    box.querySelector('.tp_save').addEventListener('click',async function(){
+      var e=box.querySelector('.tp_err');e.classList.remove('on');
+      this.disabled=true;
+      try{
+        var r=await apiPost('updateRecruitMailTemplate',{key:key,subject:box.querySelector('.tp_sub').value,body:box.querySelector('.tp_body').value});
+        if(r&&r.ok===false)throw new Error(r.error);
+        CACHE.templates=null;toast('保存しました');
+      }catch(ex){e.textContent=String(ex&&ex.message||ex);e.classList.add('on')}
+      this.disabled=false;
+    });
+    var rst=box.querySelector('.tp_reset');
+    if(rst)rst.addEventListener('click',async function(){
+      if(!confirm('この定型文を既定の文面に戻します。よろしいですか？'))return;
+      this.disabled=true;
+      try{var r=await apiPost('resetRecruitMailTemplate',{key:key});if(r&&r.ok===false)throw new Error(r.error);
+        CACHE.templates=null;toast('既定に戻しました');vMail();
+      }catch(ex){var e=box.querySelector('.tp_err');e.textContent=String(ex&&ex.message||ex);e.classList.add('on');this.disabled=false}
+    });
+  });
+}
+
+route();
 </script>
 </body>
 </html>
