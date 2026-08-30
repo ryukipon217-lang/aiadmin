@@ -256,7 +256,7 @@ function stateChips(a){
   else if(rs==='rejected')out.push('<span class="chip r">不採用</span>');
   else if(rs==='withdrawn')out.push('<span class="chip">辞退</span>');
   else{
-    out.push('<span class="chip b">'+esc(phase+(task?' · '+task:''))+'</span>');
+    out.push('<span class="chip b">'+esc(phLabel(phase)+(task?' · '+task:''))+'</span>');
     if(na==='admin')out.push('<span class="chip y">運営の対応待ち</span>');
     else if(na==='candidate')out.push('<span class="chip">ご本人待ち</span>');
     else if(na==='guardian')out.push('<span class="chip">保護者待ち</span>');
@@ -327,10 +327,12 @@ function vLogin(){
 
 /* ============ dashboard ============ */
 var BUCKETS=[
-  ['todayFirstInterview','本日の一次面談'],['needDateSelect','一次面談の日時選択'],['needFirstInterview','一次面談の実施'],
-  ['needFirstDecision','一次通過の判断'],['needSecondSchedule','二次面談の日程設定'],['needSecondInterview','二次面談の実施'],
-  ['needFinalDecision','合否の判断'],['needRegistration','本登録の承認'],
+  ['todayFirstInterview','本日の代表面談'],['needDateSelect','代表面談の日時選択'],['needFirstInterview','代表面談の実施'],
+  ['needFirstDecision','代表面談の合否判断'],['needSecondSchedule','(旧)二次面談の日程設定'],['needSecondInterview','(旧)二次面談の実施'],
+  ['needFinalDecision','(旧)二次選考の合否判断'],['needRegistration','本登録の承認'],
 ];
+var PHASE_LABEL={'一次選考':'代表面談','二次選考':'二次選考(旧)'};
+function phLabel(p){return PHASE_LABEL[p]||p}
 function rowHtml(s,extra){
   return '<div class="rowline" onclick="location.hash=\'#detail?id='+esc(s.id)+'\'">'+
     '<span class="nm">'+esc(s.name||'（無名）')+'</span><span class="cd">'+esc(s.candidateCode||s.id)+'</span>'+
@@ -396,8 +398,8 @@ async function vList(){
     }).join(''):'<div class="empty">該当する候補者がいません。</div>';
     el('listcnt').textContent=f.length+'名';
   }
-  var phases=['','応募','一次選考','二次選考','採用後','登録','完了','終了','direct'];
-  var labels={'':'すべて','direct':'面談なし採用'};
+  var phases=['','応募','一次選考','採用後','登録','完了','終了','direct'];
+  var labels={'':'すべて','direct':'面談なし採用','一次選考':'代表面談'};
   shell(
     '<p class="eyebrow">Candidates</p><h1 class="pg">候補者一覧</h1><p class="pg-lede">クリックで詳細・操作へ。</p>'+
     '<div class="filters">'+phases.map(function(p){return '<button class="fpill'+(LIST_FILTER.ph===p?' on':'')+'" data-ph="'+esc(p)+'">'+esc(labels[p]!==undefined?labels[p]:p)+'</button>'}).join('')+
@@ -433,30 +435,29 @@ async function vDetail(appId){
         '<div class="fld"><label>初期役職</label><select id="ap_role">'+['メンバー','アシマネ'].map(function(r){return '<option'+(String(app.initial_role||'メンバー')===r?' selected':'')+'>'+r+'</option>'}).join('')+'</select></div>'+
         '</div><div class="err" id="ap_err"></div><div class="btnrow"><button class="btn" id="ap_go">承認して構成員登録する</button></div></div>';
     }else if(phase==='一次選考'&&task==='日時選択待ち'){
-      act='<div class="banner warn"><b>一次面談の日時を確定してください。</b><br>希望時間帯: '+esc(String(app.primaryAvailableSlots||'未入力').replace(/\n/g,' / '))+'</div>'+
+      act='<div class="banner warn"><b>代表面談の日時を確定してください。</b><br>希望時間帯: '+esc(String(app.primaryAvailableSlots||'未入力').replace(/\n/g,' / '))+'</div>'+
         '<div class="card"><div class="grid3">'+
         '<div class="fld"><label>日時</label><input type="datetime-local" id="iv_dt"></div>'+
         '<div class="fld"><label>担当者</label><select id="iv_who">'+opts(interviewers)+'</select></div>'+
         '<div class="fld"><label>Zoom URL<span class="opt">空欄で既定</span></label><input type="url" id="iv_url" placeholder="既定のZoomを使用"></div>'+
         '</div><div class="err" id="iv_err"></div><div class="btnrow"><button class="btn" id="iv_go">日時を確定して案内を自動送信</button></div></div>';
-    }else if(phase==='一次選考'&&task==='判断待ち'){
-      act='<div class="banner warn"><b>一次面談の通過可否を判断してください。</b></div>'+
-        '<div class="card"><div class="err" id="dc_err"></div><div class="btnrow">'+
-        '<button class="btn" id="dc_pass">一次通過（二次へ進める）</button>'+
-        '<button class="btn danger" id="dc_rej">不採用にする</button></div>'+
-        '<p class="note" style="margin-top:10px">通過で二次入力の依頼、不採用で不採用連絡が自動送信されます。</p></div>';
-    }else if(phase==='二次選考'&&task==='日程調整待ち'){
-      act='<div class="banner warn"><b>二次面談の日程リンクを設定してください。</b></div>'+
-        '<div class="card"><div class="fld"><label>外部日程調整リンク（TimeRex等）</label><input type="url" id="sl_url" value="'+esc((d.settings&&d.settings.second_interview_booking_url)||'')+'"></div>'+
-        '<div class="err" id="sl_err"></div><div class="btnrow"><button class="btn" id="sl_go">設定して案内を自動送信</button></div></div>';
-    }else if(phase==='二次選考'&&task==='判断待ち'){
-      act='<div class="banner warn"><b>最終合否を判断してください。</b>採用には所属部署の確定が必要です。</div>'+
+    }else if(phase==='一次選考'&&task==='面談実施待ち'){
+      act='<div class="banner warn"><b>代表面談の実施待ちです。</b>'+(app.primaryInterviewAt?'<br>予定: '+esc(fmtDt(app.primaryInterviewAt))+(app.primaryInterviewer?' · 担当: '+esc(app.primaryInterviewer):''):'')+'</div>'+
+        '<div class="card"><div class="fld"><label>面談メモ<span class="opt">任意</span></label><textarea id="mm_memo" placeholder="面談の記録・所感など（あとから判断の参考になります）"></textarea></div>'+
+        '<div class="err" id="mm_err"></div><div class="btnrow"><button class="btn" id="mm_go">面談を実施済みにして合否判断へ進める</button></div>'+
+        '<p class="note" style="margin-top:10px">お礼メールが自動送信され、合否判断の画面に切り替わります。</p></div>';
+    }else if(task==='判断待ち'&&(phase==='一次選考'||phase==='二次選考')){
+      act='<div class="banner warn"><b>代表面談の合否を判断してください。</b>採用には所属部署の確定が必要です。</div>'+
         '<div class="card"><div class="grid2">'+
         '<div class="fld"><label>所属部署（採用時 必須）</label><select id="fd_dept">'+opts(depts,(A.desiredDepartmentNames&&A.desiredDepartmentNames[0]&&A.desiredDepartmentNames[0].id)||'')+'</select></div>'+
         '<div class="fld"><label>初期役職</label><select id="fd_role"><option>メンバー</option><option>アシマネ</option></select></div>'+
         '</div><div class="err" id="fd_err"></div><div class="btnrow">'+
         '<button class="btn" id="fd_accept">採用する</button><button class="btn danger" id="fd_rej">不採用にする</button></div>'+
-        '<p class="note" style="margin-top:10px">採用すると内定通知が自動送信され、以降（意思確認→追加情報→未成年は保護者同意→登録）は自動で進みます。</p></div>';
+        '<p class="note" style="margin-top:10px">採用すると内定通知が自動送信され、以降（意思確認→追加情報→未成年は保護者同意→登録）は自動で進みます。不採用の場合は不採用連絡が自動送信されます。</p></div>';
+    }else if(phase==='二次選考'&&task==='日程調整待ち'){
+      act='<div class="banner warn"><b>二次面談の日程リンクを設定してください。</b></div>'+
+        '<div class="card"><div class="fld"><label>外部日程調整リンク（TimeRex等）</label><input type="url" id="sl_url" value="'+esc((d.settings&&d.settings.second_interview_booking_url)||'')+'"></div>'+
+        '<div class="err" id="sl_err"></div><div class="btnrow"><button class="btn" id="sl_go">設定して案内を自動送信</button></div></div>';
     }else if(phase==='採用後'&&task==='入力待ち'&&isDirect){
       act='<div class="banner ok"><b>ご本人の入力待ちです（面談なし採用）。</b><br>入力が完了すると自動で登録まで進みます。リンクの有効期限は発行から72時間です。</div>'+
         '<div class="card"><div class="btnrow">'+
@@ -548,13 +549,13 @@ async function vDetail(appId){
       toast('一次面談を確定し、案内を送信しました');reload();
     }catch(ex){unbusy(this);showErr('iv_err',ex)}
   });
-  if(el('dc_pass'))el('dc_pass').addEventListener('click',async function(){
-    if(!confirm('一次通過にします。二次入力の依頼が自動送信されます。よろしいですか？'))return;
-    busy(this);try{var r=await apiPost('adminRecruitDecision',{appId:appId,decision:'pass_primary'});if(r&&r.ok===false)throw new Error(r.error);toast('一次通過にしました');reload()}catch(ex){unbusy(this);showErr('dc_err',ex)}
-  });
-  if(el('dc_rej'))el('dc_rej').addEventListener('click',async function(){
-    if(!confirm('不採用にします。不採用連絡が自動送信されます。よろしいですか？'))return;
-    busy(this);try{var r=await apiPost('adminRecruitDecision',{appId:appId,decision:'reject_primary'});if(r&&r.ok===false)throw new Error(r.error);toast('不採用にしました');reload()}catch(ex){unbusy(this);showErr('dc_err',ex)}
+  if(el('mm_go'))el('mm_go').addEventListener('click',async function(){
+    if(!confirm('面談を実施済みにします。お礼メールが自動送信され、合否判断に進みます。よろしいですか？'))return;
+    busy(this);
+    try{var r=await apiPost('adminGenerateMinutes',{appId:appId,stage:'primary',transcript:el('mm_memo').value});
+      if(r&&r.ok===false)throw new Error(r.error||'更新に失敗しました');
+      toast('合否判断へ進めました');reload();
+    }catch(ex){unbusy(this);showErr('mm_err',ex)}
   });
   if(el('sl_go'))el('sl_go').addEventListener('click',async function(){
     var u=el('sl_url').value.trim();if(!u){showErr('sl_err',new Error('リンクを入力してください'));return}
@@ -567,7 +568,8 @@ async function vDetail(appId){
   });
   if(el('fd_rej'))el('fd_rej').addEventListener('click',async function(){
     if(!confirm('不採用にします。不採用連絡が自動送信されます。よろしいですか？'))return;
-    busy(this);try{var r=await apiPost('adminRecruitDecision',{appId:appId,decision:'reject_final'});if(r&&r.ok===false)throw new Error(r.error);toast('不採用にしました');reload()}catch(ex){unbusy(this);showErr('fd_err',ex)}
+    var rejDecision=(phase==='一次選考')?'reject_primary':'reject_final';
+    busy(this);try{var r=await apiPost('adminRecruitDecision',{appId:appId,decision:rejDecision});if(r&&r.ok===false)throw new Error(r.error);toast('不採用にしました');reload()}catch(ex){unbusy(this);showErr('fd_err',ex)}
   });
   async function reissue(sendMail,btn){
     busy(btn);
