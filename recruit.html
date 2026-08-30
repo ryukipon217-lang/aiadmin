@@ -238,13 +238,33 @@ async function apiPost(action,payload){
   if(!j.ok)throw new Error(j.error||'処理に失敗しました');
   return j.data;
 }
-function logout(){S=null;localStorage.removeItem(SKEY);CACHE={bundle:null,bundleAt:0,templates:null};location.hash='#login';route()}
+function logout(){S=null;localStorage.removeItem(SKEY);try{localStorage.removeItem(BKEY);localStorage.removeItem(DKEY)}catch(e){}CACHE={bundle:null,bundleAt:0,templates:null};location.hash='#login';route()}
 
+/* 体感ゼロ化: 直近スナップショットで即描画→裏で最新を取得して差し替える (keep-previous) */
+var BKEY='recruitBundle-v1',DKEY='recruitDepts-v1';
+function routeName(){return (location.hash||'#home').replace(/^#/,'').split('?')[0]||'home'}
+function peekBundle(){
+  if(CACHE.bundle)return CACHE.bundle;
+  try{var s=JSON.parse(localStorage.getItem(BKEY)||'null');if(s&&s.data)return s.data}catch(e){}
+  return null;
+}
 async function loadBundle(force){
   if(!force&&CACHE.bundle&&Date.now()-CACHE.bundleAt<45000)return CACHE.bundle;
   var b=await apiGet('getRecruitConsoleBundle',{});
   CACHE.bundle=b;CACHE.bundleAt=Date.now();
+  try{localStorage.setItem(BKEY,JSON.stringify({at:Date.now(),data:b}))}catch(e){}
   return b;
+}
+function peekDepts(){
+  if(CACHE.depts)return CACHE.depts;
+  try{var s=JSON.parse(localStorage.getItem(DKEY)||'null');if(Array.isArray(s))return s}catch(e){}
+  return null;
+}
+async function loadDepts(){
+  var d=await apiGet('listRecruitDepartments',{});
+  CACHE.depts=d;
+  try{localStorage.setItem(DKEY,JSON.stringify(d))}catch(e){}
+  return d;
 }
 
 /* ============ 状態表示 ============ */
@@ -269,7 +289,9 @@ function needsDeptWarning(a){
 }
 
 /* ============ router ============ */
+var NAV=0;   // 画面遷移の世代。非同期読み込み完了時に世代が変わっていたら描画しない(古い画面の上書き防止)
 function route(){
+  NAV++;
   var h=(location.hash||'#home').replace(/^#/,'');
   var m=h.split('?')[0],q=new URLSearchParams(h.indexOf('?')>=0?h.slice(h.indexOf('?')+1):'');
   if(!S&&m!=='login'){location.hash='#login';return}
@@ -328,10 +350,9 @@ function vLogin(){
 /* ============ dashboard ============ */
 var BUCKETS=[
   ['todayFirstInterview','本日の代表面談'],['needDateSelect','代表面談の日時選択'],['needFirstInterview','代表面談の実施'],
-  ['needFirstDecision','代表面談の合否判断'],['needSecondSchedule','(旧)二次面談の日程設定'],['needSecondInterview','(旧)二次面談の実施'],
-  ['needFinalDecision','(旧)二次選考の合否判断'],['needRegistration','本登録の承認'],
+  ['needFirstDecision','代表面談の合否判断'],['needFinalDecision','合否の判断（旧データ）'],['needRegistration','本登録の承認'],
 ];
-var PHASE_LABEL={'一次選考':'代表面談','二次選考':'二次選考(旧)'};
+var PHASE_LABEL={'一次選考':'代表面談','二次選考':'選考(旧)'};
 function phLabel(p){return PHASE_LABEL[p]||p}
 function rowHtml(s,extra){
   return '<div class="rowline" onclick="location.hash=\'#detail?id='+esc(s.id)+'\'">'+
@@ -340,8 +361,15 @@ function rowHtml(s,extra){
     '<span class="meta">'+(s.ageDays!=null?esc(s.ageDays)+'日経過':'')+'</span></div>';
 }
 async function vHome(){
-  spin();
-  var b;try{b=await loadBundle()}catch(e){return errView(e)}
+  var nav=NAV,b0=peekBundle();
+  if(b0)renderHome(b0);else spin();
+  try{
+    var b=await loadBundle();
+    if(nav!==NAV)return;
+    if(b!==b0)renderHome(b);
+  }catch(e){if(nav===NAV&&!b0)errView(e)}
+}
+function renderHome(b){
   var d=b.dashboard||{},c=d.counts||{},bk=d.buckets||{},ex=d.exceptions||[];
   var appById={};(b.applications||[]).forEach(function(a){appById[a.id]=a});
   var need='';
@@ -381,8 +409,15 @@ async function vHome(){
 /* ============ list ============ */
 var LIST_FILTER={ph:'',q:''};
 async function vList(){
-  spin();
-  var b;try{b=await loadBundle()}catch(e){return errView(e)}
+  var nav=NAV,b0=peekBundle();
+  if(b0)renderList(b0);else spin();
+  try{
+    var b=await loadBundle();
+    if(nav!==NAV)return;
+    if(b!==b0)renderList(b);
+  }catch(e){if(nav===NAV&&!b0)errView(e)}
+}
+function renderList(b){
   var apps=b.applications||[];
   function render(){
     var f=apps.filter(function(a){
@@ -414,8 +449,10 @@ async function vList(){
 /* ============ detail ============ */
 async function vDetail(appId){
   if(!appId){location.hash='#list';return}
+  var nav=NAV;
   spin();
-  var d;try{d=await apiGet('getRecruitDetailBundle',{appId:appId})}catch(e){return errView(e)}
+  var d;try{d=await apiGet('getRecruitDetailBundle',{appId:appId})}catch(e){if(nav===NAV)errView(e);return}
+  if(nav!==NAV)return;
   var A=d.application||{},app=A.application||{},reg=A.registrationForm,gc=A.guardian,hist=A.statusHistory||[],msgs=A.messages||[];
   var depts=d.departments||[],interviewers=d.interviewers||[];
   var phase=app.currentPhase||'',task=app.currentTask||'',rs=app.resultStatus||'active';
@@ -454,10 +491,6 @@ async function vDetail(appId){
         '</div><div class="err" id="fd_err"></div><div class="btnrow">'+
         '<button class="btn" id="fd_accept">採用する</button><button class="btn danger" id="fd_rej">不採用にする</button></div>'+
         '<p class="note" style="margin-top:10px">採用すると内定通知が自動送信され、以降（意思確認→追加情報→未成年は保護者同意→登録）は自動で進みます。不採用の場合は不採用連絡が自動送信されます。</p></div>';
-    }else if(phase==='二次選考'&&task==='日程調整待ち'){
-      act='<div class="banner warn"><b>二次面談の日程リンクを設定してください。</b></div>'+
-        '<div class="card"><div class="fld"><label>外部日程調整リンク（TimeRex等）</label><input type="url" id="sl_url" value="'+esc((d.settings&&d.settings.second_interview_booking_url)||'')+'"></div>'+
-        '<div class="err" id="sl_err"></div><div class="btnrow"><button class="btn" id="sl_go">設定して案内を自動送信</button></div></div>';
     }else if(phase==='採用後'&&task==='入力待ち'&&isDirect){
       act='<div class="banner ok"><b>ご本人の入力待ちです（面談なし採用）。</b><br>入力が完了すると自動で登録まで進みます。リンクの有効期限は発行から72時間です。</div>'+
         '<div class="card"><div class="btnrow">'+
@@ -557,10 +590,6 @@ async function vDetail(appId){
       toast('合否判断へ進めました');reload();
     }catch(ex){unbusy(this);showErr('mm_err',ex)}
   });
-  if(el('sl_go'))el('sl_go').addEventListener('click',async function(){
-    var u=el('sl_url').value.trim();if(!u){showErr('sl_err',new Error('リンクを入力してください'));return}
-    busy(this);try{var r=await apiPost('adminSetSecondInterviewLink',{appId:appId,link:u});if(r&&r.ok===false)throw new Error(r.error);toast('日程リンクを設定しました');reload()}catch(ex){unbusy(this);showErr('sl_err',ex)}
-  });
   if(el('fd_accept'))el('fd_accept').addEventListener('click',async function(){
     var deptId=el('fd_dept').value;if(!deptId){showErr('fd_err',new Error('採用には所属部署の選択が必要です'));return}
     if(!confirm('採用します。内定通知が自動送信され、以降は自動で進みます。よろしいですか？'))return;
@@ -616,10 +645,26 @@ async function vDetail(appId){
 
 /* ============ 面談なし採用 ============ */
 async function vIssue(){
-  spin();
-  var b;try{b=await loadBundle()}catch(e){return errView(e)}
-  var depts=[];try{depts=await apiGet('listRecruitDepartments',{})}catch(e){}
-  var directs=(b.applications||[]).filter(function(a){return a.source==='direct_entry'});
+  var nav=NAV;
+  renderIssue(peekDepts()||[],peekBundle());   // 即時描画(前回スナップショット)。裏で最新を並列取得して差し替え
+  Promise.all([
+    loadDepts().catch(function(){return null}),
+    loadBundle().catch(function(){return null})
+  ]).then(function(rs){
+    if(nav!==NAV)return;
+    if(rs[0]){var sel=el('ie_dept');if(sel){var cur=sel.value;sel.innerHTML=opts(rs[0],cur,'未定（あとで承認が必要になります）')}}
+    if(rs[1]){var box=el('ie_directs');if(box)box.outerHTML=directsHtml(rs[1])}
+  });
+}
+function directsHtml(b){
+  var directs=(b&&b.applications||[]).filter(function(a){return a.source==='direct_entry'});
+  return '<div id="ie_directs"><h2 class="sect-h">面談なし採用の候補者<span class="cnt">'+directs.length+'名</span></h2><div class="sect-rule"></div>'+
+    '<div class="card">'+(directs.length?directs.map(function(a){
+      var warn=needsDeptWarning(a)?'<span class="chip r">部署未定 — 承認が必要</span>':'';
+      return rowHtml(a,warn);
+    }).join(''):'<div class="empty">'+(b?'まだ発行していません。':'読み込んでいます…')+'</div>')+'</div></div>';
+}
+function renderIssue(depts,b){
   shell(
     '<p class="eyebrow">Direct Entry</p><h1 class="pg">面談なし採用</h1>'+
     '<p class="pg-lede">採用が決まっている方に、基本情報から保護者同意までを一括で入力できる専用リンクを発行します。入力完了後は自動で構成員登録まで進みます。</p>'+
@@ -642,11 +687,7 @@ async function vIssue(){
       '<div class="banner ok" id="ie_msg"></div>'+
       '<div class="linkbox"><input readonly id="ie_url"><button class="btn sm ghost" onclick="__copy(el(\'ie_url\').value)">コピー</button></div>'+
     '</div></div>'+
-    '<h2 class="sect-h">面談なし採用の候補者<span class="cnt">'+directs.length+'名</span></h2><div class="sect-rule"></div>'+
-    '<div class="card">'+(directs.length?directs.map(function(a){
-      var warn=needsDeptWarning(a)?'<span class="chip r">部署未定 — 承認が必要</span>':'';
-      return rowHtml(a,warn);
-    }).join(''):'<div class="empty">まだ発行していません。</div>')+'</div>');
+    directsHtml(b));
 
   el('ie_go').addEventListener('click',async function(){
     var e=el('ie_err');e.classList.remove('on');
@@ -662,6 +703,7 @@ async function vIssue(){
       el('ie_msg').innerHTML='<b>リンクを発行しました（'+esc(r.candidateCode||r.appId)+'）。</b> 有効期限: '+esc(expTxt)+'（72時間）'+
         (send?(r.mailSent?'<br>案内メールを自動送信しました。':'<br>メール送信は行われませんでした'+(r.mailReason?'（'+esc(r.mailReason)+'）':'')+'。リンクをコピーして直接お送りください。'):'<br>リンクをコピーしてご本人にお送りください。');
       CACHE.bundleAt=0;
+      loadBundle(true).then(function(nb){var box=el('ie_directs');if(box)box.outerHTML=directsHtml(nb)}).catch(function(){});
       btn.disabled=false;btn.textContent='リンクを発行する';
       toast('発行しました');
     }catch(ex){
@@ -673,13 +715,17 @@ async function vIssue(){
 
 /* ============ メール・設定 ============ */
 async function vMail(){
+  var nav=NAV;
   spin();
   var t,s;
   try{
-    if(!CACHE.templates)CACHE.templates=await apiGet('listRecruitMailTemplates',{});
-    t=CACHE.templates;
-    var b=await loadBundle();s=b.settings||{};
-  }catch(e){return errView(e)}
+    var rs=await Promise.all([
+      CACHE.templates?Promise.resolve(CACHE.templates):apiGet('listRecruitMailTemplates',{}),
+      loadBundle()
+    ]);
+    CACHE.templates=rs[0];t=rs[0];s=rs[1].settings||{};
+  }catch(e){if(nav===NAV)errView(e);return}
+  if(nav!==NAV)return;
   var auto=String(s.auto_mail_enabled)!=='false';
   shell(
     '<p class="eyebrow">Mail & Settings</p><h1 class="pg">メール・設定</h1>'+
@@ -689,7 +735,6 @@ async function vMail(){
       '<label style="display:flex;align-items:center;gap:10px;font-size:13.5px;font-weight:700;cursor:pointer;margin-bottom:14px"><input type="checkbox" id="st_auto" '+(auto?'checked':'')+' style="accent-color:var(--blue);width:16px;height:16px">自動メールを有効にする<span class="note" style="font-weight:400">（案内・追いかけ・運営通知の自動送信）</span></label>'+
       '<div class="grid2">'+
       '<div class="fld"><label>運営通知の宛先</label><input type="email" id="st_notify" value="'+esc(s.notify_email||'')+'"><div class="hint">新規応募・承認依頼・自動登録完了などの通知が届きます。</div></div>'+
-      '<div class="fld"><label>二次面談の日程調整リンク（既定）</label><input type="url" id="st_book" value="'+esc(s.second_interview_booking_url||'')+'"></div>'+
       '<div class="fld"><label>Zoom URL（既定）</label><input type="url" id="st_zoom" value="'+esc(s.zoom_url||'')+'"></div>'+
       '<div class="fld"><label>ミーティングID / パスコード</label><div class="grid2" style="gap:0 8px"><input type="text" id="st_zid" value="'+esc(s.zoom_meeting_id||'')+'" style="width:100%;font-family:inherit;font-size:14px;border:1px solid var(--line);border-radius:8px;padding:10px 12px"><input type="text" id="st_zpw" value="'+esc(s.zoom_passcode||'')+'" style="width:100%;font-family:inherit;font-size:14px;border:1px solid var(--line);border-radius:8px;padding:10px 12px"></div></div>'+
       '</div><div class="err" id="st_err"></div><div class="btnrow"><button class="btn" id="st_save">設定を保存</button><span class="note">設定の編集は代表・人事のみ可能です。</span></div>'+
@@ -710,7 +755,7 @@ async function vMail(){
     var e=el('st_err');e.classList.remove('on');
     this.disabled=true;this.textContent='保存しています…';
     try{
-      var r=await apiPost('updateRecruitmentSettings',{auto_mail_enabled:el('st_auto').checked?'true':'false',notify_email:el('st_notify').value.trim(),second_interview_booking_url:el('st_book').value.trim(),zoom_url:el('st_zoom').value.trim(),zoom_meeting_id:el('st_zid').value.trim(),zoom_passcode:el('st_zpw').value.trim()});
+      var r=await apiPost('updateRecruitmentSettings',{auto_mail_enabled:el('st_auto').checked?'true':'false',notify_email:el('st_notify').value.trim(),zoom_url:el('st_zoom').value.trim(),zoom_meeting_id:el('st_zid').value.trim(),zoom_passcode:el('st_zpw').value.trim()});
       if(r&&r.ok===false)throw new Error(r.error);
       CACHE.bundleAt=0;toast('設定を保存しました');
     }catch(ex){e.textContent=String(ex&&ex.message||ex);e.classList.add('on')}
