@@ -177,6 +177,36 @@ h1.pg{font-family:var(--serif);font-weight:600;font-size:clamp(24px,4vw,32px);li
 .search input{border:1px solid var(--line);border-radius:999px;padding:7px 16px;font-family:inherit;font-size:12.5px;outline:none;width:190px}
 .search input:focus{border-color:var(--azure)}
 
+/* ===== 兼任部署チップ ===== */
+.selchips{display:flex;flex-wrap:wrap;gap:8px;margin:2px 0 4px}
+.selchips .sc{border:1px solid var(--line);background:#fff;border-radius:999px;padding:5px 14px;font-size:12px;font-weight:700;color:var(--ink2);cursor:pointer;transition:all .15s;font-family:inherit}
+.selchips .sc:hover{border-color:#c9d6e8}
+.selchips .sc.on{background:#e8effb;border-color:#c9d6e8;color:var(--blue-deep)}
+/* ===== 選考の流れ ===== */
+.flowrail{display:flex;overflow-x:auto;padding:10px 2px 22px;-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity}
+.fstage{flex:0 0 236px;scroll-snap-align:start;position:relative;padding-right:34px}
+.fstage::after{content:"";position:absolute;top:22px;right:13px;width:9px;height:9px;border-top:1px solid #b8c4d6;border-right:1px solid #b8c4d6;transform:rotate(45deg)}
+.fstage::before{content:"";position:absolute;top:26px;right:8px;width:24px;height:1px;background:linear-gradient(to right,var(--line),#b8c4d6)}
+.fstage:last-child::after,.fstage:last-child::before{display:none}
+.fs-en{font-family:var(--latin);font-weight:600;font-size:9.5px;letter-spacing:.22em;color:var(--azure)}
+.fs-t{font-family:var(--serif);font-weight:600;font-size:17px;letter-spacing:.06em;display:flex;align-items:baseline;gap:8px}
+.fs-t .fs-cnt{font-family:var(--latin);font-size:11px;color:var(--ink3);font-weight:400}
+.fs-note{font-size:10.5px;color:var(--ink3);line-height:1.65;margin:5px 0 12px;min-height:3.2em}
+.fs-card{border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin:0 0 8px;cursor:pointer;background:#fff;transition:background .15s,border-color .15s}
+.fs-card:hover{border-color:#c9d6e8;background:var(--soft)}
+.fs-card .n{font-weight:700;font-size:13px}
+.fs-card .m{font-size:10.5px;color:var(--ink3);font-family:var(--latin);display:flex;gap:8px;align-items:center;margin-top:2px}
+.fs-empty{border:1px dashed var(--line);border-radius:10px;padding:10px 12px;font-size:11px;color:var(--ink3);text-align:center}
+/* ===== 候補者詳細 進捗ステッパー ===== */
+.dstep{display:flex;align-items:center;margin:0 0 20px;overflow-x:auto;padding:2px 0 6px}
+.ds-i{display:flex;align-items:center;gap:7px;flex:none}
+.ds-dot{width:9px;height:9px;border-radius:50%;background:#d6dee9;flex:none}
+.ds-i.done .ds-dot{background:#9fb6dd}
+.ds-i.cur .ds-dot{background:var(--blue-deep);box-shadow:0 0 0 3px rgba(18,53,111,.14)}
+.ds-l{font-size:10.5px;color:var(--ink3);letter-spacing:.04em;white-space:nowrap}
+.ds-i.done .ds-l{color:var(--ink2)}
+.ds-i.cur .ds-l{color:var(--blue-deep);font-weight:700}
+.ds-line{width:24px;height:1px;background:var(--line);flex:none;margin:0 9px}
 .toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(80px);background:var(--ink);color:#fff;font-size:12.5px;letter-spacing:.05em;border-radius:999px;padding:11px 24px;z-index:300;opacity:0;transition:all .3s ease;pointer-events:none;max-width:88vw}
 .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
 
@@ -195,6 +225,7 @@ h1.pg{font-family:var(--serif);font-weight:600;font-size:clamp(24px,4vw,32px);li
     <a class="brand" href="#home">connec+a<small>採用管理</small></a>
     <nav class="tabs" id="navtabs">
       <a href="#home" data-r="home">ダッシュボード</a>
+      <a href="#flow" data-r="flow">選考の流れ</a>
       <a href="#list" data-r="list">候補者</a>
       <a href="#issue" data-r="issue">面談なし採用</a>
       <a href="#mail" data-r="mail">メール・設定</a>
@@ -218,6 +249,15 @@ function toast(m){var t=el('toast');t.textContent=m;t.classList.add('on');clearT
 function fmtDt(v){if(!v)return '';var d=new Date(v);if(isNaN(d.getTime()))return String(v);return (d.getMonth()+1)+'/'+d.getDate()+' '+('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2)}
 function fmtD(v){if(!v)return '';var d=new Date(v);if(isNaN(d.getTime()))return String(v);return d.getFullYear()+'/'+(d.getMonth()+1)+'/'+d.getDate()}
 function opts(arr,sel,ph){return '<option value="">'+esc(ph||'選択してください')+'</option>'+ (arr||[]).map(function(v){var val=typeof v==='string'?v:v.id,lab=typeof v==='string'?v:v.name;return '<option value="'+esc(val)+'"'+(String(sel)===String(val)?' selected':'')+'>'+esc(lab)+'</option>'}).join('')}
+/* 兼任部署の複数選択チップ */
+function deptChipsHtml(id,depts,selected){
+  selected=selected||[];
+  return '<div class="selchips" id="'+esc(id)+'">'+(depts||[]).map(function(d){
+    return '<button type="button" class="sc'+(selected.indexOf(d.id)>=0?' on':'')+'" data-id="'+esc(d.id)+'">'+esc(d.name)+'</button>';
+  }).join('')+'</div>';
+}
+function bindChips(id){var box=el(id);if(!box)return;box.querySelectorAll('.sc').forEach(function(c){c.addEventListener('click',function(){c.classList.toggle('on')})})}
+function chipVals(id,excl){var box=el(id);if(!box)return [];return [].map.call(box.querySelectorAll('.sc.on'),function(c){return c.dataset.id}).filter(function(v){return v!==excl})}
 function copyText(v){try{navigator.clipboard.writeText(v).then(function(){toast('コピーしました')})}catch(e){var i=document.createElement('input');i.value=v;document.body.appendChild(i);i.select();document.execCommand('copy');i.remove();toast('コピーしました')}}
 window.__copy=copyText;
 
@@ -300,6 +340,7 @@ function route(){
   if(S){el('uname').textContent=(S.name||'')+(S.role?'（'+S.role+'）':'');
     document.querySelectorAll('#navtabs a').forEach(function(a){a.classList.toggle('on',a.dataset.r===m)})}
   if(m==='login')vLogin();
+  else if(m==='flow')vFlow();
   else if(m==='list')vList();
   else if(m==='issue')vIssue();
   else if(m==='mail')vMail();
@@ -406,6 +447,65 @@ function renderHome(b){
     '</div>'+need+waiting+exh);
 }
 
+/* ============ 選考の流れ ============ */
+var FLOW_STAGES=[
+  {t:'エントリー',en:'Entry',note:'公式サイトから応募。受付メールと運営通知は自動送信。',m:function(a){return a.currentPhase==='応募'}},
+  {t:'日程調整',en:'Schedule',note:'本人はエントリー時にカレンダーで予約済み。予約を確認して日時を確定→案内自動送信。',m:function(a){return a.currentPhase==='一次選考'&&(a.currentTask==='希望時間入力待ち'||a.currentTask==='日時選択待ち')}},
+  {t:'代表面談',en:'Interview',note:'面談を実施し、メモを記録して判断へ。リマインドは自動送信。',m:function(a){return a.currentPhase==='一次選考'&&a.currentTask==='面談実施待ち'}},
+  {t:'合否判断',en:'Decision',note:'採用(部署確定)か不採用を判断。通知はどちらも自動送信。',m:function(a){return a.currentTask==='判断待ち'||a.currentPhase==='二次選考'}},
+  {t:'情報入力',en:'Onboard',note:'ご本人が基本情報を入力。面談なし採用はここから開始。追いかけは自動。',m:function(a){return a.currentPhase==='採用後'&&a.currentTask==='入力待ち'}},
+  {t:'保護者同意',en:'Consent',note:'未成年のみ。保護者へ依頼メールを自動送信し、同意を待つ。',m:function(a){return a.currentPhase==='採用後'&&a.currentTask==='同意待ち'}},
+  {t:'本登録',en:'Register',note:'必要事項が揃った瞬間に自動で構成員登録。部署未定のときだけ承認。',m:function(a){return a.currentPhase==='登録'}},
+  {t:'完了',en:'Joined',note:'構成員登録済み。歓迎メールと初回案内を自動送信。',m:function(a){return a.resultStatus==='registered'}},
+];
+function flowStageIndex(a){
+  if((a.resultStatus||'active')==='registered')return FLOW_STAGES.length-1;
+  for(var i=0;i<FLOW_STAGES.length;i++)if(FLOW_STAGES[i].m(a))return i;
+  return -1;
+}
+async function vFlow(){
+  var nav=NAV,b0=peekBundle();
+  if(b0)renderFlow(b0);else spin();
+  try{
+    var b=await loadBundle();
+    if(nav!==NAV)return;
+    if(b!==b0)renderFlow(b);
+  }catch(e){if(nav===NAV&&!b0)errView(e)}
+}
+function renderFlow(b){
+  var apps=b.applications||[];
+  var cols=FLOW_STAGES.map(function(){return []});
+  var ended=[];
+  apps.forEach(function(a){
+    var rs=a.resultStatus||'active';
+    if(rs==='rejected'||rs==='withdrawn'){ended.push(a);return}
+    var i=flowStageIndex(a);
+    if(i>=0)cols[i].push(a);
+  });
+  var actorChip=function(a){
+    if((a.resultStatus||'active')==='registered')return '';
+    if(a.nextActor==='admin')return '<span class="chip y" style="font-size:10px;padding:2px 8px">運営</span>';
+    if(a.nextActor==='candidate')return '<span class="chip" style="font-size:10px;padding:2px 8px">ご本人</span>';
+    if(a.nextActor==='guardian')return '<span class="chip" style="font-size:10px;padding:2px 8px">保護者</span>';
+    return '';
+  };
+  shell(
+    '<p class="eyebrow">Process</p><h1 class="pg">選考の流れ</h1>'+
+    '<p class="pg-lede">エントリーから構成員登録までの流れと、各候補者の現在地です。メール送信・登録はほぼ自動で進み、<b>色付き(運営)のカードだけ</b>操作が必要です。</p>'+
+    '<div class="flowrail">'+FLOW_STAGES.map(function(st,i){
+      return '<div class="fstage"><div class="fs-en">'+esc(st.en)+'</div>'+
+        '<div class="fs-t">'+(i+1)+'. '+esc(st.t)+'<span class="fs-cnt">'+cols[i].length+'名</span></div>'+
+        '<div class="fs-note">'+esc(st.note)+'</div>'+
+        (cols[i].length?cols[i].map(function(a){
+          return '<div class="fs-card" onclick="location.hash=\'#detail?id='+esc(a.id)+'\'"><div class="n">'+esc(a.name||'（無名）')+'</div>'+
+            '<div class="m">'+esc(a.candidateCode||a.id)+(a.source==='direct_entry'?' · 面談なし':'')+' '+actorChip(a)+'</div></div>';
+        }).join(''):'<div class="fs-empty">—</div>')+
+      '</div>';
+    }).join('')+'</div>'+
+    (ended.length?'<h2 class="sect-h">終了（不採用・辞退）<span class="cnt">'+ended.length+'名</span></h2><div class="sect-rule"></div><div class="card">'+
+      ended.map(function(a){return rowHtml(a)}).join('')+'</div>':''));
+}
+
 /* ============ list ============ */
 var LIST_FILTER={ph:'',q:''};
 async function vList(){
@@ -470,7 +570,9 @@ async function vDetail(appId){
         '<div class="card"><div class="grid2">'+
         '<div class="fld"><label>所属部署'+(missDept?'':'<span class="opt">確定済み: '+esc(finalDept)+'</span>')+'</label><select id="ap_dept">'+opts(depts,app.final_department_id||(reg&&reg.final_department_id)||'')+'</select></div>'+
         '<div class="fld"><label>初期役職</label><select id="ap_role">'+['メンバー','アシマネ'].map(function(r){return '<option'+(String(app.initial_role||'メンバー')===r?' selected':'')+'>'+r+'</option>'}).join('')+'</select></div>'+
-        '</div><div class="err" id="ap_err"></div><div class="btnrow"><button class="btn" id="ap_go">承認して構成員登録する</button></div></div>';
+        '</div>'+
+        '<div class="fld"><label>兼任部署<span class="opt">任意・複数選択可</span></label>'+deptChipsHtml('ap_subs',depts,String(app.sub_department_ids||'').split(',').filter(Boolean))+'</div>'+
+        '<div class="err" id="ap_err"></div><div class="btnrow"><button class="btn" id="ap_go">承認して構成員登録する</button></div></div>';
     }else if(phase==='一次選考'&&task==='日時選択待ち'){
       act='<div class="banner warn"><b>代表面談の日時を確定してください。</b><br>'+(app.primaryAvailableSlots?'希望時間帯: '+esc(String(app.primaryAvailableSlots).replace(/\n/g,' / ')):'エントリー時にGoogleカレンダーで日程予約されている場合があります。カレンダーの予約を確認し、同じ日時を確定してください。')+'</div>'+
         '<div class="card"><div class="grid3">'+
@@ -488,7 +590,9 @@ async function vDetail(appId){
         '<div class="card"><div class="grid2">'+
         '<div class="fld"><label>所属部署（採用時 必須）</label><select id="fd_dept">'+opts(depts,(A.desiredDepartmentNames&&A.desiredDepartmentNames[0]&&A.desiredDepartmentNames[0].id)||'')+'</select></div>'+
         '<div class="fld"><label>初期役職</label><select id="fd_role"><option>メンバー</option><option>アシマネ</option></select></div>'+
-        '</div><div class="err" id="fd_err"></div><div class="btnrow">'+
+        '</div>'+
+        '<div class="fld"><label>兼任部署<span class="opt">任意・複数選択可</span></label>'+deptChipsHtml('fd_subs',depts)+'<div class="hint">最初から兼任する場合は選択。登録時に副所属として自動作成されます。</div></div>'+
+        '<div class="err" id="fd_err"></div><div class="btnrow">'+
         '<button class="btn" id="fd_accept">採用する</button><button class="btn danger" id="fd_rej">不採用にする</button></div>'+
         '<p class="note" style="margin-top:10px">採用すると内定通知が自動送信され、以降（意思確認→追加情報→未成年は保護者同意→登録）は自動で進みます。不採用の場合は不採用連絡が自動送信されます。</p></div>';
     }else if(phase==='採用後'&&task==='入力待ち'&&isDirect){
@@ -513,7 +617,9 @@ async function vDetail(appId){
     kv('メール',app.email)+kv('フリガナ',app.name_kana)+kv('学年',app.grade)+kv('学校・所属',app.school_name||app.affiliation)+
     kv('在住',[app.residence_prefecture,(reg&&reg.residence_country)].filter(Boolean).join(' / '))+
     kv('希望部署',(A.desiredDepartmentNames||[]).map(function(x){return x.name}).join('、'))+
-    kv('確定部署',finalDept)+kv('初期役職',app.initial_role)+
+    kv('確定部署',finalDept)+
+    kv('兼任部署',String(app.sub_department_ids||'').split(',').filter(Boolean).map(function(id){return deptMapId[id]||id}).join('、'))+
+    kv('初期役職',app.initial_role)+
     kv('志望動機',app.desired_department_reason)+
     kv('事前質問・メモ',app.pre_interview_questions)+
     kv('紹介者',app.referrer_name)+kv('応募経路',isDirect?'面談なし採用（リンク発行）':(app.source||''))+
@@ -533,10 +639,25 @@ async function vDetail(appId){
   var msgH=msgs.length?msgs.slice(0,12).map(function(m){
     return '<div class="msg"><div class="s">'+esc(m.subject||m.message_type||'')+'</div><div class="m">'+esc(m.to_email||'')+' · '+esc(fmtDt(m.sent_at||m.created_at))+'</div></div>'}).join(''):'<div class="empty">送信履歴はまだありません。</div>';
 
+  /* 進捗ステッパー(選考の流れの現在地)。面談なし採用は情報入力からの短縮フロー。終了(不採用/辞退)は非表示 */
+  var stepper='';
+  if(rs==='active'||rs==='registered'){
+    var stApp={currentPhase:phase,currentTask:task,resultStatus:rs};
+    var stages=isDirect?FLOW_STAGES.slice(4):FLOW_STAGES;
+    var curIdx=-1;
+    for(var si=0;si<stages.length;si++)if(rs==='registered'?si===stages.length-1:stages[si].m(stApp)){curIdx=si;break}
+    if(curIdx>=0){
+      stepper='<div class="dstep">'+stages.map(function(st,i){
+        var cls=i<curIdx?'done':(i===curIdx?'cur':'');
+        return '<span class="ds-i '+cls+'"><span class="ds-dot"></span><span class="ds-l">'+esc(st.t)+'</span></span>'+(i<stages.length-1?'<span class="ds-line"></span>':'');
+      }).join('')+'</div>';
+    }
+  }
   shell(
     '<p class="eyebrow"><a href="#list" style="color:inherit;text-decoration:none">← 候補者一覧</a></p>'+
     '<div class="dhead"><h1>'+esc(app.name||'（無名）')+'</h1><span class="code">'+esc(app.candidate_code||app.id||'')+'</span></div>'+
     '<div class="chips">'+stateChips({currentPhase:phase,currentTask:task,nextActor:app.nextActor,resultStatus:rs,source:app.source})+'</div>'+
+    stepper+
     act+
     '<div class="two"><div>'+
       '<h2 class="sect-h">プロフィール</h2><div class="sect-rule"></div><div class="card">'+prof+'</div>'+regH+
@@ -560,15 +681,16 @@ async function vDetail(appId){
   function reload(){CACHE.bundleAt=0;vDetail(appId)}
   function showErr(id,ex){var e=el(id);if(!e)return alert(String(ex&&ex.message||ex));e.textContent=String(ex&&ex.message||ex);e.classList.add('on')}
 
+  bindChips('ap_subs');bindChips('fd_subs');
   if(el('ap_go'))el('ap_go').addEventListener('click',async function(){
-    var deptId=el('ap_dept').value,role=el('ap_role').value;
+    var deptId=el('ap_dept').value,role=el('ap_role').value,subs=chipVals('ap_subs',deptId);
     if(!deptId){showErr('ap_err',new Error('所属部署を選択してください'));return}
     busy(this);
     try{
-      var r=await apiPost('registerAcceptedCandidate',{appId:appId,deptId:deptId,role:role});
+      var r=await apiPost('registerAcceptedCandidate',{appId:appId,deptId:deptId,role:role,subDeptIds:subs});
       if(r&&r.ok===false&&r.duplicate){
         if(confirm(r.error+'\n\n既存の構成員（'+r.existingMemberId+'）に紐づけて完了しますか？')){
-          r=await apiPost('registerAcceptedCandidate',{appId:appId,deptId:deptId,role:role,confirmDuplicate:true});
+          r=await apiPost('registerAcceptedCandidate',{appId:appId,deptId:deptId,role:role,subDeptIds:subs,confirmDuplicate:true});
         }else{unbusy(this);return}
       }
       if(r&&r.ok===false)throw new Error(r.error||'承認に失敗しました');
@@ -595,7 +717,7 @@ async function vDetail(appId){
   if(el('fd_accept'))el('fd_accept').addEventListener('click',async function(){
     var deptId=el('fd_dept').value;if(!deptId){showErr('fd_err',new Error('採用には所属部署の選択が必要です'));return}
     if(!confirm('採用します。内定通知が自動送信され、以降は自動で進みます。よろしいですか？'))return;
-    busy(this);try{var r=await apiPost('adminRecruitDecision',{appId:appId,decision:'accept_final',finalDeptId:deptId,initialRole:el('fd_role').value});if(r&&r.ok===false)throw new Error(r.error);toast('採用にしました');reload()}catch(ex){unbusy(this);showErr('fd_err',ex)}
+    busy(this);try{var r=await apiPost('adminRecruitDecision',{appId:appId,decision:'accept_final',finalDeptId:deptId,initialRole:el('fd_role').value,subDeptIds:chipVals('fd_subs',deptId)});if(r&&r.ok===false)throw new Error(r.error);toast('採用にしました');reload()}catch(ex){unbusy(this);showErr('fd_err',ex)}
   });
   if(el('fd_rej'))el('fd_rej').addEventListener('click',async function(){
     if(!confirm('不採用にします。不採用連絡が自動送信されます。よろしいですか？'))return;
@@ -654,7 +776,10 @@ async function vIssue(){
     loadBundle().catch(function(){return null})
   ]).then(function(rs){
     if(nav!==NAV)return;
-    if(rs[0]){var sel=el('ie_dept');if(sel){var cur=sel.value;sel.innerHTML=opts(rs[0],cur,'未定（あとで承認が必要になります）')}}
+    if(rs[0]){
+      var sel=el('ie_dept');if(sel){var cur=sel.value;sel.innerHTML=opts(rs[0],cur,'未定（あとで承認が必要になります）')}
+      var chips=el('ie_subs');if(chips){var cs=chipVals('ie_subs');chips.outerHTML=deptChipsHtml('ie_subs',rs[0],cs);bindChips('ie_subs')}
+    }
     if(rs[1]){var box=el('ie_directs');if(box)box.outerHTML=directsHtml(rs[1])}
   });
 }
@@ -682,6 +807,7 @@ function renderIssue(depts,b){
       '<div class="fld"><label>所属部署<span class="opt">推奨</span></label><select id="ie_dept">'+opts(depts,'','未定（あとで承認が必要になります）')+'</select><div class="hint">ここで指定しておくと、入力完了と同時に登録まで全自動で完了します。</div></div>'+
       '<div class="fld"><label>初期役職</label><select id="ie_role"><option>メンバー</option><option>アシマネ</option></select></div>'+
     '</div>'+
+    '<div class="fld"><label>兼任部署<span class="opt">任意・複数選択可</span></label>'+deptChipsHtml('ie_subs',depts)+'<div class="hint">最初から兼任する部署があれば選択。登録時に副所属として自動作成されます。</div></div>'+
     '<label style="display:flex;align-items:center;gap:9px;font-size:13px;margin:2px 0 14px;cursor:pointer"><input type="checkbox" id="ie_send" checked style="accent-color:var(--blue);width:15px;height:15px">案内メールを自動送信する</label>'+
     '<div class="err" id="ie_err"></div>'+
     '<div class="btnrow"><button class="btn" id="ie_go">リンクを発行する</button></div>'+
@@ -691,6 +817,7 @@ function renderIssue(depts,b){
     '</div></div>'+
     directsHtml(b));
 
+  bindChips('ie_subs');
   el('ie_go').addEventListener('click',async function(){
     var e=el('ie_err');e.classList.remove('on');
     var name=el('ie_name').value.trim(),mail=el('ie_mail').value.trim(),send=el('ie_send').checked;
@@ -698,7 +825,7 @@ function renderIssue(depts,b){
     if(send&&!mail){e.textContent='メールを自動送信する場合は、メールアドレスを入力してください';e.classList.add('on');return}
     var btn=this;btn.disabled=true;btn.textContent='発行しています…';
     try{
-      var r=await apiPost('recruitIssueDirectEntry',{name:name,email:mail,deptId:el('ie_dept').value,role:el('ie_role').value,sendMail:send});
+      var r=await apiPost('recruitIssueDirectEntry',{name:name,email:mail,deptId:el('ie_dept').value,role:el('ie_role').value,subDeptIds:chipVals('ie_subs',el('ie_dept').value),sendMail:send});
       if(r&&r.ok===false)throw new Error(r.error||'発行に失敗しました');
       el('ie_done').style.display='';el('ie_url').value=r.url||'';
       var expTxt=r.expiresAt?fmtDt(r.expiresAt):'';
