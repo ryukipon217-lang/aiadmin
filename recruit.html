@@ -233,7 +233,7 @@ h1.pg{font-family:var(--serif);font-weight:600;font-size:clamp(24px,4vw,32px);li
       <a href="#home" data-r="home">ダッシュボード</a>
       <a href="#flow" data-r="flow">選考の流れ</a>
       <a href="#list" data-r="list">候補者</a>
-      <a href="#issue" data-r="issue">面談なし採用</a>
+      <a href="#issue" data-r="issue">エントリーなし採用</a>
       <a href="#mail" data-r="mail">メール・設定</a>
     </nav>
     <div class="tb-user"><span id="uname"></span><button id="logoutBtn">ログアウト</button></div>
@@ -391,7 +391,7 @@ function stateChips(a){
     else if(na==='candidate')out.push('<span class="chip">ご本人待ち</span>');
     else if(na==='guardian')out.push('<span class="chip">保護者待ち</span>');
   }
-  if((a.source||'')==='direct_entry')out.push('<span class="chip dir">面談なし採用</span>');
+  if((a.source||'')==='direct_entry')out.push('<span class="chip dir">エントリーなし採用</span>');
   return out.join('');
 }
 function needsDeptWarning(a){
@@ -527,7 +527,7 @@ var FLOW_STAGES=[
   {t:'日程調整',en:'Schedule',note:'本人はエントリー時にカレンダーで予約済み。予約を確認して日時を確定→案内自動送信。',m:function(a){return a.currentPhase==='一次選考'&&(a.currentTask==='希望時間入力待ち'||a.currentTask==='日時選択待ち')}},
   {t:'代表面談',en:'Interview',note:'面談を実施し、メモを記録して判断へ。リマインドは自動送信。',m:function(a){return a.currentPhase==='一次選考'&&a.currentTask==='面談実施待ち'}},
   {t:'合否判断',en:'Decision',note:'採用(部署確定)か不採用を判断。通知はどちらも自動送信。',m:function(a){return a.currentTask==='判断待ち'||a.currentPhase==='二次選考'}},
-  {t:'情報入力',en:'Onboard',note:'ご本人が基本情報を入力。面談なし採用はここから開始。追いかけは自動。',m:function(a){return a.currentPhase==='採用後'&&a.currentTask==='入力待ち'}},
+  {t:'情報入力',en:'Onboard',note:'ご本人が参加情報を入力。追いかけは自動。',m:function(a){return a.currentPhase==='採用後'&&a.currentTask==='入力待ち'}},
   {t:'保護者同意',en:'Consent',note:'未成年のみ。保護者へ依頼メールを自動送信し、同意を待つ。',m:function(a){return a.currentPhase==='採用後'&&a.currentTask==='同意待ち'}},
   {t:'本登録',en:'Register',note:'必要事項が揃った瞬間に自動で構成員登録。部署未定のときだけ承認。',m:function(a){return a.currentPhase==='登録'}},
   {t:'完了',en:'Joined',note:'構成員登録済み。歓迎メールと初回案内を自動送信。',m:function(a){return a.resultStatus==='registered'}},
@@ -572,7 +572,7 @@ function renderFlow(b){
         '<div class="fs-note">'+esc(st.note)+'</div>'+
         (cols[i].length?cols[i].map(function(a){
           return '<div class="fs-card" onclick="location.hash=\'#detail?id='+esc(a.id)+'\'"><div class="n">'+esc(a.name||'（無名）')+'</div>'+
-            '<div class="m">'+esc(a.candidateCode||a.id)+(a.source==='direct_entry'?' · 面談なし':'')+' '+actorChip(a)+'</div></div>';
+            '<div class="m">'+esc(a.candidateCode||a.id)+(a.source==='direct_entry'?' · エントリーなし':'')+' '+actorChip(a)+'</div></div>';
         }).join(''):'<div class="fs-empty">—</div>')+
       '</div>';
     }).join('')+'</div>'+
@@ -608,7 +608,7 @@ function renderList(b){
     el('listcnt').textContent=f.length+'名';
   }
   var phases=['','応募','一次選考','採用後','登録','完了','終了','direct'];
-  var labels={'':'すべて','direct':'面談なし採用','一次選考':'代表面談'};
+  var labels={'':'すべて','direct':'エントリーなし採用','一次選考':'代表面談'};
   shell(
     '<p class="eyebrow">Candidates</p><h1 class="pg">候補者一覧</h1><p class="pg-lede">クリックで詳細・操作へ。</p>'+
     '<div class="filters">'+phases.map(function(p){return '<button class="fpill'+(LIST_FILTER.ph===p?' on':'')+'" data-ph="'+esc(p)+'">'+esc(labels[p]!==undefined?labels[p]:p)+'</button>'}).join('')+
@@ -729,8 +729,8 @@ function renderDetail(appId,d){
         '<div class="err" id="fd_err"></div><div class="btnrow">'+
         '<button class="btn" id="fd_accept">採用する</button><button class="btn danger" id="fd_rej">不採用にする</button></div>'+
         '<p class="note" style="margin-top:10px">採用すると内定通知が自動送信され、以降（意思確認→追加情報→未成年は保護者同意→登録）は自動で進みます。不採用の場合は不採用連絡が自動送信されます。</p></div>';
-    }else if(phase==='採用後'&&task==='入力待ち'&&isDirect){
-      act='<div class="banner ok"><b>ご本人の入力待ちです（面談なし採用）。</b><br>入力が完了すると自動で登録まで進みます。リンクの有効期限は発行から72時間です。</div>'+
+    }else if(phase==='応募'&&isDirect){
+      act='<div class="banner ok"><b>ご本人の基本情報入力待ちです（エントリーなし採用）。</b><br>入力が完了すると面談の日程調整へ進みます（本人には入力後、面談予約カレンダーが案内されます）。リンクの有効期限は発行から72時間です。</div>'+
         '<div class="card"><div class="btnrow">'+
         '<button class="btn ghost" id="de_reissue">新しいリンクを発行してコピー</button>'+
         '<button class="btn ghost" id="de_remail">新しいリンクをメールで再送</button>'+
@@ -756,7 +756,7 @@ function renderDetail(appId,d){
     kv('初期役職',app.initial_role)+
     kv('志望動機',app.desired_department_reason)+
     kv('事前質問・メモ',app.pre_interview_questions)+
-    kv('紹介者',app.referrer_name)+kv('応募経路',isDirect?'面談なし採用（リンク発行）':(app.source||''))+
+    kv('紹介者',app.referrer_name)+kv('応募経路',isDirect?'エントリーなし採用（リンク発行）':(app.source||''))+
     kv('応募日',fmtD(app.created_at))+kv('会員ID',app.member_id)+
     '</dl>';
   var regH='';
@@ -773,11 +773,11 @@ function renderDetail(appId,d){
   var msgH=msgs.length?msgs.slice(0,12).map(function(m){
     return '<div class="msg"><div class="s">'+esc(m.subject||m.message_type||'')+'</div><div class="m">'+esc(m.to_email||'')+' · '+esc(fmtDt(m.sent_at||m.created_at))+'</div></div>'}).join(''):'<div class="empty">送信履歴はまだありません。</div>';
 
-  /* 進捗ステッパー(選考の流れの現在地)。面談なし採用は情報入力からの短縮フロー。終了(不採用/辞退)は非表示 */
+  /* 進捗ステッパー(選考の流れの現在地)。終了(不採用/辞退)は非表示 */
   var stepper='';
   if(rs==='active'||rs==='registered'){
     var stApp={currentPhase:phase,currentTask:task,resultStatus:rs};
-    var stages=isDirect?FLOW_STAGES.slice(4):FLOW_STAGES;
+    var stages=FLOW_STAGES;   // エントリーなし採用も面談を経る=全段階共通
     var curIdx=-1;
     for(var si=0;si<stages.length;si++)if(rs==='registered'?si===stages.length-1:stages[si].m(stApp)){curIdx=si;break}
     if(curIdx>=0){
@@ -1009,7 +1009,7 @@ function renderDetail(appId,d){
   })();
 }
 
-/* ============ 面談なし採用 ============ */
+/* ============ エントリーなし採用(面談あり) ============ */
 async function vIssue(){
   var nav=NAV;
   renderIssue(peekDepts()||[],peekBundle());   // 即時描画(前回スナップショット)。裏で最新を並列取得して差し替え
@@ -1027,7 +1027,7 @@ async function vIssue(){
 }
 function directsHtml(b){
   var directs=(b&&b.applications||[]).filter(function(a){return a.source==='direct_entry'});
-  return '<div id="ie_directs"><h2 class="sect-h">面談なし採用の候補者<span class="cnt">'+directs.length+'名</span></h2><div class="sect-rule"></div>'+
+  return '<div id="ie_directs"><h2 class="sect-h">エントリーなし採用の候補者<span class="cnt">'+directs.length+'名</span></h2><div class="sect-rule"></div>'+
     '<div class="card">'+(directs.length?directs.map(function(a){
       var warn=needsDeptWarning(a)?'<span class="chip r">部署未定 — 承認が必要</span>':'';
       return rowHtml(a,warn);
@@ -1035,18 +1035,18 @@ function directsHtml(b){
 }
 function renderIssue(depts,b){
   shell(
-    '<p class="eyebrow">Direct Entry</p><h1 class="pg">面談なし採用</h1>'+
-    '<p class="pg-lede">採用が決まっている方に、基本情報から保護者同意までを一括で入力できる専用リンクを発行します。入力完了後は自動で構成員登録まで進みます。</p>'+
+    '<p class="eyebrow">Direct Entry</p><h1 class="pg">エントリーなし採用</h1>'+
+    '<p class="pg-lede">公式サイトからのエントリーを経ずに、直接お声がけした方へ専用リンクを発行します。ご本人は基本情報を入力後そのまま代表面談の日程を予約し、面談→合否のあとは通常の手続き（意思確認・追加情報・未成年は保護者同意→登録）が自動で進みます。</p>'+
     '<div class="steps">'+
       '<div class="step"><div class="sn">STEP 01</div><div class="st">リンクを発行</div><div class="sd">氏名と（あれば）部署を指定して発行。メール自動送信もできます。有効期限は72時間です。</div></div>'+
-      '<div class="step"><div class="sn">STEP 02</div><div class="st">ご本人が入力</div><div class="sd">公式サイト上のフォームで基本情報〜同意を一括入力。未成年の場合は保護者へ同意依頼が自動送信されます。</div></div>'+
-      '<div class="step"><div class="sn">STEP 03</div><div class="st">自動で登録完了</div><div class="sd">入力（と保護者同意）が揃った瞬間に構成員登録が自動で完了し、歓迎メールが送られます。部署未定のときだけ承認が必要です。</div></div>'+
+      '<div class="step"><div class="sn">STEP 02</div><div class="st">入力→面談予約</div><div class="sd">ご本人が基本情報を入力すると、面談予約カレンダーが案内されます。予約を確認して面談日時を確定してください。</div></div>'+
+      '<div class="step"><div class="sn">STEP 03</div><div class="st">面談→自動手続き</div><div class="sd">代表面談ののち合否を判断。採用後の手続き（〜構成員登録）は自動で進みます。部署未定のときだけ承認が必要です。</div></div>'+
     '</div>'+
     '<h2 class="sect-h">リンクを発行する</h2><div class="sect-rule"></div>'+
     '<div class="card"><div class="grid2">'+
       '<div class="fld"><label>氏名（必須）</label><input type="text" id="ie_name" placeholder="山田 太郎"></div>'+
       '<div class="fld"><label>メールアドレス<span class="opt">自動送信する場合は必須</span></label><input type="email" id="ie_mail" placeholder="taro@gmail.com"></div>'+
-      '<div class="fld"><label>所属部署<span class="opt">推奨</span></label><select id="ie_dept">'+opts(depts,'','未定（あとで承認が必要になります）')+'</select><div class="hint">ここで指定しておくと、入力完了と同時に登録まで全自動で完了します。</div></div>'+
+      '<div class="fld"><label>所属部署<span class="opt">任意</span></label><select id="ie_dept">'+opts(depts,'','未定（面談で相談して決定）')+'</select><div class="hint">ここで指定しておくと、採用判断の際にそのまま確定され、登録まで全自動で進みます。</div></div>'+
       '<div class="fld"><label>初期役職</label><select id="ie_role"><option>メンバー</option><option>アシマネ</option></select></div>'+
     '</div>'+
     '<div class="fld"><label>兼任部署<span class="opt">任意・複数選択可</span></label>'+deptChipsHtml('ie_subs',depts)+'<div class="hint">最初から兼任する部署があれば選択。登録時に副所属として自動作成されます。</div></div>'+
