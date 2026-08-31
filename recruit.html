@@ -177,6 +177,12 @@ h1.pg{font-family:var(--serif);font-weight:600;font-size:clamp(24px,4vw,32px);li
 .search input{border:1px solid var(--line);border-radius:999px;padding:7px 16px;font-family:inherit;font-size:12.5px;outline:none;width:190px}
 .search input:focus{border-color:var(--azure)}
 
+/* ===== 面談録音 ===== */
+.rec-dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:#c0392b;animation:recpulse 1.2s infinite;vertical-align:middle;margin-right:9px}
+@keyframes recpulse{50%{opacity:.3}}
+@media(prefers-reduced-motion:reduce){.rec-dot{animation:none}}
+.rec-time{font-family:var(--latin);font-weight:500;font-size:22px;letter-spacing:.06em;vertical-align:middle}
+.rec-sub{font-family:var(--serif);font-weight:600;font-size:15px;letter-spacing:.08em;margin:0 0 10px}
 /* ===== 兼任部署チップ ===== */
 .selchips{display:flex;flex-wrap:wrap;gap:8px;margin:2px 0 4px}
 .selchips .sc{border:1px solid var(--line);background:#fff;border-radius:999px;padding:5px 14px;font-size:12px;font-weight:700;color:var(--ink2);cursor:pointer;transition:all .15s;font-family:inherit}
@@ -249,6 +255,19 @@ function toast(m){var t=el('toast');t.textContent=m;t.classList.add('on');clearT
 function fmtDt(v){if(!v)return '';var d=new Date(v);if(isNaN(d.getTime()))return String(v);return (d.getMonth()+1)+'/'+d.getDate()+' '+('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2)}
 function fmtD(v){if(!v)return '';var d=new Date(v);if(isNaN(d.getTime()))return String(v);return d.getFullYear()+'/'+(d.getMonth()+1)+'/'+d.getDate()}
 function opts(arr,sel,ph){return '<option value="">'+esc(ph||'選択してください')+'</option>'+ (arr||[]).map(function(v){var val=typeof v==='string'?v:v.id,lab=typeof v==='string'?v:v.name;return '<option value="'+esc(val)+'"'+(String(sel)===String(val)?' selected':'')+'>'+esc(lab)+'</option>'}).join('')}
+/* 面談チェックリスト: メモと一緒に面談記録(first_interview_content)へテキスト集約して保存 */
+var CHECK_ITEMS=['自己紹介と団体概要の説明','志望動機・希望部署の確認','活動頻度・参加できる時間帯の確認','会費・規約・個人情報の取り扱いの説明','未成年の場合は保護者同意の流れを案内','今後の流れ（結果連絡→登録）の説明'];
+function noteSerialize(memo,checks){
+  var lines=CHECK_ITEMS.map(function(it,i){return (checks[i]?'✓ ':'□ ')+it});
+  return (memo?memo+'\n\n':'')+'【確認チェック】\n'+lines.join('\n');
+}
+function noteParse(content){
+  content=String(content||'');
+  var idx=content.indexOf('【確認チェック】');
+  var memo=idx>=0?content.slice(0,idx).replace(/\n+$/,''):content;
+  var checks=CHECK_ITEMS.map(function(it){return content.indexOf('✓ '+it)>=0});
+  return {memo:memo,checks:checks};
+}
 /* 兼任部署の複数選択チップ */
 function deptChipsHtml(id,depts,selected){
   selected=selected||[];
@@ -332,6 +351,8 @@ function needsDeptWarning(a){
 var NAV=0;   // 画面遷移の世代。非同期読み込み完了時に世代が変わっていたら描画しない(古い画面の上書き防止)
 function route(){
   NAV++;
+  // 画面遷移時に進行中の録音を停止(マイク残留防止)
+  try{if(window.__rec){var _r=window.__rec;window.__rec=null;if(_r.mr&&_r.mr.state!=='inactive')_r.mr.stop();if(_r.stream)_r.stream.getTracks().forEach(function(t){t.stop()});clearInterval(_r.timer)}}catch(e){}
   var h=(location.hash||'#home').replace(/^#/,'');
   var m=h.split('?')[0],q=new URLSearchParams(h.indexOf('?')>=0?h.slice(h.indexOf('?')+1):'');
   if(!S&&m!=='login'){location.hash='#login';return}
@@ -582,11 +603,35 @@ async function vDetail(appId){
         '</div><div class="err" id="iv_err"></div><div class="btnrow"><button class="btn" id="iv_go">日時を確定して案内を自動送信</button></div></div>';
     }else if(phase==='一次選考'&&task==='面談実施待ち'){
       act='<div class="banner warn"><b>代表面談の実施待ちです。</b>'+(app.primaryInterviewAt?'<br>予定: '+esc(fmtDt(app.primaryInterviewAt))+(app.primaryInterviewer?' · 担当: '+esc(app.primaryInterviewer):''):'')+'</div>'+
-        '<div class="card"><div class="fld"><label>面談メモ<span class="opt">任意</span></label><textarea id="mm_memo" placeholder="面談の記録・所感など（あとから判断の参考になります）"></textarea></div>'+
-        '<div class="err" id="mm_err"></div><div class="btnrow"><button class="btn" id="mm_go">面談を実施済みにして合否判断へ進める</button></div>'+
-        '<p class="note" style="margin-top:10px">お礼メールが自動送信され、合否判断の画面に切り替わります。</p></div>';
+        '<div class="card">'+
+        '<p class="rec-sub">録音から議事録をつくる</p>'+
+        '<div id="rc_idle"><div class="btnrow">'+
+          '<button class="btn" id="rc_start"><span style="color:#ff8a80">●</span> 録音を開始</button>'+
+          '<label class="btn ghost" style="cursor:pointer">録音ファイルを選ぶ<input type="file" id="rc_file" accept="audio/*,video/*" style="display:none"></label>'+
+        '</div><p class="note" style="margin-top:10px">面談中にこの画面で録音するか、録音済みファイルをアップロードします。音声は自動で文字起こしされ、面談記録として保存されます。</p></div>'+
+        '<div id="rc_live" style="display:none"><span class="rec-dot"></span><span class="rec-time" id="rc_time">0:00</span>'+
+          '<div class="btnrow" style="margin-top:12px"><button class="btn danger" id="rc_stop">録音を停止する</button></div>'+
+          '<p class="note" style="margin-top:8px">録音中は画面を閉じないでください。</p></div>'+
+        '<div id="rc_done" style="display:none"><audio controls id="rc_audio" style="width:100%;margin:4px 0 12px"></audio>'+
+          '<div class="btnrow"><button class="btn" id="rc_up">アップロードして合否判断へ進める</button><button class="btn ghost" id="rc_redo">選び直す・録り直す</button></div></div>'+
+        '<p class="note" id="rc_status" style="margin-top:10px"></p><div class="err" id="rc_err"></div>'+
+        '</div>'+
+        (function(){
+          var np=noteParse(A.note&&A.note.first_interview_content);
+          return '<div class="card"><p class="rec-sub">面談メモ・チェックリスト</p>'+
+          '<div class="fld"><label>確認チェックリスト</label>'+CHECK_ITEMS.map(function(it,i){
+            return '<label class="check" style="margin-bottom:8px;padding:10px 13px"><input type="checkbox" id="ck_'+i+'"'+(np.checks[i]?' checked':'')+'><span class="t" style="font-size:13px">'+esc(it)+'</span></label>';
+          }).join('')+'</div>'+
+          '<div class="fld"><label>面談メモ<span class="opt">面談中に随時保存できます</span></label><textarea id="mm_memo" placeholder="面談の記録・所感など（合否判断の画面に表示されます）">'+esc(np.memo)+'</textarea></div>'+
+          '<div class="err" id="mm_err"></div><div class="btnrow">'+
+          '<button class="btn ghost" id="mm_save">メモを保存</button>'+
+          '<button class="btn" id="mm_go">面談を終えて合否判断へ進める</button></div>'+
+          '<p class="note" style="margin-top:10px">メモとチェックは面談記録として保存され、合否判断の画面に表示されます。録音した場合もメモは併せて保存されます。</p></div>';
+        })();
     }else if(task==='判断待ち'&&(phase==='一次選考'||phase==='二次選考')){
+      var _noteC=A.note&&String(A.note.first_interview_content||'').trim();
       act='<div class="banner warn"><b>代表面談の合否を判断してください。</b>採用には所属部署の確定が必要です。</div>'+
+        (_noteC?'<div class="card"><p class="rec-sub">面談記録</p><div style="font-size:13px;white-space:pre-line;line-height:1.9;color:var(--ink)">'+esc(_noteC)+'</div></div>':'')+
         '<div class="card"><div class="grid2">'+
         '<div class="fld"><label>所属部署（採用時 必須）</label><select id="fd_dept">'+opts(depts,(A.desiredDepartmentNames&&A.desiredDepartmentNames[0]&&A.desiredDepartmentNames[0].id)||'')+'</select></div>'+
         '<div class="fld"><label>初期役職</label><select id="fd_role"><option>メンバー</option><option>アシマネ</option></select></div>'+
@@ -706,10 +751,103 @@ async function vDetail(appId){
       toast('一次面談を確定し、案内を送信しました');reload();
     }catch(ex){unbusy(this);showErr('iv_err',ex)}
   });
+  /* 面談録音: その場録音(timeslice=1秒で取りこぼし防止) or ファイル → Drive直PUT(resumable) → 議事録パイプライン登録 */
+  if(el('rc_start')){
+    var RC={mr:null,stream:null,chunks:[],blob:null,name:'',timer:null,t0:0,lock:null};
+    window.__rec=RC;
+    var rcShow=function(m){['rc_idle','rc_live','rc_done'].forEach(function(x){var n=el(x);if(n)n.style.display=(x===m)?'':'none'})};
+    var rcSt=function(m){var n=el('rc_status');if(n)n.textContent=m||''};
+    var rcErr=function(ex){var n=el('rc_err');if(n){n.textContent=String(ex&&ex.message||ex);n.classList.add('on')}};
+    var rcClearErr=function(){var n=el('rc_err');if(n)n.classList.remove('on')};
+    var rcMime=function(){var c=['audio/webm;codecs=opus','audio/webm','audio/mp4'];for(var i=0;i<c.length;i++){if(window.MediaRecorder&&MediaRecorder.isTypeSupported&&MediaRecorder.isTypeSupported(c[i]))return c[i]}return ''};
+    var rcSetBlob=function(blob,name){
+      RC.blob=blob;RC.name=name;
+      var au=el('rc_audio');try{au.src=URL.createObjectURL(blob)}catch(e){}
+      rcShow('rc_done');rcSt('サイズ: '+(blob.size>1048576?(blob.size/1048576).toFixed(1)+'MB':Math.round(blob.size/1024)+'KB'));
+    };
+    el('rc_start').addEventListener('click',async function(){
+      rcClearErr();
+      if(!(window.MediaRecorder&&navigator.mediaDevices&&navigator.mediaDevices.getUserMedia)){rcErr(new Error('このブラウザは録音に対応していません。録音ファイルのアップロードをご利用ください'));return}
+      try{
+        RC.stream=await navigator.mediaDevices.getUserMedia({audio:true});
+        var mt=rcMime();
+        RC.mr=new MediaRecorder(RC.stream,mt?{mimeType:mt}:undefined);
+        RC.chunks=[];
+        RC.mr.ondataavailable=function(ev){if(ev.data&&ev.data.size)RC.chunks.push(ev.data)};
+        RC.mr.onstop=function(){
+          try{RC.stream.getTracks().forEach(function(t){t.stop()})}catch(e){}
+          try{if(RC.lock)RC.lock.release()}catch(e){}
+          clearInterval(RC.timer);
+          if(!RC.chunks.length){rcShow('rc_idle');rcErr(new Error('録音データが空でした。もう一度お試しください'));return}
+          var type=(RC.mr.mimeType||mt||'audio/webm').split(';')[0];
+          rcSetBlob(new Blob(RC.chunks,{type:type}),'代表面談録音.'+(type.indexOf('mp4')>=0?'m4a':'webm'));
+        };
+        RC.mr.onerror=function(){rcErr(new Error('録音エンジンがエラーを報告しました'))};
+        RC.mr.start(1000);   // timeslice必須(バックグラウンド化での0バイト録音防止)
+        RC.t0=Date.now();
+        try{if(navigator.wakeLock)RC.lock=await navigator.wakeLock.request('screen')}catch(e){}
+        rcShow('rc_live');rcSt('');
+        RC.timer=setInterval(function(){var s=Math.floor((Date.now()-RC.t0)/1000);var n=el('rc_time');if(n)n.textContent=Math.floor(s/60)+':'+('0'+s%60).slice(-2)},500);
+      }catch(ex){rcErr(new Error('マイクを開始できませんでした: '+String(ex&&ex.message||ex)))}
+    });
+    el('rc_stop').addEventListener('click',function(){try{if(RC.mr&&RC.mr.state!=='inactive')RC.mr.stop()}catch(e){}});
+    el('rc_file').addEventListener('change',function(){
+      rcClearErr();
+      var f=this.files&&this.files[0];
+      if(f)rcSetBlob(f.slice(0,f.size,f.type),f.name);   // sliceでinputの寿命から切り離す(値クリア後の参照無効化防止)
+      this.value='';
+    });
+    el('rc_redo').addEventListener('click',function(){RC.blob=null;rcShow('rc_idle');rcSt('')});
+    el('rc_up').addEventListener('click',async function(){
+      if(!RC.blob){rcErr(new Error('録音またはファイルがありません'));return}
+      rcClearErr();
+      var btn=this;busy(btn,'アップロード中…');
+      try{
+        // メモ/チェックが入力されていれば面談記録として先に保存 (録音と併存)
+        var _hasNote=(el('mm_memo')&&el('mm_memo').value.trim())||CHECK_ITEMS.some(function(_,i){var c=el('ck_'+i);return c&&c.checked});
+        if(_hasNote)await saveInterviewNote();
+        rcSt('アップロード先を準備しています…');
+        var sess=await apiPost('createMinutesUploadSession',{filename:RC.name||'recording.webm',mimeType:RC.blob.type||'application/octet-stream',sizeBytes:RC.blob.size,origin:location.origin});
+        if(!sess||sess.ok===false||!sess.uploadUrl)throw new Error((sess&&sess.error)||'アップロードURLを取得できません');
+        var fileId=await new Promise(function(resolve,reject){
+          var xhr=new XMLHttpRequest();
+          xhr.open('PUT',sess.uploadUrl,true);
+          xhr.setRequestHeader('Content-Type',RC.blob.type||'application/octet-stream');
+          if(xhr.upload)xhr.upload.onprogress=function(e){if(e.lengthComputable)rcSt('アップロード中… '+Math.round(e.loaded/e.total*100)+'%')};
+          xhr.onload=function(){try{var j=JSON.parse(xhr.responseText);resolve(j.id||j.fileId)}catch(e){reject(new Error('Drive応答の解析に失敗しました'))}};
+          xhr.onerror=function(){reject(new Error('アップロードに失敗しました。通信環境をご確認ください'))};
+          xhr.send(RC.blob);
+        });
+        if(!fileId)throw new Error('DriveのファイルIDを取得できませんでした');
+        rcSt('面談記録を登録しています…');
+        var r=await apiPost('recruitFinalizeInterviewUpload',{appId:appId,stage:'primary',fileId:fileId});
+        if(r&&r.ok===false)throw new Error(r.error||'登録に失敗しました');
+        toast('録音を登録しました。文字起こしと議事録は自動で進みます');
+        reload();
+      }catch(ex){unbusy(btn);rcSt('');rcErr(ex)}
+    });
+  }
+  /* 面談メモ+チェックリストの保存 (面談記録へ upsert。既存の他フィールドは温存) */
+  async function saveInterviewNote(){
+    var ser=noteSerialize(el('mm_memo').value.trim(),CHECK_ITEMS.map(function(_,i){var c=el('ck_'+i);return !!(c&&c.checked)}));
+    var prev=A.note||{};
+    var r=await apiPost('saveRecruitNote',{appId:appId,first_interview_content:ser,
+      impression:String(prev.impression||''),second_interview_content:String(prev.second_interview_content||''),
+      ai_analysis_result:String(prev.ai_analysis_result||''),final_department_id:String(prev.final_department_id||'')});
+    if(r&&r.ok===false)throw new Error(r.error||'メモの保存に失敗しました');
+    return ser;
+  }
+  if(el('mm_save'))el('mm_save').addEventListener('click',async function(){
+    busy(this,'保存中…');
+    try{await saveInterviewNote();toast('メモを保存しました');unbusy(this)}
+    catch(ex){unbusy(this);showErr('mm_err',ex)}
+  });
   if(el('mm_go'))el('mm_go').addEventListener('click',async function(){
     if(!confirm('面談を実施済みにします。お礼メールが自動送信され、合否判断に進みます。よろしいですか？'))return;
     busy(this);
-    try{var r=await apiPost('adminGenerateMinutes',{appId:appId,stage:'primary',transcript:el('mm_memo').value});
+    try{
+      var ser=await saveInterviewNote();
+      var r=await apiPost('adminGenerateMinutes',{appId:appId,stage:'primary',transcript:ser});
       if(r&&r.ok===false)throw new Error(r.error||'更新に失敗しました');
       toast('合否判断へ進めました');reload();
     }catch(ex){unbusy(this);showErr('mm_err',ex)}
