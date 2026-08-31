@@ -297,7 +297,7 @@ async function apiPost(action,payload){
   if(!j.ok)throw new Error(j.error||'処理に失敗しました');
   return j.data;
 }
-function logout(){S=null;localStorage.removeItem(SKEY);try{localStorage.removeItem(BKEY);localStorage.removeItem(DKEY)}catch(e){}CACHE={bundle:null,bundleAt:0,templates:null};location.hash='#login';route()}
+function logout(){S=null;localStorage.removeItem(SKEY);try{localStorage.removeItem(BKEY);localStorage.removeItem(DKEY);localStorage.removeItem(DETKEY)}catch(e){}DCACHE={};CACHE={bundle:null,bundleAt:0,templates:null};location.hash='#login';route()}
 
 /* 体感ゼロ化: 直近スナップショットで即描画→裏で最新を取得して差し替える (keep-previous) */
 var BKEY='recruitBundle-v1',DKEY='recruitDepts-v1';
@@ -314,6 +314,7 @@ async function loadBundle(force){
   _bundleInflight=apiGet('getRecruitConsoleBundle',{}).then(function(b){
     CACHE.bundle=b;CACHE.bundleAt=Date.now();_bundleInflight=null;
     try{localStorage.setItem(BKEY,JSON.stringify({at:Date.now(),data:b}))}catch(e){}
+    try{prefetchDetails(b.applications)}catch(e){}
     return b;
   },function(e){_bundleInflight=null;throw e});
   return _bundleInflight;
@@ -334,6 +335,46 @@ async function loadDepts(){
   CACHE.depts=d;
   try{localStorage.setItem(DKEY,JSON.stringify(d))}catch(e){}
   return d;
+}
+
+/* 詳細のkeep-previous: appIdごとに直近の詳細を保持→再訪は即全画面描画し、裏で最新化 */
+var DETKEY='recruitDetail-v1',DCACHE={},_detInflight={};
+function _detStore(){try{return JSON.parse(localStorage.getItem(DETKEY)||'{}')||{}}catch(e){return {}}}
+function peekDetail(appId){
+  if(DCACHE[appId])return DCACHE[appId];
+  var s=_detStore()[appId];
+  if(s&&s.data){DCACHE[appId]=s;return s}
+  return null;
+}
+function saveDetail(appId,d){
+  var rec={at:Date.now(),data:d};
+  DCACHE[appId]=rec;
+  try{
+    var st=_detStore();st[appId]=rec;
+    Object.keys(st).sort(function(a,b){return st[b].at-st[a].at}).slice(20).forEach(function(k){delete st[k]});   // 新しい20件だけ保持
+    localStorage.setItem(DETKEY,JSON.stringify(st));
+  }catch(e){}
+}
+function dropDetail(appId){delete DCACHE[appId];try{var st=_detStore();delete st[appId];localStorage.setItem(DETKEY,JSON.stringify(st))}catch(e){}}
+function fetchDetail(appId){
+  if(_detInflight[appId])return _detInflight[appId];
+  _detInflight[appId]=apiGet('getRecruitDetailBundle',{appId:appId}).then(function(d){
+    delete _detInflight[appId];saveDetail(appId,d);return d;
+  },function(e){delete _detInflight[appId];throw e});
+  return _detInflight[appId];
+}
+/* 先読み: 開かれそうな候補者(要対応が先頭)の詳細を裏で温める→初回クリックも即表示 */
+function prefetchDetails(apps){
+  var ids=(apps||[]).slice().sort(function(a,b){
+    var pa=(a.nextActor==='admin'&&(a.resultStatus||'active')==='active')?0:1;
+    var pb=(b.nextActor==='admin'&&(b.resultStatus||'active')==='active')?0:1;
+    return pa-pb;
+  }).map(function(a){return a.id}).filter(Boolean).slice(0,8);
+  ids.forEach(function(id,i){
+    var pk=peekDetail(id);
+    if(pk&&Date.now()-pk.at<120000)return;   // 2分以内は再取得しない
+    setTimeout(function(){fetchDetail(id).catch(function(){})},500*(i+1));
+  });
 }
 
 /* ============ 状態表示 ============ */
@@ -361,6 +402,7 @@ function needsDeptWarning(a){
 var NAV=0;   // 画面遷移の世代。非同期読み込み完了時に世代が変わっていたら描画しない(古い画面の上書き防止)
 function route(){
   NAV++;
+  try{var _fp=el('freshpill');if(_fp)_fp.remove()}catch(e){}   // 詳細の更新ピルは画面遷移で破棄
   // 画面遷移時に進行中の録音を停止(マイク残留防止)
   try{if(window.__rec){var _r=window.__rec;window.__rec=null;if(_r.mr&&_r.mr.state!=='inactive')_r.mr.stop();if(_r.stream)_r.stream.getTracks().forEach(function(t){t.stop()});clearInterval(_r.timer)}}catch(e){}
   var h=(location.hash||'#home').replace(/^#/,'');
@@ -579,19 +621,48 @@ function renderList(b){
 }
 
 /* ============ detail ============ */
+function _userBusy(){
+  if(window.__rec)return true;   // 録音中は絶対に画面を差し替えない
+  var ae=document.activeElement;
+  return !!(ae&&/^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName)&&ae.closest('#app'));
+}
+function _showFreshPill(appId){
+  if(el('freshpill'))return;
+  var b=document.createElement('button');
+  b.id='freshpill';b.className='btn sm';b.textContent='新しい情報があります — 表示を更新';
+  b.style.cssText='position:fixed;right:18px;bottom:18px;z-index:60;box-shadow:0 10px 30px rgba(18,53,111,.25)';
+  b.onclick=function(){b.remove();vDetail(appId)};
+  document.body.appendChild(b);
+}
 async function vDetail(appId){
   if(!appId){location.hash='#list';return}
   var nav=NAV;
-  // 即時スケルトン: 一覧キャッシュに居ればヘッダだけ先に描画し、詳細は裏で取得
-  var _pb=peekBundle(),_pa=_pb&&(_pb.applications||[]).find(function(x){return x.id===appId});
-  if(_pa){
-    shell('<p class="eyebrow"><a href="#list" style="color:inherit;text-decoration:none">← 候補者一覧</a></p>'+
-      '<div class="dhead"><h1>'+esc(_pa.name||'（無名）')+'</h1><span class="code">'+esc(_pa.candidateCode||appId)+'</span></div>'+
-      '<div class="chips">'+stateChips(_pa)+'</div>'+
-      '<div class="loading" style="padding:46px 20px"><div class="ring"></div>詳細を読み込んでいます</div>');
-  }else spin();
-  var d;try{d=await apiGet('getRecruitDetailBundle',{appId:appId})}catch(e){if(nav===NAV)errView(e);return}
+  var cached=peekDetail(appId);
+  if(cached){
+    renderDetail(appId,cached.data);   // 前回の詳細で即座に全画面描画(体感ゼロ)→裏で最新化
+  }else{
+    // 即時スケルトン: 一覧キャッシュに居ればヘッダだけ先に描画し、詳細は裏で取得
+    var _pb=peekBundle(),_pa=_pb&&(_pb.applications||[]).find(function(x){return x.id===appId});
+    if(_pa){
+      shell('<p class="eyebrow"><a href="#list" style="color:inherit;text-decoration:none">← 候補者一覧</a></p>'+
+        '<div class="dhead"><h1>'+esc(_pa.name||'（無名）')+'</h1><span class="code">'+esc(_pa.candidateCode||appId)+'</span></div>'+
+        '<div class="chips">'+stateChips(_pa)+'</div>'+
+        '<div class="loading" style="padding:46px 20px"><div class="ring"></div>詳細を読み込んでいます</div>');
+    }else spin();
+  }
+  var d;try{d=await fetchDetail(appId)}catch(e){
+    if(nav!==NAV)return;
+    if(cached){toast('最新の取得に失敗しました（前回の内容を表示中）')}else{errView(e)}
+    return;
+  }
   if(nav!==NAV)return;
+  if(cached){
+    if(JSON.stringify(d)===JSON.stringify(cached.data))return;   // 変化なし=そのまま
+    if(_userBusy()){_showFreshPill(appId);return}   // 入力・録音中は上書きせず更新ピルで知らせる
+  }
+  renderDetail(appId,d);
+}
+function renderDetail(appId,d){
   var A=d.application||{},app=A.application||{},reg=A.registrationForm,gc=A.guardian,hist=A.statusHistory||[],msgs=A.messages||[];
   var depts=d.departments||[],interviewers=d.interviewers||[];
   var phase=app.currentPhase||'',task=app.currentTask||'',rs=app.resultStatus||'active';
@@ -744,7 +815,7 @@ async function vDetail(appId){
   /* --- handlers --- */
   function busy(btn,label){btn.disabled=true;btn.dataset.t=btn.textContent;btn.textContent=label||'処理中…'}
   function unbusy(btn){btn.disabled=false;btn.textContent=btn.dataset.t}
-  function reload(){CACHE.bundleAt=0;vDetail(appId)}
+  function reload(){CACHE.bundleAt=0;dropDetail(appId);vDetail(appId)}   // 操作後は必ず最新を取り直す(古いキャッシュの瞬間表示を防ぐ)
   function showErr(id,ex){var e=el(id);if(!e)return alert(String(ex&&ex.message||ex));e.textContent=String(ex&&ex.message||ex);e.classList.add('on')}
 
   bindChips('ap_subs');bindChips('fd_subs');
