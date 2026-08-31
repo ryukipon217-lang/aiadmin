@@ -392,6 +392,7 @@ function stateChips(a){
     else if(na==='guardian')out.push('<span class="chip">保護者待ち</span>');
   }
   if((a.source||'')==='direct_entry')out.push('<span class="chip dir">エントリーなし採用</span>');
+  else if((a.source||'')==='direct_entry_noiv')out.push('<span class="chip dir">面談なし採用</span>');
   return out.join('');
 }
 function needsDeptWarning(a){
@@ -572,7 +573,7 @@ function renderFlow(b){
         '<div class="fs-note">'+esc(st.note)+'</div>'+
         (cols[i].length?cols[i].map(function(a){
           return '<div class="fs-card" onclick="location.hash=\'#detail?id='+esc(a.id)+'\'"><div class="n">'+esc(a.name||'（無名）')+'</div>'+
-            '<div class="m">'+esc(a.candidateCode||a.id)+(a.source==='direct_entry'?' · エントリーなし':'')+' '+actorChip(a)+'</div></div>';
+            '<div class="m">'+esc(a.candidateCode||a.id)+(a.source==='direct_entry'?' · エントリーなし':(a.source==='direct_entry_noiv'?' · 面談なし':''))+' '+actorChip(a)+'</div></div>';
         }).join(''):'<div class="fs-empty">—</div>')+
       '</div>';
     }).join('')+'</div>'+
@@ -595,7 +596,7 @@ function renderList(b){
   var apps=b.applications||[];
   function render(){
     var f=apps.filter(function(a){
-      if(LIST_FILTER.ph==='direct'&&a.source!=='direct_entry')return false;
+      if(LIST_FILTER.ph==='direct'&&String(a.source||'').indexOf('direct_entry')!==0)return false;
       if(LIST_FILTER.ph&&LIST_FILTER.ph!=='direct'&&a.currentPhase!==LIST_FILTER.ph)return false;
       if(LIST_FILTER.q){var q=LIST_FILTER.q.toLowerCase();if(String(a.name||'').toLowerCase().indexOf(q)<0&&String(a.candidateCode||'').toLowerCase().indexOf(q)<0&&String(a.email||'').toLowerCase().indexOf(q)<0)return false}
       return true;
@@ -666,7 +667,7 @@ function renderDetail(appId,d){
   var A=d.application||{},app=A.application||{},reg=A.registrationForm,gc=A.guardian,hist=A.statusHistory||[],msgs=A.messages||[];
   var depts=d.departments||[],interviewers=d.interviewers||[];
   var phase=app.currentPhase||'',task=app.currentTask||'',rs=app.resultStatus||'active';
-  var isDirect=(app.source||'')==='direct_entry';
+  var isDirect=String(app.source||'').indexOf('direct_entry')===0;   // direct_entry(面談あり)/direct_entry_noiv(面談なし)
   var deptMapId={};depts.forEach(function(x){deptMapId[x.id]=x.name});
   var finalDept=app.final_department_id?(deptMapId[app.final_department_id]||app.final_department_id):'';
 
@@ -736,6 +737,13 @@ function renderDetail(appId,d){
         '<button class="btn ghost" id="de_remail">新しいリンクをメールで再送</button>'+
         '</div><div class="linkbox" id="de_box" style="display:none"><input readonly id="de_url"><button class="btn sm ghost" onclick="__copy(el(\'de_url\').value)">コピー</button></div>'+
         '<div class="err" id="de_err"></div></div>';
+    }else if(phase==='採用後'&&task==='入力待ち'&&app.source==='direct_entry_noiv'){
+      act='<div class="banner ok"><b>ご本人の入力待ちです（面談なし採用）。</b><br>入力が完了すると自動で登録まで進みます。リンクの有効期限は発行から72時間です。</div>'+
+        '<div class="card"><div class="btnrow">'+
+        '<button class="btn ghost" id="de_reissue">新しいリンクを発行してコピー</button>'+
+        '<button class="btn ghost" id="de_remail">新しいリンクをメールで再送</button>'+
+        '</div><div class="linkbox" id="de_box" style="display:none"><input readonly id="de_url"><button class="btn sm ghost" onclick="__copy(el(\'de_url\').value)">コピー</button></div>'+
+        '<div class="err" id="de_err"></div></div>';
     }else if(task==='同意待ち'){
       act='<div class="banner ok"><b>保護者の同意待ちです。</b>同意のご案内は自動送信済みです。同意が確認されると自動で登録まで進みます。'+(gc?'<br>保護者: '+esc(gc.guardian_name||'')+'（'+esc(gc.guardian_email||'')+'）· 状態: '+esc(gc.consent_status||''):'')+'</div>';
     }else if(app.nextActor==='candidate'){
@@ -756,7 +764,7 @@ function renderDetail(appId,d){
     kv('初期役職',app.initial_role)+
     kv('志望動機',app.desired_department_reason)+
     kv('事前質問・メモ',app.pre_interview_questions)+
-    kv('紹介者',app.referrer_name)+kv('応募経路',isDirect?'エントリーなし採用（リンク発行）':(app.source||''))+
+    kv('紹介者',app.referrer_name)+kv('応募経路',app.source==='direct_entry_noiv'?'面談なし採用（リンク発行）':(isDirect?'エントリーなし採用（リンク発行）':(app.source||'')))+
     kv('応募日',fmtD(app.created_at))+kv('会員ID',app.member_id)+
     '</dl>';
   var regH='';
@@ -1026,7 +1034,7 @@ async function vIssue(){
   });
 }
 function directsHtml(b){
-  var directs=(b&&b.applications||[]).filter(function(a){return a.source==='direct_entry'});
+  var directs=(b&&b.applications||[]).filter(function(a){return String(a.source||'').indexOf('direct_entry')===0});
   return '<div id="ie_directs"><h2 class="sect-h">エントリーなし採用の候補者<span class="cnt">'+directs.length+'名</span></h2><div class="sect-rule"></div>'+
     '<div class="card">'+(directs.length?directs.map(function(a){
       var warn=needsDeptWarning(a)?'<span class="chip r">部署未定 — 承認が必要</span>':'';
@@ -1036,7 +1044,7 @@ function directsHtml(b){
 function renderIssue(depts,b){
   shell(
     '<p class="eyebrow">Direct Entry</p><h1 class="pg">エントリーなし採用</h1>'+
-    '<p class="pg-lede">公式サイトからのエントリーを経ずに、直接お声がけした方へ専用リンクを発行します。ご本人は基本情報を入力後そのまま代表面談の日程を予約し、面談→合否のあとは通常の手続き（意思確認・追加情報・未成年は保護者同意→登録）が自動で進みます。</p>'+
+    '<p class="pg-lede">公式サイトからのエントリーを経ずに、直接お声がけした方へ専用リンクを発行します。標準は<b>面談あり</b>（基本情報入力→代表面談→合否→自動手続き）。採用が確定済みの方には<b>面談なし</b>も選べます（入力完了で登録まで自動）。</p>'+
     '<div class="steps">'+
       '<div class="step"><div class="sn">STEP 01</div><div class="st">リンクを発行</div><div class="sd">氏名と（あれば）部署を指定して発行。メール自動送信もできます。有効期限は72時間です。</div></div>'+
       '<div class="step"><div class="sn">STEP 02</div><div class="st">入力→面談予約</div><div class="sd">ご本人が基本情報を入力すると、面談予約カレンダーが案内されます。予約を確認して面談日時を確定してください。</div></div>'+
@@ -1044,6 +1052,10 @@ function renderIssue(depts,b){
     '</div>'+
     '<h2 class="sect-h">リンクを発行する</h2><div class="sect-rule"></div>'+
     '<div class="card"><div class="grid2">'+
+      '<div class="fld"><label>フロー</label><select id="ie_flow">'+
+        '<option value="interview">面談あり（標準）— 基本情報入力 → 代表面談 → 合否</option>'+
+        '<option value="no_interview">面談なし — 入力完了で登録まで自動（採用確定済みの方）</option>'+
+      '</select></div>'+
       '<div class="fld"><label>氏名（必須）</label><input type="text" id="ie_name" placeholder="山田 太郎"></div>'+
       '<div class="fld"><label>メールアドレス<span class="opt">自動送信する場合は必須</span></label><input type="email" id="ie_mail" placeholder="taro@gmail.com"></div>'+
       '<div class="fld"><label>所属部署<span class="opt">任意</span></label><select id="ie_dept">'+opts(depts,'','未定（面談で相談して決定）')+'</select><div class="hint">ここで指定しておくと、採用判断の際にそのまま確定され、登録まで全自動で進みます。</div></div>'+
@@ -1067,7 +1079,7 @@ function renderIssue(depts,b){
     if(send&&!mail){e.textContent='メールを自動送信する場合は、メールアドレスを入力してください';e.classList.add('on');return}
     var btn=this;btn.disabled=true;btn.textContent='発行しています…';
     try{
-      var r=await apiPost('recruitIssueDirectEntry',{name:name,email:mail,deptId:el('ie_dept').value,role:el('ie_role').value,subDeptIds:chipVals('ie_subs',el('ie_dept').value),sendMail:send});
+      var r=await apiPost('recruitIssueDirectEntry',{name:name,email:mail,deptId:el('ie_dept').value,role:el('ie_role').value,subDeptIds:chipVals('ie_subs',el('ie_dept').value),sendMail:send,flow:el('ie_flow').value});
       if(r&&r.ok===false)throw new Error(r.error||'発行に失敗しました');
       el('ie_done').style.display='';el('ie_url').value=r.url||'';
       var expTxt=r.expiresAt?fmtDt(r.expiresAt):'';
