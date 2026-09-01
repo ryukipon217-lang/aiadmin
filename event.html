@@ -6,7 +6,7 @@
 <meta name="robots" content="noindex">
 <title>イベント — connec+a 運営ポータル</title>
 <meta name="description" content="connec+a 運営ポータル — イベント面">
-<script>window.__ADMIN2_BUILD='20260901142549';</script>
+<script>window.__ADMIN2_BUILD='20260901145507';</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://script.google.com" crossorigin>
@@ -194,6 +194,15 @@ h2.sec .act{font-family:var(--sans);font-size:12.5px;font-weight:700;color:var(-
 .tabbar a .cnt{font-size:11px;font-weight:700;background:var(--warn);color:#fff;border-radius:999px;padding:0 7px;line-height:1.6}
 .tabbar .spacer{flex:1}
 
+/* ============ ハブ共通: Dayセグメント(複数日のみ・数字バンド直上・全タブ同位置) ============ */
+.dayseg{display:flex;flex-wrap:wrap;gap:2px;align-items:center;padding:4px;border-radius:8px;margin:-8px 0 10px;width:max-content;max-width:100%}
+.dayseg button{border:0;background:transparent;font:inherit;font-size:12.5px;letter-spacing:.06em;padding:7px 14px;border-radius:6px;color:var(--ink3);min-height:40px;cursor:pointer;white-space:nowrap;font-variant-numeric:tabular-nums}
+.dayseg button:hover{background:rgba(255,255,255,.6)}
+.dayseg button[aria-pressed="true"]{background:var(--deep);color:#fff;font-weight:700}
+.dayseg button.today{position:relative;padding-top:12px;padding-bottom:2px}
+.dayseg button.today::after{content:'きょう';display:block;font-size:9px;letter-spacing:.1em;font-weight:700;color:var(--warn);line-height:1.4}
+.dayseg button.today[aria-pressed="true"]::after{color:rgba(255,255,255,.85)}
+
 /* ============ ハブ共通: 数字バンド ============ */
 .numband{display:flex;margin:0 0 26px;border-radius:8px;overflow:hidden}
 .numband.tight{margin-bottom:12px}
@@ -340,6 +349,8 @@ table.regs{width:100%;border-collapse:collapse;min-width:680px;font-size:13.5px}
 .regs .who img{width:32px;height:32px;border-radius:50%;object-fit:cover;flex:none}
 .regs .who .tag{font-size:10.5px;font-weight:700;color:var(--deep);border:1px solid rgba(110,134,224,.45);border-radius:999px;padding:0 8px;line-height:1.7}
 .regs .when{font-family:var(--serif);font-variant-numeric:tabular-nums;color:var(--ink3);white-space:nowrap}
+.regs .day{font-variant-numeric:tabular-nums;font-size:12.5px;color:var(--ink3);white-space:nowrap}
+.regs tr.child .day{font-size:11.5px;color:var(--ink4)}
 .regs .amt{font-family:var(--serif);font-variant-numeric:tabular-nums;font-size:14.5px;white-space:nowrap}
 .regs .st{white-space:nowrap}
 .regs .st .how{display:block;font-size:11.5px;color:var(--ink5);font-weight:400}
@@ -493,6 +504,9 @@ table.regs{width:100%;border-collapse:collapse;min-width:680px;font-size:13.5px}
 .staffed .sr.head{padding:0 0 6px;border-bottom:1.5px solid var(--rule);font-size:11.5px;color:var(--ink4);letter-spacing:.08em}
 .staffed input{font:inherit;font-size:14px;padding:9px 11px;min-height:42px;border:1px solid var(--line);border-radius:6px;background:rgba(255,255,255,.72);color:var(--ink);width:100%}
 .staffed input::placeholder{color:var(--ink5);font-size:12.5px}
+/* 複数日: Day列(全日共通⇔Day別)つきの4+1列 */
+.staffed .sr.withday{grid-template-columns:minmax(180px,1.2fr) minmax(120px,.7fr) minmax(120px,.7fr) minmax(130px,.9fr) 44px}
+.staffed select.sr-day{font:inherit;font-size:13px;padding:9px 8px;min-height:42px;border:1px solid var(--line);border-radius:6px;background:rgba(255,255,255,.72);color:var(--ink);width:100%}
 .sr-del{border:0;background:none;color:var(--ink5);cursor:pointer;min-height:42px;min-width:42px;border-radius:6px}
 .sr-del:hover{color:var(--warn);background:rgba(168,67,79,.08)}
 .sr-add{margin-top:12px;display:inline-flex;align-items:center;gap:6px;border:1.5px dashed var(--line);background:none;color:var(--deep);font-family:var(--sans);font-weight:700;font-size:13px;padding:9px 16px;border-radius:8px;cursor:pointer;min-height:42px;white-space:nowrap}
@@ -519,9 +533,9 @@ table.regs{width:100%;border-collapse:collapse;min-width:680px;font-size:13.5px}
 /* 収支の見込み: 赤字のとき */
 .ledger .lr.total.neg span:last-child{color:var(--warn)}
 @media(max-width:640px){
-  .staffed .sr{grid-template-columns:1fr 44px;gap:8px}
+  .staffed .sr,.staffed .sr.withday{grid-template-columns:1fr 44px;gap:8px}
   .staffed .sr.head{display:none}
-  .staffed .sr input{grid-column:1}
+  .staffed .sr input,.staffed .sr select.sr-day{grid-column:1}
   .staffed .sr .sr-del{grid-column:2;grid-row:1}
   .xconfirm{flex-wrap:wrap;justify-content:flex-end}
   .xadd{grid-template-columns:1fr 1fr}
@@ -555,6 +569,8 @@ window.AdminAPI = (function () {
     listNews: 1, listMinutesMeetings: 1, listMembers: 1,
     // read-api @listWaitlist 追加済み(2026-09-01): キャンセル待ちの読取
     listWaitlist: 1,
+    // イベント単体の申込読取(バックエンド実装中の新action。無ければ本体→呼び出し側でlistRegistrationsへフォールバック)
+    listEventRegistrations: 1,
   };
   var ROLE_RANK = { '代表': 5, '副代表': 4, 'マネージャー': 3, 'アシマネ': 2, 'メンバー': 1 };
   var onUnauthorized = null; // アプリ側が setOnUnauthorized で登録(認証切れ→ログイン画面へ)
@@ -799,6 +815,30 @@ window.AdminAPI = (function () {
     for (var i = 0; i < ss.length; i++) if (String(ss[i].date || '').slice(0, 10) === TODAY) return true;
     return false;
   }
+  /* ---------- 複数日(セッション)ヘルパ ----------
+     consoleと同じデータ実形: listEvents は multi のとき e.format==='multi' と
+     e.sessions=[{id,name,date:'YYYY-MM-DD',startTime,endTime,venue}](日付昇順) を返す。
+     申込行(listRegistrations)は sessionId(空=イベント全体)/sessionOrder/sessionLabel を持ち、
+     参加費は日付ソートの先頭行(=Day1)に全額計上・Day2以降は金額0の兄弟行(同 applicationId)。 */
+  function evSess(e) {
+    if (!e || e.format !== 'multi') return [];
+    return arr(e.sessions).filter(function (s) { return s && s.date; }).slice()
+      .sort(function (a, b) { return String(a.date).localeCompare(String(b.date)); });
+  }
+  function evIsMulti(e) { return evSess(e).length > 1; }
+  function dayLabelMap(e) { // sessionId -> {n, label:'Day1', md:'9/14'}
+    var m = {};
+    evSess(e).forEach(function (s, i) {
+      var d = parseYmd(s.date);
+      m[String(s.id)] = { n: i + 1, label: 'Day' + (i + 1), md: d ? dateSlash(d) : '' };
+    });
+    return m;
+  }
+  function todayDayOf(e) { // きょうのDay判定=セッションdate===今日
+    var ss = evSess(e);
+    for (var i = 0; i < ss.length; i++) if (String(ss[i].date).slice(0, 10) === TODAY) return { n: i + 1, total: ss.length };
+    return null;
+  }
   function regStatus(r) { return String(r.status || ''); }
   function regCancelled(r) { return /キャンセル/.test(regStatus(r)); }
   function regPaid(r) { return r.paid === true || r.paid === 'TRUE' || /決済済み|チェックイン/.test(regStatus(r)); }
@@ -806,7 +846,14 @@ window.AdminAPI = (function () {
   function regRefundWait(r) { return regCancelled(r) && regPaid(r) && !r.refundedAt && !(num(r.refundAmount) > 0); }
   function regActive(r) { return !r.isTest && !regCancelled(r); }
 
-  /* ---------- イベント別 集計(非PII: 件数と日次カウントのみ。キャッシュ可) ---------- */
+  /* ---------- イベント別 集計(非PII: 件数と日次カウントのみ。キャッシュ可) ----------
+     multiday監査の教訓を継承:
+     - KPIユニーク化: 複数日は1申込=Day数ぶんの行になるため、applicationId で1申込に束ねて数える。
+     - 0円行(Day2以降)は未決済に数えない。ただし同一申込の課金行(Day1)が未決済なら申込ごと未決済(兄弟未決済検知)。
+     - 収入/決済方法は課金行(金額>0)だけで数える(0円行は入金ではない)。
+     - dayAggs: sessionId別の申込/決済/未決済/チェックイン(''=日程未指定の救済対象)。 */
+  function appKeyOf(r) { return r.eventId + '||' + String(r.applicationId || r.userId || r.id || ''); }
+  function newAgg() { return { applied: 0, paid: 0, unpaid: 0, checked: 0, cancels: 0, refundWait: 0, companions: 0, days: {}, yesterday: 0, first: 0, repeat: 0, firstKnown: 0, pay: {}, revenue: 0, unpaidAmt: 0, dayAggs: {} }; }
   function buildAggs(regs, parts) {
     var pmap = null;
     if (parts) {
@@ -814,34 +861,65 @@ window.AdminAPI = (function () {
       arr(parts).forEach(function (p) { if (p && p.id) pmap[String(p.id).trim()] = p; });
     }
     var by = {};
+    function aggOf(eid) { return by[eid] || (by[eid] = newAgg()); }
+    // 1) 申込(application)単位に束ねる
+    var apps = {};
+    var order = [];
     arr(regs).forEach(function (r) {
       if (!r || r.isTest || !r.eventId) return;
-      var a = by[r.eventId];
-      if (!a) a = by[r.eventId] = { applied: 0, paid: 0, unpaid: 0, checked: 0, cancels: 0, refundWait: 0, companions: 0, days: {}, yesterday: 0, first: 0, repeat: 0, firstKnown: 0, pay: {}, revenue: 0, unpaidAmt: 0 };
+      var k = appKeyOf(r);
+      var g = apps[k];
+      if (!g) { g = apps[k] = { eventId: r.eventId, rows: [], cans: [] }; order.push(k); }
+      if (regCancelled(r)) g.cans.push(r); else g.rows.push(r);
+    });
+    // 2) 行単位の金銭(課金行のみ)+返金待ち
+    arr(regs).forEach(function (r) {
+      if (!r || r.isTest || !r.eventId) return;
+      var a = aggOf(r.eventId);
       if (regCancelled(r)) {
-        a.cancels++;
-        if (regRefundWait(r)) a.refundWait++;
+        // 返金待ちは課金行(金額>0)だけ数える(0円の兄弟行は決済フラグ継承のため二重計上しない)
+        if (regRefundWait(r) && num(r.amount) > 0) a.refundWait++;
         return;
       }
-      a.applied++;
-      if (regPaid(r)) {
-        a.paid++;
-        a.revenue += num(r.amount);
-        var m = String(r.actualPaymentMethod || '').trim();
-        if (m) a.pay[m] = (a.pay[m] || 0) + 1;
-      } else {
-        a.unpaid++;
-        a.unpaidAmt += num(r.amount);
+      if (num(r.amount) > 0) {
+        if (regPaid(r)) {
+          a.revenue += num(r.amount);
+          var m = String(r.actualPaymentMethod || '').trim();
+          if (m) a.pay[m] = (a.pay[m] || 0) + 1;
+        } else {
+          a.unpaidAmt += num(r.amount);
+        }
       }
-      if (regChecked(r)) a.checked++;
-      if (num(r.companionsCount) > 0) a.companions++;
-      var d = String(r.appliedAt || r.createdAt || '').slice(0, 10);
-      if (d) {
-        a.days[d] = (a.days[d] || 0) + 1;
-        if (d === YESTER) a.yesterday++;
+    });
+    // 3) 申込単位のユニーク集計+Day別集計
+    order.forEach(function (k) {
+      var g = apps[k];
+      var a = aggOf(g.eventId);
+      if (!g.rows.length) { if (g.cans.length) a.cancels++; return; } // 全行キャンセル=1申込のキャンセル
+      // 申込の決済状態: 単日行(sessionIdなし)=従来どおり !regPaid /
+      // セッション行(複数日)=課金行(金額>0)が未決済のときだけ未決済(0円行=Day2以降は支払対象なし)
+      var appUnpaid = g.rows.some(function (r) { return !regPaid(r) && (num(r.amount) > 0 || !r.sessionId); });
+      a.applied++;
+      if (appUnpaid) a.unpaid++; else a.paid++;
+      if (g.rows.some(regChecked)) a.checked++;
+      if (g.rows.some(function (r) { return num(r.companionsCount) > 0; })) a.companions++;
+      var first = '';
+      g.rows.forEach(function (r) {
+        var d = String(r.appliedAt || r.createdAt || '').slice(0, 10);
+        if (d && (!first || d < first)) first = d;
+        // Day別: そのDayの申込行(0円行の決済状態は兄弟=申込単位で判定)
+        var sid = String(r.sessionId || '');
+        var da = a.dayAggs[sid] || (a.dayAggs[sid] = { applied: 0, paid: 0, unpaid: 0, checked: 0 });
+        da.applied++;
+        if (appUnpaid) da.unpaid++; else da.paid++;
+        if (regChecked(r)) da.checked++;
+      });
+      if (first) {
+        a.days[first] = (a.days[first] || 0) + 1;
+        if (first === YESTER) a.yesterday++;
       }
       if (pmap) {
-        var p = pmap[String(r.userId || '').trim()];
+        var p = pmap[String(g.rows[0].userId || '').trim()];
         if (p) {
           a.firstKnown++;
           if (num(p.events) <= 0) a.first++; else a.repeat++;
@@ -991,21 +1069,22 @@ window.AdminAPI = (function () {
         cs.map(function (c) { return '<span class="nb">' + esc(c) + '</span>'; }).join('・') + '。';
     }
     var parts = [];
+    var td = todayDayOf(ev);
+    if (td && td.total > 1) parts.push('きょうは<span class="nb">Day' + td.n + '/' + td.total + '日目</span>');
     if (a) {
       parts.push('申込 ' + a.applied + (num(ev.capacity) > 0 ? '/' + num(ev.capacity) : '件'));
       if (a.yesterday > 0) parts.push('きのう<span class="nb">+' + a.yesterday + '名</span>');
       var fc = fullForecast(ev, a);
       if (fc === '満員') parts.push('<span class="nb">満員</span>です');
       else if (fc) parts.push(fc);
-      return parts.join(' ― ') + '。';
     }
-    return '';
+    return parts.length ? parts.join(' ― ') + '。' : '';
   }
   function buildListModel(M) {
     var vm = { mePhoto: M.me && M.me.photo, showHq: (M.me && M.me.rank >= 3) };
     var events = arr(M.events).filter(function (e) { return e && !evCancelled(e); });
     var aggs = M.aggs || null;
-    function aggOf(e) { return aggs ? (aggs[e.id] || { applied: 0, paid: 0, unpaid: 0, checked: 0, cancels: 0, refundWait: 0, companions: 0, days: {}, yesterday: 0, first: 0, repeat: 0, firstKnown: 0, pay: {}, revenue: 0, unpaidAmt: 0 }) : null; }
+    function aggOf(e) { return aggs ? (aggs[e.id] || newAgg()) : null; }
 
     var upcoming = events.filter(function (e) { return !evPast(e); });
     var past = arr(M.events).filter(function (e) { return e && evPast(e) && !/中止/.test(evStatus(e)); });
@@ -1039,8 +1118,11 @@ window.AdminAPI = (function () {
       } else if (fa && fa.yesterday > 0) {
         crew.push({ facesHtml: '', textHtml: 'きのう<span class="nb">+' + fa.yesterday + '名</span>の申込' });
       }
+      var ftd = todayDayOf(featured); // 開催中の複数日: 何日目かを特集kickerに
       vm.feature = {
-        kicker: evToday(featured) ? 'きょう開催 ・ 進行中' : (evDraft(featured) ? '次号 ・ 下書き' : '次回イベント'),
+        kicker: evToday(featured)
+          ? (ftd && ftd.total > 1 ? 'きょう開催 ・ <span class="nb">Day' + ftd.n + '/' + ftd.total + '日目</span>' : 'きょう開催 ・ 進行中')
+          : (evDraft(featured) ? '次号 ・ 下書き' : '次回イベント'),
         title: evTitle(featured),
         metaHtml: (evToday(featured) ? '' : '<span class="nb">' + esc(evDate(featured) ? dateJa(parseYmd(evDate(featured))) : '日付未定') + '</span> ・ ') + meta.join(' ・ '),
         photo: evImage(featured) ? { src: evImage(featured), cap: '' } : null,
@@ -1130,6 +1212,35 @@ window.AdminAPI = (function () {
       (reception ? '<a class="btn" href="#"><span class="mi">qr_code_scanner</span>受付を開く(iPad)</a>' : '') +
       '</nav>';
     return h;
+  }
+  /* ---- Dayセグメント(複数日のみ)。選択は全タブ共有(メモリ)・イベントを跨いだらリセット ---- */
+  var dayState = { evId: '', sel: '' }; // sel: ''=全日 / sessionId=そのDay
+  function daySel(ev) {
+    if (dayState.evId !== String(ev.id)) dayState = { evId: String(ev.id), sel: '' };
+    return dayState.sel;
+  }
+  function daySegHtml(ev) {
+    if (!evIsMulti(ev)) return ''; // 単日イベントでは出さない
+    var sel = daySel(ev);
+    var h = '<div class="dayseg glass" role="group" aria-label="開催日で絞り込み">' +
+      '<button type="button" data-day="" aria-pressed="' + (sel === '') + '">全日</button>';
+    evSess(ev).forEach(function (s, i) {
+      var d = parseYmd(s.date);
+      var today = String(s.date).slice(0, 10) === TODAY;
+      h += '<button type="button" class="nb' + (today ? ' today' : '') + '" data-day="' + esc(s.id) + '"' +
+        ' aria-pressed="' + (sel === String(s.id)) + '">Day' + (i + 1) + (d ? ' ' + esc(dateSlash(d)) : '') + '</button>';
+    });
+    h += '</div>';
+    return h;
+  }
+  function bindDaySeg(ev) {
+    Array.prototype.forEach.call(root.querySelectorAll('[data-day]'), function (b) {
+      b.addEventListener('click', function () {
+        daySel(ev); // evId合わせ
+        dayState.sel = b.getAttribute('data-day') || '';
+        render();
+      });
+    });
   }
   function numbandHtml(nums, note, tight) {
     if (note) {
@@ -1234,10 +1345,12 @@ window.AdminAPI = (function () {
       '</main>';
     root.innerHTML = mastheadHtml({ mePhoto: vm.mePhoto, showHq: vm.showHq }) +
       hubHeadHtml(vm.head, vm.tabs, vm.reception) +
+      (vm.dayseg || '') +
       numbandHtml(vm.nums, vm.numsNote) +
       '<div class="cols' + (vm.aside ? '' : ' solo') + '">' + main + hubAsideHtml(vm.aside) + '</div>' +
       colophonHtml(esc(vm.head.title));
     bindRetry();
+    if (vm.dayseg) bindDaySeg({ id: vm.evId });
     var cr = document.getElementById('ev-crew-retry');
     if (cr) cr.addEventListener('click', function () {
       var x = EX[vm.evId];
@@ -1249,15 +1362,22 @@ window.AdminAPI = (function () {
   /* ---------- ハブ: 実データ → ビューモデル ---------- */
   function hubHeadModel(ev, tab) {
     var kicker, stateCls, stateLabel;
+    var td = todayDayOf(ev);
     if (evCancelled(ev)) { kicker = '中止'; stateCls = 'off'; stateLabel = /アーカイブ/.test(evStatus(ev)) ? 'アーカイブ' : '中止'; }
-    else if (evToday(ev)) { kicker = 'きょう開催'; stateCls = evPublished(ev) ? '' : 'draft'; stateLabel = evStatus(ev) || '公開中'; }
+    else if (evToday(ev)) { kicker = td && td.total > 1 ? 'きょう開催 ・ <span class="nb">Day' + td.n + '/' + td.total + '日目</span>' : 'きょう開催'; stateCls = evPublished(ev) ? '' : 'draft'; stateLabel = evStatus(ev) || '公開中'; }
     else if (evPast(ev)) { kicker = '終了'; stateCls = 'done'; stateLabel = '開催済み'; }
     else if (evDraft(ev)) { kicker = '下書き'; stateCls = 'draft'; stateLabel = '下書き'; }
     else { kicker = '開催予定'; stateCls = ''; stateLabel = evStatus(ev) || '公開中'; }
     var meta = [];
     var d = parseYmd(evDate(ev));
     var tr = timeRange(ev);
-    if (d) meta.push('<span class="nb">' + esc(dateJa(d)) + (tr ? ' ' + esc(tr) : '') + '</span>');
+    if (evIsMulti(ev) && d) { // 複数日: 期間(初日〜最終日・全n日)で示す
+      var ed = parseYmd(evEndDate(ev));
+      meta.push('<span class="nb">' + esc(dateJa(d)) + '</span>' +
+        (ed && evEndDate(ev) !== evDate(ev) ? '〜<span class="nb">' + esc(dateSlash(ed)) + '(' + WD[ed.getDay()] + ')</span>' : '') +
+        ' ・ <span class="nb">全' + evSess(ev).length + '日</span>');
+    }
+    else if (d) meta.push('<span class="nb">' + esc(dateJa(d)) + (tr ? ' ' + esc(tr) : '') + '</span>');
     else if (tr) meta.push('<span class="nb">' + esc(tr) + '</span>');
     if (ev.venue) meta.push(esc(ev.venue));
     if (num(ev.capacity) > 0) meta.push('<span class="nb">定員' + num(ev.capacity) + '名</span>');
@@ -1318,12 +1438,25 @@ window.AdminAPI = (function () {
   }
   function hubNumsModel(ev, a, regsHref) {
     if (!a) return null;
+    var sel = evIsMulti(ev) ? daySel(ev) : '';
+    if (sel) { // Day選択: そのDayの申込/決済/未決済/残枠
+      var lm = dayLabelMap(ev)[sel] || null;
+      var da = (a.dayAggs && a.dayAggs[sel]) || { applied: 0, paid: 0, unpaid: 0, checked: 0 };
+      var dn = [
+        { v: String(da.applied), unit: '名', labelHtml: lm ? '<span class="nb">' + esc(lm.label) + 'の申込</span>' : '申込' },
+        { v: String(da.paid), unit: '名', labelHtml: '決済済み' },
+        { v: String(da.unpaid), unit: '名', labelHtml: da.unpaid > 0 && evToday(ev) ? '<span class="nb">未決済 ―</span> <span class="nb">受付で案内</span>' : '未決済', hot: da.unpaid > 0, href: da.unpaid > 0 ? regsHref : '' },
+      ];
+      if (num(ev.capacity) > 0) dn.push({ v: String(Math.max(0, num(ev.capacity) - da.applied)), unit: '枠', labelHtml: '残り' });
+      return dn;
+    }
     var nums = [
-      { v: String(a.applied), unit: '名', labelHtml: '申込' },
+      { v: String(a.applied), unit: '名', labelHtml: evIsMulti(ev) ? '<span class="nb">申込(全日ユニーク)</span>' : '申込' },
       { v: String(a.paid), unit: '名', labelHtml: '決済済み' },
       { v: String(a.unpaid), unit: '名', labelHtml: a.unpaid > 0 && evToday(ev) ? '<span class="nb">未決済 ―</span> <span class="nb">受付で案内</span>' : '未決済', hot: a.unpaid > 0, href: a.unpaid > 0 ? regsHref : '' },
     ];
-    if (num(ev.capacity) > 0) nums.push({ v: String(Math.max(0, num(ev.capacity) - a.applied)), unit: '枠', labelHtml: '残り' });
+    // 残枠: 複数日の全日ビューでは出さない(定員はDayごとに判定される=合算の残数は嘘になる)
+    if (num(ev.capacity) > 0 && !evIsMulti(ev)) nums.push({ v: String(Math.max(0, num(ev.capacity) - a.applied)), unit: '枠', labelHtml: '残り' });
     return nums;
   }
   function hubTrendModel(ev, a, M) {
@@ -1369,11 +1502,11 @@ window.AdminAPI = (function () {
   /* ---- 担当レール/収支(listEventStaffAssignments / listEventExpenses の実データ結線) ---- */
   function memberMap() {
     var mm = {};
-    arr(M.members).forEach(function (m) { if (m && m.id) mm[String(m.id).trim()] = m; });
+    arr(DEMO ? DEMO_MEMBERS : M.members).forEach(function (m) { if (m && m.id) mm[String(m.id).trim()] = m; });
     return mm;
   }
   function memberName(m) { return (m && (m.nickname || m.name || m['氏名'])) || ''; }
-  function canStaff() { return !!(M.me && M.me.rank >= 2); } // 読取/書込ともアシマネ+
+  function canStaff() { return DEMO || !!(M.me && M.me.rank >= 2); } // 読取/書込ともアシマネ+(デモは表示のみ)
   function hubCrewModel(ev, base) {
     if (!canStaff()) return null;
     var x = EX[ev.id];
@@ -1383,9 +1516,16 @@ window.AdminAPI = (function () {
       return { editHref: editHref, lineHtml: '担当の割当を取得できませんでした。<button type="button" id="ev-crew-retry">再読み込み</button>' };
     }
     var mm = memberMap();
-    var rows = arr(x.staff).map(function (e) {
+    var sel = evIsMulti(ev) ? daySel(ev) : '';
+    var lmap = evIsMulti(ev) ? dayLabelMap(ev) : {};
+    var entries = arr(x.staff);
+    // Day選択中: そのDayの担当+全日共通(sessionId空)だけを見せる
+    if (sel) entries = entries.filter(function (e) { var sid = String((e && e.sessionId) || ''); return !sid || sid === sel; });
+    var rows = entries.map(function (e) {
       var id = String((e && e.memberId) || '').trim();
       var nt = (e && (e.slot || e.note)) || '';
+      var lm = lmap[String((e && e.sessionId) || '')];
+      if (evIsMulti(ev) && !sel) nt = (lm ? lm.label : '全日') + (nt ? ' ・ ' + nt : ''); // 全日ビューではDay帰属を明示
       if (!id) return { empty: true, role: ((e && e.role) || '担当') + ' ― 未定', nt: nt || '空き枠' };
       var m = mm[id];
       return {
@@ -1396,6 +1536,7 @@ window.AdminAPI = (function () {
       };
     });
     if (!rows.length) {
+      if (sel) return { editHref: editHref, lineHtml: 'このDayの担当はまだ割り当てられていません ― <a href="' + esc(editHref) + '">割当を編集</a>' };
       return { editHref: editHref, lineHtml: '担当はまだ割り当てられていません ― <a href="' + esc(editHref) + '">割当を編集</a>' };
     }
     return { editHref: editHref, rows: rows };
@@ -1429,8 +1570,21 @@ window.AdminAPI = (function () {
       note: note,
     };
   }
+  // イベント別の申込行(全件到着済みなら全件から・未着なら listEventRegistrations の先行分)
+  function regsOf(ev) {
+    if (S.regs) return arr(S.regs).filter(function (r) { return r && r.eventId === ev.id; });
+    var er = ER[ev.id];
+    if (er && Array.isArray(er.rows)) return er.rows.filter(function (r) { return r && r.eventId === ev.id; });
+    return null; // まだ読み込み中
+  }
+  function aggFor(M, ev) {
+    if (M.aggs && M.regsOk !== false) return M.aggs[ev.id] || newAgg();
+    var er = ER[ev.id]; // 全件が失敗/未着でも、イベント単体の先行読取があればそこから集計
+    if (er && Array.isArray(er.rows)) return buildAggs(er.rows, null)[ev.id] || newAgg();
+    return null;
+  }
   function buildHubModel(M, ev, active) {
-    var a = (M.aggs && M.regsOk !== false) ? (M.aggs[ev.id] || buildAggs([], null)[ev.id] || { applied: 0, paid: 0, unpaid: 0, checked: 0, cancels: 0, refundWait: 0, companions: 0, days: {}, yesterday: 0, first: 0, repeat: 0, firstKnown: 0, pay: {}, revenue: 0, unpaidAmt: 0 }) : null;
+    var a = aggFor(M, ev);
     var base = '#/ev/' + encodeURIComponent(ev.id);
     var regsHref = base + '/regs';
     var ledger = hubLedgerModel(ev, a, base);
@@ -1439,13 +1593,16 @@ window.AdminAPI = (function () {
     if (nums && wn > 0) nums.push({ v: String(wn), unit: '名', labelHtml: '<span class="nb">キャンセル待ち</span>' }); // 0件はセル自体を出さない
     return {
       demo: false,
+      dayseg: daySegHtml(ev),
       evId: ev.id,
       mePhoto: M.me && M.me.photo, showHq: (M.me && M.me.rank >= 3),
       head: hubHeadModel(ev, active),
       tabs: { base: base, active: active, unpaid: a ? a.unpaid : 0 },
       reception: false, // 受付アプリは本再設計ではまだ未接続(デモのみ)。当面の受付は console から。
       nums: nums,
-      numsNote: a ? null : '申込数を取得できませんでした。<button type="button" id="ev-retry">再読み込み</button>',
+      numsNote: a ? null : (M.regsOk === false
+        ? '申込数を取得できませんでした。<button type="button" id="ev-retry">再読み込み</button>'
+        : '申込数を読み込み中…'),
       facts: hubFactsModel(ev),
       trend: hubTrendModel(ev, a, M),
       crew: hubCrewModel(ev, base),
@@ -1484,6 +1641,9 @@ window.AdminAPI = (function () {
   function regRowsFiltered(vm) {
     var rows = vm.rows || [];
     var st = regsState;
+    if (vm.multi && vm.daySel) { // Dayセグメント連動: そのDayを含む申込だけ
+      rows = rows.filter(function (r) { return r.sessionIds && r.sessionIds.indexOf(vm.daySel) >= 0; });
+    }
     if (st.mode === 'person') rows = personRows(rows); // 1名ごと=描画時に展開(切替で再構築不要)
     if (st.filter === 'unpaid') rows = rows.filter(function (r) { return r.stCls === 'unpaid'; });
     else if (st.filter === 'refund') rows = rows.filter(function (r) { return r.stCls === 'refund'; });
@@ -1514,8 +1674,9 @@ window.AdminAPI = (function () {
         st.filter === 'unpaid' ? '未決済の申込はありません。' :
         st.filter === 'refund' ? '返金待ちの申込はありません。' : 'まだ申込がありません。') + '</div>';
     }
+    var dayTh = vm.multi ? '<th>日程</th>' : '';
     var h = '<div class="tblwrap"><table class="regs"><thead><tr>' +
-      '<th>申込者</th><th>申込日</th><th>決済状態</th><th class="num">金額</th><th>同伴</th><th>操作</th>' +
+      '<th>申込者</th><th>申込日</th>' + dayTh + '<th>決済状態</th><th class="num">金額</th><th>同伴</th><th>操作</th>' +
       '</tr></thead><tbody>';
     rows.forEach(function (r) {
       var sel = st.sel === r.id;
@@ -1524,6 +1685,7 @@ window.AdminAPI = (function () {
         '<td><span class="who">' + (r.img ? '<img src="' + esc(r.img) + '" alt="">' : '') +
         '<span class="nb">' + esc(r.name) + '</span>' + (r.tag ? '<span class="tag nb">' + esc(r.tag) + '</span>' : '') + '</span></td>' +
         '<td class="when">' + esc(r.when) + '</td>' +
+        (vm.multi ? '<td class="day">' + (r.day || '―') + '</td>' : '') +
         '<td class="st ' + stCls + '">' + esc(r.stLabel) + (r.how ? '<span class="how">' + r.how + '</span>' : '') + '</td>' +
         '<td class="amt">' + (r.amt || '―') + '</td>' +
         '<td class="' + (r.comp ? 'comp' : 'none') + '">' + (r.comp ? '<span class="nb">' + esc(r.comp) + '</span>' : '―') + '</td>' +
@@ -1533,7 +1695,8 @@ window.AdminAPI = (function () {
       if (st.mode === 'group') {
         arr(r.children).forEach(function (c) {
           h += '<tr class="child' + (sel ? ' sel' : '') + '"><td class="cname"><span class="nb">' + esc(c.label) + '</span></td><td></td>' +
-            '<td class="how" style="color:var(--ink5)">' + esc(c.how || '') + '</td>' +
+            (vm.multi ? '<td class="day">' + esc(c.day || '') + '</td>' : '') +
+            '<td class="how" style="color:var(--ink5)">' + (c.howHtml || esc(c.how || '')) + '</td>' +
             '<td class="amt" style="font-size:12.5px">' + (c.amt || '') + '</td><td></td><td></td></tr>';
         });
       }
@@ -1731,6 +1894,7 @@ window.AdminAPI = (function () {
       '</nav></div>';
     root.innerHTML = mastheadHtml({ mePhoto: vm.mePhoto, showHq: vm.showHq }) +
       hubHeadHtml(vm.head, vm.tabs, vm.reception) +
+      (vm.dayseg || '') +
       numbandHtml(vm.nums, vm.numsNote, true) +
       paybandHtml(vm.payband) +
       '<div class="cols"><main>' +
@@ -1742,6 +1906,7 @@ window.AdminAPI = (function () {
       colophonHtml(esc(vm.head.title) + ' ・ 申込・決済');
     bindRegs(vm);
     bindRetry();
+    if (vm.dayseg) bindDaySeg({ id: vm.evId });
   }
   function bindRegs(vm) {
     function rerenderZones() {
@@ -1795,9 +1960,10 @@ window.AdminAPI = (function () {
   }
 
   /* ---------- regs: 実データ → ビューモデル ---------- */
-  function buildRegRows(M, ev) {
-    if (!S.regs) return M.regsOk === false ? [] : null; // null = 読み込み中
-    var mine = arr(S.regs).filter(function (r) { return r && !r.isTest && r.eventId === ev.id && (regActive(r) || regRefundWait(r)); });
+  function buildRegRows(M, ev, regs) {
+    if (!regs) return M.regsOk === false ? [] : null; // null = 読み込み中
+    var mine = arr(regs).filter(function (r) { return r && !r.isTest && r.eventId === ev.id && (regActive(r) || regRefundWait(r)); });
+    if (evIsMulti(ev)) return buildRegRowsMulti(M, ev, mine);
     // 未決済 → 返金待ち → 決済済み(新しい順)
     function rankOf(r) { return regRefundWait(r) ? 1 : (regActive(r) && !regPaid(r) ? 0 : 2); }
     mine.sort(function (a, b) {
@@ -1866,26 +2032,141 @@ window.AdminAPI = (function () {
       };
     });
   }
+  /* ---- 複数日: 申込(applicationId)単位に束ねて表示する。
+     - 親行 = 課金行(参加費のDay帰属先)。金額は申込合計・Day列は参加日程。
+     - 子行 = Day別の申込行。0円行(Day2以降)には兄弟行(課金行)の決済状態を注記(徴収漏れ防止)。
+     - 金銭ボタン(決済済みにする)は課金行がある未決済の申込だけ(0円行への金銭操作は作らない)。 ---- */
+  function buildRegRowsMulti(M, ev, mine) {
+    var lmap = dayLabelMap(ev);
+    var total = evSess(ev).length;
+    var pmap = {};
+    arr(S.parts).forEach(function (p) { if (p && p.id) pmap[String(p.id).trim()] = p; });
+    var groups = {};
+    var gorder = [];
+    mine.forEach(function (r) {
+      var k = appKeyOf(r);
+      if (!groups[k]) { groups[k] = []; gorder.push(k); }
+      groups[k].push(r);
+    });
+    var rows = gorder.map(function (k) {
+      var g = groups[k].slice().sort(function (x, y) {
+        var lx = lmap[String(x.sessionId || '')], ly = lmap[String(y.sessionId || '')];
+        return (lx ? lx.n : 99) - (ly ? ly.n : 99);
+      });
+      var moneyRows = g.filter(function (r) { return num(r.amount) > 0; });
+      var moneyRow = moneyRows[0] || null;
+      var primary = moneyRow || g[0];
+      var appUnpaid = moneyRows.some(function (r) { return regActive(r) && !regPaid(r); });
+      var refund = regRefundWait(primary);
+      var moneyLm = moneyRow ? lmap[String(moneyRow.sessionId || '')] : null;
+      var moneyDay = moneyLm ? moneyLm.label : (moneyRow ? '課金行' : '');
+      var stCls, stLabel, how = '';
+      if (refund) {
+        stCls = 'refund'; stLabel = '返金待ち';
+        var cd = dtLabel(primary.cancelledAt || primary.updatedAt);
+        how = (cd ? '<span class="nb">' + esc(cd) + 'キャンセル</span>' : 'キャンセル済み') + (primary.actualPaymentMethod ? ' ・ ' + esc(primary.actualPaymentMethod) + '決済分' : '');
+      } else if (appUnpaid) {
+        stCls = 'unpaid'; stLabel = '未決済';
+        how = moneyDay ? '<span class="nb">参加費は' + esc(moneyDay) + 'の行</span>' : '';
+      } else {
+        stCls = 'paid'; stLabel = '決済済み';
+        var hp = [];
+        if (moneyRow && moneyRow.actualPaymentMethod) hp.push(esc(moneyRow.actualPaymentMethod));
+        if (moneyRow && moneyRow.paidAt) hp.push('<span class="nb">' + esc(dtLabel(moneyRow.paidAt)) + '</span>');
+        how = hp.join(' ・ ');
+      }
+      var totalAmt = 0;
+      moneyRows.forEach(function (r) { totalAmt += num(r.amount); });
+      // Day別の子行(0円行には兄弟=課金行の決済状態を注記)
+      var dayChildren = g.map(function (r) {
+        var lm = lmap[String(r.sessionId || '')];
+        var label = lm ? lm.label + (lm.md ? ' ' + lm.md : '') : '日程未指定';
+        var isMoney = num(r.amount) > 0;
+        var note;
+        if (isMoney && regRefundWait(r)) note = '<span class="nb">返金待ち</span>';
+        else if (isMoney) note = '<span class="nb">参加費の計上行</span>' + (regPaid(r) ? ' ・ 決済済み' : ' ・ <span class="nb">未決済</span>');
+        else if (refund) note = '0円行 ― <span class="nb">参加費は' + esc(moneyDay || '別のDay') + 'の行</span>(返金待ち)';
+        else note = '0円行 ― <span class="nb">参加費は' + esc(moneyDay || '別のDay') + 'の行</span>' + (appUnpaid ? ' ・ <span class="nb">未決済のまま</span>' : ' ・ 決済済み');
+        return { label: label, howHtml: note, amt: isMoney ? money(r.amount) + '円' : '', day: lm ? lm.label : '' };
+      });
+      var p = pmap[String(primary.userId || '').trim()];
+      var firstTag = (M.partsOk && p && num(p.events) <= 0 && !evPast(ev)) ? '初参加' : '';
+      var comps = arr(primary.companions).map(function (c) {
+        c = c || {};
+        var isChild = /child|子/.test(String(c.type || c.kind || '')) || c.age != null;
+        var label = (isChild ? '同伴の子ども' : '同伴者') + (c.age != null && c.age !== '' ? '(' + esc(c.age) + '歳)' : '');
+        if (c.name) label += ' ' + c.name;
+        return { label: label, how: '親と同時決済', amt: (isChild && num(ev.childFee) > 0) ? money(ev.childFee) + '円' : '' };
+      });
+      if (!comps.length && num(primary.companionsCount) > 0) {
+        for (var i = 0; i < num(primary.companionsCount); i++) comps.push({ label: '同伴者', how: '親と同時決済', amt: '' });
+      }
+      var ids = g.map(function (r) { return String(r.sessionId || ''); });
+      var dayCell;
+      if (ids.length >= total && total > 0 && ids.every(function (x) { return !!lmap[x]; })) dayCell = '<span class="nb">全' + total + '日</span>';
+      else dayCell = g.map(function (r) { var lm = lmap[String(r.sessionId || '')]; return lm ? lm.label : '未指定'; }).join('・');
+      var dfacts = [{ dt: '申込日時', ddHtml: '<b class="nb">' + esc(dtLabel(primary.appliedAt) || '—') + '</b>' }];
+      dfacts.push({ dt: '参加日程', ddHtml: dayCell + '<span class="note">' + dayChildren.map(function (c) { return '<span class="nb">' + esc(c.label) + '</span>'; }).join(' ・ ') + '</span>' });
+      var pay = refund ? '返金待ち' : (appUnpaid ? '未決済' : '決済済み');
+      var payDd = '<b>' + pay + (totalAmt > 0 ? ' ― ' + money(totalAmt) + '円' : '') + '</b>';
+      if (moneyDay) payDd += '<span class="note">参加費は<span class="nb">' + esc(moneyDay) + 'の行に計上</span>(Day2以降は0円行)</span>';
+      dfacts.push({ dt: '決済', ddHtml: payDd });
+      if (comps.length) dfacts.push({ dt: '同伴', ddHtml: '<span class="nb">同伴' + comps.length + '名</span>' });
+      if (primary.userEmail) dfacts.push({ dt: '連絡先', ddHtml: esc(primary.userEmail) });
+      if (primary.note) dfacts.push({ dt: '備考', ddHtml: esc(primary.note) });
+      return {
+        id: primary.id || (primary.userId + '/' + primary.appliedAt),
+        img: '', name: primary.userName || '(名前未登録)', tag: firstTag,
+        when: dtLabel(primary.appliedAt),
+        stCls: stCls, stLabel: stLabel, how: how,
+        amt: totalAmt > 0 ? money(totalAmt) + '円' : '',
+        day: dayCell,
+        sessionIds: ids,
+        comp: comps.length ? '同伴' + comps.length + '名' : '',
+        canMark: stCls === 'unpaid' && !!moneyRow,
+        children: dayChildren.concat(comps),
+        comps: comps,
+        detail: {
+          sub: [p && p.nationality, p && p.city].filter(Boolean).join(' ・ '),
+          facts: dfacts,
+          email: primary.userEmail || '',
+          dangerText: (!refund && !appUnpaid && totalAmt > 0)
+            ? 'この申込を取り消すと、決済済みの' + money(totalAmt) + '円は返金の手続きに入ります。全日程分がまとめて対象になります。'
+            : 'この申込を取り消します。' + (appUnpaid ? '未決済のため返金は発生しません。' : ''),
+        },
+      };
+    });
+    // 未決済 → 返金待ち → 決済済み(新しい順)
+    function rankOf(r) { return r.stCls === 'refund' ? 1 : (r.stCls === 'unpaid' ? 0 : 2); }
+    rows.sort(function (a, b) {
+      var d = rankOf(a) - rankOf(b);
+      return d !== 0 ? d : String(b.when || '').localeCompare(String(a.when || ''));
+    });
+    return rows;
+  }
   function personRows(rows) {
-    // 1名ごと: 申込者と同伴者をそれぞれ1行に展開
+    // 1名ごと: 申込者と同伴者をそれぞれ1行に展開(複数日はDay別子行を除き comps=同伴者のみ)
     var out = [];
     arr(rows).forEach(function (r) {
       out.push(Object.assign({}, r, { children: [] }));
-      arr(r.children).forEach(function (c) {
+      arr(r.comps || r.children).forEach(function (c) {
         out.push({
           id: r.id + '::' + c.label, img: '', name: c.label + '(' + r.name + 'の同伴)', tag: '',
           when: r.when, stCls: r.stCls, stLabel: r.stLabel, how: c.how, amt: c.amt,
+          day: r.day || '', sessionIds: r.sessionIds,
           comp: '', canMark: false, children: [], detail: r.detail,
         });
       });
     });
     return out;
   }
-  function buildRegsModel(M, ev) {
+  function buildRegsModel(M, ev, regs) {
     var vm = buildHubModel(M, ev, 'regs');
     var a = vm.agg;
-    vm.rows = buildRegRows(M, ev); // 申込ごとの行。1名ごと展開は描画時(regRowsFiltered)で行う
-    vm.rowsErr = (M.regsOk === false) ? '申込データを取得できませんでした。再読み込みしてください。' : '';
+    vm.multi = evIsMulti(ev);
+    vm.daySel = vm.multi ? daySel(ev) : '';
+    vm.rows = buildRegRows(M, ev, regs); // 申込ごとの行。1名ごと展開は描画時(regRowsFiltered)で行う
+    vm.rowsErr = (M.regsOk === false && vm.rows !== null && !(vm.rows && vm.rows.length)) ? '申込データを取得できませんでした。再読み込みしてください。' : '';
     vm.counts = {
       all: a ? a.applied : 0,
       unpaid: a ? a.unpaid : 0,
@@ -1896,6 +2177,9 @@ window.AdminAPI = (function () {
     if (a) {
       sf.push('申込' + a.applied + '件のうち<span class="nb">未決済が' + a.unpaid + '件</span>。');
       if (a.refundWait > 0) sf.push('返金待ちが<span class="nb">' + a.refundWait + '件</span>あります。');
+      if (vm.multi && a.dayAggs && a.dayAggs[''] && a.dayAggs[''].applied > 0) {
+        sf.push('<span class="nb">日程未指定の申込行が' + a.dayAggs[''].applied + '件</span>あります(日程の確定は console から)。');
+      }
     }
     if (sf.length) vm.head.standfirst = sf.join('');
     // 決済方法の内訳(actualPaymentMethod があるときだけ)
@@ -1942,8 +2226,10 @@ window.AdminAPI = (function () {
     document.body.classList.toggle('has-tabbtn', !!vm.reception);
     root.innerHTML = mastheadHtml({ mePhoto: vm.mePhoto, showHq: vm.showHq }) +
       hubHeadHtml(vm.head, vm.tabs, vm.reception) +
+      (vm.dayseg || '') +
       '<p class="stub-line">「' + esc(STUB_LABEL[tabId]) + '」タブはまだ作られていません。当面は console から操作してください。</p>' +
       colophonHtml(esc(vm.head.title));
+    if (vm.dayseg) bindDaySeg({ id: vm.evId });
   }
 
   /* ============================================================================
@@ -2003,6 +2289,7 @@ window.AdminAPI = (function () {
       var m = g('st-m-' + i); if (m !== null) row.memberText = m;
       var r0 = g('st-r-' + i); if (r0 !== null) row.role = r0;
       var t = g('st-t-' + i); if (t !== null) row.slot = t;
+      var d = g('st-d-' + i); if (d !== null) row.sessionId = d; // 複数日: 全日共通('')⇔Day別(sessionId)
     });
   }
   function renderStaffEdit(ev, staffData) {
@@ -2023,19 +2310,31 @@ window.AdminAPI = (function () {
       staffEdInit(ev.id, staffData);
     }
     var st = staffEd;
+    var multi = evIsMulti(ev);
+    var sess = multi ? evSess(ev) : [];
+    function dayOptions(row) {
+      var o = '<option value=""' + (!row.sessionId ? ' selected' : '') + '>全日共通</option>';
+      sess.forEach(function (s, j) {
+        var d = parseYmd(s.date);
+        o += '<option value="' + esc(s.id) + '"' + (String(row.sessionId) === String(s.id) ? ' selected' : '') + '>Day' + (j + 1) + (d ? ' ' + esc(dateSlash(d)) : '') + '</option>';
+      });
+      return o;
+    }
     var rowsHtml = st.rows.map(function (row, i) {
-      return '<div class="sr">' +
+      return '<div class="sr' + (multi ? ' withday' : '') + '">' +
         '<input id="st-m-' + i + '" list="dl-members" value="' + esc(row.memberText) + '" placeholder="名前で検索(空欄=空き枠)" autocomplete="off" aria-label="メンバー">' +
         '<input id="st-r-' + i + '" list="dl-roles" value="' + esc(row.role) + '" placeholder="受付・司会など" autocomplete="off" aria-label="役割">' +
+        (multi ? '<select id="st-d-' + i + '" class="sr-day nb" aria-label="担当するDay">' + dayOptions(row) + '</select>' : '') +
         '<input id="st-t-' + i + '" value="' + esc(row.slot) + '" placeholder="11:30–13:30 など" autocomplete="off" aria-label="時間帯">' +
         '<button type="button" class="sr-del" data-sdel="' + i + '" aria-label="' + (i + 1) + '行目を削除"><span class="mi">close</span></button>' +
         '</div>';
     }).join('');
     root.innerHTML = head +
-      editHeadHtml(ev, 'この日の担当', '割当の編集 ・ ' + esc(evTitle(ev)), base) +
-      '<p class="edit-note">保存すると、この一覧の内容で<span class="nb">この日の担当</span>を<span class="nb">まるごと置き換えます</span>。メンバーを空欄にした行は<span class="nb">「未定」の空き枠</span>として残ります。</p>' +
+      editHeadHtml(ev, multi ? '担当の割当(複数日)' : 'この日の担当', '割当の編集 ・ ' + esc(evTitle(ev)), base) +
+      '<p class="edit-note">保存すると、この一覧の内容で<span class="nb">' + (multi ? 'このイベントの担当' : 'この日の担当') + '</span>を<span class="nb">まるごと置き換えます</span>。メンバーを空欄にした行は<span class="nb">「未定」の空き枠</span>として残ります。' +
+      (multi ? '<span class="nb">Dayの列</span>で<span class="nb">全日共通</span>か<span class="nb">特定のDayだけ</span>かを選べます。' : '') + '</p>' +
       '<div class="staffed">' +
-      '<div class="sr head"><span>メンバー</span><span>役割</span><span>時間帯</span><span></span></div>' +
+      '<div class="sr head' + (multi ? ' withday' : '') + '"><span>メンバー</span><span>役割</span>' + (multi ? '<span>Day</span>' : '') + '<span>時間帯</span><span></span></div>' +
       rowsHtml +
       '</div>' +
       '<button type="button" class="sr-add" id="st-add"><span class="mi">add</span>行を追加</button>' +
@@ -2394,6 +2693,67 @@ window.AdminAPI = (function () {
     vm.showHq = true;
     return vm;
   }
+  /* ---- デモ複数日イベント(2泊3日合宿)。実データと同じビルダー(buildAggs/buildHubModel/
+     buildRegsModel)を通す=複数日の実コードパスをデモで目視検証できる。 ---- */
+  var DEMO_ID2 = 'EV-CAMP';
+  function dYmd(n) { var d = new Date(NOW.getFullYear(), NOW.getMonth(), NOW.getDate() + n); return ymd(d); }
+  function dIso(n, hm) { return dYmd(n) + 'T' + (hm || '09:30') + ':00+09:00'; }
+  var DEMO_CAMP_EV = {
+    id: DEMO_ID2, title: '秋の国際交流合宿(2泊3日)', format: 'multi', status: '公開中',
+    date: dYmd(-1), endDate: dYmd(1), time: '10:00', venue: '河口湖 青少年交流の家', capacity: 24,
+    fee: 12000, paymentMethods: 'クレジット,PayPay', summary: '2泊3日で富士山のふもとへ。夜は国ごとの料理を持ち寄ります。',
+    sessions: [
+      { id: 'CS1', name: '1日目', date: dYmd(-1), startTime: '10:00', endTime: '21:00', venue: '河口湖 青少年交流の家' },
+      { id: 'CS2', name: '2日目', date: dYmd(0), startTime: '07:00', endTime: '21:00', venue: '河口湖 青少年交流の家' },
+      { id: 'CS3', name: '3日目', date: dYmd(1), startTime: '07:00', endTime: '15:00', venue: '河口湖 青少年交流の家' },
+    ],
+  };
+  // 参加費のDay帰属=日付ソート先頭の課金行・Day2以降は0円の兄弟行(同applicationId・決済フラグ継承)
+  var DEMO_CAMP_REGS = [
+    // ユスフ: 全3日 ・ 決済済み(課金行=Day1)
+    { id: 'CR1', applicationId: 'CA1', eventId: DEMO_ID2, userId: 'CU1', userName: 'ユスフ', userEmail: 'yusuf@example.com', sessionId: 'CS1', appliedAt: dIso(-9), status: '決済済み', paid: true, amount: 12000, actualPaymentMethod: 'クレジット', paidAt: dIso(-9, '10:02') },
+    { id: 'CR2', applicationId: 'CA1', eventId: DEMO_ID2, userId: 'CU1', userName: 'ユスフ', sessionId: 'CS2', appliedAt: dIso(-9), status: '決済済み', paid: true, amount: 0 },
+    { id: 'CR3', applicationId: 'CA1', eventId: DEMO_ID2, userId: 'CU1', userName: 'ユスフ', sessionId: 'CS3', appliedAt: dIso(-9), status: '決済済み', paid: true, amount: 0 },
+    // ミオ: Day1〜2 ・ 未決済(0円行の兄弟未決済検知の見本)
+    { id: 'CR4', applicationId: 'CA2', eventId: DEMO_ID2, userId: 'CU2', userName: 'ミオ', userEmail: 'mio@example.com', sessionId: 'CS1', appliedAt: dIso(-3), status: '申込済み', paid: false, amount: 12000 },
+    { id: 'CR5', applicationId: 'CA2', eventId: DEMO_ID2, userId: 'CU2', userName: 'ミオ', sessionId: 'CS2', appliedAt: dIso(-3), status: '申込済み', paid: false, amount: 0 },
+    // ハンナ: Day2から参加 ・ 決済済み(課金行=Day2)
+    { id: 'CR6', applicationId: 'CA3', eventId: DEMO_ID2, userId: 'CU3', userName: 'ハンナ', sessionId: 'CS2', appliedAt: dIso(-1), status: '決済済み', paid: true, amount: 8000, actualPaymentMethod: 'PayPay', paidAt: dIso(-1, '20:15') },
+    { id: 'CR7', applicationId: 'CA3', eventId: DEMO_ID2, userId: 'CU3', userName: 'ハンナ', sessionId: 'CS3', appliedAt: dIso(-1), status: '決済済み', paid: true, amount: 0 },
+    // レオ: Day2のみ ・ 未決済 ・ 子ども同伴
+    { id: 'CR8', applicationId: 'CA4', eventId: DEMO_ID2, userId: 'CU4', userName: 'レオ', sessionId: 'CS2', appliedAt: dIso(-1, '22:40'), status: '申込済み', paid: false, amount: 8000, companionsCount: 1, companions: [{ type: 'child', age: 6 }] },
+    // アオイ: キャンセル ・ 返金待ち(課金行のみ返金対象)
+    { id: 'CR9', applicationId: 'CA5', eventId: DEMO_ID2, userId: 'CU5', userName: 'アオイ', sessionId: 'CS1', appliedAt: dIso(-8), status: 'キャンセル', paid: true, amount: 12000, actualPaymentMethod: 'クレジット', cancelledAt: dIso(-2) },
+    { id: 'CR10', applicationId: 'CA5', eventId: DEMO_ID2, userId: 'CU5', userName: 'アオイ', sessionId: 'CS2', appliedAt: dIso(-8), status: 'キャンセル', paid: true, amount: 0, cancelledAt: dIso(-2) },
+  ];
+  var DEMO_CAMP_STAFF = [
+    { memberId: 'CN0047', role: '引率・統括', slot: '', sessionId: '' },
+    { memberId: 'CN0012', role: '受付', slot: '9:30–10:30', sessionId: 'CS1' },
+    { memberId: 'CN0044', role: '夜プログラム', slot: '19:00–21:00', sessionId: 'CS2' },
+    { memberId: '', role: '写真', slot: '', sessionId: 'CS3', note: '1枠あいています' },
+  ];
+  var DEMO_CAMP_EXPENSES = [
+    { id: 'CX1', label: '宿泊費(前払い)', amount: 96000, note: '2泊×24名想定' },
+    { id: 'CX2', label: '食材・飲み物', amount: 23000 },
+  ];
+  function demoCampM() {
+    return {
+      events: [DEMO_CAMP_EV],
+      aggs: buildAggs(DEMO_CAMP_REGS, null),
+      me: { name: 'みずき', role: 'マネージャー', rank: 3, photo: 'https://i.pravatar.cc/56?img=47' },
+      regsOk: true, partsOk: false, members: DEMO_MEMBERS,
+    };
+  }
+  function renderDemoCamp(r) {
+    if (!EX[DEMO_ID2]) EX[DEMO_ID2] = { staff: DEMO_CAMP_STAFF, expenses: DEMO_CAMP_EXPENSES, staffErr: false, expErr: false, fetched: true, loading: false };
+    var dm = demoCampM();
+    var ev = dm.events[0];
+    if (r.view === 'staff') { renderStaffEdit(ev, DEMO_CAMP_STAFF); return; }
+    if (r.view === 'expenses') { renderExpEdit(ev, DEMO_CAMP_EXPENSES); return; }
+    if (r.view === 'regs') { renderRegs(demoChrome(buildRegsModel(dm, ev, DEMO_CAMP_REGS))); return; }
+    if (r.view === 'prep' || r.view === 'day' || r.view === 'after') { renderStub(demoChrome(buildHubModel(dm, ev, r.view)), r.view); return; }
+    renderHub(demoChrome(buildHubModel(dm, ev, 'hub')));
+  }
   function demoListModel() {
     return demoChrome({
       countLine: '開催予定 3件 ・ 過去 14件',
@@ -2415,6 +2775,7 @@ window.AdminAPI = (function () {
         ctaHref: '#/ev/' + DEMO_ID,
       },
       upcoming: [
+        { href: '#/ev/' + DEMO_ID2, img: null, dateV: dateSlash(new Date(NOW.getFullYear(), NOW.getMonth(), NOW.getDate() - 1)), dateSmall: '開催中', ttl: '秋の国際交流合宿(2泊3日)', st: { cls: 'pub', label: '公開中' }, subHtml: 'きょうは<span class="nb">Day2/3日目</span> ― 申込 4/24 ・ <span class="nb">未決済2件</span>。', facesHtml: '' },
         { href: '#/ev/' + DEMO_ID, img: 'https://images.unsplash.com/photo-1543269865-cbf427effbad?w=340&q=70', dateV: '9/14', dateSmall: '日曜', ttl: '日本語カフェ vol.12', st: { cls: 'pub', label: '公開中' }, subHtml: '申込 18/30 ― きのう<span class="nb">+3名</span>・初参加が4割。<span class="nb">9/10に満員</span>の見込み。', facesHtml: '<img src="https://i.pravatar.cc/40?img=44" alt=""><img src="https://i.pravatar.cc/40?img=15" alt="">' },
         { href: '#/ev/' + DEMO_ID, img: 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=340&q=70', dateV: '10/5', dateSmall: '月曜', ttl: 'バディプログラム発足会', st: { cls: 'draft', label: '下書き' }, subHtml: '<span class="warn-t">公開前チェック2件</span> ― 料金未設定・写真なし。担当はまだ決まっていません。', facesHtml: '<img src="https://i.pravatar.cc/40?img=12" alt="">' },
         { href: '#/ev/' + DEMO_ID, img: null, dateV: '10/19', dateSmall: '日曜', ttl: '秋の紅葉ハイキング', st: { cls: 'draft', label: '下書き' }, subHtml: '7月ピクニックの複製から作成中 ・ 会場未定 ― 会場ライブラリに候補2件。', facesHtml: '' },
@@ -2653,6 +3014,8 @@ window.AdminAPI = (function () {
   var S = { regs: null, parts: null };
   var EX = {}; // eventId -> { staff, expenses, staffErr, expErr, fetched, loading }(担当/支出はイベント単位で遅延読取)
   var WL = {}; // eventId -> { items(PII=メモリのみ), err, fetched, loading, cachedWaiting(件数のみキャッシュ可) }
+  var ER = {}; // eventId -> { rows(PII=メモリのみ・永続キャッシュ禁止), err, fetched, loading }(listEventRegistrations の先行読取)
+  var erUnsupported = false; // バックエンド未実装(unknown action)を検知したらセッション中は再試行しない
   var loadedOnce = false, loading = false, unauthShown = false;
   var membersLoading = null;
 
@@ -2699,6 +3062,32 @@ window.AdminAPI = (function () {
     });
   }
 
+  /* イベント単体の申込先行読取(申込一覧の高速化・二段構え):
+     新アクション listEventRegistrations {eventId} があれば使い、
+     無ければ(unknown action/失敗)既存 listRegistrations(起動時に全件を裏で先読み中)へ自動フォールバック。
+     全件が先に到着したらそちらを正とし、この結果は使わない。行はPII=メモリのみ。 */
+  function loadEventRegs(evId) {
+    if (DEMO) return;
+    if (S.regs) return; // 全件到着済みなら不要
+    if (erUnsupported) return; // BE未実装 → 既存listRegistrations の先読みに委ねる
+    var er = ER[evId] || (ER[evId] = { rows: null, err: false, fetched: false, loading: false });
+    if (er.loading || er.fetched) return;
+    er.loading = true;
+    API.fetchData('listEventRegistrations', { eventId: evId }).then(function (d) {
+      er.rows = arr(d && d.rows ? d.rows : d);
+      er.err = false;
+    }, function (e) {
+      if (/unknown action|invalid action|not supported|未対応|不明なアクション/i.test(String((e && e.message) || ''))) erUnsupported = true;
+      er.err = true; // フォールバック: listRegistrations(全件)の到着を待つ
+    }).then(function () {
+      er.loading = false;
+      er.fetched = true;
+      if (unauthShown || S.regs || !Array.isArray(er.rows)) return;
+      var r = route();
+      if (String(r.id) === String(evId) && (r.view === 'regs' || r.view === 'hub')) render();
+    });
+  }
+
   // キャンセル待ちの遅延読取(ハブ/申込・決済タブを開いたイベントだけ・アシマネ+)
   function loadWaitlist(evId) {
     if (DEMO) return;
@@ -2736,6 +3125,7 @@ window.AdminAPI = (function () {
     if (DEMO) {
       if (r.view === 'list') { renderList(demoListModel()); return; }
       resetRegsState(r.id);
+      if (r.id === DEMO_ID2) { renderDemoCamp(r); return; } // 複数日デモは実ビルダー経由
       if (r.view === 'regs') { renderRegs(demoRegsModel()); return; }
       if (r.view === 'staff') { renderStaffEdit({ id: DEMO_ID, title: '国際交流ピクニック' }, DEMO_STAFF); return; }
       if (r.view === 'expenses') { renderExpEdit({ id: DEMO_ID, title: '国際交流ピクニック' }, DEMO_EXPENSES); return; }
@@ -2754,7 +3144,8 @@ window.AdminAPI = (function () {
     resetRegsState(r.id);
     if (r.view === 'hub' || r.view === 'staff' || r.view === 'expenses') loadExtras(ev.id); // 担当/支出の遅延読取
     if (r.view === 'hub' || r.view === 'regs') loadWaitlist(ev.id); // キャンセル待ち(数字バンド+一覧)
-    if (r.view === 'regs') { renderRegs(buildRegsModel(M, ev)); return; }
+    if (r.view === 'hub' || r.view === 'regs') loadEventRegs(ev.id); // 全件未着ならイベント単体で先行読取(高速化)
+    if (r.view === 'regs') { renderRegs(buildRegsModel(M, ev, regsOf(ev))); return; }
     if (r.view === 'staff') {
       var xs = EX[ev.id];
       renderStaffEdit(ev, xs && xs.staff !== undefined ? xs.staff : null);
@@ -2808,6 +3199,11 @@ window.AdminAPI = (function () {
     }
     render(); // キャッシュがあれば 0ms で紙面 / なければローディング
 
+    // 深いリンク(#/ev/<id>)直開き: 全件(listRegistrations)の到着を待たず、
+    // イベント単体の先行読取(listEventRegistrations)を最初から並行発火(無ければ全件へフォールバック)
+    var r0 = route();
+    if (r0.id && (r0.view === 'regs' || r0.view === 'hub')) loadEventRegs(r0.id);
+
     var regsOk = true, partsOk = true;
     var pEvents = API.fetchData('listEvents', {});
     var pRegs = API.fetchData('listRegistrations', {}).then(function (r) { return r; }, function () { regsOk = false; return []; });
@@ -2816,6 +3212,15 @@ window.AdminAPI = (function () {
     // 段階レンダリング: キャッシュなし初回は 速い2本(events+regs)で先に描画
     var doneAll = false;
     if (!cached) {
+      if (r0.id) {
+        // 深いリンクはさらに前段=eventsのみで骨格+数字バンドを即描画(行は先行読取/全件の到着で後着)
+        pEvents.then(function (events) {
+          if (doneAll || unauthShown || M.events !== null) return;
+          M.events = arr(events);
+          M.me = meModel();
+          render();
+        }).catch(function () { /* エラーは全体待ちで一元処理 */ });
+      }
       Promise.all([pEvents, pRegs]).then(function (res) {
         if (doneAll || unauthShown) return;
         M.events = arr(res[0]);

@@ -6,7 +6,7 @@
 <meta name="robots" content="noindex">
 <title>connec+a 運営ポータル</title>
 <meta name="description" content="connec+a 運営ポータル — 今日の紙面">
-<script>window.__ADMIN2_BUILD='20260901142549';</script>
+<script>window.__ADMIN2_BUILD='20260901145507';</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://script.google.com" crossorigin>
@@ -292,6 +292,8 @@ window.AdminAPI = (function () {
     listNews: 1, listMinutesMeetings: 1, listMembers: 1,
     // read-api @listWaitlist 追加済み(2026-09-01): キャンセル待ちの読取
     listWaitlist: 1,
+    // イベント単体の申込読取(バックエンド実装中の新action。無ければ本体→呼び出し側でlistRegistrationsへフォールバック)
+    listEventRegistrations: 1,
   };
   var ROLE_RANK = { '代表': 5, '副代表': 4, 'マネージャー': 3, 'アシマネ': 2, 'メンバー': 1 };
   var onUnauthorized = null; // アプリ側が setOnUnauthorized で登録(認証切れ→ログイン画面へ)
@@ -515,6 +517,14 @@ window.AdminAPI = (function () {
   function evCancelled(e) { return /中止|アーカイブ/.test(String(e.status || '')); }
   function regActive(r) { return !r.isTest && !/キャンセル/.test(String(r.status || '')); }
   function regPaid(r) { return r.paid === true || r.paid === 'TRUE' || /決済済み|チェックイン/.test(String(r.status || '')); }
+  // 複数日(セッション): 「きょうのDay」判定=セッションdate===今日。{n,total,sess} を返す(該当なし=null)
+  function todayDayOf(e) {
+    if (!e || e.format !== 'multi' || !Array.isArray(e.sessions)) return null;
+    var ss = e.sessions.filter(function (s) { return s && s.date; }).slice()
+      .sort(function (a, b) { return String(a.date).localeCompare(String(b.date)); });
+    for (var i = 0; i < ss.length; i++) if (String(ss[i].date).slice(0, 10) === TODAY) return { n: i + 1, total: ss.length, sess: ss[i] };
+    return null;
+  }
   function taskTitle(t) { return t.title || t.name || t.taskName || t.task || '(無題のタスク)'; }
   function taskDeadline(t) { return String(t.deadline || t.dueDate || t.due || '').slice(0, 10); }
   function taskDone(t) { return t.done === true || /完了|done/i.test(String(t.status || '')); }
@@ -791,24 +801,36 @@ window.AdminAPI = (function () {
     vm.mePhoto = mePhoto; // 顔写真フィールドが無ければ省略(イニシャル等の代替マークは出さない)
     vm.weatherHtml = ''; // 天気チップは v1 スコープ外(デモのみ)
 
-    // きょう開催(中止を含まない) > なければ次回イベント
+    // きょう開催(中止を含まない) > なければ次回イベント。複数日は開催中のDay(セッションdate===今日)も「きょう開催」
     var todayEv = null, nextEv = null;
     events.forEach(function (e) {
       if (evCancelled(e)) return;
       var ds = String(e.date || '').slice(0, 10);
-      if (!ds) return;
-      if (ds === TODAY) { if (!todayEv) todayEv = e; }
-      else if (ds > TODAY) { if (!nextEv || ds < String(nextEv.date).slice(0, 10)) nextEv = e; }
+      if (ds === TODAY || todayDayOf(e)) { if (!todayEv) todayEv = e; return; }
+      if (ds && ds > TODAY) { if (!nextEv || ds < String(nextEv.date).slice(0, 10)) nextEv = e; }
     });
     var ev = todayEv || nextEv;
 
-    // 対象イベントの申込集計(status文字列は防御的に判定)
+    // 対象イベントの申込集計(status文字列は防御的に判定)。
+    // 複数日は1申込=Day数ぶんの行になるため applicationId でユニーク化し、
+    // 0円行(Day2以降)は未決済に数えない(未決済=課金行(金額>0)が未決済の申込)= multiday監査の教訓。
     var counts = null;
     if (ev && d.regsOk) {
-      var mine = regs.filter(function (r) { return r.eventId === ev.id; });
-      var act = mine.filter(regActive);
-      var paid = act.filter(regPaid).length;
-      counts = { applied: act.length, paid: paid, unpaid: act.length - paid, capacity: Number(ev.capacity) || 0 };
+      var apps = {};
+      var appOrder = [];
+      regs.forEach(function (r) {
+        if (!r || r.eventId !== ev.id || !regActive(r)) return;
+        var k = String(r.applicationId || r.userId || r.id || '');
+        if (!apps[k]) { apps[k] = []; appOrder.push(k); }
+        apps[k].push(r);
+      });
+      // 未決済判定: 単日行(sessionIdなし)=従来どおり !regPaid /
+      // セッション行(複数日)=課金行(金額>0)のみ対象(0円行=Day2以降は支払対象なし)
+      var applied = appOrder.length, unpaid = 0;
+      appOrder.forEach(function (k) {
+        if (apps[k].some(function (r) { return !regPaid(r) && ((Number(r.amount) || 0) > 0 || !r.sessionId); })) unpaid++;
+      });
+      counts = { applied: applied, paid: applied - unpaid, unpaid: unpaid, capacity: Number(ev.capacity) || 0 };
     }
 
     // きょうの自分の担当(listEventStaffAssignments)。割当があれば一面kickerを個別化する
@@ -825,14 +847,18 @@ window.AdminAPI = (function () {
 
     var lead;
     if (ev) {
-      var evd = parseYmd(ev.date) || NOW;
+      var td = todayEv ? todayDayOf(ev) : null; // 開催中の複数日: きょうのDay
+      var evd = (td && parseYmd(td.sess.date)) || parseYmd(ev.date) || NOW;
+      var evTime = String((td && td.sess.startTime) || ev.time || '').slice(0, 5);
       var sf = '<span class="nb">' + esc(dateJaShort(evd)) + '</span>';
-      if (ev.time) sf += ' ・ <span class="nb">' + esc(String(ev.time).slice(0, 5)) + ' 開始</span>';
+      if (evTime) sf += ' ・ <span class="nb">' + esc(evTime) + ' 開始</span>';
       if (ev.venue) sf += ' ・ <span class="nb">' + esc(ev.venue) + '</span>';
+      var kick = todayEv
+        ? (myRoleToday ? 'きょう開催 ・ <span class="nb">あなたは' + esc(myRoleToday) + '担当</span>' : 'きょう開催')
+        : '次回イベント';
+      if (td && td.total > 1) kick += ' ・ <span class="nb">Day' + td.n + '/' + td.total + '日目</span>';
       lead = {
-        kicker: todayEv
-          ? (myRoleToday ? 'きょう開催 ・ <span class="nb">あなたは' + esc(myRoleToday) + '担当</span>' : 'きょう開催')
-          : '次回イベント',
+        kicker: kick,
         titleHtml: esc(evTitle(ev)),
         standfirstHtml: sf,
         photo: evImage(ev) ? { src: evImage(ev), alt: evTitle(ev) } : null, // 画像なし=figureごと省略
@@ -844,7 +870,7 @@ window.AdminAPI = (function () {
           { v: String(counts.applied), unit: '名', label: '申込' },
           { v: String(counts.paid), unit: '名', label: '決済済み' },
           { v: String(counts.unpaid), unit: '名', label: counts.unpaid > 0 ? (todayEv ? '未決済 ― <span class="nb">受付で案内</span>' : '未決済') : '未決済', hot: counts.unpaid > 0 },
-        ].concat(counts.capacity > 0
+        ].concat(counts.capacity > 0 && ev.format !== 'multi' // 複数日の残枠はDayごと(合算は嘘になる)=イベント面で
           ? [{ v: String(Math.max(0, counts.capacity - counts.applied)), unit: '枠', label: '残り(定員' + counts.capacity + ')' }]
           : []) : null,
         noteHtml: (!d.regsOk)
@@ -1090,11 +1116,16 @@ window.AdminAPI = (function () {
     var pStaffToday = pEvents.then(function (events) {
       var t = null;
       arr(events).forEach(function (e) {
-        if (e && !evCancelled(e) && String(e.date || '').slice(0, 10) === TODAY && !t) t = e;
+        if (e && !evCancelled(e) && !t && (String(e.date || '').slice(0, 10) === TODAY || todayDayOf(e))) t = e; // 複数日の開催中Dayも対象
       });
       if (!t || API.myRank() < 2) return null;
       return API.fetchData('listEventStaffAssignments', { eventId: t.id }).then(
-        function (s) { return arr(s); },
+        function (s) {
+          var td = todayDayOf(t);
+          // 複数日: きょうのDayの割当+全日共通(sessionId空)だけを個別化の根拠にする
+          if (td) return arr(s).filter(function (e2) { var sid = String((e2 && e2.sessionId) || ''); return !sid || sid === String(td.sess.id); });
+          return arr(s);
+        },
         function () { return null; }
       );
     }, function () { return null; });
