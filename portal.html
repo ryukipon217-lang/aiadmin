@@ -6,7 +6,7 @@
 <meta name="robots" content="noindex">
 <title>connec+a 運営ポータル</title>
 <meta name="description" content="connec+a 運営ポータル — 今日の紙面">
-<script>window.__ADMIN2_BUILD='20260901133616';</script>
+<script>window.__ADMIN2_BUILD='20260901142549';</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://script.google.com" crossorigin>
@@ -290,6 +290,8 @@ window.AdminAPI = (function () {
     // read-api @5 で追加(2026-09-01 B1): イベント新機能の読取+ポータルの遅い3本
     listEventStaffAssignments: 1, listVenues: 1, listEventExpenses: 1, listEventGroups: 1,
     listNews: 1, listMinutesMeetings: 1, listMembers: 1,
+    // read-api @listWaitlist 追加済み(2026-09-01): キャンセル待ちの読取
+    listWaitlist: 1,
   };
   var ROLE_RANK = { '代表': 5, '副代表': 4, 'マネージャー': 3, 'アシマネ': 2, 'メンバー': 1 };
   var onUnauthorized = null; // アプリ側が setOnUnauthorized で登録(認証切れ→ログイン画面へ)

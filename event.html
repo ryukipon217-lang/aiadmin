@@ -6,7 +6,7 @@
 <meta name="robots" content="noindex">
 <title>イベント — connec+a 運営ポータル</title>
 <meta name="description" content="connec+a 運営ポータル — イベント面">
-<script>window.__ADMIN2_BUILD='20260901133616';</script>
+<script>window.__ADMIN2_BUILD='20260901142549';</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://script.google.com" crossorigin>
@@ -374,6 +374,8 @@ table.regs{width:100%;border-collapse:collapse;min-width:680px;font-size:13.5px}
 .wl .ord{font-family:var(--serif);font-size:12.5px;color:var(--ink5);flex:none;width:24px}
 .wl .sp{flex:1}
 .wl .btn.sub{font-size:12.5px;padding:8px 14px;min-height:40px;flex:none}
+.wl .wl-done{font-family:var(--serif);font-size:12.5px;color:var(--ink4);flex:none;font-variant-numeric:tabular-nums}
+.wl .xconfirm{min-height:40px}
 
 /* ============ regs: 右列 申込の詳細 ============ */
 .side.regside{padding-bottom:18px}
@@ -551,6 +553,8 @@ window.AdminAPI = (function () {
     // read-api @5 で追加(2026-09-01 B1): イベント新機能の読取+ポータルの遅い3本
     listEventStaffAssignments: 1, listVenues: 1, listEventExpenses: 1, listEventGroups: 1,
     listNews: 1, listMinutesMeetings: 1, listMembers: 1,
+    // read-api @listWaitlist 追加済み(2026-09-01): キャンセル待ちの読取
+    listWaitlist: 1,
   };
   var ROLE_RANK = { '代表': 5, '副代表': 4, 'マネージャー': 3, 'アシマネ': 2, 'メンバー': 1 };
   var onUnauthorized = null; // アプリ側が setOnUnauthorized で登録(認証切れ→ログイン画面へ)
@@ -729,9 +733,10 @@ window.AdminAPI = (function () {
                      #/ev/<id>/prep|day|after = 準備中(正直な1行)
    方針:
    - デモと実データは同じ描画関数を通す(ビューモデルの出所だけが違う)。
-   - バックエンド未実装の新機能(担当レール/配信タイムライン/収支/キャンセル待ち/
-     準備チェック)は、実データモードでは vm 側が null → セクションごと非表示。
-     描画関数は分離済みなので、GAS実装後は vm 組立に結線するだけでよい。
+   - バックエンド未実装の新機能(配信タイムライン/準備チェック)は、実データモードでは
+     vm 側が null → セクションごと非表示。描画関数は分離済みなので、GAS実装後は
+     vm 組立に結線するだけでよい。
+     担当レール/収支(B1)+キャンセル待ち(listWaitlist/promoteWaitlist)は結線済み。
    - 実フィールドに無い項目の行は出さない(偽データ・空飾り禁止)。
    - 金銭の書込(決済済みにする/返金)は第1弾では実装しない。ボタンは正典どおり
      出すが、押すと控えめな案内のみ(偽完了禁止)。
@@ -1429,6 +1434,9 @@ window.AdminAPI = (function () {
     var base = '#/ev/' + encodeURIComponent(ev.id);
     var regsHref = base + '/regs';
     var ledger = hubLedgerModel(ev, a, base);
+    var nums = hubNumsModel(ev, a, regsHref);
+    var wn = wlWaiting(ev.id);
+    if (nums && wn > 0) nums.push({ v: String(wn), unit: '名', labelHtml: '<span class="nb">キャンセル待ち</span>' }); // 0件はセル自体を出さない
     return {
       demo: false,
       evId: ev.id,
@@ -1436,7 +1444,7 @@ window.AdminAPI = (function () {
       head: hubHeadModel(ev, active),
       tabs: { base: base, active: active, unpaid: a ? a.unpaid : 0 },
       reception: false, // 受付アプリは本再設計ではまだ未接続(デモのみ)。当面の受付は console から。
-      nums: hubNumsModel(ev, a, regsHref),
+      nums: nums,
       numsNote: a ? null : '申込数を取得できませんでした。<button type="button" id="ev-retry">再読み込み</button>',
       facts: hubFactsModel(ev),
       trend: hubTrendModel(ev, a, M),
@@ -1452,8 +1460,12 @@ window.AdminAPI = (function () {
      金銭の書込は第1弾では実装しない(ボタンは出すが押すと控えめな案内のみ)
      ============================================================================ */
   var regsState = { evId: '', mode: 'group', filter: 'all', q: '', sel: '', showAll: false, notice: '' };
+  var wlState = { confirmId: '', busy: false, notice: '', err: '' }; // キャンセル待ちの操作状態
   function resetRegsState(evId) {
-    if (regsState.evId !== evId) regsState = { evId: evId, mode: 'group', filter: 'all', q: '', sel: '', showAll: false, notice: '' };
+    if (regsState.evId !== evId) {
+      regsState = { evId: evId, mode: 'group', filter: 'all', q: '', sel: '', showAll: false, notice: '' };
+      wlState = { confirmId: '', busy: false, notice: '', err: '' };
+    }
   }
   function paybandHtml(P) {
     if (!P) return '';
@@ -1538,16 +1550,144 @@ window.AdminAPI = (function () {
   }
   function waitlistHtml(W) {
     if (!W) return '';
-    var h = '<h2 class="sec">キャンセル待ち ― ' + W.items.length + '名</h2>';
+    var cnt = (W.count != null) ? W.count : W.items.length;
+    var h = '<h2 class="sec">キャンセル待ち ― ' + cnt + '名</h2>';
     if (W.note) h += '<p class="waitnote">' + W.note + '</p>';
     h += '<div>' + W.items.map(function (w) {
+      var op;
+      if (w.promoted) {
+        // 繰上げ済みの行: 案内済み表示のみ(ボタンは出さない)
+        op = '<span class="wl-done nb">案内済み' + (w.promotedAt ? '(' + esc(w.promotedAt) + ')' : '') + '</span>';
+      } else if (w.id) {
+        // 実データ: 確認ステップつき(誤タップでメールを送らない)
+        if (W.confirmId === w.id) {
+          op = '<span class="xconfirm"><span class="nb">' + esc(w.nm) + 'さんに繰上げの案内を送りますか?</span>' +
+            '<button type="button" class="yes nb" data-wlyes="' + esc(w.id) + '"' + (W.busy ? ' disabled' : '') + '>' + (W.busy ? '送信中…' : '送信する') + '</button>' +
+            '<button type="button" class="no" data-wlno="' + esc(w.id) + '"' + (W.busy ? ' disabled' : '') + '>やめる</button></span>';
+        } else {
+          op = '<button type="button" class="btn sub nb" data-promote="' + esc(w.id) + '"' + (W.busy ? ' disabled' : '') + '>繰上げの案内を送る</button>';
+        }
+      } else {
+        op = '<a class="btn sub nb" href="#">繰上げの案内を送る</a>'; // デモ(正典モックのまま)
+      }
       return '<div class="wl"><span class="ord">' + esc(w.ord) + '</span>' +
         (w.img ? '<img src="' + esc(w.img) + '" alt="">' : '') +
         '<div class="wi"><span class="nm">' + esc(w.nm) + (w.tag ? '<span class="tag nb">' + esc(w.tag) + '</span>' : '') + '</span>' +
-        '<span class="at nb">' + esc(w.at) + '</span></div><span class="sp"></span>' +
-        '<a class="btn sub nb" href="#">繰上げの案内を送る</a></div>';
+        '<span class="at nb">' + esc(w.at) + '</span></div><span class="sp"></span>' + op + '</div>';
     }).join('') + '</div>';
+    if (W.err) h += '<p class="edit-err">' + esc(W.err) + '</p>';
+    if (W.notice) h += '<p class="opnote" role="status">' + esc(W.notice) + '</p>';
     return h;
+  }
+  /* ---- キャンセル待ち: 実データ結線(listWaitlist / promoteWaitlist)。
+          参加者名はメモリのみ(永続キャッシュには件数だけ=PII方針)。 ---- */
+  function wlWaiting(evId) {
+    if (!canStaff()) return 0;
+    var w = WL[evId];
+    if (!w) return 0;
+    if (Array.isArray(w.items)) {
+      return w.items.filter(function (it) { return it && String(it.status) !== 'promoted'; }).length;
+    }
+    return num(w.cachedWaiting); // 未取得時は前回の件数(件数のみのキャッシュ)
+  }
+  function buildWaitlistModel(evId) {
+    if (!canStaff()) return null; // アシマネ未満は非表示(fetchもしない)
+    var w = WL[evId];
+    if (!w || !Array.isArray(w.items) || !w.items.length) return null; // 未取得/0件 → セクション非表示
+    var waiting = [], promoted = [];
+    w.items.forEach(function (it) {
+      if (!it) return;
+      if (String(it.status) === 'promoted') promoted.push(it); else waiting.push(it);
+    });
+    if (!waiting.length && !promoted.length) return null;
+    function rowOf(it, i) {
+      var at = dtLabel(it.createdAt);
+      return {
+        id: String(it.id || ''),
+        ord: i == null ? '—' : String(i + 1), // 登録順の番号(繰上げ済みは番号なし)
+        img: '', nm: it.name || '(名前未登録)', tag: '',
+        at: at ? at + ' 登録' : '',
+      };
+    }
+    var items = waiting.map(function (it, i) { return rowOf(it, i); })
+      .concat(promoted.map(function (it) {
+        var r = rowOf(it, null);
+        r.promoted = true;
+        r.promotedAt = dtLabel(it.promotedAt);
+        return r;
+      }));
+    return {
+      count: waiting.length,
+      note: waiting.length ? '登録順です。「繰上げの案内を送る」と、その方にメールで案内が届きます。' : '',
+      items: items,
+      confirmId: wlState.confirmId, busy: wlState.busy,
+      notice: wlState.notice, err: wlState.err,
+    };
+  }
+  function repaintWait(vm) {
+    vm.waitlist = buildWaitlistModel(vm.evId);
+    var z = document.getElementById('ev-waitzone');
+    if (z) { z.innerHTML = waitlistHtml(vm.waitlist); bindWaitlist(vm); }
+  }
+  function bindWaitlist(vm) {
+    if (vm.demo) return; // デモは正典モックのリンクのみ(結線なし)
+    Array.prototype.forEach.call(root.querySelectorAll('[data-promote]'), function (b) {
+      b.addEventListener('click', function () {
+        if (wlState.busy) return;
+        wlState.confirmId = b.getAttribute('data-promote');
+        wlState.notice = ''; wlState.err = '';
+        repaintWait(vm);
+      });
+    });
+    Array.prototype.forEach.call(root.querySelectorAll('[data-wlno]'), function (b) {
+      b.addEventListener('click', function () {
+        if (wlState.busy) return;
+        wlState.confirmId = '';
+        repaintWait(vm);
+      });
+    });
+    Array.prototype.forEach.call(root.querySelectorAll('[data-wlyes]'), function (b) {
+      b.addEventListener('click', function () { wlPromote(vm, b.getAttribute('data-wlyes')); });
+    });
+  }
+  function wlRefetch(evId) {
+    var w = WL[evId] || (WL[evId] = { items: null, err: false, fetched: false, loading: false });
+    return API.fetchData('listWaitlist', { eventId: evId }).then(
+      function (d) { w.items = arr(d && d.items); w.err = false; },
+      function () {} // 再取得に失敗しても、繰上げ済みの表示(楽観更新)を維持
+    ).then(function () { w.fetched = true; cacheSave(); });
+  }
+  function wlPromote(vm, id) {
+    if (wlState.busy || DEMO) return; // busy中の二重送信防止
+    wlState.busy = true; wlState.err = ''; wlState.notice = '';
+    repaintWait(vm);
+    // 書込=自動リトライなし(既存の書込作法)
+    API.postData('promoteWaitlist', { id: id }).then(function (res) {
+      wlState.busy = false; wlState.confirmId = '';
+      wlState.notice = (res && res.mailOk === false)
+        ? '繰上げは記録しましたが、メール送信に失敗しました。参加者へ個別に連絡してください。'
+        : '案内を送りました(メール送信済み)。';
+      var w = WL[vm.evId];
+      if (w && Array.isArray(w.items)) {
+        w.items.forEach(function (it) {
+          if (it && String(it.id) === String(id)) {
+            it.status = 'promoted';
+            it.promotedAt = (res && res.promotedAt) || new Date().toISOString();
+          }
+        });
+      }
+      repaintWait(vm);
+      return wlRefetch(vm.evId).then(function () {
+        var r = route();
+        if (r.view === 'regs' && String(r.id) === String(vm.evId)) repaintWait(vm);
+      });
+    }).catch(function (e) {
+      wlState.busy = false;
+      wlState.confirmId = ''; // 失敗は非破壊: 元の表示に戻す(繰上げは行われていない)
+      if (e && e._auth) return;
+      wlState.err = ((e && e.message) || '送信に失敗しました。') + ' 繰上げは行われていません。もう一度お試しください。';
+      repaintWait(vm);
+    });
   }
   function regDetailHtml(vm) {
     var h = '<aside class="side glass regside" aria-label="選択中の申込の詳細"><h2>申込の詳細</h2>';
@@ -1597,7 +1737,7 @@ window.AdminAPI = (function () {
       paceHtml(vm.pace) +
       '<h2 class="sec" id="unpaid">申込一覧</h2>' + listhead +
       '<div id="ev-tblzone">' + regTableHtml(vm) + '</div>' +
-      waitlistHtml(vm.waitlist) +
+      '<div id="ev-waitzone">' + waitlistHtml(vm.waitlist) + '</div>' +
       '</main><div id="ev-detailzone">' + regDetailHtml(vm) + '</div></div>' +
       colophonHtml(esc(vm.head.title) + ' ・ 申込・決済');
     bindRegs(vm);
@@ -1620,6 +1760,7 @@ window.AdminAPI = (function () {
       a.addEventListener('click', function (e) { e.preventDefault(); regsState.filter = a.getAttribute('data-f'); renderRegs(vm); });
     });
     bindZone(vm);
+    bindWaitlist(vm);
   }
   function bindZone(vm) {
     function note() {
@@ -1787,7 +1928,7 @@ window.AdminAPI = (function () {
         noteHtml: np.join(' ― ') + '。',
       };
     }
-    vm.waitlist = null; // キャンセル待ちは バックエンド未実装 → 非表示(デモのみ)
+    vm.waitlist = buildWaitlistModel(ev.id); // 実結線(0件=非表示・取得はloadWaitlist)
     vm.moneynote = 'この画面からの決済記録・返金の操作は試験配信では無効です。当面は console から行ってください。';
     vm.moreHtml = '';
     return vm;
@@ -2473,12 +2614,18 @@ window.AdminAPI = (function () {
         if (EX[id] && Array.isArray(EX[id].staff)) staffBy[id] = pickKeys(EX[id].staff, STAFF_KEEP);
         if (EX[id] && Array.isArray(EX[id].expenses)) expBy[id] = pickKeys(EX[id].expenses, EXP_KEEP);
       });
+      // キャンセル待ちは件数のみ保存(参加者名などのPIIは永続キャッシュに入れない)
+      var wlBy = {};
+      Object.keys(WL).forEach(function (id) {
+        var n = wlWaiting(id);
+        if (n > 0) wlBy[id] = n;
+      });
       localStorage.setItem(CACHE_KEY, JSON.stringify({
         mid: API.mid(), t: Date.now(),
         vm: {
           events: sanitizeEvents(M.events), aggs: M.aggs, me: M.me, regsOk: M.regsOk, partsOk: M.partsOk,
           members: M.members === null ? null : pickKeys(M.members, MEM_KEEP),
-          staffBy: staffBy, expBy: expBy,
+          staffBy: staffBy, expBy: expBy, wlBy: wlBy,
         },
       }));
     } catch (e) {}
@@ -2505,6 +2652,7 @@ window.AdminAPI = (function () {
   var M = { events: null, aggs: null, me: null, regsOk: true, partsOk: false, members: null, membersFetched: false };
   var S = { regs: null, parts: null };
   var EX = {}; // eventId -> { staff, expenses, staffErr, expErr, fetched, loading }(担当/支出はイベント単位で遅延読取)
+  var WL = {}; // eventId -> { items(PII=メモリのみ), err, fetched, loading, cachedWaiting(件数のみキャッシュ可) }
   var loadedOnce = false, loading = false, unauthShown = false;
   var membersLoading = null;
 
@@ -2551,6 +2699,27 @@ window.AdminAPI = (function () {
     });
   }
 
+  // キャンセル待ちの遅延読取(ハブ/申込・決済タブを開いたイベントだけ・アシマネ+)
+  function loadWaitlist(evId) {
+    if (DEMO) return;
+    if (!M.me || M.me.rank < 2) return; // アシマネ未満はfetchしない(セクションごと非表示)
+    var w = WL[evId] || (WL[evId] = { items: null, err: false, fetched: false, loading: false });
+    if (w.loading || w.fetched) return;
+    w.loading = true;
+    API.fetchData('listWaitlist', { eventId: evId }).then(
+      function (d) { w.items = arr(d && d.items); w.err = false; },
+      function () { w.err = true; if (w.items === null) w.items = []; } // 取得失敗=非表示のまま(壊さない)
+    ).then(function () {
+      w.loading = false;
+      w.fetched = true;
+      cacheSave();
+      if (unauthShown) return;
+      var r = route();
+      if (String(r.id) !== String(evId)) return;
+      if (r.view === 'hub' || r.view === 'regs') render();
+    });
+  }
+
   function findEvent(id) {
     var hit = null;
     arr(M.events).forEach(function (e) { if (e && String(e.id) === String(id)) hit = e; });
@@ -2584,6 +2753,7 @@ window.AdminAPI = (function () {
     }
     resetRegsState(r.id);
     if (r.view === 'hub' || r.view === 'staff' || r.view === 'expenses') loadExtras(ev.id); // 担当/支出の遅延読取
+    if (r.view === 'hub' || r.view === 'regs') loadWaitlist(ev.id); // キャンセル待ち(数字バンド+一覧)
     if (r.view === 'regs') { renderRegs(buildRegsModel(M, ev)); return; }
     if (r.view === 'staff') {
       var xs = EX[ev.id];
@@ -2630,6 +2800,10 @@ window.AdminAPI = (function () {
           expenses: (cached.expBy && cached.expBy[k]) || null,
           staffErr: false, expErr: false, fetched: false, loading: false,
         };
+      });
+      Object.keys(cached.wlBy || {}).forEach(function (k) {
+        WL[k] = WL[k] || { items: null, err: false, fetched: false, loading: false };
+        WL[k].cachedWaiting = num(cached.wlBy[k]); // 件数のみ(一覧は次の読取で)
       });
     }
     render(); // キャッシュがあれば 0ms で紙面 / なければローディング
