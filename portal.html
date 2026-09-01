@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>connec+a 運営ポータル</title>
+<meta name="description" content="connec+a 運営ポータル — 今日の紙面">
+<script>window.__ADMIN2_BUILD='20260901133616';</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://script.google.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Old+Mincho:wght@400;500;600;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,300,0,0&display=block" rel="stylesheet">
+<style>
+/* ================= shared/01-tokens.css ================= */
+/* ============================================================================
+   admin2 共通トークン+共通部品 (正典: redesign/portal-proto/portal.html)
+   ここに置くのは全アプリで再利用する規則のみ: 色・書体・.glass・.btn・.nb・
+   フォーカス・reduced-motion。レイアウトは各アプリ側で設計する(機械的統一の禁止)。
+   ============================================================================ */
+:root{
+  --accent:#6e86e0; --deep:#4f63c4; --ink:#22314a; --ink2:#2b3d57; --ink3:#3d5877; --ink4:#526d89; --ink5:#71859a;
+  --cream:#faf6e8; --paper:#fdfcf8; --line:#d9dfe9; --rule:#22314a;
+  --warn:#a8434f; --ok:#3f7d5c; --amber:#8a6a2f;
+  --wash1:rgba(110,134,224,.08); --wash2:rgba(244,232,196,.35); --wash3:rgba(233,180,196,.10);
+  --serif:'Zen Old Mincho',serif; --sans:'Zen Kaku Gothic New',sans-serif; --latin:'Cormorant Garamond',serif;
+  /* アプリ識別色(全アプリ共通で固定の意味を持つ) */
+  --app-event:#6e86e0; --app-comms:#c96f83; --app-org:#4c8f6a; --app-hq:#b08430; --app-analytics:#5d7bab;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--sans);color:var(--ink);background:var(--paper);font-size:14px;line-height:1.8;
+  background-image:
+    radial-gradient(ellipse 900px 520px at 88% -6%, rgba(110,134,224,.26), transparent 60%),
+    radial-gradient(ellipse 700px 500px at -8% 30%, rgba(244,228,178,.75), transparent 60%),
+    radial-gradient(ellipse 540px 430px at 96% 46%, rgba(110,134,224,.2), transparent 62%),
+    radial-gradient(ellipse 700px 460px at 26% 74%, rgba(110,134,224,.14), transparent 62%),
+    radial-gradient(ellipse 620px 480px at 70% 108%, rgba(233,180,196,.26), transparent 62%);
+  background-attachment:fixed}
+/* フロストガラス(浮いている操作面・状態帯に使用。見出し・本文の紙面には使わない) */
+.glass{background:linear-gradient(168deg, rgba(255,255,255,.52), rgba(255,255,255,.24));
+  -webkit-backdrop-filter:blur(22px) saturate(1.3);backdrop-filter:blur(22px) saturate(1.3);
+  border:1px solid rgba(255,255,255,.75);box-shadow:0 14px 38px -18px rgba(34,49,74,.3), inset 0 1px 0 rgba(255,255,255,.9)}
+.mi{font-family:'Material Symbols Rounded';font-weight:normal;font-style:normal;line-height:1;vertical-align:-3px;display:inline-block}
+.wrap{max-width:1240px;margin:0 auto;padding:0 40px}
+/* 日本語の改行制御: 単語の途中・単位の直前で折らない。複合語・日付時刻・数値+単位は .nb で固定 */
+body{line-break:strict}
+.nb{white-space:nowrap}
+.btn{white-space:nowrap}
+a:focus-visible,button:focus-visible,input:focus-visible{outline:2.5px solid var(--deep);outline-offset:2px;border-radius:4px}
+@media (prefers-reduced-motion: reduce){*{transition:none !important;animation:none !important}}
+
+/* ボタン(操作規則は全アプリ共通。文字は絶対に折らない=入らないときはボタンごと縦積み) */
+.btn{display:inline-flex;align-items:center;gap:8px;font-family:var(--sans);font-weight:700;font-size:14px;
+  background:var(--deep);color:#fff;padding:12px 22px;border-radius:8px;text-decoration:none;min-height:44px;
+  border:0;cursor:pointer;transition:background .15s}
+.btn:hover{background:#43549f}
+.btn.sub{color:var(--deep);background:linear-gradient(168deg, rgba(255,255,255,.55), rgba(255,255,255,.28));
+  -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.8);
+  box-shadow:0 8px 22px -14px rgba(34,49,74,.3)}
+.btn.sub:hover{background:rgba(255,255,255,.65)}
+
+/* ================= portal/20-portal.css ================= */
+/* ============================================================================
+   ポータル固有スタイル (正典: redesign/portal-proto/portal.html から移植)
+   編集紙面型(A案)+フロストガラス。読む紙面は紙のまま、浮く操作面だけガラス。
+   ============================================================================ */
+/* 見出し・短文は文節単位で折る(auto-phraseは撮影Chromeで効かないため .nb 手動指定が正) */
+h1,h2,.standfirst,.ix-head,.kicker,.sb-row,.todo li,.move p,.ix-sub,.byline,.lead p.body{word-break:auto-phrase;text-wrap:pretty}
+.lead h1{text-wrap:balance}
+
+/* ============ マストヘッド(題字) ============ */
+.masthead{padding:26px 0 14px;border-bottom:3px double var(--rule)}
+.mast-top{display:flex;align-items:baseline;gap:18px}
+.daimoku{font-family:var(--latin);font-size:44px;font-weight:500;letter-spacing:.01em;color:var(--ink)}
+.daimoku b{color:var(--accent);font-weight:500}
+.mast-sub{font-family:var(--serif);font-size:13px;letter-spacing:.28em;color:var(--ink3)}
+.mast-right{margin-left:auto;text-align:right;font-size:12px;color:var(--ink4);line-height:1.7}
+.mast-right .day{font-family:var(--serif);font-size:15px;color:var(--ink);letter-spacing:.1em}
+.mast-me{display:flex;align-items:center;gap:9px;justify-content:flex-end;margin-top:3px}
+.mast-me img{width:30px;height:30px;border-radius:50%;object-fit:cover;border:1.5px solid var(--accent)}
+.edition{display:flex;gap:2px;font-size:12.5px;margin-top:12px;padding:5px;border-radius:8px;align-items:center;
+  background:linear-gradient(168deg, rgba(255,255,255,.5), rgba(255,255,255,.22));
+  -webkit-backdrop-filter:blur(22px) saturate(1.3);backdrop-filter:blur(22px) saturate(1.3);
+  border:1px solid rgba(255,255,255,.75);box-shadow:0 10px 30px -18px rgba(34,49,74,.3), inset 0 1px 0 rgba(255,255,255,.9);
+  position:sticky;top:10px;z-index:20}
+.edition a{padding:8px 18px;letter-spacing:.14em;color:var(--ink3);text-decoration:none;min-height:40px;display:inline-flex;align-items:center;border-radius:6px;transition:background .15s}
+.edition a:hover{background:rgba(255,255,255,.55)}
+.edition a[aria-current]{font-weight:700;color:#fff;background:var(--deep);box-shadow:0 6px 16px -6px rgba(79,99,196,.6)}
+.edition .spacer{flex:1}
+.edition .weather{border-right:0;color:var(--ink3);display:inline-flex;align-items:center;gap:6px;padding:5px 14px;margin:3px 0;border-radius:8px}
+.edition .weather .mi{color:var(--accent);font-size:17px}
+
+/* ============ 一面 ============ */
+.front{display:grid;grid-template-columns:1fr 348px;gap:0;border-bottom:1px solid var(--rule)}
+.lead{padding:30px 34px 30px 0;border-right:1px solid var(--line)}
+.kicker{font-size:12px;letter-spacing:.3em;color:var(--deep);font-weight:700;display:flex;align-items:center;gap:10px}
+.kicker::before{content:'';width:26px;height:1.5px;background:var(--accent)}
+.lead h1{font-family:var(--serif);font-size:38px;font-weight:600;line-height:1.45;letter-spacing:.03em;margin:10px 0 4px}
+.lead .standfirst{font-size:14px;color:var(--ink3);margin-bottom:18px}
+.lead-photo{position:relative;overflow:hidden;border-radius:3px}
+.lead-photo img{width:100%;height:330px;object-fit:cover;display:block;filter:saturate(1.04);background:var(--cream)}
+.lead-photo figcaption{position:absolute;left:10px;bottom:10px;padding:7px 14px;font-size:12px;color:#fff;letter-spacing:.06em;
+  background:rgba(24,32,52,.38);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
+  border:1px solid rgba(255,255,255,.28);border-radius:7px}
+.byline{display:flex;align-items:center;gap:10px;margin:14px 0 10px;font-size:12.5px;color:var(--ink4)}
+.byline .faces{display:flex}
+.byline .faces img{width:26px;height:26px;border-radius:50%;object-fit:cover;border:2px solid var(--paper);margin-left:-8px}
+.byline .faces img:first-child{margin-left:0}
+.lead p.body{font-size:14px;color:var(--ink2);max-width:58ch}
+.lead-cta{display:flex;gap:12px;align-items:center;margin-top:18px}
+/* 数字バンド(ガラスの状態帯) */
+.numband{display:flex;margin-top:26px;border-radius:8px;overflow:hidden;
+  background:linear-gradient(168deg, rgba(255,255,255,.5), rgba(255,255,255,.22));
+  -webkit-backdrop-filter:blur(22px) saturate(1.3);backdrop-filter:blur(22px) saturate(1.3);
+  border:1px solid rgba(255,255,255,.75);box-shadow:0 12px 32px -18px rgba(34,49,74,.28), inset 0 1px 0 rgba(255,255,255,.9)}
+.numband .n{flex:1;padding:14px 18px 10px;border-right:1px solid rgba(255,255,255,.65)}
+.numband .n:last-child{border-right:0}
+.numband .v{font-family:var(--serif);font-size:34px;font-weight:600;letter-spacing:.02em;font-variant-numeric:tabular-nums}
+.numband .v small{font-size:14px;color:var(--ink4);font-weight:400;margin-left:2px}
+.numband .l{font-size:12px;letter-spacing:.14em;color:var(--ink4)}
+.numband .n.hot .v{color:var(--warn)}
+.numband .n.hot .l{color:var(--warn);font-weight:700}
+/* 部分エラーの注記(数字が出せない時に理由と動線を示す) */
+.lead-note{margin-top:12px;font-size:12.5px;color:var(--warn)}
+.lead-note button{background:none;border:0;color:var(--deep);font:inherit;font-weight:700;cursor:pointer;padding:2px 4px}
+
+/* ============ 右列(ガラスの自分欄) ============ */
+.aside{margin:26px 0 26px 26px;padding:22px 22px 18px;border-radius:8px;align-self:start}
+.aside h2{font-family:var(--serif);font-size:17px;font-weight:600;letter-spacing:.12em;
+  border-bottom:1px solid var(--rule);padding-bottom:9px;margin-bottom:4px}
+.aside h2 small{font-family:var(--sans);font-size:12px;font-weight:400;color:var(--ink4);letter-spacing:.04em;margin-left:8px}
+.todo{list-style:none}
+.todo li{display:flex;gap:11px;padding:13px 2px;border-bottom:1px dashed var(--line);font-size:13.5px;align-items:flex-start}
+.todo .when{font-family:var(--serif);flex:none;width:58px;font-size:12px;color:var(--deep);letter-spacing:.05em;padding-top:2px;font-variant-numeric:tabular-nums}
+.todo .when.urgent{color:var(--warn);font-weight:700}
+.todo b{font-weight:700;color:var(--ink)}
+.todo .from{display:block;font-size:12px;color:var(--ink5);margin-top:1px}
+.sidebox{margin-top:24px}
+.sb-row{display:flex;align-items:center;gap:11px;padding:11px 2px;border-bottom:1px dashed var(--line);font-size:13px;min-height:44px}
+.sb-row img{width:32px;height:32px;border-radius:50%;object-fit:cover;flex:none}
+.sb-row .mi{color:var(--accent);font-size:20px;flex:none}
+.sb-row a{color:var(--deep);font-weight:700;text-decoration:none;margin-left:auto;font-size:12.5px;flex:none;letter-spacing:.05em;padding:6px 2px}
+/* 空状態(なぜ空か+次の行動。装飾で埋めない) */
+.side-empty{padding:12px 2px;font-size:12.5px;color:var(--ink4)}
+
+/* ============ 部署の動き/直近のニュース ============ */
+.section-rule{display:flex;align-items:baseline;gap:14px;padding:24px 0 12px}
+.section-rule h2{font-family:var(--serif);font-size:20px;font-weight:600;letter-spacing:.14em}
+.section-rule::after{content:'';flex:1;height:1px;background:var(--rule);opacity:.5}
+.moves{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-radius:8px;overflow:hidden;
+  background:linear-gradient(168deg, rgba(255,255,255,.5), rgba(255,255,255,.24));
+  -webkit-backdrop-filter:blur(22px) saturate(1.3);backdrop-filter:blur(22px) saturate(1.3);
+  border:1px solid rgba(255,255,255,.75);box-shadow:0 12px 34px -18px rgba(34,49,74,.28), inset 0 1px 0 rgba(255,255,255,.9)}
+.move{padding:20px 22px;border-right:1px solid rgba(255,255,255,.65);position:relative}
+.move:last-child{border-right:0}
+.move .who{display:flex;align-items:center;gap:10px;margin-bottom:9px}
+.move .who img{width:38px;height:38px;border-radius:50%;object-fit:cover}
+.move .who b{font-size:13.5px}
+.move .who span{display:block;font-size:11px;color:var(--ink5);letter-spacing:.06em}
+.move p{font-size:13px;color:var(--ink2)}
+.move p b{color:var(--deep)}
+.move time{font-size:11px;color:var(--ink5);letter-spacing:.08em;position:absolute;top:22px;right:20px;font-family:var(--serif)}
+.moves-empty{padding:18px 22px;font-size:13px;color:var(--ink4);border-radius:8px}
+
+/* ============ 面別インデックス(新聞の目次) ============ */
+.index{margin:0 0 46px;border-radius:8px;overflow:hidden}
+.idx{display:grid;grid-template-columns:200px 1fr 280px 40px;align-items:baseline;gap:18px;
+  padding:15px 22px;text-decoration:none;color:var(--ink);border-bottom:1px solid rgba(255,255,255,.6);
+  transition:background .15s;position:relative}
+.idx:last-child{border-bottom:0}
+.idx:hover{background:rgba(255,255,255,.5)}
+.idx .ix-name{font-family:var(--serif);font-size:18px;font-weight:600;letter-spacing:.12em;display:flex;align-items:baseline;gap:11px;white-space:nowrap}
+.idx .ix-name::before{content:'';width:3px;height:17px;background:var(--app-event);align-self:center;flex:none}
+.idx.comms .ix-name::before{background:var(--app-comms)}
+.idx.org .ix-name::before{background:var(--app-org)}
+.idx.hq .ix-name::before{background:var(--app-hq)}
+.idx.analytics .ix-name::before{background:var(--app-analytics)}
+.idx .ix-name small{font-family:var(--sans);font-size:11px;font-weight:400;color:var(--ink5);letter-spacing:.04em}
+.idx .ix-head{font-size:14px;color:var(--ink2);min-width:0}
+.idx .ix-head b{font-weight:700}
+.idx .ix-head .warn-t{color:var(--warn);font-weight:700}
+.idx .ix-sub{font-size:12.5px;color:var(--ink4);display:flex;align-items:center;gap:7px;justify-content:flex-end;white-space:nowrap}
+.idx .ix-sub img{width:22px;height:22px;border-radius:50%;object-fit:cover;align-self:center}
+.idx .ix-go{font-size:18px;color:var(--ink5);justify-self:end;align-self:center;transition:transform .18s cubic-bezier(.16,1,.3,1)}
+.idx:hover .ix-go{transform:translateX(3px);color:var(--deep)}
+.idx.today{padding:19px 22px}
+.idx.today .ix-name{font-size:21px}
+.idx.today .ix-head{font-size:15px}
+
+.colophon{border-top:3px double var(--rule);padding:14px 0 34px;display:flex;font-size:12px;color:var(--ink5);letter-spacing:.1em}
+.colophon span:last-child{margin-left:auto}
+
+/* ============ 状態: ローディング / エラー(実レイアウトに近い控えめ表示) ============ */
+.state-line{font-size:13px;color:var(--ink4);padding:8px 0}
+.state-error h1{font-family:var(--serif);font-size:26px;font-weight:600;margin:10px 0 8px}
+.state-error p{font-size:13.5px;color:var(--ink2);max-width:52ch}
+.state-error .lead-cta{margin-top:16px}
+
+/* ============ ログイン(未ログイン時の一面) ============ */
+.login-main{max-width:430px;margin:0 auto;padding:52px 0 90px}
+.login-h{font-family:var(--serif);font-size:30px;font-weight:600;letter-spacing:.06em;margin:10px 0 6px}
+.login-sub{font-size:13px;color:var(--ink3);margin-bottom:20px}
+.login-card{padding:24px 22px 20px;border-radius:8px}
+.login-card label{display:block;font-size:12.5px;font-weight:700;color:var(--ink3);letter-spacing:.06em;margin-bottom:15px}
+.login-card input{display:block;width:100%;margin-top:6px;padding:11px 12px;font-family:var(--sans);font-size:14px;
+  border:1px solid var(--line);border-radius:6px;background:rgba(255,255,255,.85);color:var(--ink);min-height:44px;font-weight:400}
+.login-card .hint{display:block;font-size:11.5px;font-weight:400;color:var(--ink5);margin-top:3px}
+.login-card .btn{width:100%;justify-content:center;margin-top:4px}
+.login-err{margin-top:12px;font-size:13px;color:var(--warn)}
+.login-alt{margin-top:10px;background:none;border:0;color:var(--ink4);font-family:var(--sans);font-size:12.5px;cursor:pointer;padding:8px 0;display:block}
+
+/* ============ レスポンシブ(縮小ではなく再配置。長い日本語は縦積みで解消) ============ */
+@media(max-width:960px){
+  .wrap{padding:0 20px}
+  .front{grid-template-columns:1fr}
+  .lead{border-right:0;padding-right:0}
+  .aside{margin:0 0 26px}
+  .moves{grid-template-columns:1fr}
+  .move{border-right:0;border-bottom:1px solid rgba(255,255,255,.6)}
+  .move:last-child{border-bottom:0}
+  .idx{grid-template-columns:1fr 40px;gap:4px 12px;padding:14px 16px}
+  .idx .ix-head{grid-column:1}
+  .idx .ix-sub{grid-column:1;justify-content:flex-start}
+  .idx .ix-go{grid-column:2;grid-row:1 / span 3}
+  .daimoku{font-size:34px}
+  .lead h1{font-size:29px}
+  .lead-photo img{height:220px}
+  .edition{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .edition a{flex:none}
+}
+@media(max-width:640px){
+  .masthead{padding:18px 0 12px}
+  /* 題字ブロックを縦積みに(中途半端な回り込みを禁止) */
+  .mast-top{display:block}
+  .mast-sub{display:none}
+  .mast-right{margin:8px 0 0;text-align:left}
+  .mast-me{justify-content:flex-start;margin-top:5px}
+  /* タブは1行のまま横スクロール。天気は一面の情報と重複するため隠す */
+  .edition{position:static}
+  .edition .weather{display:none}
+  .edition .spacer{display:none}
+  .lead{padding-top:22px}
+  .lead h1{font-size:26px}
+  .lead h1 br{display:none}
+  .lead-photo img{height:200px}
+  .lead-photo figcaption{position:static;margin-top:8px;display:block;background:none;border:0;padding:0;color:var(--ink4);-webkit-backdrop-filter:none;backdrop-filter:none}
+  /* ボタンは文字を折らず、入らなければボタンごと縦に並ぶ */
+  .lead-cta{flex-wrap:wrap}
+  .lead-cta .btn{flex:1 1 100%;justify-content:center}
+  /* 数字バンドは2×2(ラベルを折らないため) */
+  .numband{flex-wrap:wrap}
+  .numband .n{flex:1 1 50%;border-right:0;border-bottom:1px solid rgba(255,255,255,.65);padding:12px 16px 8px}
+  .numband .n:nth-child(odd){border-right:1px solid rgba(255,255,255,.65)}
+  .numband .n:nth-child(n+3){border-bottom:0}
+  .numband .v{font-size:28px}
+  .numband .l{letter-spacing:.06em}
+  .byline{flex-wrap:wrap}
+  .idx .ix-name{font-size:16.5px}
+  .idx.today .ix-name{font-size:18px}
+  .idx .ix-sub{white-space:normal}
+  .move time{position:static;display:block;margin-bottom:4px}
+  .colophon{flex-direction:column;gap:2px}
+  .colophon span:last-child{margin-left:0}
+  .login-main{padding-top:34px}
+}
+
+</style>
+</head>
+<body>
+<div id="app" class="wrap"></div>
+<script>
+// ================= shared/10-api.js =================
+/* ============================================================================
+   admin2 共通 GAS API 層 (vanilla JS・console.html の実プロトコル準拠)
+   - 読取 = GET ?action&memberId&params(JSON: {...params, token})。タイムアウト12s。
+     ネットワーク断/5xx/429/404 は指数バックオフで最大2回リトライ(読取は冪等)。
+     対象4action は軽量読取API優先。2連続失敗で5分間 本体GAS直行にフォールバック。
+   - 書込 = POST body=JSON {action,payload,memberId,token} / Content-Type: text/plain。
+     二重送信防止のため自動リトライしない。
+   - セッション = localStorage connecta.memberId / connecta.token
+     (console.html と同一キー=同一オリジンでSSO。consoleログイン済ならそのまま開く)
+   ============================================================================ */
+window.AdminAPI = (function () {
+  'use strict';
+  var URL_MAIN = 'https://script.google.com/macros/s/AKfycbxLs1eXm39MHM0lSioBf9ghVFL8p8fIhIdYJpBBweBTCLOFDqWclPhoF66c0FgfrbHg/exec';
+  var URL_READ = 'https://script.google.com/macros/s/AKfycbxm-_IBapGbmilVQSzPhsLhL6cMwm8_bIwxyq8Wh8j3IxXjGjBz234EwEohFe18EAY/exec';
+  var READ_API_ACTIONS = {
+    listEvents: 1, listParticipants: 1, listRegistrations: 1, listTodos: 1,
+    // read-api @5 で追加(2026-09-01 B1): イベント新機能の読取+ポータルの遅い3本
+    listEventStaffAssignments: 1, listVenues: 1, listEventExpenses: 1, listEventGroups: 1,
+    listNews: 1, listMinutesMeetings: 1, listMembers: 1,
+  };
+  var ROLE_RANK = { '代表': 5, '副代表': 4, 'マネージャー': 3, 'アシマネ': 2, 'メンバー': 1 };
+  var onUnauthorized = null; // アプリ側が setOnUnauthorized で登録(認証切れ→ログイン画面へ)
+
+  function mid() { try { return localStorage.getItem('connecta.memberId') || ''; } catch (e) { return ''; } }
+  function tok() { try { return localStorage.getItem('connecta.token') || ''; } catch (e) { return ''; } }
+  function setSession(id, t) { try { if (id) localStorage.setItem('connecta.memberId', id); if (t) localStorage.setItem('connecta.token', t); } catch (e) {} }
+  function clearSession() { try { localStorage.removeItem('connecta.memberId'); localStorage.removeItem('connecta.token'); } catch (e) {} }
+
+  // 認証切れ判定(console.html authFail と同一)。権限不足(FORBIDDEN等)は認証切れ扱いにしない
+  function authFail(j) {
+    var e = (j && j.error && (j.error.message || j.error)) || '';
+    if (/FORBIDDEN|権限がありません|required /i.test(String(e))) return false;
+    return !!(j && (j.unauthorized === true || (!j.ok && /AUTH_REQUIRED|認証が必要|認証が切れ|再ログイン|未ログイン|セッション|ログインが必要|unauthorized|expired/i.test(String(e)))));
+  }
+  function handleResp(j) {
+    if (j && j.user !== undefined) window.currentUser = j.user;
+    if (authFail(j)) {
+      if (typeof onUnauthorized === 'function') onUnauthorized();
+      var er = new Error('認証が切れています。再ログインしてください。');
+      er._auth = true;
+      throw er;
+    }
+    if (!j || !j.ok) throw new Error((j && j.error && (j.error.message || j.error)) || '取得に失敗しました');
+    return j.data;
+  }
+
+  // 1回のGET。silent=軽量API用(認証不一致でもログアウトさせず、失敗として本体へ委譲)
+  async function fetchAt(base, action, params, timeoutMs, silent) {
+    var u = base + '?action=' + encodeURIComponent(action)
+      + '&memberId=' + encodeURIComponent(mid())
+      + '&params=' + encodeURIComponent(JSON.stringify(Object.assign({}, params, { token: tok() })));
+    var ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+    var to = ctrl ? setTimeout(function () { try { ctrl.abort(); } catch (e) {} }, timeoutMs || 12000) : null;
+    var r;
+    try { r = await fetch(u, { method: 'GET', signal: ctrl ? ctrl.signal : undefined }); }
+    catch (e) {
+      if (to) clearTimeout(to);
+      var m = String((e && e.message) || '');
+      var net = (e && e.name === 'AbortError') || /Load failed|Failed to fetch|NetworkError|network/i.test(m) || m === '';
+      var err = new Error((e && e.name === 'AbortError')
+        ? '応答に時間がかかっています。通信環境をご確認のうえ再読み込みしてください。'
+        : net ? '通信が一時的に不安定です。少し待ってから再読み込みしてください。' : (m || '通信エラー'));
+      err._net = net;
+      throw err;
+    }
+    if (to) clearTimeout(to);
+    if (!r.ok) {
+      var e5 = new Error((r.status >= 500 || r.status === 429)
+        ? 'サーバが混み合っています（HTTP ' + r.status + '）。少し待って再読み込みしてください。'
+        : ('HTTP ' + r.status));
+      // 404を含む理由: GASは並列GET時に一過性404を返すことがある(再送で成功する)
+      if (r.status >= 500 || r.status === 429 || r.status === 404) e5._net = true;
+      throw e5;
+    }
+    var t = await r.text();
+    var j;
+    try { j = JSON.parse(t); }
+    catch (e2) { throw new Error('GASからの応答を解析できません。GASの公開設定(全員/自分として実行)を確認してください。'); }
+    if (silent) {
+      if (j && j.user !== undefined) window.currentUser = j.user;
+      if (!j || !j.ok) throw new Error((j && j.error && (j.error.message || j.error)) || 'lite失敗');
+      return j.data;
+    }
+    return handleResp(j);
+  }
+
+  var liteFails = 0, liteOff = false;
+  async function fetchData(action, params, opts) {
+    params = params || {}; opts = opts || {};
+    // 対象readは軽量API優先。2回連続で不調なら5分間 本体直行(GAS混雑スパイクは数分で収まる)
+    if (URL_READ && !liteOff && READ_API_ACTIONS[action]) {
+      try {
+        var d = await fetchAt(URL_READ, action, params, Math.min(opts.timeout || 12000, 5000), true);
+        liteFails = 0;
+        return d;
+      } catch (e) {
+        if (++liteFails >= 2 && !liteOff) {
+          liteOff = true;
+          setTimeout(function () { liteOff = false; liteFails = 0; }, 300000);
+        }
+      }
+    }
+    var attempt = 0;
+    while (true) {
+      try { return await fetchAt(URL_MAIN, action, params, opts.timeout); }
+      catch (e) {
+        if (e && e._net && attempt < 2) {
+          attempt++;
+          await new Promise(function (r) { setTimeout(r, 400 * attempt); });
+          continue;
+        }
+        throw e;
+      }
+    }
+  }
+
+  // 書込。自動リトライしない(二重送信防止)
+  async function postData(action, payload) {
+    var r;
+    try {
+      r = await fetch(URL_MAIN, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ action: action, payload: payload || {}, memberId: mid(), token: tok() }),
+      });
+    } catch (e) {
+      var m = String((e && e.message) || '');
+      throw new Error(/Load failed|Failed to fetch|NetworkError|network/i.test(m) || m === ''
+        ? '通信が一時的に不安定です。もう一度お試しください（二重送信を避けるため自動での再試行はしていません）。'
+        : (m || '通信エラー'));
+    }
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    var t = await r.text();
+    var j;
+    try { j = JSON.parse(t); }
+    catch (e2) { throw new Error('GASからの応答を解析できません。GASの公開設定を確認してください。'); }
+    return handleResp(j);
+  }
+
+  /* ログイン確定。重要: バックエンドの _validateToken_ は token先頭セグメント(=本来のメンバーID)と
+     送信memberIdの一致を要求する。入力IDがメール/別コードだと不一致で直後にログアウトするため、
+     user.member.id → token先頭 → r.memberId → 入力ID の順で本来のIDを採用する(console 2943-2945行と同じ)。 */
+  function finishLogin(r, typedId) {
+    var tk = (r && r.token) || '';
+    if (!tk) return false;
+    var realId = (r && r.user && r.user.member && r.user.member.id)
+      || (String(tk).indexOf('.') > 0 ? String(tk).split('.')[0] : '')
+      || (r && r.memberId) || String(typedId || '').trim();
+    setSession(realId, tk);
+    if (r && r.user !== undefined) window.currentUser = r.user;
+    return true;
+  }
+  // 認証。needsPasswordSet===true が返ったら初回PW設定モードへ(呼び出し側で分岐)
+  function login(identifier, password) { return postData('authenticate', { identifier: identifier, password: password }); }
+  // 初回パスワード設定(10文字以上)。成功時 token が返る
+  function setPassword(identifier, newPassword) { return postData('setPassword', { identifier: identifier, newPassword: newPassword }); }
+
+  // ユーザー形: user.member.{id,name}, user.highestRole, user.highestRank
+  function myRank() {
+    var u = window.currentUser;
+    if (!u || !u.member) return 0;
+    if (typeof u.highestRank === 'number') return u.highestRank;
+    return ROLE_RANK[u.highestRole] || 0;
+  }
+  function myName() {
+    var m = (window.currentUser && window.currentUser.member) || {};
+    return m.nickname || m.name || m['氏名'] || '';
+  }
+  function myRole() { return (window.currentUser && window.currentUser.highestRole) || ''; }
+
+  return {
+    fetchData: fetchData,
+    postData: postData,
+    login: login,
+    setPassword: setPassword,
+    finishLogin: finishLogin,
+    hasSession: function () { return !!(mid() && tok()); },
+    setSession: setSession,
+    clearSession: clearSession,
+    mid: mid,
+    tok: tok,
+    myRank: myRank,
+    myName: myName,
+    myRole: myRole,
+    ROLE_RANK: ROLE_RANK,
+    setOnUnauthorized: function (fn) { onUnauthorized = fn; },
+  };
+})();
+
+// ================= portal/30-app.js =================
+/* ============================================================================
+   ポータル(一面)レンダラ — vanilla JS
+   技術判断: 読み取り中心のコックピットに React/Babel ブートの税は不要(READMEに詳細)。
+   構成: 状態(demo/未ログイン/読込中/エラー/紙面) → ビューモデル(vm) → 1本のHTML組立。
+   デモと実データは同じ組立関数を通す=見た目の正典(portal-proto)を1箇所で守る。
+   ============================================================================ */
+(function () {
+  'use strict';
+  var API = window.AdminAPI;
+  var root = document.getElementById('app');
+  var DEMO = /[?&]demo=1/.test(location.search);
+  // イベント面アプリへの結線(デモは ?demo=1 を引き継ぐ)。他の面は未実装なので # のまま。
+  var EV_APP = './event.html' + (DEMO ? '?demo=1' : '');
+  function evHubHref(id) { return EV_APP + '#/ev/' + encodeURIComponent(id); }
+
+  /* ---------- 小道具 ---------- */
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function arr(x) { return Array.isArray(x) ? x : []; }
+  var WD = ['日', '月', '火', '水', '木', '金', '土'];
+  function pad2(n) { return String(n).length < 2 ? '0' + n : String(n); }
+  function ymd(d) { return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()); }
+  function parseYmd(s) {
+    var m = /^(\d{4})[-/](\d{1,2})[-/](\d{1,2})/.exec(String(s || ''));
+    return m ? new Date(+m[1], +m[2] - 1, +m[3]) : null;
+  }
+  function dateJaFull(d) { return d.getFullYear() + '年' + (d.getMonth() + 1) + '月' + d.getDate() + '日(' + WD[d.getDay()] + ')'; }
+  function dateJaShort(d) { return (d.getMonth() + 1) + '月' + d.getDate() + '日(' + WD[d.getDay()] + ')'; }
+  var NOW = new Date();
+  var TODAY = ymd(NOW);
+  // 更新時刻の表示: きょう=HH:MM / 昨日=昨日 HH:MM / それ以前=M/D
+  function relLabel(iso) {
+    if (!iso) return '';
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) { var p = parseYmd(iso); if (!p) return ''; d = p; }
+    var hm = d.getHours() + ':' + pad2(d.getMinutes());
+    var dd = ymd(d);
+    if (dd === TODAY) return hm;
+    var yd = new Date(NOW.getFullYear(), NOW.getMonth(), NOW.getDate() - 1);
+    if (dd === ymd(yd)) return '昨日 ' + hm;
+    return (d.getMonth() + 1) + '/' + d.getDate();
+  }
+
+  /* ---------- データを防御的に読む(形が想定と違っても画面を壊さない) ---------- */
+  function evTitle(e) { return e.title || e.name || '(無題のイベント)'; }
+  function evImage(e) { return e.heroImageUrl || e.posterUrl || e.imageUrl || e.image || ''; }
+  function evCancelled(e) { return /中止|アーカイブ/.test(String(e.status || '')); }
+  function regActive(r) { return !r.isTest && !/キャンセル/.test(String(r.status || '')); }
+  function regPaid(r) { return r.paid === true || r.paid === 'TRUE' || /決済済み|チェックイン/.test(String(r.status || '')); }
+  function taskTitle(t) { return t.title || t.name || t.taskName || t.task || '(無題のタスク)'; }
+  function taskDeadline(t) { return String(t.deadline || t.dueDate || t.due || '').slice(0, 10); }
+  function taskDone(t) { return t.done === true || /完了|done/i.test(String(t.status || '')); }
+  function taskFrom(t) { return t.eventTitle || t.dept || t.deptName || t.note || t.detail || ''; }
+
+  /* ---------- 画面の骨格(題字+タブは全状態で共通) ---------- */
+  function mastheadHtml(o) {
+    o = o || {};
+    var right = '<div class="mast-right"><div class="day"><span class="nb">' + esc(dateJaFull(NOW)) + '</span></div>';
+    if (o.meLine) {
+      right += '<div class="mast-me"><span>' + o.meLine + '</span>' +
+        (o.mePhoto ? '<img src="' + esc(o.mePhoto) + '" alt="">' : '') + '</div>';
+    }
+    right += '</div>';
+    var tabs = '<a href="#" aria-current="page">一面</a><a href="' + EV_APP + '#/">イベント</a><a href="#">発信</a><a href="#">組織</a>';
+    if (o.showHq) tabs += '<a href="#">統括</a>';
+    var nav = '';
+    if (o.nav !== false) {
+      nav = '<nav class="edition" aria-label="アプリ切替">' + tabs + '<span class="spacer"></span>' + (o.weatherHtml || '') + '</nav>';
+    }
+    return '<header class="masthead"><div class="mast-top">' +
+      '<div class="daimoku">connec<b>+</b>a</div><div class="mast-sub">運 営 ポ ー タ ル</div>' +
+      right + '</div>' + nav + '</header>';
+  }
+  function colophonHtml() {
+    return '<footer class="colophon"><span>connec+a 運営ポータル</span><span>' + esc(dateJaFull(NOW)) + '</span></footer>';
+  }
+
+  /* ---------- 紙面の組立(デモと実データで共用) ---------- */
+  function leadHtml(L) {
+    var h = '<article class="lead">';
+    h += '<div class="kicker">' + L.kicker + '</div>';
+    h += '<h1>' + L.titleHtml + '</h1>';
+    if (L.standfirstHtml) h += '<p class="standfirst">' + L.standfirstHtml + '</p>';
+    // 写真: 画像フィールドが無ければ figure ごと省略(代替マーク禁止・レイアウトは破綻させない)
+    if (L.photo) {
+      h += '<figure class="lead-photo"><img src="' + esc(L.photo.src) + '" alt="' + esc(L.photo.alt || '') + '">' +
+        (L.photo.caption ? '<figcaption>' + L.photo.caption + '</figcaption>' : '') + '</figure>';
+    }
+    if (L.bylineHtml) h += '<div class="byline">' + L.bylineHtml + '</div>';
+    if (L.bodyHtml) h += '<p class="body">' + L.bodyHtml + '</p>';
+    if (L.ctas && L.ctas.length) {
+      h += '<div class="lead-cta">' + L.ctas.map(function (c) {
+        return '<a class="btn' + (c.sub ? ' sub' : '') + '" href="' + esc(c.href || '#') + '">' +
+          (c.icon ? '<span class="mi">' + esc(c.icon) + '</span>' : '') + esc(c.label) + '</a>';
+      }).join('') + '</div>';
+    }
+    if (L.numband && L.numband.length) {
+      h += '<div class="numband">' + L.numband.map(function (n) {
+        return '<div class="n' + (n.hot ? ' hot' : '') + '"><div class="v">' + esc(n.v) +
+          (n.unit ? '<small>' + esc(n.unit) + '</small>' : '') + '</div><div class="l">' + n.label + '</div></div>';
+      }).join('') + '</div>';
+    }
+    if (L.noteHtml) h += '<div class="lead-note">' + L.noteHtml + '</div>';
+    h += '</article>';
+    return h;
+  }
+  function asideHtml(vm) {
+    var h = '<aside class="aside glass">';
+    h += '<h2>' + esc(vm.todosTitle) + '<small>' + esc(vm.todosSmall || '締切順') + '</small></h2>';
+    if (vm.todos === null) { // null = 読み込み中(実レイアウトの空状態スタイルを流用した控えめ表示)
+      h += '<div class="side-empty">読み込み中…</div>';
+    } else if (vm.todos && vm.todos.length) {
+      h += '<ul class="todo">' + vm.todos.map(function (t) {
+        return '<li><span class="when' + (t.urgent ? ' urgent' : '') + '">' + esc(t.when) + '</span><div><b>' + t.titleHtml + '</b>' +
+          (t.from ? '<span class="from">' + t.from + '</span>' : '') + '</div></li>';
+      }).join('') + '</ul>';
+    } else {
+      h += '<div class="side-empty">' + (vm.todosEmpty || '期限つきのタスクはありません。') + '</div>';
+    }
+    h += '<div class="sidebox"><h2>' + esc(vm.sideTitle) + (vm.sideSmall ? '<small>' + esc(vm.sideSmall) + '</small>' : '') + '</h2>';
+    if (vm.sideRows === null) { // null = 読み込み中(キャッシュ復元時はPIIを保存しないためこの欄だけ後から届く)
+      h += '<div class="side-empty">読み込み中…</div>';
+    } else if (vm.sideRows && vm.sideRows.length) {
+      h += vm.sideRows.map(function (r) {
+        return '<div class="sb-row">' +
+          (r.img ? '<img src="' + esc(r.img) + '" alt="">' : (r.icon ? '<span class="mi">' + esc(r.icon) + '</span>' : '')) +
+          '<span>' + r.html + '</span>' +
+          (r.action ? '<a href="' + esc(r.actionHref || '#') + '">' + esc(r.action) + '</a>' : '') + '</div>';
+      }).join('');
+    } else {
+      h += '<div class="side-empty">' + (vm.sideEmpty || 'まだ申込がありません。') + '</div>';
+    }
+    h += '</div></aside>';
+    return h;
+  }
+  function movesHtml(vm) {
+    var h = '<div class="section-rule"><h2>' + esc(vm.movesTitle) + '</h2></div>';
+    if (vm.moves === null) { // null = 読み込み中
+      h += '<div class="moves-empty glass">読み込み中…</div>';
+    } else if (vm.moves && vm.moves.length) {
+      h += '<section class="moves">' + vm.moves.map(function (m) {
+        var who = '';
+        if (m.whoName || m.whoRole) {
+          who = '<div class="who">' + (m.whoImg ? '<img src="' + esc(m.whoImg) + '" alt="">' : '') +
+            '<div><b>' + esc(m.whoName || '') + '</b><span>' + esc(m.whoRole || '') + '</span></div></div>';
+        }
+        return '<article class="move">' + (m.time ? '<time>' + esc(m.time) + '</time>' : '') + who + '<p>' + m.bodyHtml + '</p></article>';
+      }).join('') + '</section>';
+    } else {
+      h += '<div class="moves-empty glass">' + (vm.movesEmpty || 'まだ記事がありません。') + '</div>';
+    }
+    return h;
+  }
+  function indexHtml(vm) {
+    return '<div class="section-rule"><h2>すべての面</h2></div>' +
+      '<nav class="index glass" aria-label="アプリ一覧">' + vm.index.map(function (x) {
+        return '<a class="idx ' + esc(x.cls || '') + '" href="' + esc(x.href || '#') + '">' +
+          '<span class="ix-name">' + esc(x.name) + (x.small ? '<small>' + esc(x.small) + '</small>' : '') + '</span>' +
+          '<span class="ix-head">' + x.headHtml + '</span>' +
+          '<span class="ix-sub">' + (x.subHtml || '') + '</span>' +
+          '<span class="mi ix-go">arrow_forward</span></a>';
+      }).join('') + '</nav>';
+  }
+  function renderPortal(vm) {
+    root.innerHTML =
+      mastheadHtml({ meLine: vm.meLine, mePhoto: vm.mePhoto, showHq: vm.showHq, weatherHtml: vm.weatherHtml }) +
+      '<main class="front">' + leadHtml(vm.lead) + asideHtml(vm) + '</main>' +
+      movesHtml(vm) + indexHtml(vm) + colophonHtml();
+  }
+
+  /* ---------- 状態: 読込中 / エラー / ログイン ---------- */
+  function renderLoading() {
+    root.innerHTML = mastheadHtml({}) +
+      '<main class="front"><article class="lead"><div class="kicker">一面</div>' +
+      '<div class="state-line">読み込み中…</div></article>' +
+      '<aside class="aside glass"><h2>あなたの今日<small>締切順</small></h2>' +
+      '<div class="side-empty">読み込み中…</div></aside></main>' + colophonHtml();
+  }
+  function renderError(msg) {
+    root.innerHTML = mastheadHtml({}) +
+      '<main class="state-error" style="padding:36px 0 60px"><div class="kicker">一面</div>' +
+      '<h1>データを取得できませんでした</h1>' +
+      '<p>' + esc(msg || '通信に失敗しました。') + '</p>' +
+      '<p>通信環境をご確認のうえ再読み込みしてください。解決しない場合は再ログインをお試しください。</p>' +
+      '<div class="lead-cta"><button class="btn" id="retry">再読み込み</button>' +
+      '<button class="btn sub" id="relogin">再ログイン</button></div></main>' + colophonHtml();
+    document.getElementById('retry').addEventListener('click', function () { boot(); });
+    document.getElementById('relogin').addEventListener('click', function () { API.clearSession(); cacheClear(); renderLogin(''); });
+  }
+  function renderLogin(note) {
+    var state = { mode: 'login', err: note || '', busy: false, id: '', pw: '', npw: '', npw2: '' };
+    function paint() {
+      var f;
+      if (state.mode === 'setpw') {
+        f = '<label>新しいパスワード<input type="password" id="f-npw" value="' + esc(state.npw) + '" autocomplete="new-password">' +
+          '<span class="hint">10文字以上で設定してください</span></label>' +
+          '<label>パスワード(確認)<input type="password" id="f-npw2" value="' + esc(state.npw2) + '" autocomplete="new-password"></label>' +
+          '<button class="btn" id="f-go">' + (state.busy ? '設定中…' : '設定してログイン') + '</button>' +
+          '<button type="button" class="login-alt" id="f-back">ログインに戻る</button>';
+      } else {
+        f = '<label>メンバーコード または メール<input id="f-id" value="' + esc(state.id) + '" autocomplete="username" placeholder="CN0001 / you@example.com"></label>' +
+          '<label>パスワード<input type="password" id="f-pw" value="' + esc(state.pw) + '" autocomplete="current-password">' +
+          '<span class="hint"><span class="nb">初回(未設定)の場合は</span><span class="nb">空のままログインしてください</span></span></label>' +
+          '<button class="btn" id="f-go">' + (state.busy ? '認証中…' : 'ログイン') + '</button>';
+      }
+      root.innerHTML = mastheadHtml({ nav: false }) +
+        '<main class="login-main"><div class="kicker">運営メンバー専用</div>' +
+        '<h1 class="login-h">' + (state.mode === 'setpw' ? 'パスワードの設定' : 'ログイン') + '</h1>' +
+        '<p class="login-sub">' + (state.mode === 'setpw'
+          ? '初回ログインです。ご自身のパスワードを設定してください。'
+          : 'console と同じ<span class="nb">メンバーコード(またはメール)</span>と<span class="nb">パスワードで入れます</span>。') + '</p>' +
+        '<form class="login-card glass" id="f">' + f +
+        (state.err ? '<div class="login-err">' + esc(state.err) + '</div>' : '') +
+        '</form></main>' + colophonHtml();
+      bind();
+    }
+    function keep() { // 再描画前に入力値を保持
+      var g = function (id) { var n = document.getElementById(id); return n ? n.value : ''; };
+      if (state.mode === 'setpw') { state.npw = g('f-npw'); state.npw2 = g('f-npw2'); }
+      else { state.id = g('f-id'); state.pw = g('f-pw'); }
+    }
+    function submit() {
+      keep();
+      if (state.busy) return;
+      if (state.mode === 'setpw') {
+        if (state.npw !== state.npw2) { state.err = '確認用パスワードが一致しません。'; paint(); return; }
+        if (state.npw.length < 10) { state.err = 'パスワードは10文字以上にしてください。'; paint(); return; }
+        state.busy = true; state.err = ''; paint();
+        API.setPassword(state.id.trim(), state.npw).then(function (r) {
+          if (r && r.ok === false) { state.busy = false; state.err = r.error || 'パスワードの設定に失敗しました。'; paint(); return; }
+          if (API.finishLogin(r, state.id)) { boot(); return; }
+          state.busy = false; state.mode = 'login'; state.pw = '';
+          state.err = '設定は完了しました。設定したパスワードでログインしてください。'; paint();
+        }).catch(function (e) { state.busy = false; state.err = (e && e.message) || 'パスワードの設定に失敗しました。'; paint(); });
+        return;
+      }
+      if (!state.id.trim()) { state.err = 'メンバーコードまたはメールを入力してください。'; paint(); return; }
+      state.busy = true; state.err = ''; paint();
+      API.login(state.id.trim(), state.pw).then(function (r) {
+        if (r && r.needsPasswordSet) { state.busy = false; state.mode = 'setpw'; state.npw = ''; state.npw2 = ''; state.err = ''; paint(); return; }
+        if (API.finishLogin(r, state.id)) { boot(); return; }
+        state.busy = false; state.err = (r && r.error) || 'ID またはパスワードが違います。ご確認ください。'; paint();
+      }).catch(function (e) { state.busy = false; state.err = (e && e.message) || 'ログインに失敗しました。'; paint(); });
+    }
+    function bind() {
+      var form = document.getElementById('f');
+      form.addEventListener('submit', function (ev) { ev.preventDefault(); submit(); });
+      document.getElementById('f-go').addEventListener('click', function (ev) { ev.preventDefault(); submit(); });
+      var back = document.getElementById('f-back');
+      if (back) back.addEventListener('click', function () { keep(); state.mode = 'login'; state.err = ''; paint(); });
+    }
+    paint();
+  }
+
+  /* ---------- デモ(portal-proto/portal.html と同じ「みずき・イベント当日」) ---------- */
+  function demoModel() {
+    return {
+      meLine: '広報部・マネージャー 佐藤みずき',
+      mePhoto: 'https://i.pravatar.cc/72?img=47',
+      showHq: true,
+      weatherHtml: '<span class="weather glass"><span class="mi">partly_cloudy_day</span><span class="nb">渋谷区 27° ／ 降水20%</span></span>',
+      lead: {
+        kicker: 'きょう開催 ・ あなたは受付担当',
+        titleHtml: 'きょう、代々木公園で<br>42人と会いましょう。',
+        standfirstHtml: '国際交流ピクニック ― <span class="nb">12:00開場</span>、受付開始は<span class="nb">11:30</span>。集合は<span class="nb">11:00 原宿門</span>。',
+        photo: {
+          src: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=1200&q=80',
+          alt: '前回7月のピクニックで肩を組む参加者たち',
+          caption: '前回(7月)のピクニック。今日の申込はこの1.4倍です。',
+        },
+        bylineHtml: '<span class="faces"><img src="https://i.pravatar.cc/72?img=47" alt=""><img src="https://i.pravatar.cc/72?img=12" alt=""></span>' +
+          '<span><span class="nb">受付: みずき・ケンタ</span> ／ <span class="nb">司会: ユイ</span> ／ <span class="nb">写真: リナ</span> ／ <span class="nb">救護・案内: アイシャ</span></span>',
+        bodyHtml: '昨夜から新たに6名の申込。未決済が4名いるため、受付で当日決済を案内してください。持ち物リストとタイムテーブルは配信済みです。',
+        ctas: [{ label: '受付を開く', icon: 'qr_code_scanner' }, { label: 'イベントの詳細', sub: true, href: evHubHref('EV-PIC') }],
+        numband: [
+          { v: '42', unit: '名', label: '申込' },
+          { v: '38', unit: '名', label: '決済済み' },
+          { v: '4', unit: '名', label: '未決済 ― <span class="nb">受付で案内</span>', hot: true },
+          { v: '8', unit: '枠', label: '残り(定員50)' },
+        ],
+      },
+      todosTitle: 'みずきさんの今日',
+      todos: [
+        { when: '11:00', urgent: true, titleHtml: 'Instagram投稿の最終確認', from: 'きょうのピクニック告知・予約済み' },
+        { when: '14:00', titleHtml: '受付シフト(前半)', from: '後半はケンタさんに交代' },
+        { when: 'あす', titleHtml: 'ニュース下書きのレビュー', from: 'ユイさんから依頼「10月バディプログラム」' },
+        { when: '9/3', titleHtml: '広報定例のアジェンダ', from: '前回の議事録は部署ハブにあります' },
+      ],
+      sideTitle: 'あなた宛て', sideSmall: '3件',
+      sideRows: [
+        { icon: 'how_to_reg', html: '<b>アイシャさん</b>の入会申請 ― <span class="nb">承認待ち</span>', action: '承認へ' },
+        { icon: 'forum', html: '問い合わせ<b> 2件</b>が<span class="nb">未対応(英語)</span>', action: '返信する' },
+        { img: 'https://i.pravatar.cc/72?img=32', html: '<b>リナさん</b>から写真係交代の相談', action: '返事する' },
+      ],
+      movesTitle: '広報部の動き',
+      moves: [
+        { time: '8:12', whoImg: 'https://i.pravatar.cc/76?img=44', whoName: 'ユイさん', whoRole: '広報部・アシマネ', bodyHtml: 'ニュース<b>「10月バディプログラム募集」</b>の下書きを更新。みずきさんのレビュー待ちです。' },
+        { time: '昨日 22:04', whoImg: 'https://i.pravatar.cc/76?img=32', whoName: 'リナさん', whoRole: '広報部', bodyHtml: '問い合わせ<b>3件に返信</b>。英語の2件はみずきさんに割り当てられています。' },
+        { time: '昨日 19:30', whoImg: 'https://i.pravatar.cc/76?img=12', whoName: 'ケンタさん', whoRole: 'イベント運営部', bodyHtml: 'きょうの<b>持ち物リストとタイムテーブル</b>を確定し、参加者42名に配信しました。' },
+      ],
+      index: [
+        { cls: 'today', name: 'イベント面', href: evHubHref('EV-PIC'), headHtml: '<b>国際交流ピクニック、開場まで<span class="nb">あと3時間</span>。</b>未決済4名は<span class="nb">受付で案内</span>。', subHtml: '<img src="https://i.pravatar.cc/48?img=12" alt="">ケンタさんが最終準備中' },
+        { cls: 'comms', name: '発信面', headHtml: '<span class="warn-t">問い合わせ2件が<span class="nb">返信待ち(英語)</span>。</span><span class="nb">ニュース下書き</span>が1本<span class="nb">レビュー待ち</span>。', subHtml: '<img src="https://i.pravatar.cc/48?img=44" alt="">ユイさんが執筆中' },
+        { cls: 'org', name: '組織面', headHtml: '今夜20:00 広報定例。前回の議事録は部署ハブに。', subHtml: '出席予定 6名' },
+        { cls: 'hq', name: '統括面', small: 'マネ以上', headHtml: '<span class="warn-t">アイシャさんの入会申請が<span class="nb">承認待ち</span>。</span>ほかの承認はありません。', subHtml: '<img src="https://i.pravatar.cc/48?img=68" alt="">昨日18:47 申請' },
+        { cls: 'analytics', name: '分析面', small: 'マネ以上', headHtml: '今月の申込は<span class="nb">先月比<b> +18%</b></span>。<span class="nb">土曜開催</span>が伸びています。', subHtml: '9月1日 7:00 集計' },
+      ],
+    };
+  }
+
+  /* ---------- 実データ → ビューモデル ---------- */
+  function buildRealModel(d) {
+    var events = arr(d.events);
+    var regs = arr(d.regs);
+    var vm = {};
+    var rank = API.myRank();
+    vm.showHq = rank >= 3;
+    var name = API.myName();
+    var role = API.myRole();
+    vm.me = { name: name, role: role, rank: rank }; // 非PII(自分自身)。キャッシュ復元時のrankゲート/表示に使う
+    vm.meLine = esc((role ? role + ' ' : '') + (name || ''));
+    var mePhoto = (window.currentUser && window.currentUser.member && (window.currentUser.member.photoUrl || window.currentUser.member.avatarUrl)) || '';
+    vm.mePhoto = mePhoto; // 顔写真フィールドが無ければ省略(イニシャル等の代替マークは出さない)
+    vm.weatherHtml = ''; // 天気チップは v1 スコープ外(デモのみ)
+
+    // きょう開催(中止を含まない) > なければ次回イベント
+    var todayEv = null, nextEv = null;
+    events.forEach(function (e) {
+      if (evCancelled(e)) return;
+      var ds = String(e.date || '').slice(0, 10);
+      if (!ds) return;
+      if (ds === TODAY) { if (!todayEv) todayEv = e; }
+      else if (ds > TODAY) { if (!nextEv || ds < String(nextEv.date).slice(0, 10)) nextEv = e; }
+    });
+    var ev = todayEv || nextEv;
+
+    // 対象イベントの申込集計(status文字列は防御的に判定)
+    var counts = null;
+    if (ev && d.regsOk) {
+      var mine = regs.filter(function (r) { return r.eventId === ev.id; });
+      var act = mine.filter(regActive);
+      var paid = act.filter(regPaid).length;
+      counts = { applied: act.length, paid: paid, unpaid: act.length - paid, capacity: Number(ev.capacity) || 0 };
+    }
+
+    // きょうの自分の担当(listEventStaffAssignments)。割当があれば一面kickerを個別化する
+    var myRoleToday = '';
+    if (todayEv && Array.isArray(d.staffToday)) {
+      var meid = String(API.mid() || '').trim();
+      d.staffToday.forEach(function (s) {
+        if (myRoleToday || !s) return;
+        if (String(s.memberId || '').trim() === meid && String(s.role || '').trim()) {
+          myRoleToday = String(s.role).trim().replace(/担当$/, '');
+        }
+      });
+    }
+
+    var lead;
+    if (ev) {
+      var evd = parseYmd(ev.date) || NOW;
+      var sf = '<span class="nb">' + esc(dateJaShort(evd)) + '</span>';
+      if (ev.time) sf += ' ・ <span class="nb">' + esc(String(ev.time).slice(0, 5)) + ' 開始</span>';
+      if (ev.venue) sf += ' ・ <span class="nb">' + esc(ev.venue) + '</span>';
+      lead = {
+        kicker: todayEv
+          ? (myRoleToday ? 'きょう開催 ・ <span class="nb">あなたは' + esc(myRoleToday) + '担当</span>' : 'きょう開催')
+          : '次回イベント',
+        titleHtml: esc(evTitle(ev)),
+        standfirstHtml: sf,
+        photo: evImage(ev) ? { src: evImage(ev), alt: evTitle(ev) } : null, // 画像なし=figureごと省略
+        bodyHtml: ev.summary ? esc(String(ev.summary).slice(0, 90)) : '',
+        ctas: todayEv
+          ? [{ label: '受付を開く', icon: 'qr_code_scanner' }, { label: 'イベントの詳細', sub: true, href: evHubHref(ev.id) }]
+          : [{ label: 'イベントの詳細', href: evHubHref(ev.id) }],
+        numband: counts ? [
+          { v: String(counts.applied), unit: '名', label: '申込' },
+          { v: String(counts.paid), unit: '名', label: '決済済み' },
+          { v: String(counts.unpaid), unit: '名', label: counts.unpaid > 0 ? (todayEv ? '未決済 ― <span class="nb">受付で案内</span>' : '未決済') : '未決済', hot: counts.unpaid > 0 },
+        ].concat(counts.capacity > 0
+          ? [{ v: String(Math.max(0, counts.capacity - counts.applied)), unit: '枠', label: '残り(定員' + counts.capacity + ')' }]
+          : []) : null,
+        noteHtml: (!d.regsOk)
+          ? '申込数を取得できませんでした。<button type="button" id="note-retry">再読み込み</button>'
+          : '',
+      };
+    } else {
+      lead = {
+        kicker: 'イベント',
+        titleHtml: '開催予定のイベントはありません。',
+        bodyHtml: 'イベント面で次のイベントを公開すると、ここに当日の受付状況と申込数が載ります。',
+        ctas: [{ label: 'イベント面を開く', sub: true, href: EV_APP + '#/' }],
+      };
+    }
+    vm.lead = lead;
+
+    // 自分のタスク(締切順4件)
+    vm.todosTitle = name ? name + 'さんの今日' : 'あなたの今日';
+    if (d.tasksOk) {
+      var tasks = arr(d.tasks).filter(function (t) { return t && !taskDone(t); });
+      tasks.sort(function (a, b) { return (taskDeadline(a) || '9999').localeCompare(taskDeadline(b) || '9999'); });
+      vm.todos = tasks.slice(0, 4).map(function (t) {
+        var dl = taskDeadline(t);
+        var when = '—', urgent = false;
+        if (dl) {
+          if (dl < TODAY) { when = '期限超過'; urgent = true; }
+          else if (dl === TODAY) { when = 'きょう'; urgent = true; }
+          else {
+            var tm = new Date(NOW.getFullYear(), NOW.getMonth(), NOW.getDate() + 1);
+            var dd = parseYmd(dl);
+            when = (dl === ymd(tm)) ? 'あす' : (dd ? (dd.getMonth() + 1) + '/' + dd.getDate() : dl.slice(5));
+          }
+        }
+        return { when: when, urgent: urgent, titleHtml: esc(taskTitle(t)), from: esc(taskFrom(t)) };
+      });
+      vm.todosEmpty = '期限つきのタスクはありません。タスクは組織面で確認できます。';
+    } else {
+      vm.todos = [];
+      vm.todosEmpty = 'タスクを取得できませんでした。再読み込みしてください。';
+    }
+
+    // 直近の申込(新しい順3件: 名前+イベント名)
+    vm.sideTitle = '直近の申込';
+    if (d.regsOk) {
+      var recent = regs.filter(function (r) { return r && !r.isTest; })
+        .sort(function (a, b) { return String(b.appliedAt || '').localeCompare(String(a.appliedAt || '')); })
+        .slice(0, 3);
+      vm.sideSmall = recent.length ? '新しい順' : '';
+      vm.sideRows = recent.map(function (r) {
+        return {
+          icon: 'how_to_reg',
+          html: '<b>' + esc(r.userName || '(名前未登録)') + '</b>さん ― ' + esc(r.eventTitle || '') +
+            (r.appliedAt ? ' <span class="nb">' + esc(relLabel(r.appliedAt)) + '</span>' : ''),
+        };
+      });
+      vm.sideEmpty = 'まだ申込がありません。イベントを公開すると、ここに新着順で並びます。';
+    } else {
+      vm.sideRows = [];
+      vm.sideEmpty = '申込データを取得できませんでした。再読み込みしてください。';
+    }
+
+    // 直近のニュース(上位3件: タイトル+状態+更新者)
+    vm.movesTitle = '直近のニュース';
+    var news = arr(d.news);
+    if (d.newsPending) {
+      vm.moves = null; // 遅い組が未着 → 読み込み中表示
+    } else if (d.newsOk) {
+      var recentNews = news.slice().sort(function (a, b) {
+        return String(b.updatedAt || b.createdAt || '').localeCompare(String(a.updatedAt || a.createdAt || ''));
+      }).slice(0, 3);
+      vm.moves = recentNews.map(function (n) {
+        var updater = n.updatedBy || n.author || n.createdBy || '';
+        return {
+          time: relLabel(n.updatedAt || n.createdAt),
+          whoName: n.status || '下書き',
+          whoRole: updater ? updater + ' が更新' : (n.category || ''),
+          bodyHtml: '<b>' + esc(n.title || '(無題)') + '</b>',
+        };
+      });
+      vm.movesEmpty = 'ニュースはまだありません。発信面から下書きを作成できます。';
+    } else {
+      vm.moves = [];
+      vm.movesEmpty = 'ニュースを取得できませんでした。発信面で直接ご確認ください。';
+    }
+
+    // 面別インデックス(実データ見出し)
+    var index = [];
+    // イベント面
+    var evHead;
+    if (todayEv) {
+      evHead = '<b>' + esc(evTitle(todayEv)) + '、きょう開催。</b>';
+      if (counts && counts.unpaid > 0) evHead += '未決済' + counts.unpaid + '名は<span class="nb">受付で案内</span>。';
+      else if (counts) evHead += '申込' + counts.applied + '名。';
+    } else if (nextEv) {
+      var nd = parseYmd(nextEv.date);
+      evHead = '次回 <b>' + esc(evTitle(nextEv)) + '</b> ― <span class="nb">' + esc(nd ? dateJaShort(nd) : String(nextEv.date)) + '</span>。' +
+        (counts ? '申込' + counts.applied + '名。' : '');
+    } else {
+      evHead = '公開中のイベントはありません。次のイベントを作成できます。';
+    }
+    index.push({
+      cls: todayEv ? 'today' : '', name: 'イベント面',
+      href: todayEv ? evHubHref(todayEv.id) : EV_APP + '#/',
+      headHtml: evHead, subHtml: ev && ev.venue ? esc(ev.venue) : '',
+    });
+    // 発信面
+    if (d.newsPending) {
+      index.push({ cls: 'comms', name: '発信面', headHtml: '読み込み中…', subHtml: '' });
+    } else if (d.newsOk) {
+      var drafts = news.filter(function (n) { return n && (n.status === '下書き' || n.status === '予約'); }).length;
+      var pub = news.filter(function (n) { return n && n.status === '公開中'; }).length;
+      index.push({
+        cls: 'comms', name: '発信面',
+        headHtml: 'ニュースは<span class="nb">下書き' + drafts + '本</span>・<span class="nb">公開中' + pub + '本</span>。',
+        subHtml: '',
+      });
+    } else {
+      index.push({ cls: 'comms', name: '発信面', headHtml: 'ニュース・問い合わせは発信面で確認できます。', subHtml: '' });
+    }
+    // 組織面(次回会議)
+    var meetings = arr(d.meetings && d.meetings.meetings ? d.meetings.meetings : d.meetings);
+    var nextMtg = null;
+    meetings.forEach(function (m) {
+      if (!m || String(m.status || '').toLowerCase() === 'cancelled') return;
+      var md = String(m.meetingDate || m.meeting_date || '').slice(0, 10);
+      if (!md || md < TODAY) return;
+      var cur = nextMtg ? String(nextMtg.meetingDate || nextMtg.meeting_date || '').slice(0, 10) : '';
+      if (!nextMtg || md < cur) nextMtg = m;
+    });
+    if (d.meetingsPending) {
+      index.push({ cls: 'org', name: '組織面', headHtml: '読み込み中…', subHtml: '' });
+    } else if (nextMtg) {
+      var mdd = parseYmd(nextMtg.meetingDate || nextMtg.meeting_date);
+      index.push({
+        cls: 'org', name: '組織面',
+        headHtml: '次回の会議は<span class="nb">' + esc(mdd ? dateJaShort(mdd) : '') + '</span> <b>' + esc(nextMtg.meetingName || nextMtg.meeting_name || '会議') + '</b>。',
+        subHtml: esc(nextMtg.dept || ''),
+      });
+    } else {
+      index.push({ cls: 'org', name: '組織面', headHtml: '予定されている会議はありません。議事録・部署ハブはこちら。', subHtml: '' });
+    }
+    // 統括面(マネ以上)
+    if (rank >= 3) {
+      var membersHead = d.membersPending
+        ? '読み込み中…'
+        : d.membersOk
+          ? '在籍メンバーは<span class="nb">' + arr(d.members).filter(function (m) { return m && !/アーカイブ|退会/.test(String(m.status || '')); }).length + '名</span>。承認・評価はこちら。'
+          : '承認・週次評価・設定はこちら。';
+      index.push({ cls: 'hq', name: '統括面', small: 'マネ以上', headHtml: membersHead, subHtml: '' });
+    }
+    // 分析面(マネ以上): 今月申込数と先月比
+    if (rank >= 3 && d.regsOk) {
+      var ymNow = TODAY.slice(0, 7);
+      var lm = new Date(NOW.getFullYear(), NOW.getMonth() - 1, 1);
+      var ymPrev = lm.getFullYear() + '-' + pad2(lm.getMonth() + 1);
+      var actRegs = regs.filter(regActive);
+      var cur2 = actRegs.filter(function (r) { return String(r.appliedAt || '').slice(0, 7) === ymNow; }).length;
+      var prev = actRegs.filter(function (r) { return String(r.appliedAt || '').slice(0, 7) === ymPrev; }).length;
+      var head = '今月の申込は<span class="nb"><b>' + cur2 + '件</b></span>';
+      if (prev > 0) {
+        var pct = Math.round((cur2 - prev) / prev * 100);
+        head += '、<span class="nb">先月比' + (pct >= 0 ? '+' : '') + pct + '%</span>。';
+      } else head += '。';
+      index.push({ cls: 'analytics', name: '分析面', small: 'マネ以上', headHtml: head, subHtml: '' });
+    } else if (rank >= 3) {
+      index.push({ cls: 'analytics', name: '分析面', small: 'マネ以上', headHtml: 'KPI・推移は分析面で確認できます。', subHtml: '' });
+    }
+    vm.index = index;
+    return vm;
+  }
+
+  /* ---------- 永続キャッシュ(SWR: 前回の紙面を即描画→裏で実データ→揃ったら差し替え) ----------
+     保存対象は描画済みビューモデル(vm)のみ。PII方針(console準拠):
+     参加者PII(直近の申込=氏名)は保存しない(sideRows を null 化→復元時は「読み込み中…」)。
+     集計値(申込数/決済数/先月比%)と自分のユーザー情報 {name, role, rank} は非PIIなので保存する。 */
+  var CACHE_KEY = 'admin2.portal.v1';
+  var CACHE_TTL = 24 * 60 * 60 * 1000; // 24h
+  function cacheSave(vm) {
+    try {
+      var c = JSON.parse(JSON.stringify(vm)); // vm はプレーンなJSON構造(関数を持たない)
+      c.sideRows = null;   // 参加者PIIを永続化しない
+      c.sideSmall = '';    // 「新しい順」等の件数ラベルも一緒に落とす
+      localStorage.setItem(CACHE_KEY, JSON.stringify({ mid: API.mid(), t: Date.now(), vm: c }));
+    } catch (e) {}
+  }
+  function cacheLoad() {
+    try {
+      var raw = localStorage.getItem(CACHE_KEY);
+      if (!raw) return null;
+      var o = JSON.parse(raw);
+      if (!o || !o.vm || o.mid !== API.mid() || !o.t || Date.now() - o.t > CACHE_TTL) {
+        localStorage.removeItem(CACHE_KEY); // 別人 or 期限切れは破棄
+        return null;
+      }
+      return o.vm;
+    } catch (e) { return null; }
+  }
+  function cacheClear() { try { localStorage.removeItem(CACHE_KEY); } catch (e) {} }
+
+  /* ---------- 読込 ---------- */
+  function loadTasks() {
+    // 自分のタスク: getPersonalTaskList → 失敗時は listTodos を自分担当で絞る
+    return API.fetchData('getPersonalTaskList', {}).then(function (d) {
+      return arr(d && d.tasks ? d.tasks : d);
+    }).catch(function () {
+      return API.fetchData('listTodos', {}).then(function (todos) {
+        var all = arr(todos);
+        var me = (window.currentUser && window.currentUser.member) || {};
+        var mine = all.filter(function (t) {
+          var a = String(t.assignee || t.assigneeId || t.assigneeName || t.memberId || '');
+          return a && (a === me.id || a === me.name);
+        });
+        return mine.length ? mine : all; // 担当フィールドが判別できない形なら全件(壊さない)
+      });
+    });
+  }
+  var unauthShown = false;
+  function bindNoteRetry() {
+    var nr = document.getElementById('note-retry');
+    if (nr) nr.addEventListener('click', function () { boot(); });
+  }
+  function loadReal() {
+    unauthShown = false;
+    // 1) キャッシュがあれば 0ms で前回の紙面を描画(SWR)。無ければ従来のローディング。
+    var cached = cacheLoad();
+    if (cached) renderPortal(cached); // sideRows は保存時に null 化済み=その欄だけ「読み込み中…」
+    else renderLoading();
+
+    // 2) 全fetchを最初から同時に発火(2巡目を作らない)。
+    //    listMembers はキャッシュの rank<3 が確実なときだけ省略。不明なら投げて、rank<3なら結果を捨てる。
+    var d = { regsOk: true, tasksOk: true, newsOk: true, membersOk: true };
+    var cachedRank = cached && cached.me && typeof cached.me.rank === 'number' ? cached.me.rank : null;
+    var pEvents = API.fetchData('listEvents', {}); // 一面の主データ。これが落ちたら画面全体をエラーに
+    var pRegs = API.fetchData('listRegistrations', {}).then(function (r) { return r; }, function () { d.regsOk = false; return []; });
+    var pTasks = loadTasks().then(function (r) { return r; }, function () { d.tasksOk = false; return []; });
+    var pNews = API.fetchData('listNews', {}).then(function (r) { return r; }, function () { d.newsOk = false; return []; });
+    var pMeetings = API.fetchData('listMinutesMeetings', {}).then(function (r) { return r; }, function () { return []; });
+    var pMembers = (cachedRank !== null && cachedRank < 3)
+      ? Promise.resolve([])
+      : API.fetchData('listMembers', {}).then(function (m) { return m; }, function () { d.membersOk = false; return []; });
+    // きょう開催イベントの担当割当(events到着後にイベントIDが分かるため連鎖)。
+    // 読取はアシマネ+なので rank<2 は投げない。失敗しても一面は個別化なしで成立(nullのまま)。
+    var pStaffToday = pEvents.then(function (events) {
+      var t = null;
+      arr(events).forEach(function (e) {
+        if (e && !evCancelled(e) && String(e.date || '').slice(0, 10) === TODAY && !t) t = e;
+      });
+      if (!t || API.myRank() < 2) return null;
+      return API.fetchData('listEventStaffAssignments', { eventId: t.id }).then(
+        function (s) { return arr(s); },
+        function () { return null; }
+      );
+    }, function () { return null; });
+
+    // 3) 段階レンダリング: キャッシュが無い初回は、速い組(軽量読取API)だけで一面と数字バンドを先に出す。
+    //    キャッシュ表示済みのときはチラつき防止のため全部揃ってから1回で再render。
+    var doneAll = false;
+    if (!cached) {
+      Promise.all([pEvents, pRegs, pTasks]).then(function (res) {
+        if (doneAll || unauthShown) return;
+        d.events = res[0]; d.regs = res[1]; d.tasks = res[2];
+        d.newsPending = true; d.meetingsPending = true; d.membersPending = true;
+        renderPortal(buildRealModel(d));
+        bindNoteRetry();
+      }).catch(function () { /* エラーは下の全体待ちで一元処理 */ });
+    }
+
+    // 4) 全部揃ったら最終renderしてキャッシュ更新。
+    Promise.all([pEvents, pRegs, pTasks, pNews, pMeetings, pMembers, pStaffToday]).then(function (res) {
+      doneAll = true;
+      d.events = res[0]; d.regs = res[1]; d.tasks = res[2]; d.news = res[3]; d.meetings = res[4]; d.members = res[5] || [];
+      d.staffToday = res[6];
+      d.newsPending = false; d.meetingsPending = false; d.membersPending = false;
+      var vm = buildRealModel(d);
+      renderPortal(vm);
+      cacheSave(vm);
+      bindNoteRetry();
+    }).catch(function (e) {
+      doneAll = true;
+      if (unauthShown || (e && e._auth)) return; // 認証切れは onUnauthorized がログイン画面を出している
+      // キャッシュの紙面を出せているなら維持(24h以内の前回紙面>全面エラー)。初回のみ全面エラー。
+      if (cached) return;
+      renderError((e && e.message) || String(e));
+    });
+  }
+
+  /* ---------- 起動 ---------- */
+  API.setOnUnauthorized(function () {
+    unauthShown = true;
+    API.clearSession();
+    cacheClear(); // ログアウト時は前回紙面のキャッシュも消す
+    renderLogin('セッションが切れました。再度ログインしてください。');
+  });
+  function boot() {
+    if (DEMO) { renderPortal(demoModel()); return; }
+    if (!API.hasSession()) { cacheClear(); renderLogin(''); return; } // 未ログイン時は紙面キャッシュも残さない(ログイン画面はまっさら)
+    loadReal();
+  }
+  boot();
+})();
+
+</script>
+</body>
+</html>

@@ -1,0 +1,2702 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>イベント — connec+a 運営ポータル</title>
+<meta name="description" content="connec+a 運営ポータル — イベント面">
+<script>window.__ADMIN2_BUILD='20260901133616';</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://script.google.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Old+Mincho:wght@400;500;600;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,300,0,0&display=block" rel="stylesheet">
+<style>
+/* ================= shared/01-tokens.css ================= */
+/* ============================================================================
+   admin2 共通トークン+共通部品 (正典: redesign/portal-proto/portal.html)
+   ここに置くのは全アプリで再利用する規則のみ: 色・書体・.glass・.btn・.nb・
+   フォーカス・reduced-motion。レイアウトは各アプリ側で設計する(機械的統一の禁止)。
+   ============================================================================ */
+:root{
+  --accent:#6e86e0; --deep:#4f63c4; --ink:#22314a; --ink2:#2b3d57; --ink3:#3d5877; --ink4:#526d89; --ink5:#71859a;
+  --cream:#faf6e8; --paper:#fdfcf8; --line:#d9dfe9; --rule:#22314a;
+  --warn:#a8434f; --ok:#3f7d5c; --amber:#8a6a2f;
+  --wash1:rgba(110,134,224,.08); --wash2:rgba(244,232,196,.35); --wash3:rgba(233,180,196,.10);
+  --serif:'Zen Old Mincho',serif; --sans:'Zen Kaku Gothic New',sans-serif; --latin:'Cormorant Garamond',serif;
+  /* アプリ識別色(全アプリ共通で固定の意味を持つ) */
+  --app-event:#6e86e0; --app-comms:#c96f83; --app-org:#4c8f6a; --app-hq:#b08430; --app-analytics:#5d7bab;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--sans);color:var(--ink);background:var(--paper);font-size:14px;line-height:1.8;
+  background-image:
+    radial-gradient(ellipse 900px 520px at 88% -6%, rgba(110,134,224,.26), transparent 60%),
+    radial-gradient(ellipse 700px 500px at -8% 30%, rgba(244,228,178,.75), transparent 60%),
+    radial-gradient(ellipse 540px 430px at 96% 46%, rgba(110,134,224,.2), transparent 62%),
+    radial-gradient(ellipse 700px 460px at 26% 74%, rgba(110,134,224,.14), transparent 62%),
+    radial-gradient(ellipse 620px 480px at 70% 108%, rgba(233,180,196,.26), transparent 62%);
+  background-attachment:fixed}
+/* フロストガラス(浮いている操作面・状態帯に使用。見出し・本文の紙面には使わない) */
+.glass{background:linear-gradient(168deg, rgba(255,255,255,.52), rgba(255,255,255,.24));
+  -webkit-backdrop-filter:blur(22px) saturate(1.3);backdrop-filter:blur(22px) saturate(1.3);
+  border:1px solid rgba(255,255,255,.75);box-shadow:0 14px 38px -18px rgba(34,49,74,.3), inset 0 1px 0 rgba(255,255,255,.9)}
+.mi{font-family:'Material Symbols Rounded';font-weight:normal;font-style:normal;line-height:1;vertical-align:-3px;display:inline-block}
+.wrap{max-width:1240px;margin:0 auto;padding:0 40px}
+/* 日本語の改行制御: 単語の途中・単位の直前で折らない。複合語・日付時刻・数値+単位は .nb で固定 */
+body{line-break:strict}
+.nb{white-space:nowrap}
+.btn{white-space:nowrap}
+a:focus-visible,button:focus-visible,input:focus-visible{outline:2.5px solid var(--deep);outline-offset:2px;border-radius:4px}
+@media (prefers-reduced-motion: reduce){*{transition:none !important;animation:none !important}}
+
+/* ボタン(操作規則は全アプリ共通。文字は絶対に折らない=入らないときはボタンごと縦積み) */
+.btn{display:inline-flex;align-items:center;gap:8px;font-family:var(--sans);font-weight:700;font-size:14px;
+  background:var(--deep);color:#fff;padding:12px 22px;border-radius:8px;text-decoration:none;min-height:44px;
+  border:0;cursor:pointer;transition:background .15s}
+.btn:hover{background:#43549f}
+.btn.sub{color:var(--deep);background:linear-gradient(168deg, rgba(255,255,255,.55), rgba(255,255,255,.28));
+  -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.8);
+  box-shadow:0 8px 22px -14px rgba(34,49,74,.3)}
+.btn.sub:hover{background:rgba(255,255,255,.65)}
+
+/* ================= event/20-event.css ================= */
+/* ============================================================================
+   イベントアプリ固有スタイル
+   正典: redesign/portal-proto/event-list.html / event-hub.html / event-regs.html
+   トークン・.glass・.btn・.nb・focus・reduced-motion は shared/01-tokens.css。
+   読む紙面(罫線・表・数字)は紙のまま、浮く操作面(タブ・数字バンド・右欄)だけガラス。
+   ============================================================================ */
+/* 見出し・短文は文節単位で折る(auto-phraseは撮影Chromeで効かないため .nb 手動指定が正) */
+h1,h2,.standfirst,.kicker,.meta,.mixline,.waitnote,.f-body .meta,.up .sub{word-break:auto-phrase;text-wrap:pretty}
+/* ボタン寸法は正典(event-*)に合わせる(sharedの操作規則はそのまま・余白のみ調整) */
+.btn{padding:11px 20px}
+
+/* ============ ミニマストヘッド(アプリ内共通) ============ */
+.masthead{padding:20px 0 0;border-bottom:3px double var(--rule)}
+.mast-top{display:flex;align-items:baseline;gap:16px}
+.daimoku{font-family:var(--latin);font-size:28px;font-weight:500;color:var(--ink)}
+.daimoku b{color:var(--accent);font-weight:500}
+.mast-sub{font-family:var(--serif);font-size:12px;letter-spacing:.24em;color:var(--ink3)}
+.mast-right{margin-left:auto;display:flex;align-items:center;gap:10px;font-size:12.5px;color:var(--ink4)}
+.mast-right img{width:28px;height:28px;border-radius:50%;object-fit:cover;border:1.5px solid var(--accent)}
+.edition{display:flex;gap:2px;font-size:12.5px;margin:12px 0;padding:5px;border-radius:8px;align-items:center;
+  background:linear-gradient(168deg, rgba(255,255,255,.5), rgba(255,255,255,.22));
+  -webkit-backdrop-filter:blur(22px) saturate(1.3);backdrop-filter:blur(22px) saturate(1.3);
+  border:1px solid rgba(255,255,255,.75);box-shadow:0 10px 30px -18px rgba(34,49,74,.3), inset 0 1px 0 rgba(255,255,255,.9)}
+.edition a{padding:8px 18px;letter-spacing:.14em;color:var(--ink3);text-decoration:none;min-height:40px;display:inline-flex;align-items:center;border-radius:6px;flex:none}
+.edition a:hover{background:rgba(255,255,255,.55)}
+.edition a[aria-current]{font-weight:700;color:#fff;background:var(--deep);box-shadow:0 6px 16px -6px rgba(79,99,196,.6)}
+.edition .spacer{flex:1}
+
+/* ============ 一覧: ページ見出し+主要操作 ============ */
+.pagehead{display:flex;align-items:baseline;gap:16px;margin:24px 0 4px}
+.pagehead h1{font-family:var(--serif);font-size:24px;font-weight:600;letter-spacing:.14em}
+.pagehead .count{font-size:12.5px;color:var(--ink4)}
+.pagehead .spacer{flex:1}
+
+/* ============ 一覧: 特集(きょう/次号) ============ */
+.feature{display:grid;grid-template-columns:1.2fr 1fr;gap:0;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);margin-top:14px}
+.feature.nophoto{grid-template-columns:1fr}
+.feature.nophoto .f-body{padding-left:0}
+.f-photo{position:relative;overflow:hidden}
+.f-photo img{width:100%;height:100%;min-height:300px;object-fit:cover;display:block}
+.f-photo .cap{position:absolute;left:10px;bottom:10px;padding:6px 13px;font-size:12px;color:#fff;letter-spacing:.06em;
+  background:rgba(24,32,52,.38);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
+  border:1px solid rgba(255,255,255,.28);border-radius:7px}
+.f-body{padding:26px 0 26px 30px;display:flex;flex-direction:column}
+.kicker{font-size:12px;letter-spacing:.3em;color:var(--deep);font-weight:700;display:flex;align-items:center;gap:10px}
+.kicker::before{content:'';width:26px;height:1.5px;background:var(--accent)}
+.f-body h2{font-family:var(--serif);font-size:30px;font-weight:600;letter-spacing:.03em;line-height:1.45;margin:8px 0 2px}
+.f-body .meta{font-size:13.5px;color:var(--ink3)}
+.f-nums{display:flex;gap:0;margin:16px 0 14px;border-radius:8px;overflow:hidden}
+.f-nums .n{flex:1;padding:11px 16px 7px;border-right:1px solid rgba(255,255,255,.65)}
+.f-nums .n:last-child{border-right:0}
+.f-nums .v{font-family:var(--serif);font-size:25px;font-weight:600;font-variant-numeric:tabular-nums}
+.f-nums .v small{font-size:12px;color:var(--ink4);font-weight:400}
+.f-nums .l{font-size:11.5px;letter-spacing:.1em;color:var(--ink4)}
+.f-nums .n.hot .v,.f-nums .n.hot .l{color:var(--warn)}
+.f-crew{display:flex;align-items:center;gap:10px;font-size:12.5px;color:var(--ink4);margin-bottom:16px}
+.f-crew .faces{display:flex}
+.f-crew .faces img{width:26px;height:26px;border-radius:50%;object-fit:cover;border:2px solid var(--paper);margin-left:-8px}
+.f-crew .faces img:first-child{margin-left:0}
+.f-cta{margin-top:auto;display:flex;gap:12px}
+.f-note{font-size:12.5px;color:var(--warn);margin-bottom:14px}
+.f-note button{background:none;border:0;color:var(--deep);font:inherit;font-weight:700;cursor:pointer;padding:2px 4px}
+
+/* ============ 一覧: これから(次号の小組) ============ */
+h2.sec{font-family:var(--serif);font-size:17px;font-weight:600;letter-spacing:.14em;display:flex;align-items:baseline;gap:12px;margin:30px 0 12px}
+h2.sec::after{content:'';flex:1;height:1px;background:var(--rule);opacity:.4}
+h2.sec .act{font-family:var(--sans);font-size:12.5px;font-weight:700;color:var(--deep);text-decoration:none;letter-spacing:.04em;flex:none;order:2}
+.up{border-radius:8px;overflow:hidden}
+.up a{display:grid;grid-template-columns:84px 96px 1fr 300px 40px;gap:16px;align-items:center;padding:14px 22px;
+  text-decoration:none;color:var(--ink);border-bottom:1px solid rgba(255,255,255,.6);transition:background .15s}
+.up a:last-child{border-bottom:0}
+.up a:hover{background:rgba(255,255,255,.5)}
+.up .th{width:84px;height:60px;object-fit:cover;border-radius:5px;display:block;background:#e8ecf4}
+.up .th.empty{display:flex;align-items:center;justify-content:center;color:var(--ink5);border:1.5px dashed var(--line);background:rgba(255,255,255,.5)}
+.up .faces{display:flex;justify-content:flex-end;margin-top:3px}
+.up .faces img{width:20px;height:20px;border-radius:50%;object-fit:cover;border:1.5px solid #fff;margin-left:-6px}
+.up .date{font-family:var(--serif);font-size:16px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+.up .date small{display:block;font-family:var(--sans);font-size:11px;font-weight:400;color:var(--ink5);letter-spacing:.08em}
+.up .ttl{font-size:15px;font-weight:700;min-width:0}
+.up .ttl .st{font-size:11.5px;font-weight:700;letter-spacing:.06em;border-radius:999px;padding:1px 10px;margin-left:10px;vertical-align:2px}
+.up .ttl .st.pub{color:var(--ok);border:1.5px solid rgba(63,125,92,.4)}
+.up .ttl .st.draft{color:var(--amber);border:1.5px solid rgba(138,106,47,.4)}
+.up .sub{font-size:12.5px;color:var(--ink4);text-align:right;white-space:nowrap}
+.up .sub .warn-t{color:var(--warn);font-weight:700}
+.up .go{font-size:18px;color:var(--ink5);justify-self:end;align-self:center}
+.up a:hover .go{color:var(--deep)}
+.up-empty{padding:16px 22px;font-size:13px;color:var(--ink4);border-radius:8px}
+
+/* ============ 一覧: アーカイブ棚(罫線の表組・カードにしない) ============ */
+.arch{border-top:1px solid var(--rule)}
+.arch a{display:grid;grid-template-columns:64px 96px 1fr 130px 130px 110px 40px;gap:14px;align-items:center;
+  padding:10px 6px;border-bottom:1px solid var(--line);text-decoration:none;color:var(--ink);font-size:13.5px}
+.arch .th{width:64px;height:44px;object-fit:cover;border-radius:4px;display:block;background:#e8ecf4;filter:saturate(.9)}
+.arch .th.empty{display:flex;align-items:center;justify-content:center;color:var(--ink5);border:1.5px dashed var(--line);background:rgba(255,255,255,.5)}
+.arch a:hover{background:rgba(255,255,255,.45)}
+.arch .date{font-family:var(--serif);font-variant-numeric:tabular-nums;color:var(--ink3);white-space:nowrap}
+.arch .ttl{font-weight:700;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.arch .m{font-variant-numeric:tabular-nums;color:var(--ink3);white-space:nowrap}
+.arch .m b{font-family:var(--serif);font-size:15px;color:var(--ink)}
+.arch .go{font-size:17px;color:var(--ink5);justify-self:end}
+.arch-more{display:inline-flex;align-items:center;gap:6px;margin-top:12px;font-size:12.5px;font-weight:700;color:var(--deep);text-decoration:none;min-height:40px}
+
+/* ============ ハブ共通: 戻る+見出しブロック(表紙写真つき) ============ */
+.back{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--ink4);text-decoration:none;margin:18px 0 4px;min-height:40px}
+.back:hover{color:var(--deep)}
+.titlegrid{display:grid;grid-template-columns:1fr 310px;gap:28px;align-items:end;padding-bottom:16px;border-bottom:1px solid var(--rule)}
+.titlegrid.nophoto{grid-template-columns:1fr}
+.titleblock{display:flex;align-items:flex-end;gap:20px;flex-wrap:wrap}
+.standfirst{font-size:13.5px;color:var(--ink3);margin-top:6px;max-width:52ch}
+.cover{position:relative}
+.cover img{width:100%;height:158px;object-fit:cover;border-radius:6px;display:block;background:#e8ecf4}
+.cover .cap{position:absolute;left:8px;bottom:8px;padding:4px 11px;font-size:11.5px;color:#fff;letter-spacing:.05em;
+  background:rgba(24,32,52,.38);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
+  border:1px solid rgba(255,255,255,.28);border-radius:6px}
+.titleblock h1{font-family:var(--serif);font-size:34px;font-weight:600;letter-spacing:.03em;line-height:1.4}
+.titleblock .meta{font-size:13.5px;color:var(--ink3);padding-bottom:6px}
+.state{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;letter-spacing:.08em;color:var(--ok);border:1.5px solid rgba(63,125,92,.4);border-radius:999px;padding:3px 12px;background:rgba(255,255,255,.6)}
+.state .dot{width:7px;height:7px;border-radius:50%;background:var(--ok)}
+.state.draft{color:var(--amber);border-color:rgba(138,106,47,.4)}
+.state.draft .dot{background:var(--amber)}
+.state.off{color:var(--warn);border-color:rgba(168,67,79,.4)}
+.state.off .dot{background:var(--warn)}
+.state.done{color:var(--ink4);border-color:rgba(82,109,137,.4)}
+.state.done .dot{background:var(--ink4)}
+
+/* ============ ハブ共通: タブ+受付起動 ============ */
+.tabbar{display:flex;gap:2px;align-items:center;margin:16px 0 22px;padding:5px;border-radius:8px}
+.tabbar a{padding:9px 20px;font-size:13.5px;letter-spacing:.08em;color:var(--ink3);text-decoration:none;border-radius:6px;min-height:42px;display:inline-flex;align-items:center;gap:7px;flex:none}
+.tabbar a:hover{background:rgba(255,255,255,.55)}
+.tabbar a[aria-current]{font-weight:700;color:#fff;background:var(--deep);box-shadow:0 6px 16px -6px rgba(79,99,196,.6)}
+.tabbar a .cnt{font-size:11px;font-weight:700;background:var(--warn);color:#fff;border-radius:999px;padding:0 7px;line-height:1.6}
+.tabbar .spacer{flex:1}
+
+/* ============ ハブ共通: 数字バンド ============ */
+.numband{display:flex;margin:0 0 26px;border-radius:8px;overflow:hidden}
+.numband.tight{margin-bottom:12px}
+.numband .n{flex:1;padding:13px 18px 9px;border-right:1px solid rgba(255,255,255,.65)}
+.numband .n:last-child{border-right:0}
+.numband .v{font-family:var(--serif);font-size:30px;font-weight:600;font-variant-numeric:tabular-nums}
+.numband .v small{font-size:13px;color:var(--ink4);font-weight:400;margin-left:2px}
+.numband .l{font-size:12px;letter-spacing:.12em;color:var(--ink4)}
+.numband .n.hot .v,.numband .n.hot .l{color:var(--warn)}
+.numband .n.hot .l{font-weight:700}
+.numband .n a{color:inherit;text-decoration:none}
+.numband-note{font-size:12.5px;color:var(--warn);margin:0 0 26px}
+.numband-note button{background:none;border:0;color:var(--deep);font:inherit;font-weight:700;cursor:pointer;padding:2px 4px}
+
+/* ============ regs: 決済方法の内訳(数字バンド直下・紙のまま) ============ */
+.payband{display:flex;align-items:center;gap:14px;margin:0 0 26px;font-size:12.5px;color:var(--ink4);flex-wrap:wrap}
+.payband .lbl{letter-spacing:.12em;flex:none}
+.payband .bar{flex:1;min-width:180px;display:flex;height:10px;border-radius:999px;overflow:hidden;background:rgba(255,255,255,.55)}
+.payband .bar i{height:100%}
+.payband .bar .p0{background:var(--deep)}
+.payband .bar .p1{background:rgba(110,134,224,.45)}
+.payband .bar .p2{background:rgba(138,106,47,.55)}
+.payband .bar .p3{background:rgba(82,109,137,.45)}
+.payband .leg b{font-weight:700;color:var(--ink3)}
+
+/* ============ 本文2列 ============ */
+.cols{display:grid;grid-template-columns:1fr 356px;gap:30px;align-items:start;padding-bottom:40px}
+.cols.solo{grid-template-columns:1fr}
+.cols>*{min-width:0}
+.cols h2.sec{letter-spacing:.12em;margin:26px 0 4px}
+.cols h2.sec:first-child{margin-top:0}
+
+/* 基本情報(罫線の定義リスト・カードにしない) */
+.facts{margin-top:6px}
+.facts .f{display:grid;grid-template-columns:110px 1fr;gap:14px;padding:11px 2px;border-bottom:1px dashed var(--line);font-size:13.5px}
+.facts .f dt{color:var(--ink4);letter-spacing:.06em;font-size:12.5px;padding-top:2px}
+.facts .f dd b{font-weight:700}
+.facts .f dd .note{display:block;font-size:12px;color:var(--ink5)}
+.facts .venue-src{font-size:11.5px;color:var(--ink5);margin-left:8px}
+.facts a{color:var(--deep);font-weight:700;text-decoration:none}
+
+/* 担当レール(人物型) */
+.rail{display:flex;gap:0;margin-top:12px;overflow-x:auto}
+.crew{width:118px;flex:none;text-align:center;position:relative}
+.crew img{width:66px;height:66px;border-radius:50%;object-fit:cover;border:3px solid #fff;box-shadow:0 8px 20px -8px rgba(34,49,74,.35)}
+.crew .role{display:inline-block;margin-top:-12px;position:relative;background:var(--deep);color:#fff;font-size:10.5px;font-weight:700;letter-spacing:.06em;border-radius:999px;padding:2px 10px}
+.crew .nm{font-size:13px;font-weight:700;margin-top:5px}
+.crew .nt{font-size:11px;color:var(--ink5);line-height:1.5}
+.crew .ph-empty{width:66px;height:66px;border-radius:50%;border:2px dashed var(--line);display:inline-flex;align-items:center;justify-content:center;color:var(--ink5);background:rgba(255,255,255,.5)}
+.crew.empty .role{background:transparent;color:var(--warn);border:1.5px dashed rgba(168,67,79,.5)}
+/* 担当レールの空状態/取得失敗(非表示にせず、操作に繋がる1行) */
+.rail-line{font-size:13.5px;color:var(--ink4);padding:12px 2px}
+.rail-line a,.rail-line button{color:var(--deep);font-weight:700;text-decoration:none;background:none;border:0;font:inherit;cursor:pointer;padding:0}
+
+/* 配信タイムライン */
+.tl{margin-top:10px;border-left:2px solid var(--line);padding-left:0;list-style:none}
+.tl li{position:relative;padding:9px 2px 9px 22px;font-size:13.5px;display:flex;gap:10px;align-items:baseline}
+.tl li::before{content:'';position:absolute;left:-6px;top:16px;width:10px;height:10px;border-radius:50%;background:#fff;border:2.5px solid var(--ink5)}
+.tl li.sent::before{border-color:var(--ok);background:var(--ok)}
+.tl li.next::before{border-color:var(--deep);background:var(--deep)}
+.tl .when{font-family:var(--serif);flex:none;width:106px;font-size:12.5px;color:var(--ink3);font-variant-numeric:tabular-nums}
+.tl b{font-weight:700}
+.tl .st{margin-left:auto;flex:none;font-size:11.5px;letter-spacing:.06em}
+.tl .st.ok{color:var(--ok);font-weight:700}
+.tl .st.next{color:var(--deep);font-weight:700}
+.tl .st.plan{color:var(--ink5)}
+
+/* 申込のうごき(日次バー+注釈) */
+.trend-wrap{margin-top:14px}
+.trend{display:flex;align-items:flex-end;gap:4px;height:96px}
+.trend i{flex:1;background:rgba(110,134,224,.28);border-radius:2px 2px 0 0;min-height:3px;position:relative}
+.trend i.mark{background:rgba(110,134,224,.5)}
+.trend i.hi{background:var(--deep)}
+.trend i em{position:absolute;top:-20px;left:50%;transform:translateX(-50%);font-style:normal;font-family:var(--serif);font-size:12px;color:var(--deep);font-weight:600;white-space:nowrap}
+.trend-x{display:flex;justify-content:space-between;font-size:11.5px;color:var(--ink5);margin-top:5px}
+.trend-notes{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--ink4);margin-top:8px}
+.trend-notes span::before{content:'';display:inline-block;width:8px;height:8px;border-radius:2px;background:rgba(110,134,224,.5);margin-right:6px;vertical-align:-1px}
+.trend-notes span.hi::before{background:var(--deep)}
+.trend-empty{font-size:13px;color:var(--ink4);padding:10px 2px}
+.mixline{font-size:13.5px;margin-top:14px;padding-top:12px;border-top:1px dashed var(--line)}
+.mixline b{font-weight:700}
+.crowd{display:flex;align-items:center;gap:12px;margin-top:10px}
+.crowd .faces{display:flex}
+.crowd .faces img{width:30px;height:30px;border-radius:50%;object-fit:cover;border:2px solid var(--paper);margin-left:-9px}
+.crowd .faces img:first-child{margin-left:0}
+.crowd span{font-size:12.5px;color:var(--ink4)}
+
+/* ============ 右列(ガラスの状況欄・申込詳細) ============ */
+.side{border-radius:8px;padding:20px 20px 16px}
+.side h2{font-family:var(--serif);font-size:15.5px;font-weight:600;letter-spacing:.1em;border-bottom:1px solid var(--rule);padding-bottom:8px;margin-bottom:8px;display:flex;align-items:baseline}
+.side h2 .act{margin-left:auto;font-family:var(--sans);font-size:12px;font-weight:700;color:var(--deep);text-decoration:none}
+.side .grp{margin-bottom:20px}
+.side-empty{padding:10px 2px;font-size:12.5px;color:var(--ink4)}
+/* 申込ペース(概要タブ右欄の小さな棒) */
+.pace{display:flex;align-items:flex-end;gap:5px;height:64px;margin:10px 0 4px}
+.pace i{flex:1;background:rgba(110,134,224,.35);border-radius:2px 2px 0 0;min-height:4px}
+.pace i.hi{background:var(--deep)}
+.pace-cap{font-size:11.5px;color:var(--ink4);display:flex;justify-content:space-between}
+.pace-note{font-size:12.5px;margin-top:6px}
+.pace-note b{color:var(--deep)}
+/* チェック行 */
+.chk{list-style:none}
+.chk li{display:flex;gap:9px;padding:8px 0;border-bottom:1px dashed var(--line);font-size:13px;align-items:baseline}
+.chk li:last-child{border-bottom:0}
+.chk .mi{font-size:17px;color:var(--ok);flex:none}
+.chk li.todo .mi{color:var(--amber)}
+.chk li .sub2{display:block;font-size:11.5px;color:var(--ink5)}
+.chk li time{margin-left:auto;flex:none;font-size:11.5px;color:var(--ink5);font-family:var(--serif)}
+/* 収支ミニ */
+.ledger{font-size:13.5px}
+.ledger .lr{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px dashed var(--line)}
+.ledger .lr span:last-child{font-variant-numeric:tabular-nums;font-family:var(--serif);font-size:15px}
+.ledger .lr.total{border-bottom:0;border-top:1.5px solid var(--rule);margin-top:2px;padding-top:9px;font-weight:700}
+.ledger .lr.total span:last-child{color:var(--ok);font-size:18px}
+.ledger .note{font-size:11.5px;color:var(--ink5);margin-top:4px}
+
+/* ============ regs: 申込のうごき(縮小版) ============ */
+.pace-strip{display:flex;align-items:flex-end;gap:18px;margin-top:8px}
+.pace-strip .pace{height:52px;flex:1;max-width:420px;gap:4px;margin:0}
+.pace-strip .pace-note{font-size:12.5px;color:var(--ink4);padding-bottom:2px;margin-top:0}
+.pace-strip .pace-note b{color:var(--deep);font-weight:700}
+
+/* ============ regs: 表示切替+絞り込み+検索 ============ */
+.listhead{display:flex;align-items:center;gap:18px;margin-top:12px;flex-wrap:wrap}
+.seg{display:inline-flex;padding:3px;border-radius:8px;gap:2px}
+.seg button{border:0;background:transparent;font:inherit;font-size:12.5px;letter-spacing:.06em;padding:7px 16px;border-radius:6px;color:var(--ink3);min-height:40px;cursor:pointer;white-space:nowrap}
+.seg button[aria-pressed="true"]{background:var(--deep);color:#fff;font-weight:700}
+.q{font:inherit;font-size:12.5px;padding:8px 12px;min-height:40px;width:170px;border:1px solid var(--line);border-radius:6px;background:rgba(255,255,255,.7);color:var(--ink)}
+.q::placeholder{color:var(--ink5)}
+.filters{display:flex;gap:16px;font-size:12.5px;margin-left:auto}
+.filters a{color:var(--ink4);text-decoration:none;min-height:40px;display:inline-flex;align-items:center}
+.filters a b{font-family:var(--serif);margin-left:4px}
+.filters a[aria-current]{color:var(--ink);font-weight:700;border-bottom:2px solid var(--deep)}
+.filters a.warncnt b{color:var(--warn)}
+
+/* ============ regs: 申込の表 ============ */
+.tblwrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin-top:8px}
+table.regs{width:100%;border-collapse:collapse;min-width:680px;font-size:13.5px}
+.regs th{text-align:left;font-size:11.5px;letter-spacing:.12em;color:var(--ink4);font-weight:700;border-bottom:1.5px solid var(--rule);padding:8px 10px;white-space:nowrap}
+.regs th.num,.regs td.amt{text-align:right}
+.regs td{padding:10px;border-bottom:1px dashed var(--line);vertical-align:middle}
+.regs tbody tr.sel>td{background:rgba(110,134,224,.09)}
+.regs .who{display:flex;align-items:center;gap:10px;font-weight:700;white-space:nowrap}
+.regs .who img{width:32px;height:32px;border-radius:50%;object-fit:cover;flex:none}
+.regs .who .tag{font-size:10.5px;font-weight:700;color:var(--deep);border:1px solid rgba(110,134,224,.45);border-radius:999px;padding:0 8px;line-height:1.7}
+.regs .when{font-family:var(--serif);font-variant-numeric:tabular-nums;color:var(--ink3);white-space:nowrap}
+.regs .amt{font-family:var(--serif);font-variant-numeric:tabular-nums;font-size:14.5px;white-space:nowrap}
+.regs .st{white-space:nowrap}
+.regs .st .how{display:block;font-size:11.5px;color:var(--ink5);font-weight:400}
+.regs .st-paid{color:var(--ok);font-weight:700}
+.regs .st-unpaid{color:var(--warn);font-weight:700}
+.regs .st-refund{color:var(--amber);font-weight:700}
+.regs .st-cancel{color:var(--ink5);font-weight:700}
+.regs .comp{white-space:nowrap;color:var(--ink3)}
+.regs .none{color:var(--ink5)}
+.regs tr.child td{border-bottom:1px dashed var(--line);background:rgba(255,255,255,.35);font-size:12.5px;color:var(--ink4);padding-top:6px;padding-bottom:6px}
+.regs tr.child .cname{padding-left:42px;position:relative;white-space:nowrap}
+.regs tr.child .cname::before{content:'└';position:absolute;left:22px;color:var(--ink5)}
+.rowbtn{display:inline-flex;align-items:center;font-weight:700;font-size:12.5px;color:var(--deep);text-decoration:none;border:1.5px solid rgba(79,99,196,.45);border-radius:6px;padding:7px 13px;min-height:38px;white-space:nowrap;background:rgba(255,255,255,.5);font-family:var(--sans);cursor:pointer}
+.rowbtn:hover{background:rgba(255,255,255,.8)}
+.rowlink{font-size:12.5px;font-weight:700;color:var(--deep);text-decoration:none;white-space:nowrap;min-height:38px;display:inline-flex;align-items:center;padding:0 4px;background:none;border:0;font-family:var(--sans);cursor:pointer}
+.tbl-more{font-size:12.5px;color:var(--ink4);padding:10px 2px 0}
+.tbl-more a,.tbl-more button{color:var(--deep);font-weight:700;text-decoration:none;background:none;border:0;font:inherit;cursor:pointer;padding:0}
+.moneynote{font-size:12px;color:var(--ink5);margin-top:8px}
+/* 試験配信で無効な操作の控えめな案内 */
+.opnote{font-size:12.5px;color:var(--amber);margin-top:8px}
+.tbl-empty{font-size:13px;color:var(--ink4);padding:14px 2px}
+
+/* ============ regs: キャンセル待ち(隔離) ============ */
+.waitnote{font-size:13px;color:var(--ink3);margin-top:8px;max-width:60ch}
+.wl{display:flex;flex-wrap:wrap;align-items:center;gap:10px 12px;padding:12px 2px;border-bottom:1px dashed var(--line)}
+.wl:last-of-type{border-bottom:0}
+.wl img{width:40px;height:40px;border-radius:50%;object-fit:cover;flex:none}
+.wl .wi{min-width:0}
+.wl .nm{font-weight:700;white-space:nowrap}
+.wl .nm .tag{font-size:10.5px;font-weight:700;color:var(--deep);border:1px solid rgba(110,134,224,.45);border-radius:999px;padding:0 8px;margin-left:6px}
+.wl .at{display:block;font-family:var(--serif);font-size:12.5px;color:var(--ink4);font-variant-numeric:tabular-nums;white-space:nowrap}
+.wl .ord{font-family:var(--serif);font-size:12.5px;color:var(--ink5);flex:none;width:24px}
+.wl .sp{flex:1}
+.wl .btn.sub{font-size:12.5px;padding:8px 14px;min-height:40px;flex:none}
+
+/* ============ regs: 右列 申込の詳細 ============ */
+.side.regside{padding-bottom:18px}
+.side.regside h2{margin-bottom:12px;display:block}
+.person{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+.person img{width:52px;height:52px;border-radius:50%;object-fit:cover;border:2.5px solid #fff;box-shadow:0 8px 20px -8px rgba(34,49,74,.35)}
+.person .nm{font-weight:700;font-size:16px}
+.person .tag{font-size:10.5px;font-weight:700;color:var(--deep);border:1px solid rgba(110,134,224,.45);border-radius:999px;padding:0 8px;margin-left:6px}
+.person .sub{font-size:12px;color:var(--ink5)}
+.dfacts{margin-top:4px}
+.dfacts .f{display:grid;grid-template-columns:88px 1fr;gap:12px;padding:9px 2px;border-bottom:1px dashed var(--line);font-size:13px}
+.dfacts .f dt{color:var(--ink4);letter-spacing:.06em;font-size:12px;padding-top:1px}
+.dfacts .f dd b{font-weight:700}
+.dfacts .f dd .note{display:block;font-size:11.5px;color:var(--ink5)}
+.dact{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+.dact .btn.sub{font-size:13px}
+/* 危険操作(下段に隔離) */
+.danger{margin-top:22px;border:1.5px dashed rgba(168,67,79,.5);border-radius:6px;padding:13px 15px}
+.danger h3{font-size:12px;font-weight:700;letter-spacing:.14em;color:var(--warn);margin-bottom:4px}
+.danger p{font-size:12px;color:var(--ink4);line-height:1.7;margin-bottom:10px}
+.btn-warn{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:8px 15px;border:1.5px solid var(--warn);color:var(--warn);border-radius:6px;font-weight:700;font-size:13px;text-decoration:none;background:rgba(255,255,255,.5);white-space:nowrap;font-family:var(--sans);cursor:pointer}
+.btn-warn:hover{background:rgba(168,67,79,.08)}
+
+/* ============ 準備中タブ(1行・装飾なし) ============ */
+.stub-line{font-size:13.5px;color:var(--ink4);padding:26px 2px 80px}
+
+/* ============ 状態: ローディング / エラー ============ */
+.state-line{font-size:13px;color:var(--ink4);padding:24px 0 60px}
+.state-error{padding:36px 0 60px}
+.state-error h1{font-family:var(--serif);font-size:26px;font-weight:600;margin:10px 0 8px}
+.state-error p{font-size:13.5px;color:var(--ink2);max-width:52ch}
+.state-error .cta{display:flex;gap:12px;align-items:center;margin-top:16px}
+
+/* ============ ログイン(未ログイン時) ============ */
+.login-main{max-width:430px;margin:0 auto;padding:52px 0 90px}
+.login-h{font-family:var(--serif);font-size:30px;font-weight:600;letter-spacing:.06em;margin:10px 0 6px}
+.login-sub{font-size:13px;color:var(--ink3);margin-bottom:20px}
+.login-card{padding:24px 22px 20px;border-radius:8px}
+.login-card label{display:block;font-size:12.5px;font-weight:700;color:var(--ink3);letter-spacing:.06em;margin-bottom:15px}
+.login-card input{display:block;width:100%;margin-top:6px;padding:11px 12px;font-family:var(--sans);font-size:14px;
+  border:1px solid var(--line);border-radius:6px;background:rgba(255,255,255,.85);color:var(--ink);min-height:44px;font-weight:400}
+.login-card .hint{display:block;font-size:11.5px;font-weight:400;color:var(--ink5);margin-top:3px}
+.login-card .btn{width:100%;justify-content:center;margin-top:4px}
+.login-err{margin-top:12px;font-size:13px;color:var(--warn)}
+.login-alt{margin-top:10px;background:none;border:0;color:var(--ink4);font-family:var(--sans);font-size:12.5px;cursor:pointer;padding:8px 0;display:block}
+
+/* ============ 奥付 ============ */
+.colophon{border-top:3px double var(--rule);margin-top:38px;padding:14px 0 34px;display:flex;font-size:12px;color:var(--ink5);letter-spacing:.1em}
+.colophon span:last-child{margin-left:auto}
+
+/* ============ レスポンシブ(縮小ではなく再配置) ============ */
+@media(max-width:960px){
+  .wrap{padding:0 20px}
+  .edition,.tabbar{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .feature{grid-template-columns:1fr}
+  .f-photo img{min-height:0;height:210px}
+  .f-body{padding:20px 0 22px}
+  .up a{grid-template-columns:84px 1fr 40px;gap:4px 14px}
+  .up .th{grid-row:1 / span 3}
+  .up .date{grid-column:2}
+  .up .ttl{grid-column:2}
+  .up .sub{grid-column:2;text-align:left;white-space:normal}
+  .up .faces{display:none}
+  .up .go{grid-column:3;grid-row:1 / span 3}
+  .arch a{grid-template-columns:64px 1fr 40px;gap:2px 14px}
+  .arch .th{grid-row:1 / span 4}
+  .arch .date,.arch .ttl,.arch .m{grid-column:2}
+  .arch .go{grid-column:3;grid-row:1 / span 4}
+  .cols{grid-template-columns:1fr}
+  .titlegrid{grid-template-columns:1fr}
+  .cover img{height:180px}
+  .trend i em{display:none}
+}
+@media(max-width:640px){
+  .masthead{padding-top:14px}
+  .mast-sub{display:none}
+  .pagehead{flex-wrap:wrap;gap:10px}
+  .pagehead .btn{flex:1 1 100%;justify-content:center}
+  .f-body h2{font-size:25px}
+  .f-nums{flex-wrap:wrap}
+  .f-nums .n{flex:1 1 50%;border-bottom:1px solid rgba(255,255,255,.65)}
+  .f-nums .n:nth-child(n+3){border-bottom:0}
+  .f-cta{flex-wrap:wrap}
+  .f-cta .btn{flex:1 1 100%;justify-content:center}
+  .titleblock h1{font-size:26px}
+  .titleblock{gap:8px}
+  .tabbar .btn{position:fixed;left:16px;right:16px;bottom:14px;z-index:30;justify-content:center;box-shadow:0 14px 34px -10px rgba(79,99,196,.6)}
+  .numband{flex-wrap:wrap}
+  .numband .n{flex:1 1 33%;border-bottom:1px solid rgba(255,255,255,.65)}
+  .numband .n:nth-child(-n+3){border-bottom:1px solid rgba(255,255,255,.65)}
+  .numband .n:nth-child(n+4){border-bottom:0}
+  .numband .v{font-size:24px}
+  .facts .f{grid-template-columns:92px 1fr}
+  .tl .when{width:88px}
+  .pace-strip{flex-direction:column;align-items:stretch;gap:6px}
+  .pace-strip .pace{max-width:none}
+  .listhead{gap:10px}
+  .q{width:100%}
+  .filters{margin-left:0;width:100%}
+  .wl .sp{display:none}
+  .wl .btn.sub{flex:0 0 calc(100% - 88px);margin-left:88px;justify-content:center}
+  .colophon{flex-direction:column;gap:2px}
+  .colophon span:last-child{margin-left:0}
+  .login-main{padding-top:34px}
+  body.has-tabbtn{padding-bottom:70px}
+}
+
+/* ============ ハブ内の編集ビュー: 割当を編集 / 支出の記録 ============ */
+.edit-note{font-size:13px;color:var(--ink4);margin:2px 0 14px;max-width:64ch}
+.edit-err{font-size:13px;color:var(--warn);margin-top:14px;max-width:64ch}
+.edit-cta{display:flex;gap:12px;align-items:center;margin:22px 0 8px;flex-wrap:wrap}
+/* 担当の行(罫線のシート。カードにしない) */
+.staffed{margin-top:4px;max-width:860px}
+.staffed .sr{display:grid;grid-template-columns:minmax(200px,1.2fr) minmax(130px,.8fr) minmax(150px,1fr) 44px;gap:10px;align-items:center;padding:8px 0;border-bottom:1px dashed var(--line)}
+.staffed .sr.head{padding:0 0 6px;border-bottom:1.5px solid var(--rule);font-size:11.5px;color:var(--ink4);letter-spacing:.08em}
+.staffed input{font:inherit;font-size:14px;padding:9px 11px;min-height:42px;border:1px solid var(--line);border-radius:6px;background:rgba(255,255,255,.72);color:var(--ink);width:100%}
+.staffed input::placeholder{color:var(--ink5);font-size:12.5px}
+.sr-del{border:0;background:none;color:var(--ink5);cursor:pointer;min-height:42px;min-width:42px;border-radius:6px}
+.sr-del:hover{color:var(--warn);background:rgba(168,67,79,.08)}
+.sr-add{margin-top:12px;display:inline-flex;align-items:center;gap:6px;border:1.5px dashed var(--line);background:none;color:var(--deep);font-family:var(--sans);font-weight:700;font-size:13px;padding:9px 16px;border-radius:8px;cursor:pointer;min-height:42px;white-space:nowrap}
+.sr-add:hover{border-color:var(--deep)}
+/* 支出の一覧(罫線+tabular-nums) */
+.expl{margin-top:6px;max-width:640px}
+.expl .xr{display:flex;align-items:baseline;gap:14px;padding:10px 0;border-bottom:1px dashed var(--line);font-size:13.5px}
+.expl .xl{min-width:0}
+.expl .xl b{font-weight:700}
+.expl .xn{display:block;font-size:12px;color:var(--ink5)}
+.expl .xa{margin-left:auto;font-variant-numeric:tabular-nums;font-family:var(--serif);font-size:15.5px;white-space:nowrap}
+.expl .xr.total{border-bottom:0;border-top:1.5px solid var(--rule);font-weight:700}
+.expl .xr.total .xa{font-size:18px}
+.xdel{border:0;background:none;color:var(--ink5);font-family:var(--sans);font-size:12.5px;cursor:pointer;min-height:40px;padding:0 6px;flex:none}
+.xdel:hover{color:var(--warn)}
+.xconfirm{display:inline-flex;gap:10px;align-items:center;font-size:12.5px;color:var(--warn);flex:none}
+.xconfirm button{border:0;font-family:var(--sans);font-size:12.5px;font-weight:700;cursor:pointer;min-height:40px;padding:0 8px;background:none}
+.xconfirm .yes{color:#fff;background:var(--warn);border-radius:6px;padding:0 14px}
+.xconfirm .no{color:var(--ink4)}
+.xadd{display:grid;grid-template-columns:minmax(160px,1.1fr) 130px minmax(140px,1fr) auto;gap:10px;align-items:center;margin-top:16px;max-width:640px}
+.xadd input{font:inherit;font-size:14px;padding:9px 11px;min-height:42px;border:1px solid var(--line);border-radius:6px;background:rgba(255,255,255,.72);color:var(--ink);width:100%}
+.xadd input::placeholder{color:var(--ink5);font-size:12.5px}
+.xadd .btn{min-height:42px;padding:9px 18px}
+/* 収支の見込み: 赤字のとき */
+.ledger .lr.total.neg span:last-child{color:var(--warn)}
+@media(max-width:640px){
+  .staffed .sr{grid-template-columns:1fr 44px;gap:8px}
+  .staffed .sr.head{display:none}
+  .staffed .sr input{grid-column:1}
+  .staffed .sr .sr-del{grid-column:2;grid-row:1}
+  .xconfirm{flex-wrap:wrap;justify-content:flex-end}
+  .xadd{grid-template-columns:1fr 1fr}
+  .xadd .btn{grid-column:1 / -1;justify-content:center}
+}
+
+</style>
+</head>
+<body>
+<div id="app" class="wrap"></div>
+<script>
+// ================= shared/10-api.js =================
+/* ============================================================================
+   admin2 共通 GAS API 層 (vanilla JS・console.html の実プロトコル準拠)
+   - 読取 = GET ?action&memberId&params(JSON: {...params, token})。タイムアウト12s。
+     ネットワーク断/5xx/429/404 は指数バックオフで最大2回リトライ(読取は冪等)。
+     対象4action は軽量読取API優先。2連続失敗で5分間 本体GAS直行にフォールバック。
+   - 書込 = POST body=JSON {action,payload,memberId,token} / Content-Type: text/plain。
+     二重送信防止のため自動リトライしない。
+   - セッション = localStorage connecta.memberId / connecta.token
+     (console.html と同一キー=同一オリジンでSSO。consoleログイン済ならそのまま開く)
+   ============================================================================ */
+window.AdminAPI = (function () {
+  'use strict';
+  var URL_MAIN = 'https://script.google.com/macros/s/AKfycbxLs1eXm39MHM0lSioBf9ghVFL8p8fIhIdYJpBBweBTCLOFDqWclPhoF66c0FgfrbHg/exec';
+  var URL_READ = 'https://script.google.com/macros/s/AKfycbxm-_IBapGbmilVQSzPhsLhL6cMwm8_bIwxyq8Wh8j3IxXjGjBz234EwEohFe18EAY/exec';
+  var READ_API_ACTIONS = {
+    listEvents: 1, listParticipants: 1, listRegistrations: 1, listTodos: 1,
+    // read-api @5 で追加(2026-09-01 B1): イベント新機能の読取+ポータルの遅い3本
+    listEventStaffAssignments: 1, listVenues: 1, listEventExpenses: 1, listEventGroups: 1,
+    listNews: 1, listMinutesMeetings: 1, listMembers: 1,
+  };
+  var ROLE_RANK = { '代表': 5, '副代表': 4, 'マネージャー': 3, 'アシマネ': 2, 'メンバー': 1 };
+  var onUnauthorized = null; // アプリ側が setOnUnauthorized で登録(認証切れ→ログイン画面へ)
+
+  function mid() { try { return localStorage.getItem('connecta.memberId') || ''; } catch (e) { return ''; } }
+  function tok() { try { return localStorage.getItem('connecta.token') || ''; } catch (e) { return ''; } }
+  function setSession(id, t) { try { if (id) localStorage.setItem('connecta.memberId', id); if (t) localStorage.setItem('connecta.token', t); } catch (e) {} }
+  function clearSession() { try { localStorage.removeItem('connecta.memberId'); localStorage.removeItem('connecta.token'); } catch (e) {} }
+
+  // 認証切れ判定(console.html authFail と同一)。権限不足(FORBIDDEN等)は認証切れ扱いにしない
+  function authFail(j) {
+    var e = (j && j.error && (j.error.message || j.error)) || '';
+    if (/FORBIDDEN|権限がありません|required /i.test(String(e))) return false;
+    return !!(j && (j.unauthorized === true || (!j.ok && /AUTH_REQUIRED|認証が必要|認証が切れ|再ログイン|未ログイン|セッション|ログインが必要|unauthorized|expired/i.test(String(e)))));
+  }
+  function handleResp(j) {
+    if (j && j.user !== undefined) window.currentUser = j.user;
+    if (authFail(j)) {
+      if (typeof onUnauthorized === 'function') onUnauthorized();
+      var er = new Error('認証が切れています。再ログインしてください。');
+      er._auth = true;
+      throw er;
+    }
+    if (!j || !j.ok) throw new Error((j && j.error && (j.error.message || j.error)) || '取得に失敗しました');
+    return j.data;
+  }
+
+  // 1回のGET。silent=軽量API用(認証不一致でもログアウトさせず、失敗として本体へ委譲)
+  async function fetchAt(base, action, params, timeoutMs, silent) {
+    var u = base + '?action=' + encodeURIComponent(action)
+      + '&memberId=' + encodeURIComponent(mid())
+      + '&params=' + encodeURIComponent(JSON.stringify(Object.assign({}, params, { token: tok() })));
+    var ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+    var to = ctrl ? setTimeout(function () { try { ctrl.abort(); } catch (e) {} }, timeoutMs || 12000) : null;
+    var r;
+    try { r = await fetch(u, { method: 'GET', signal: ctrl ? ctrl.signal : undefined }); }
+    catch (e) {
+      if (to) clearTimeout(to);
+      var m = String((e && e.message) || '');
+      var net = (e && e.name === 'AbortError') || /Load failed|Failed to fetch|NetworkError|network/i.test(m) || m === '';
+      var err = new Error((e && e.name === 'AbortError')
+        ? '応答に時間がかかっています。通信環境をご確認のうえ再読み込みしてください。'
+        : net ? '通信が一時的に不安定です。少し待ってから再読み込みしてください。' : (m || '通信エラー'));
+      err._net = net;
+      throw err;
+    }
+    if (to) clearTimeout(to);
+    if (!r.ok) {
+      var e5 = new Error((r.status >= 500 || r.status === 429)
+        ? 'サーバが混み合っています（HTTP ' + r.status + '）。少し待って再読み込みしてください。'
+        : ('HTTP ' + r.status));
+      // 404を含む理由: GASは並列GET時に一過性404を返すことがある(再送で成功する)
+      if (r.status >= 500 || r.status === 429 || r.status === 404) e5._net = true;
+      throw e5;
+    }
+    var t = await r.text();
+    var j;
+    try { j = JSON.parse(t); }
+    catch (e2) { throw new Error('GASからの応答を解析できません。GASの公開設定(全員/自分として実行)を確認してください。'); }
+    if (silent) {
+      if (j && j.user !== undefined) window.currentUser = j.user;
+      if (!j || !j.ok) throw new Error((j && j.error && (j.error.message || j.error)) || 'lite失敗');
+      return j.data;
+    }
+    return handleResp(j);
+  }
+
+  var liteFails = 0, liteOff = false;
+  async function fetchData(action, params, opts) {
+    params = params || {}; opts = opts || {};
+    // 対象readは軽量API優先。2回連続で不調なら5分間 本体直行(GAS混雑スパイクは数分で収まる)
+    if (URL_READ && !liteOff && READ_API_ACTIONS[action]) {
+      try {
+        var d = await fetchAt(URL_READ, action, params, Math.min(opts.timeout || 12000, 5000), true);
+        liteFails = 0;
+        return d;
+      } catch (e) {
+        if (++liteFails >= 2 && !liteOff) {
+          liteOff = true;
+          setTimeout(function () { liteOff = false; liteFails = 0; }, 300000);
+        }
+      }
+    }
+    var attempt = 0;
+    while (true) {
+      try { return await fetchAt(URL_MAIN, action, params, opts.timeout); }
+      catch (e) {
+        if (e && e._net && attempt < 2) {
+          attempt++;
+          await new Promise(function (r) { setTimeout(r, 400 * attempt); });
+          continue;
+        }
+        throw e;
+      }
+    }
+  }
+
+  // 書込。自動リトライしない(二重送信防止)
+  async function postData(action, payload) {
+    var r;
+    try {
+      r = await fetch(URL_MAIN, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ action: action, payload: payload || {}, memberId: mid(), token: tok() }),
+      });
+    } catch (e) {
+      var m = String((e && e.message) || '');
+      throw new Error(/Load failed|Failed to fetch|NetworkError|network/i.test(m) || m === ''
+        ? '通信が一時的に不安定です。もう一度お試しください（二重送信を避けるため自動での再試行はしていません）。'
+        : (m || '通信エラー'));
+    }
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    var t = await r.text();
+    var j;
+    try { j = JSON.parse(t); }
+    catch (e2) { throw new Error('GASからの応答を解析できません。GASの公開設定を確認してください。'); }
+    return handleResp(j);
+  }
+
+  /* ログイン確定。重要: バックエンドの _validateToken_ は token先頭セグメント(=本来のメンバーID)と
+     送信memberIdの一致を要求する。入力IDがメール/別コードだと不一致で直後にログアウトするため、
+     user.member.id → token先頭 → r.memberId → 入力ID の順で本来のIDを採用する(console 2943-2945行と同じ)。 */
+  function finishLogin(r, typedId) {
+    var tk = (r && r.token) || '';
+    if (!tk) return false;
+    var realId = (r && r.user && r.user.member && r.user.member.id)
+      || (String(tk).indexOf('.') > 0 ? String(tk).split('.')[0] : '')
+      || (r && r.memberId) || String(typedId || '').trim();
+    setSession(realId, tk);
+    if (r && r.user !== undefined) window.currentUser = r.user;
+    return true;
+  }
+  // 認証。needsPasswordSet===true が返ったら初回PW設定モードへ(呼び出し側で分岐)
+  function login(identifier, password) { return postData('authenticate', { identifier: identifier, password: password }); }
+  // 初回パスワード設定(10文字以上)。成功時 token が返る
+  function setPassword(identifier, newPassword) { return postData('setPassword', { identifier: identifier, newPassword: newPassword }); }
+
+  // ユーザー形: user.member.{id,name}, user.highestRole, user.highestRank
+  function myRank() {
+    var u = window.currentUser;
+    if (!u || !u.member) return 0;
+    if (typeof u.highestRank === 'number') return u.highestRank;
+    return ROLE_RANK[u.highestRole] || 0;
+  }
+  function myName() {
+    var m = (window.currentUser && window.currentUser.member) || {};
+    return m.nickname || m.name || m['氏名'] || '';
+  }
+  function myRole() { return (window.currentUser && window.currentUser.highestRole) || ''; }
+
+  return {
+    fetchData: fetchData,
+    postData: postData,
+    login: login,
+    setPassword: setPassword,
+    finishLogin: finishLogin,
+    hasSession: function () { return !!(mid() && tok()); },
+    setSession: setSession,
+    clearSession: clearSession,
+    mid: mid,
+    tok: tok,
+    myRank: myRank,
+    myName: myName,
+    myRole: myRole,
+    ROLE_RANK: ROLE_RANK,
+    setOnUnauthorized: function (fn) { onUnauthorized = fn; },
+  };
+})();
+
+// ================= event/30-app.js =================
+/* ============================================================================
+   イベントアプリ — vanilla JS(ポータルと同方式)
+   正典: redesign/portal-proto/event-list.html / event-hub.html / event-regs.html
+   ルート(ハッシュ): #/ = 一覧 / #/ev/<id> = ハブ概要 / #/ev/<id>/regs = 申込・決済
+                     #/ev/<id>/prep|day|after = 準備中(正直な1行)
+   方針:
+   - デモと実データは同じ描画関数を通す(ビューモデルの出所だけが違う)。
+   - バックエンド未実装の新機能(担当レール/配信タイムライン/収支/キャンセル待ち/
+     準備チェック)は、実データモードでは vm 側が null → セクションごと非表示。
+     描画関数は分離済みなので、GAS実装後は vm 組立に結線するだけでよい。
+   - 実フィールドに無い項目の行は出さない(偽データ・空飾り禁止)。
+   - 金銭の書込(決済済みにする/返金)は第1弾では実装しない。ボタンは正典どおり
+     出すが、押すと控えめな案内のみ(偽完了禁止)。
+   ============================================================================ */
+(function () {
+  'use strict';
+  var API = window.AdminAPI;
+  var root = document.getElementById('app');
+  var DEMO = /[?&]demo=1/.test(location.search);
+  var QS = DEMO ? '?demo=1' : '';
+
+  /* ---------- 小道具 ---------- */
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function arr(x) { return Array.isArray(x) ? x : []; }
+  function num(x) { return Number(x) || 0; }
+  var WD = ['日', '月', '火', '水', '木', '金', '土'];
+  function pad2(n) { return String(n).length < 2 ? '0' + n : String(n); }
+  function ymd(d) { return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()); }
+  function parseYmd(s) {
+    var m = /^(\d{4})[-/](\d{1,2})[-/](\d{1,2})/.exec(String(s || ''));
+    return m ? new Date(+m[1], +m[2] - 1, +m[3]) : null;
+  }
+  var NOW = new Date();
+  var TODAY = ymd(NOW);
+  var YESTER = ymd(new Date(NOW.getFullYear(), NOW.getMonth(), NOW.getDate() - 1));
+  function dateJaFull(d) { return d.getFullYear() + '年' + (d.getMonth() + 1) + '月' + d.getDate() + '日(' + WD[d.getDay()] + ')'; }
+  function dateJa(d) { return (d.getMonth() + 1) + '月' + d.getDate() + '日(' + WD[d.getDay()] + ')'; }
+  function dateSlash(d) { return (d.getMonth() + 1) + '/' + d.getDate(); }
+  function money(n) { return String(num(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
+  function dtLabel(iso) { // ISO日時 → 'M/D HH:MM'
+    if (!iso) return '';
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) { d = parseYmd(iso); return d ? dateSlash(d) : ''; }
+    return dateSlash(d) + ' ' + d.getHours() + ':' + pad2(d.getMinutes());
+  }
+  function timeRange(ev) {
+    var t = String(ev.time || '').slice(0, 5);
+    var e = String(ev.endTime || '').slice(0, 5);
+    if (!t) return '';
+    return e ? t + '–' + e : t + ' 開始';
+  }
+
+  /* ---------- データを防御的に読む ---------- */
+  function evTitle(e) { return e.title || e.name || '(無題のイベント)'; }
+  function evImage(e) { return e.heroImageUrl || e.posterUrl || e.imageUrl || e.image || ''; }
+  function evStatus(e) { return String(e.status || ''); }
+  function evCancelled(e) { return /中止|アーカイブ/.test(evStatus(e)); }
+  function evPublished(e) { return /公開中/.test(evStatus(e)); }
+  function evDraft(e) { return /下書き/.test(evStatus(e)); }
+  function evDate(e) { return String(e.date || '').slice(0, 10); }
+  function evEndDate(e) { return String(e.endDate || '').slice(0, 10) || evDate(e); }
+  function evPast(e) { var d = evEndDate(e); return !!d && d < TODAY; }
+  function evToday(e) {
+    if (evDate(e) === TODAY) return true;
+    var ss = arr(e.sessions);
+    for (var i = 0; i < ss.length; i++) if (String(ss[i].date || '').slice(0, 10) === TODAY) return true;
+    return false;
+  }
+  function regStatus(r) { return String(r.status || ''); }
+  function regCancelled(r) { return /キャンセル/.test(regStatus(r)); }
+  function regPaid(r) { return r.paid === true || r.paid === 'TRUE' || /決済済み|チェックイン/.test(regStatus(r)); }
+  function regChecked(r) { return /チェックイン/.test(regStatus(r)); }
+  function regRefundWait(r) { return regCancelled(r) && regPaid(r) && !r.refundedAt && !(num(r.refundAmount) > 0); }
+  function regActive(r) { return !r.isTest && !regCancelled(r); }
+
+  /* ---------- イベント別 集計(非PII: 件数と日次カウントのみ。キャッシュ可) ---------- */
+  function buildAggs(regs, parts) {
+    var pmap = null;
+    if (parts) {
+      pmap = {};
+      arr(parts).forEach(function (p) { if (p && p.id) pmap[String(p.id).trim()] = p; });
+    }
+    var by = {};
+    arr(regs).forEach(function (r) {
+      if (!r || r.isTest || !r.eventId) return;
+      var a = by[r.eventId];
+      if (!a) a = by[r.eventId] = { applied: 0, paid: 0, unpaid: 0, checked: 0, cancels: 0, refundWait: 0, companions: 0, days: {}, yesterday: 0, first: 0, repeat: 0, firstKnown: 0, pay: {}, revenue: 0, unpaidAmt: 0 };
+      if (regCancelled(r)) {
+        a.cancels++;
+        if (regRefundWait(r)) a.refundWait++;
+        return;
+      }
+      a.applied++;
+      if (regPaid(r)) {
+        a.paid++;
+        a.revenue += num(r.amount);
+        var m = String(r.actualPaymentMethod || '').trim();
+        if (m) a.pay[m] = (a.pay[m] || 0) + 1;
+      } else {
+        a.unpaid++;
+        a.unpaidAmt += num(r.amount);
+      }
+      if (regChecked(r)) a.checked++;
+      if (num(r.companionsCount) > 0) a.companions++;
+      var d = String(r.appliedAt || r.createdAt || '').slice(0, 10);
+      if (d) {
+        a.days[d] = (a.days[d] || 0) + 1;
+        if (d === YESTER) a.yesterday++;
+      }
+      if (pmap) {
+        var p = pmap[String(r.userId || '').trim()];
+        if (p) {
+          a.firstKnown++;
+          if (num(p.events) <= 0) a.first++; else a.repeat++;
+        }
+      }
+    });
+    return by;
+  }
+  // 「このペースだと満員」予測: 直近7日の申込ペースから線形概算(定員があるときのみ・過信させない文言)
+  function fullForecast(ev, a) {
+    if (!ev || !a || !(num(ev.capacity) > 0) || !evPublished(ev) || evPast(ev)) return '';
+    var remain = num(ev.capacity) - a.applied;
+    if (remain <= 0) return '満員';
+    var last7 = 0;
+    for (var i = 0; i < 7; i++) {
+      var d = new Date(NOW.getFullYear(), NOW.getMonth(), NOW.getDate() - i);
+      last7 += a.days[ymd(d)] || 0;
+    }
+    if (last7 <= 0) return '';
+    var daysTo = Math.ceil(remain / (last7 / 7));
+    if (daysTo > 60) return '';
+    var fd = new Date(NOW.getFullYear(), NOW.getMonth(), NOW.getDate() + daysTo);
+    var ed = parseYmd(evDate(ev));
+    if (ed && fd.getTime() > ed.getTime()) return ''; // 開催日までに満員にならない概算なら言わない
+    return 'このペースだと<span class="nb">' + esc(dateSlash(fd)) + 'ごろ満員</span>の見込み';
+  }
+  // 下書きの公開前チェック(実フィールドから判定できるものだけ)
+  function draftChecks(ev) {
+    var c = [];
+    if (!evDate(ev) && !arr(ev.sessions).length) c.push('日付未設定');
+    if (!ev.venue) c.push('会場未定');
+    if (!evImage(ev)) c.push('写真なし');
+    if (!(num(ev.fee) > 0) && !ev.feeType) c.push('料金未設定');
+    return c;
+  }
+
+  /* ---------- 画面の骨格(題字+アプリ切替は全状態で共通) ---------- */
+  function mastheadHtml(o) {
+    o = o || {};
+    var right = '<div class="mast-right"><span class="nb">' + esc(dateJa(NOW)) + '</span>' +
+      (o.mePhoto ? '<img src="' + esc(o.mePhoto) + '" alt="">' : '') + '</div>';
+    var nav = '';
+    if (o.nav !== false) {
+      var tabs = '<a href="./portal.html' + QS + '">一面</a>' +
+        '<a href="./event.html' + QS + '#/" aria-current="page">イベント</a>' +
+        '<a href="#">発信</a><a href="#">組織</a>';
+      if (o.showHq) tabs += '<a href="#">統括</a>';
+      nav = '<nav class="edition" aria-label="アプリ切替">' + tabs + '<span class="spacer"></span></nav>';
+    }
+    return '<header class="masthead"><div class="mast-top">' +
+      '<div class="daimoku">connec<b>+</b>a</div><div class="mast-sub">運 営 ポ ー タ ル</div>' +
+      right + '</div>' + nav + '</header>';
+  }
+  function colophonHtml(sub) {
+    return '<footer class="colophon"><span>connec+a 運営ポータル ― イベント</span><span>' +
+      (sub ? sub + ' ・ ' : '') + esc(dateJaFull(NOW)) + '</span></footer>';
+  }
+
+  /* ============================================================================
+     一覧(正典: event-list.html)
+     ============================================================================ */
+  function featureHtml(F) {
+    if (!F) return '';
+    var h = '<article class="feature' + (F.photo ? '' : ' nophoto') + '">';
+    if (F.photo) {
+      h += '<figure class="f-photo"><img src="' + esc(F.photo.src) + '" alt="' + esc(F.title) + '">' +
+        (F.photo.cap ? '<figcaption class="cap">' + esc(F.photo.cap) + '</figcaption>' : '') + '</figure>';
+    }
+    h += '<div class="f-body"><div class="kicker">' + F.kicker + '</div>' +
+      '<h2>' + esc(F.title) + '</h2>' +
+      (F.metaHtml ? '<div class="meta">' + F.metaHtml + '</div>' : '');
+    if (F.nums && F.nums.length) {
+      h += '<div class="f-nums glass">' + F.nums.map(function (n) {
+        return '<div class="n' + (n.hot ? ' hot' : '') + '"><div class="v">' + esc(n.v) +
+          (n.unit ? '<small>' + esc(n.unit) + '</small>' : '') + '</div><div class="l">' + n.labelHtml + '</div></div>';
+      }).join('') + '</div>';
+    }
+    if (F.noteHtml) h += '<div class="f-note">' + F.noteHtml + '</div>';
+    arr(F.crew).forEach(function (c, i) {
+      h += '<div class="f-crew"' + (i > 0 ? ' style="margin-top:-8px"' : '') + '>' +
+        (c.facesHtml ? '<span class="faces">' + c.facesHtml + '</span>' : '') +
+        '<span>' + c.textHtml + '</span></div>';
+    });
+    h += '<div class="f-cta"><a class="btn sub" href="' + esc(F.ctaHref || '#') + '">イベントを開く</a></div>';
+    h += '</div></article>';
+    return h;
+  }
+  function upcomingHtml(vm) {
+    var h = '<h2 class="sec">これから</h2>';
+    if (vm.upcoming === null) return h + '<div class="up-empty glass">読み込み中…</div>';
+    if (!vm.upcoming.length) return h + '<div class="up-empty glass">' + esc(vm.upcomingEmpty || '開催予定のイベントはありません。「新しいイベント」から作成できます。') + '</div>';
+    h += '<nav class="up glass">' + vm.upcoming.map(function (u) {
+      return '<a href="' + esc(u.href) + '">' +
+        (u.img ? '<img class="th" src="' + esc(u.img) + '" alt="">' : '<span class="th empty"><span class="mi">image</span></span>') +
+        '<span class="date">' + esc(u.dateV) + '<small>' + esc(u.dateSmall || '') + '</small></span>' +
+        '<span class="ttl">' + esc(u.ttl) + (u.st ? '<span class="st ' + esc(u.st.cls) + '">' + esc(u.st.label) + '</span>' : '') + '</span>' +
+        '<span class="sub">' + (u.subHtml || '') + (u.facesHtml ? '<span class="faces">' + u.facesHtml + '</span>' : '') + '</span>' +
+        '<span class="mi go">arrow_forward</span></a>';
+    }).join('') + '</nav>';
+    return h;
+  }
+  function pastHtml(vm) {
+    var h = '<h2 class="sec">終わったイベント</h2>';
+    if (vm.past === null) return h + '<div class="up-empty">読み込み中…</div>';
+    if (!vm.past.rows.length) return h + '<div class="up-empty">終わったイベントはまだありません。</div>';
+    h += '<nav class="arch">' + vm.past.rows.map(function (p) {
+      return '<a href="' + esc(p.href) + '">' +
+        (p.img ? '<img class="th" src="' + esc(p.img) + '" alt="">' : '<span class="th empty"><span class="mi">image</span></span>') +
+        '<span class="date">' + esc(p.date) + '</span>' +
+        '<span class="ttl">' + esc(p.ttl) + '</span>' +
+        '<span class="m">' + (p.m1 || '') + '</span>' +
+        '<span class="m">' + (p.m2 || '') + '</span>' +
+        '<span class="m">' + (p.m3 || '') + '</span>' +
+        '<span class="mi go">arrow_forward</span></a>';
+    }).join('') + '</nav>';
+    if (vm.past.total > vm.past.rows.length) {
+      h += '<a class="arch-more" href="#">過去' + vm.past.total + '件をすべて見る<span class="mi" style="font-size:16px">arrow_forward</span></a>';
+    }
+    return h;
+  }
+  function renderList(vm) {
+    document.body.classList.remove('has-tabbtn');
+    root.innerHTML = mastheadHtml({ mePhoto: vm.mePhoto, showHq: vm.showHq }) +
+      '<div class="pagehead"><h1>イベント</h1><span class="count">' + esc(vm.countLine || '') + '</span>' +
+      '<span class="spacer"></span><a class="btn" href="#" id="ev-new"><span class="mi">add</span>新しいイベント</a></div>' +
+      '<div id="ev-new-note"></div>' +
+      (vm.feature ? featureHtml(vm.feature)
+        : '<div class="feature nophoto"><div class="f-body"><div class="kicker">イベント</div>' +
+          '<h2>' + esc(vm.featureEmpty || '開催予定のイベントはありません。') + '</h2>' +
+          '<div class="meta">「新しいイベント」から作成すると、ここに特集として載ります。</div></div></div>') +
+      upcomingHtml(vm) + pastHtml(vm) + colophonHtml('');
+    bindRetry();
+    var nb = document.getElementById('ev-new');
+    if (nb) nb.addEventListener('click', function (e) {
+      e.preventDefault();
+      document.getElementById('ev-new-note').innerHTML =
+        '<p class="opnote">イベントの作成はこの画面ではまだできません。当面は console から作成してください。</p>';
+    });
+  }
+
+  /* ---------- 一覧: 実データ → ビューモデル ---------- */
+  function upRowSub(ev, a) {
+    if (evDraft(ev)) {
+      var cs = draftChecks(ev);
+      if (!cs.length) return '';
+      return '<span class="warn-t">公開前チェック' + cs.length + '件</span> ― ' +
+        cs.map(function (c) { return '<span class="nb">' + esc(c) + '</span>'; }).join('・') + '。';
+    }
+    var parts = [];
+    if (a) {
+      parts.push('申込 ' + a.applied + (num(ev.capacity) > 0 ? '/' + num(ev.capacity) : '件'));
+      if (a.yesterday > 0) parts.push('きのう<span class="nb">+' + a.yesterday + '名</span>');
+      var fc = fullForecast(ev, a);
+      if (fc === '満員') parts.push('<span class="nb">満員</span>です');
+      else if (fc) parts.push(fc);
+      return parts.join(' ― ') + '。';
+    }
+    return '';
+  }
+  function buildListModel(M) {
+    var vm = { mePhoto: M.me && M.me.photo, showHq: (M.me && M.me.rank >= 3) };
+    var events = arr(M.events).filter(function (e) { return e && !evCancelled(e); });
+    var aggs = M.aggs || null;
+    function aggOf(e) { return aggs ? (aggs[e.id] || { applied: 0, paid: 0, unpaid: 0, checked: 0, cancels: 0, refundWait: 0, companions: 0, days: {}, yesterday: 0, first: 0, repeat: 0, firstKnown: 0, pay: {}, revenue: 0, unpaidAmt: 0 }) : null; }
+
+    var upcoming = events.filter(function (e) { return !evPast(e); });
+    var past = arr(M.events).filter(function (e) { return e && evPast(e) && !/中止/.test(evStatus(e)); });
+    vm.countLine = '開催予定 ' + upcoming.length + '件 ・ 過去 ' + past.length + '件';
+
+    // 特集: きょう開催 > 直近の公開中
+    var featured = null;
+    upcoming.forEach(function (e) { if (evToday(e) && !featured) featured = e; });
+    if (!featured) {
+      upcoming.forEach(function (e) {
+        if (!evPublished(e) || !evDate(e)) return;
+        if (!featured || evDate(e) < evDate(featured)) featured = e;
+      });
+    }
+    if (featured) {
+      var fa = aggOf(featured);
+      var meta = [];
+      var tr = timeRange(featured);
+      if (tr) meta.push('<span class="nb">' + esc(tr) + '</span>');
+      if (featured.venue) meta.push(esc(featured.venue));
+      if (num(featured.capacity) > 0) meta.push('<span class="nb">定員' + num(featured.capacity) + '名</span>');
+      var crew = [];
+      if (fa && M.partsOk && fa.firstKnown > 0) {
+        var t = '参加者は';
+        var seg = [];
+        if (fa.repeat > 0) seg.push('リピーター' + fa.repeat + '名');
+        if (fa.first > 0) seg.push('初参加<span class="nb">' + fa.first + '名</span>');
+        t += seg.join('+') || '—';
+        if (fa.yesterday > 0) t += ' ・ きのう<span class="nb">+' + fa.yesterday + '名</span>';
+        crew.push({ facesHtml: '', textHtml: t });
+      } else if (fa && fa.yesterday > 0) {
+        crew.push({ facesHtml: '', textHtml: 'きのう<span class="nb">+' + fa.yesterday + '名</span>の申込' });
+      }
+      vm.feature = {
+        kicker: evToday(featured) ? 'きょう開催 ・ 進行中' : (evDraft(featured) ? '次号 ・ 下書き' : '次回イベント'),
+        title: evTitle(featured),
+        metaHtml: (evToday(featured) ? '' : '<span class="nb">' + esc(evDate(featured) ? dateJa(parseYmd(evDate(featured))) : '日付未定') + '</span> ・ ') + meta.join(' ・ '),
+        photo: evImage(featured) ? { src: evImage(featured), cap: '' } : null,
+        nums: fa ? [
+          { v: String(fa.applied), unit: '名', labelHtml: '申込' },
+          { v: String(fa.paid), unit: '名', labelHtml: '決済済み' },
+          { v: String(fa.unpaid), unit: '名', labelHtml: '未決済', hot: fa.unpaid > 0 },
+        ].concat(num(featured.capacity) > 0
+          ? [{ v: String(Math.max(0, num(featured.capacity) - fa.applied)), unit: '枠', labelHtml: '残り' }] : []) : null,
+        noteHtml: (!M.regsOk) ? '申込数を取得できませんでした。<button type="button" id="ev-retry">再読み込み</button>' : '',
+        crew: crew,
+        ctaHref: '#/ev/' + encodeURIComponent(featured.id),
+      };
+    } else {
+      vm.feature = null;
+    }
+
+    // これから(特集を除く・日付順・日付なしは最後)
+    vm.upcoming = upcoming
+      .filter(function (e) { return !featured || e.id !== featured.id; })
+      .sort(function (a, b) { return (evDate(a) || '9999').localeCompare(evDate(b) || '9999'); })
+      .map(function (e) {
+        var d = parseYmd(evDate(e));
+        return {
+          href: '#/ev/' + encodeURIComponent(e.id),
+          img: evImage(e) || null,
+          dateV: d ? dateSlash(d) : '—',
+          dateSmall: d ? WD[d.getDay()] + '曜' : '日付未定',
+          ttl: evTitle(e),
+          st: evDraft(e) ? { cls: 'draft', label: '下書き' } : (evPublished(e) ? { cls: 'pub', label: '公開中' } : null),
+          subHtml: upRowSub(e, aggOf(e)),
+          facesHtml: '',
+        };
+      });
+
+    // 終わったイベント(新しい順5件+件数)
+    var pastSorted = past.slice().sort(function (a, b) { return (evEndDate(b) || '').localeCompare(evEndDate(a) || ''); });
+    vm.past = {
+      total: past.length,
+      rows: pastSorted.slice(0, 5).map(function (e) {
+        var d = parseYmd(evEndDate(e));
+        var a = aggOf(e);
+        var m1 = '', m2 = '';
+        if (a) {
+          m1 = '参加 <b>' + a.applied + '</b>名';
+          if (a.checked > 0 && a.applied > 0) m2 = '出席率 <b>' + Math.round(a.checked / a.applied * 100) + '</b>%';
+        }
+        return {
+          href: '#/ev/' + encodeURIComponent(e.id),
+          img: evImage(e) || null,
+          date: d ? dateSlash(d) : '',
+          ttl: evTitle(e),
+          m1: m1, m2: m2,
+          m3: e.mementoPhotoUrl ? '写真公開済み' : '',
+        };
+      }),
+    };
+    return vm;
+  }
+
+  /* ============================================================================
+     ハブ共通ヘッダ(見出しブロック+タブ+数字バンド)
+     ============================================================================ */
+  function hubHeadHtml(H, tabs, reception) {
+    var h = '<a class="back" href="#/"><span class="mi">arrow_back</span>イベント一覧へ</a>';
+    h += '<div class="titlegrid' + (H.photo ? '' : ' nophoto') + '"><div><div class="titleblock">' +
+      '<div><div class="kicker">' + H.kicker + '</div><h1>' + esc(H.title) + '</h1></div>' +
+      (H.metaHtml ? '<div class="meta">' + H.metaHtml + '</div>' : '') +
+      '<span class="state ' + esc(H.stateCls || '') + '" style="margin-left:auto;margin-bottom:8px"><span class="dot"></span>' + esc(H.stateLabel) + '</span>' +
+      '</div>' +
+      (H.standfirst ? '<p class="standfirst">' + H.standfirst + '</p>' : '') + '</div>';
+    if (H.photo) {
+      h += '<figure class="cover"><img src="' + esc(H.photo.src) + '" alt="' + esc(H.title) + '">' +
+        (H.photo.cap ? '<figcaption class="cap">' + esc(H.photo.cap) + '</figcaption>' : '') + '</figure>';
+    }
+    h += '</div>';
+    var base = tabs.base;
+    function tab(id, label, extra) {
+      var href = id === 'hub' ? base : base + '/' + id;
+      return '<a href="' + href + '"' + (tabs.active === id ? ' aria-current="page"' : '') + '>' + label + (extra || '') + '</a>';
+    }
+    h += '<nav class="tabbar glass" aria-label="イベント内">' +
+      tab('hub', '概要') +
+      tab('regs', '申込・決済', tabs.unpaid > 0 ? '<span class="cnt">' + tabs.unpaid + '</span>' : '') +
+      tab('prep', '準備') + tab('day', '当日') + tab('after', '事後') +
+      '<span class="spacer"></span>' +
+      (reception ? '<a class="btn" href="#"><span class="mi">qr_code_scanner</span>受付を開く(iPad)</a>' : '') +
+      '</nav>';
+    return h;
+  }
+  function numbandHtml(nums, note, tight) {
+    if (note) {
+      return '<div class="numband-note">' + note + '</div>';
+    }
+    if (!nums || !nums.length) return '';
+    return '<div class="numband glass' + (tight ? ' tight' : '') + '">' + nums.map(function (n) {
+      var core = '<div class="v">' + esc(n.v) + (n.unit ? '<small>' + esc(n.unit) + '</small>' : '') + '</div><div class="l">' + n.labelHtml + '</div>';
+      return '<div class="n' + (n.hot ? ' hot' : '') + '">' + (n.href ? '<a href="' + esc(n.href) + '">' + core + '</a>' : core) + '</div>';
+    }).join('') + '</div>';
+  }
+
+  /* ============================================================================
+     ハブ概要(正典: event-hub.html)
+     未実装セクション(担当レール/配信タイムライン/右欄)は vm=null → 非表示
+     ============================================================================ */
+  function factsHtml(facts, showAct, regsHref) {
+    if (!facts || !facts.length) return '';
+    var h = '<h2 class="sec">基本情報' + (showAct ? '<a class="act" href="#">編集</a>' : '') + '</h2><dl class="facts">';
+    h += facts.map(function (f) {
+      return '<div class="f"><dt>' + esc(f.dt) + '</dt><dd>' + f.ddHtml + '</dd></div>';
+    }).join('');
+    h += '</dl>';
+    return h;
+  }
+  function trendHtml(T, regsHref) {
+    var h = '<h2 class="sec">申込のうごき' + (regsHref ? '<a class="act" href="' + esc(regsHref) + '">申込・決済タブで詳しく</a>' : '') + '</h2>';
+    if (!T) return '';
+    if (T.empty) return h + '<div class="trend-empty">' + esc(T.empty) + '</div>';
+    h += '<div class="trend-wrap"><div class="trend">' + T.bars.map(function (b) {
+      return '<i' + (b.cls ? ' class="' + b.cls + '"' : '') + ' style="height:' + b.h + '%">' + (b.em ? '<em>' + esc(b.em) + '</em>' : '') + '</i>';
+    }).join('') + '</div>';
+    if (T.x) h += '<div class="trend-x"><span>' + esc(T.x[0]) + '</span><span>' + esc(T.x[1]) + '</span><span>' + esc(T.x[2]) + '</span></div>';
+    if (T.notes && T.notes.length) {
+      h += '<div class="trend-notes">' + T.notes.map(function (n) {
+        return '<span' + (n.cls ? ' class="' + n.cls + '"' : '') + '>' + esc(n.text) + '</span>';
+      }).join('') + '</div>';
+    }
+    if (T.mixHtml) h += '<p class="mixline">' + T.mixHtml + '</p>';
+    if (T.crowdHtml) h += '<div class="crowd">' + T.crowdHtml + '</div>';
+    h += '</div>';
+    return h;
+  }
+  // ---- 新機能セクション。担当レール/収支は結線済み(listEventStaffAssignments / listEventExpenses)。
+  //      配信タイムライン/きょうの流れ/準備チェックは未実装のまま(実データでは null → 非表示)。
+  function crewRailHtml(C) {
+    if (!C) return '';
+    var h = '<h2 class="sec">この日の担当' +
+      (C.editHref ? '<a class="act" href="' + esc(C.editHref) + '">割当を編集</a>' : '') + '</h2>';
+    // 空状態/取得失敗: 非表示ではなく、操作に繋がる1行(なぜ空か+次にできること)
+    if (C.lineHtml != null) return h + '<div class="rail-line">' + C.lineHtml + '</div>';
+    return h + '<div class="rail">' + C.rows.map(function (c) {
+      if (c.empty) {
+        return '<div class="crew empty"><span class="ph-empty"><span class="mi">person_add</span></span>' +
+          '<div><span class="role">' + esc(c.role) + '</span></div><div class="nm">&nbsp;</div><div class="nt">' + esc(c.nt || '') + '</div></div>';
+      }
+      return '<div class="crew">' +
+        (c.img ? '<img src="' + esc(c.img) + '" alt="">' : '<span class="ph-empty"><span class="mi">person</span></span>') +
+        '<div><span class="role">' + esc(c.role) + '</span></div>' +
+        '<div class="nm">' + esc(c.nm) + '</div><div class="nt">' + esc(c.nt || '') + '</div></div>';
+    }).join('') + '</div>';
+  }
+  function timelineHtml(tl, showAct) {
+    if (!tl) return '';
+    return '<h2 class="sec">配信タイムライン' + (showAct ? '<a class="act" href="#">編集</a>' : '') + '</h2>' +
+      '<ul class="tl">' + tl.map(function (t) {
+        return '<li' + (t.cls ? ' class="' + esc(t.cls) + '"' : '') + '><span class="when">' + esc(t.when) + '</span>' +
+          '<span>' + t.bodyHtml + '</span><span class="st ' + esc(t.stCls) + '">' + esc(t.stLabel) + '</span></li>';
+      }).join('') + '</ul>';
+  }
+  function hubAsideHtml(A) {
+    if (!A) return '';
+    var h = '<aside class="side glass">';
+    if (A.flow) {
+      h += '<div class="grp"><h2>きょうの流れ</h2><ul class="chk">' + A.flow.map(function (f) {
+        return '<li><span class="mi" style="color:var(--ink4)">schedule</span><span>' + f.html + '</span></li>';
+      }).join('') + '</ul></div>';
+    }
+    if (A.checks) {
+      h += '<div class="grp"><h2>準備チェック</h2><ul class="chk">' + A.checks.map(function (c) {
+        return '<li' + (c.todo ? ' class="todo"' : '') + '><span class="mi">' + (c.todo ? 'schedule' : 'check_circle') + '</span>' +
+          '<span>' + c.html + '</span>' + (c.time ? '<time>' + esc(c.time) + '</time>' : '') + '</li>';
+      }).join('') + '</ul></div>';
+    }
+    if (A.ledger) {
+      h += '<div class="grp" style="margin-bottom:4px"><h2>収支の見込み<a class="act" href="' + esc(A.ledger.editHref || '#') + '">支出を記録</a></h2><div class="ledger">' +
+        A.ledger.rows.map(function (r) { return '<div class="lr"><span>' + r[0] + '</span><span>' + esc(r[1]) + '</span></div>'; }).join('') +
+        '<div class="lr total' + (A.ledger.neg ? ' neg' : '') + '"><span>' + esc(A.ledger.total[0]) + '</span><span>' + esc(A.ledger.total[1]) + '</span></div>' +
+        (A.ledger.note ? '<p class="note">' + A.ledger.note + '</p>' : '') + '</div></div>';
+    }
+    h += '</aside>';
+    return h;
+  }
+  function renderHub(vm) {
+    document.body.classList.toggle('has-tabbtn', !!vm.reception);
+    var regsHref = vm.tabs.base + '/regs';
+    var main = '<main>' +
+      factsHtml(vm.facts, vm.demo) +
+      trendHtml(vm.trend, regsHref) +
+      crewRailHtml(vm.crew) +
+      timelineHtml(vm.timeline, vm.demo) +
+      '</main>';
+    root.innerHTML = mastheadHtml({ mePhoto: vm.mePhoto, showHq: vm.showHq }) +
+      hubHeadHtml(vm.head, vm.tabs, vm.reception) +
+      numbandHtml(vm.nums, vm.numsNote) +
+      '<div class="cols' + (vm.aside ? '' : ' solo') + '">' + main + hubAsideHtml(vm.aside) + '</div>' +
+      colophonHtml(esc(vm.head.title));
+    bindRetry();
+    var cr = document.getElementById('ev-crew-retry');
+    if (cr) cr.addEventListener('click', function () {
+      var x = EX[vm.evId];
+      if (x) { x.fetched = false; x.staffErr = false; x.expErr = false; }
+      loadExtras(vm.evId);
+    });
+  }
+
+  /* ---------- ハブ: 実データ → ビューモデル ---------- */
+  function hubHeadModel(ev, tab) {
+    var kicker, stateCls, stateLabel;
+    if (evCancelled(ev)) { kicker = '中止'; stateCls = 'off'; stateLabel = /アーカイブ/.test(evStatus(ev)) ? 'アーカイブ' : '中止'; }
+    else if (evToday(ev)) { kicker = 'きょう開催'; stateCls = evPublished(ev) ? '' : 'draft'; stateLabel = evStatus(ev) || '公開中'; }
+    else if (evPast(ev)) { kicker = '終了'; stateCls = 'done'; stateLabel = '開催済み'; }
+    else if (evDraft(ev)) { kicker = '下書き'; stateCls = 'draft'; stateLabel = '下書き'; }
+    else { kicker = '開催予定'; stateCls = ''; stateLabel = evStatus(ev) || '公開中'; }
+    var meta = [];
+    var d = parseYmd(evDate(ev));
+    var tr = timeRange(ev);
+    if (d) meta.push('<span class="nb">' + esc(dateJa(d)) + (tr ? ' ' + esc(tr) : '') + '</span>');
+    else if (tr) meta.push('<span class="nb">' + esc(tr) + '</span>');
+    if (ev.venue) meta.push(esc(ev.venue));
+    if (num(ev.capacity) > 0) meta.push('<span class="nb">定員' + num(ev.capacity) + '名</span>');
+    return {
+      kicker: kicker, title: evTitle(ev),
+      metaHtml: meta.join(' ・ '),
+      stateCls: stateCls, stateLabel: stateLabel,
+      standfirst: ev.summary ? esc(String(ev.summary).slice(0, 140)) : '',
+      photo: evImage(ev) ? { src: evImage(ev), cap: '' } : null,
+    };
+  }
+  function hubFactsModel(ev) {
+    var facts = [];
+    var d = parseYmd(evDate(ev));
+    var tr = timeRange(ev);
+    if (d || tr) {
+      var dd = '<b>' + (d ? '<span class="nb">' + esc(dateJa(d)) + '</span>' : '') + (tr ? ' <span class="nb">' + esc(tr) + '</span>' : '') + '</b>';
+      var ss = arr(ev.sessions);
+      if (ev.format === 'multi' && ss.length) {
+        dd += '<span class="note">全' + ss.length + '回 ― ' + ss.slice(0, 4).map(function (s) {
+          var sd = parseYmd(s.date);
+          return '<span class="nb">' + esc((sd ? dateSlash(sd) : '') + (s.startTime ? ' ' + String(s.startTime).slice(0, 5) : '')) + '</span>';
+        }).join(' ・ ') + (ss.length > 4 ? ' ほか' : '') + '</span>';
+      }
+      facts.push({ dt: '日時', ddHtml: dd });
+    }
+    if (ev.venue) {
+      var vd = '<b>' + esc(ev.venue) + '</b>';
+      if (ev.address) vd += '<span class="note">' + esc(ev.address) + '</span>';
+      facts.push({ dt: '会場', ddHtml: vd });
+    }
+    if (num(ev.fee) > 0 || num(ev.childFee) > 0 || ev.feeType) {
+      var fd;
+      if (num(ev.fee) > 0) fd = '<b>' + money(ev.fee) + '円</b>';
+      else fd = esc(ev.feeType || '無料');
+      if (ev.allowCompanions && num(ev.childFee) > 0) fd += ' ／ 同伴の子ども <b>' + money(ev.childFee) + '円</b>';
+      var notes = [];
+      if (ev.allowCompanions) notes.push('同伴者の受付 ON');
+      var pm = String(ev.paymentMethods || ev.paymentMethod || '').trim();
+      if (pm) notes.push('決済は<span class="nb">' + esc(pm.split(',').map(function (s) { return s.trim(); }).filter(Boolean).join('/')) + '</span>');
+      if (notes.length) fd += '<span class="note">' + notes.join(' ・ ') + '</span>';
+      facts.push({ dt: '参加費', ddHtml: fd });
+    }
+    var pub;
+    if (evDraft(ev)) pub = '下書き ― まだ公開されていません';
+    else if (evCancelled(ev)) pub = esc(evStatus(ev));
+    else if (evPast(ev)) pub = '開催済み';
+    else {
+      pub = '公開中';
+      var pd = parseYmd(String(ev.publishAt || '').slice(0, 10));
+      if (pd) pub = esc((pd.getMonth() + 1) + '月' + pd.getDate() + '日') + 'から公開中';
+      var cd = parseYmd(String(ev.regCloseDate || '').slice(0, 10));
+      if (cd) pub += ' ・ 申込締切 <span class="nb">' + esc(dateSlash(cd)) + '</span>';
+    }
+    facts.push({ dt: '公開', ddHtml: pub });
+    if (ev.category) facts.push({ dt: '担当部署', ddHtml: esc(ev.category) });
+    return facts;
+  }
+  function hubNumsModel(ev, a, regsHref) {
+    if (!a) return null;
+    var nums = [
+      { v: String(a.applied), unit: '名', labelHtml: '申込' },
+      { v: String(a.paid), unit: '名', labelHtml: '決済済み' },
+      { v: String(a.unpaid), unit: '名', labelHtml: a.unpaid > 0 && evToday(ev) ? '<span class="nb">未決済 ―</span> <span class="nb">受付で案内</span>' : '未決済', hot: a.unpaid > 0, href: a.unpaid > 0 ? regsHref : '' },
+    ];
+    if (num(ev.capacity) > 0) nums.push({ v: String(Math.max(0, num(ev.capacity) - a.applied)), unit: '枠', labelHtml: '残り' });
+    return nums;
+  }
+  function hubTrendModel(ev, a, M) {
+    if (!a) return null;
+    var dayKeys = Object.keys(a.days).sort();
+    if (!dayKeys.length) return { empty: evDraft(ev) ? 'まだ公開前です。公開すると日次の申込がここに載ります。' : 'まだ申込がありません。' };
+    var endD = parseYmd(TODAY);
+    var startD = parseYmd(dayKeys[0]);
+    var span = Math.round((endD - startD) / 86400000) + 1;
+    if (span > 30) { startD = new Date(endD.getFullYear(), endD.getMonth(), endD.getDate() - 29); span = 30; }
+    if (span < 7) { startD = new Date(endD.getFullYear(), endD.getMonth(), endD.getDate() - 6); span = 7; }
+    var days = [];
+    var max = 1;
+    for (var i = 0; i < span; i++) {
+      var dd = new Date(startD.getFullYear(), startD.getMonth(), startD.getDate() + i);
+      var k = ymd(dd);
+      var c = a.days[k] || 0;
+      if (c > max) max = c;
+      days.push({ k: k, d: dd, c: c });
+    }
+    var pubDay = String(ev.publishAt || '').slice(0, 10);
+    var bars = days.map(function (x) {
+      var b = { h: x.c > 0 ? Math.max(8, Math.round(x.c / max * 100)) : 2 };
+      if (x.k === pubDay) { b.cls = 'mark'; b.em = '公開'; }
+      if (x.k >= YESTER && x.c > 0) b.cls = 'hi';
+      if (x.k === YESTER && a.yesterday > 0) { b.cls = 'hi'; b.em = 'きのう +' + a.yesterday; }
+      return b;
+    });
+    var midD = days[Math.floor(days.length / 2)].d;
+    var T = {
+      bars: bars,
+      x: [dateSlash(days[0].d) + (days[0].k === pubDay ? ' 公開' : ''), dateSlash(midD), 'きょう'],
+      notes: a.yesterday > 0 ? [{ cls: 'hi', text: 'きのう +' + a.yesterday + '名' }] : [],
+    };
+    // 内訳(判定できる要素だけ。判定不能なら省略)
+    var mix = [];
+    if (M.partsOk && a.firstKnown > 0) mix.push('初参加<b>' + a.first + '名</b> ・ リピーター<b>' + a.repeat + '名</b>');
+    if (a.companions > 0) mix.push('同伴あり<b>' + a.companions + '組</b>');
+    if (a.cancels > 0) mix.push('キャンセル累計<b>' + a.cancels + '件</b>');
+    if (mix.length) T.mixHtml = a.applied + '名の内訳 ― ' + mix.join(' ・ ') + '。';
+    return T;
+  }
+  /* ---- 担当レール/収支(listEventStaffAssignments / listEventExpenses の実データ結線) ---- */
+  function memberMap() {
+    var mm = {};
+    arr(M.members).forEach(function (m) { if (m && m.id) mm[String(m.id).trim()] = m; });
+    return mm;
+  }
+  function memberName(m) { return (m && (m.nickname || m.name || m['氏名'])) || ''; }
+  function canStaff() { return !!(M.me && M.me.rank >= 2); } // 読取/書込ともアシマネ+
+  function hubCrewModel(ev, base) {
+    if (!canStaff()) return null;
+    var x = EX[ev.id];
+    if (!x || x.staff === null) return null; // 取得中はまだ出さない(揃い次第 再render)
+    var editHref = base + '/staff';
+    if (x.staffErr && !arr(x.staff).length) {
+      return { editHref: editHref, lineHtml: '担当の割当を取得できませんでした。<button type="button" id="ev-crew-retry">再読み込み</button>' };
+    }
+    var mm = memberMap();
+    var rows = arr(x.staff).map(function (e) {
+      var id = String((e && e.memberId) || '').trim();
+      var nt = (e && (e.slot || e.note)) || '';
+      if (!id) return { empty: true, role: ((e && e.role) || '担当') + ' ― 未定', nt: nt || '空き枠' };
+      var m = mm[id];
+      return {
+        img: (m && (m.photoUrl || m.avatarUrl)) || '',
+        nm: m ? memberName(m) : id,
+        role: (e && e.role) || '担当',
+        nt: nt,
+      };
+    });
+    if (!rows.length) {
+      return { editHref: editHref, lineHtml: '担当はまだ割り当てられていません ― <a href="' + esc(editHref) + '">割当を編集</a>' };
+    }
+    return { editHref: editHref, rows: rows };
+  }
+  function hubLedgerModel(ev, a, base) {
+    if (!canStaff()) return null; // listEventExpenses もアシマネ+
+    var x = EX[ev.id];
+    if (!x || x.expenses === null) return null;
+    var editHref = base + '/expenses';
+    var exps = arr(x.expenses);
+    var rows = [];
+    if (a) rows.push(['<span class="nb">参加費(決済済み' + a.paid + '名)</span>', money(a.revenue) + '円']);
+    if (x.expErr && !exps.length) {
+      return {
+        editHref: editHref, rows: rows, neg: false,
+        total: ['見込み収支', a ? '+' + money(a.revenue) + '円' : '—'],
+        note: '支出の記録を取得できませんでした。再読み込みしてください。',
+      };
+    }
+    var spend = 0;
+    exps.forEach(function (r) { spend += num(r && r.amount); });
+    rows.push(['<span class="nb">支出(' + exps.length + '件)</span>', '−' + money(spend) + '円']);
+    var bal = (a ? a.revenue : 0) - spend;
+    var note = '';
+    if (!a) note = '申込データを取得できなかったため、収入は含まれていません。';
+    else if (a.unpaid > 0 && a.unpaidAmt > 0) note = '未決済' + a.unpaid + '名が決済されると <span class="nb">+' + money(a.unpaidAmt) + '円</span>。';
+    else if (!exps.length) note = '支出はまだ記録されていません ― <a href="' + esc(editHref) + '">支出を記録</a>から追加できます。';
+    return {
+      editHref: editHref, rows: rows, neg: bal < 0,
+      total: ['見込み収支', (bal < 0 ? '−' : '+') + money(Math.abs(bal)) + '円'],
+      note: note,
+    };
+  }
+  function buildHubModel(M, ev, active) {
+    var a = (M.aggs && M.regsOk !== false) ? (M.aggs[ev.id] || buildAggs([], null)[ev.id] || { applied: 0, paid: 0, unpaid: 0, checked: 0, cancels: 0, refundWait: 0, companions: 0, days: {}, yesterday: 0, first: 0, repeat: 0, firstKnown: 0, pay: {}, revenue: 0, unpaidAmt: 0 }) : null;
+    var base = '#/ev/' + encodeURIComponent(ev.id);
+    var regsHref = base + '/regs';
+    var ledger = hubLedgerModel(ev, a, base);
+    return {
+      demo: false,
+      evId: ev.id,
+      mePhoto: M.me && M.me.photo, showHq: (M.me && M.me.rank >= 3),
+      head: hubHeadModel(ev, active),
+      tabs: { base: base, active: active, unpaid: a ? a.unpaid : 0 },
+      reception: false, // 受付アプリは本再設計ではまだ未接続(デモのみ)。当面の受付は console から。
+      nums: hubNumsModel(ev, a, regsHref),
+      numsNote: a ? null : '申込数を取得できませんでした。<button type="button" id="ev-retry">再読み込み</button>',
+      facts: hubFactsModel(ev),
+      trend: hubTrendModel(ev, a, M),
+      crew: hubCrewModel(ev, base),
+      timeline: null,  // 配信予約 未実装 → 非表示
+      aside: ledger ? { ledger: ledger } : null, // きょうの流れ/準備チェックは未実装のまま
+      agg: a,
+    };
+  }
+
+  /* ============================================================================
+     申込・決済タブ(正典: event-regs.html)
+     金銭の書込は第1弾では実装しない(ボタンは出すが押すと控えめな案内のみ)
+     ============================================================================ */
+  var regsState = { evId: '', mode: 'group', filter: 'all', q: '', sel: '', showAll: false, notice: '' };
+  function resetRegsState(evId) {
+    if (regsState.evId !== evId) regsState = { evId: evId, mode: 'group', filter: 'all', q: '', sel: '', showAll: false, notice: '' };
+  }
+  function paybandHtml(P) {
+    if (!P) return '';
+    return '<div class="payband"><span class="lbl nb">' + esc(P.label) + '</span>' +
+      '<span class="bar" role="img" aria-label="' + esc(P.aria || '') + '">' +
+      P.segs.map(function (s) { return '<i class="' + esc(s.cls) + '" style="width:' + s.w + '%"></i>'; }).join('') + '</span>' +
+      '<span class="leg">' + P.legendHtml + '</span></div>';
+  }
+  function paceHtml(P) {
+    if (!P) return '';
+    return '<h2 class="sec">申込のうごき<a class="act" href="' + esc(P.hubHref) + '">概要タブのグラフへ</a></h2>' +
+      '<div class="pace-strip"><div class="pace" role="img" aria-label="日次の申込件数">' +
+      P.bars.map(function (b) { return '<i' + (b.hi ? ' class="hi"' : '') + ' style="height:' + b.h + '%"></i>'; }).join('') +
+      '</div><p class="pace-note">' + P.noteHtml + '</p></div>';
+  }
+  function regRowsFiltered(vm) {
+    var rows = vm.rows || [];
+    var st = regsState;
+    if (st.mode === 'person') rows = personRows(rows); // 1名ごと=描画時に展開(切替で再構築不要)
+    if (st.filter === 'unpaid') rows = rows.filter(function (r) { return r.stCls === 'unpaid'; });
+    else if (st.filter === 'refund') rows = rows.filter(function (r) { return r.stCls === 'refund'; });
+    if (st.q) {
+      var q = st.q.toLowerCase();
+      rows = rows.filter(function (r) { return String(r.name).toLowerCase().indexOf(q) >= 0; });
+    }
+    return rows;
+  }
+  function regTableHtml(vm) {
+    var st = regsState;
+    if (vm.rows === null) return '<div class="tbl-empty">読み込み中…</div>';
+    if (vm.rowsErr) return '<div class="tbl-empty">' + esc(vm.rowsErr) + '</div>';
+    var rows = regRowsFiltered(vm);
+    var limited = false;
+    var hiddenPaid = 0;
+    if (st.filter === 'all' && !st.q && !st.showAll && rows.length > 12) {
+      // 未決済・返金待ちは隠さない。決済済みの後方だけ畳む。
+      var keep = [];
+      rows.forEach(function (r) {
+        if (r.stCls === 'unpaid' || r.stCls === 'refund' || keep.length < 12) keep.push(r);
+        else hiddenPaid++;
+      });
+      if (hiddenPaid > 0) { rows = keep; limited = true; }
+    }
+    if (!rows.length) {
+      return '<div class="tbl-empty">' + (st.q ? '「' + esc(st.q) + '」に一致する申込はありません。' :
+        st.filter === 'unpaid' ? '未決済の申込はありません。' :
+        st.filter === 'refund' ? '返金待ちの申込はありません。' : 'まだ申込がありません。') + '</div>';
+    }
+    var h = '<div class="tblwrap"><table class="regs"><thead><tr>' +
+      '<th>申込者</th><th>申込日</th><th>決済状態</th><th class="num">金額</th><th>同伴</th><th>操作</th>' +
+      '</tr></thead><tbody>';
+    rows.forEach(function (r) {
+      var sel = st.sel === r.id;
+      var stCls = { paid: 'st-paid', unpaid: 'st-unpaid', refund: 'st-refund', cancel: 'st-cancel' }[r.stCls] || '';
+      h += '<tr' + (sel ? ' class="sel"' : '') + ' data-rid="' + esc(r.id) + '">' +
+        '<td><span class="who">' + (r.img ? '<img src="' + esc(r.img) + '" alt="">' : '') +
+        '<span class="nb">' + esc(r.name) + '</span>' + (r.tag ? '<span class="tag nb">' + esc(r.tag) + '</span>' : '') + '</span></td>' +
+        '<td class="when">' + esc(r.when) + '</td>' +
+        '<td class="st ' + stCls + '">' + esc(r.stLabel) + (r.how ? '<span class="how">' + r.how + '</span>' : '') + '</td>' +
+        '<td class="amt">' + (r.amt || '―') + '</td>' +
+        '<td class="' + (r.comp ? 'comp' : 'none') + '">' + (r.comp ? '<span class="nb">' + esc(r.comp) + '</span>' : '―') + '</td>' +
+        '<td>' + (r.canMark
+          ? '<button type="button" class="rowbtn nb" data-mark="' + esc(r.id) + '">決済済みにする</button>'
+          : '<button type="button" class="rowlink" data-sel="' + esc(r.id) + '">' + (sel ? '詳細を閉じる' : '詳細') + '</button>') + '</td></tr>';
+      if (st.mode === 'group') {
+        arr(r.children).forEach(function (c) {
+          h += '<tr class="child' + (sel ? ' sel' : '') + '"><td class="cname"><span class="nb">' + esc(c.label) + '</span></td><td></td>' +
+            '<td class="how" style="color:var(--ink5)">' + esc(c.how || '') + '</td>' +
+            '<td class="amt" style="font-size:12.5px">' + (c.amt || '') + '</td><td></td><td></td></tr>';
+        });
+      }
+    });
+    h += '</tbody></table></div>';
+    if (limited) {
+      h += '<p class="tbl-more">ほか' + hiddenPaid + '件は決済済み ・ <button type="button" id="ev-showall">すべての申込を表示</button></p>';
+    } else if (vm.moreHtml) {
+      h += '<p class="tbl-more">' + vm.moreHtml + '</p>';
+    }
+    if (st.notice) h += '<p class="opnote" role="status">' + esc(st.notice) + '</p>';
+    if (vm.moneynote) h += '<p class="moneynote">' + vm.moneynote + '</p>';
+    return h;
+  }
+  function waitlistHtml(W) {
+    if (!W) return '';
+    var h = '<h2 class="sec">キャンセル待ち ― ' + W.items.length + '名</h2>';
+    if (W.note) h += '<p class="waitnote">' + W.note + '</p>';
+    h += '<div>' + W.items.map(function (w) {
+      return '<div class="wl"><span class="ord">' + esc(w.ord) + '</span>' +
+        (w.img ? '<img src="' + esc(w.img) + '" alt="">' : '') +
+        '<div class="wi"><span class="nm">' + esc(w.nm) + (w.tag ? '<span class="tag nb">' + esc(w.tag) + '</span>' : '') + '</span>' +
+        '<span class="at nb">' + esc(w.at) + '</span></div><span class="sp"></span>' +
+        '<a class="btn sub nb" href="#">繰上げの案内を送る</a></div>';
+    }).join('') + '</div>';
+    return h;
+  }
+  function regDetailHtml(vm) {
+    var h = '<aside class="side glass regside" aria-label="選択中の申込の詳細"><h2>申込の詳細</h2>';
+    var row = null;
+    arr(vm.rows).forEach(function (r) { if (r.id === regsState.sel) row = r; });
+    if (!row) {
+      h += '<div class="side-empty">' + (vm.rows === null ? '読み込み中…' : '一覧の「詳細」を押すと、ここに申込の内容が出ます。') + '</div></aside>';
+      return h;
+    }
+    var d = row.detail || {};
+    h += '<div class="person">' + (row.img ? '<img src="' + esc(row.img) + '" alt="">' : '') +
+      '<div><div class="nm"><span class="nb">' + esc(row.name) + '</span>' + (row.tag ? '<span class="tag nb">' + esc(row.tag) + '</span>' : '') + '</div>' +
+      (d.sub ? '<div class="sub nb">' + esc(d.sub) + '</div>' : '') + '</div></div>';
+    if (d.facts && d.facts.length) {
+      h += '<dl class="dfacts">' + d.facts.map(function (f) {
+        return '<div class="f"><dt>' + esc(f.dt) + '</dt><dd>' + f.ddHtml + '</dd></div>';
+      }).join('') + '</dl>';
+    }
+    var acts = [];
+    if (d.email) acts.push('<a class="btn sub nb" href="mailto:' + esc(d.email) + '">メールを送る</a>');
+    if (vm.demo) acts.push('<a class="btn sub nb" href="#">参加者ページを見る</a>');
+    if (acts.length) h += '<div class="dact">' + acts.join('') + '</div>';
+    h += '<div class="danger"><h3>取り消し・返金</h3><p>' + (d.dangerText ||
+      'この申込を取り消すと、決済済み分は返金の手続きに入ります。実行前に金額と理由の確認画面が入ります。') + '</p>' +
+      '<button type="button" class="btn-warn nb" data-refund="' + esc(row.id) + '">申込を取り消して返金する</button></div>';
+    h += '</aside>';
+    return h;
+  }
+  function renderRegs(vm) {
+    document.body.classList.toggle('has-tabbtn', !!vm.reception);
+    var st = regsState;
+    var listhead = '<div class="listhead">' +
+      '<div class="seg glass" role="group" aria-label="表示のまとまり">' +
+      '<button type="button" id="ev-seg-g" aria-pressed="' + (st.mode === 'group') + '">申込ごと</button>' +
+      '<button type="button" id="ev-seg-p" aria-pressed="' + (st.mode === 'person') + '">1名ごと</button></div>' +
+      '<input class="q glass" id="ev-q" type="search" placeholder="名前で探す" value="' + esc(st.q) + '" aria-label="申込者を検索">' +
+      '<nav class="filters" aria-label="絞り込み">' +
+      '<a href="#" data-f="all"' + (st.filter === 'all' ? ' aria-current="true"' : '') + '>すべて<b>' + vm.counts.all + '</b></a>' +
+      '<a href="#" data-f="unpaid" class="warncnt"' + (st.filter === 'unpaid' ? ' aria-current="true"' : '') + '>未決済<b>' + vm.counts.unpaid + '</b></a>' +
+      '<a href="#" data-f="refund"' + (st.filter === 'refund' ? ' aria-current="true"' : '') + '>返金待ち<b>' + vm.counts.refund + '</b></a>' +
+      '</nav></div>';
+    root.innerHTML = mastheadHtml({ mePhoto: vm.mePhoto, showHq: vm.showHq }) +
+      hubHeadHtml(vm.head, vm.tabs, vm.reception) +
+      numbandHtml(vm.nums, vm.numsNote, true) +
+      paybandHtml(vm.payband) +
+      '<div class="cols"><main>' +
+      paceHtml(vm.pace) +
+      '<h2 class="sec" id="unpaid">申込一覧</h2>' + listhead +
+      '<div id="ev-tblzone">' + regTableHtml(vm) + '</div>' +
+      waitlistHtml(vm.waitlist) +
+      '</main><div id="ev-detailzone">' + regDetailHtml(vm) + '</div></div>' +
+      colophonHtml(esc(vm.head.title) + ' ・ 申込・決済');
+    bindRegs(vm);
+    bindRetry();
+  }
+  function bindRegs(vm) {
+    function rerenderZones() {
+      var z = document.getElementById('ev-tblzone');
+      if (z) z.innerHTML = regTableHtml(vm);
+      var dz = document.getElementById('ev-detailzone');
+      if (dz) dz.innerHTML = regDetailHtml(vm);
+      bindZone(vm);
+    }
+    var g = document.getElementById('ev-seg-g'), p = document.getElementById('ev-seg-p');
+    if (g) g.addEventListener('click', function () { regsState.mode = 'group'; renderRegs(vm); });
+    if (p) p.addEventListener('click', function () { regsState.mode = 'person'; renderRegs(vm); });
+    var q = document.getElementById('ev-q');
+    if (q) q.addEventListener('input', function () { regsState.q = q.value; rerenderZones(); });
+    Array.prototype.forEach.call(root.querySelectorAll('[data-f]'), function (a) {
+      a.addEventListener('click', function (e) { e.preventDefault(); regsState.filter = a.getAttribute('data-f'); renderRegs(vm); });
+    });
+    bindZone(vm);
+  }
+  function bindZone(vm) {
+    function note() {
+      regsState.notice = 'この操作は試験配信では無効です。決済の記録・返金は console から行ってください。';
+      var z = document.getElementById('ev-tblzone');
+      if (z) { z.innerHTML = regTableHtml(vm); bindZone(vm); }
+    }
+    Array.prototype.forEach.call(root.querySelectorAll('[data-mark]'), function (b) {
+      b.addEventListener('click', note);
+    });
+    Array.prototype.forEach.call(root.querySelectorAll('[data-refund]'), function (b) {
+      b.addEventListener('click', note);
+    });
+    Array.prototype.forEach.call(root.querySelectorAll('[data-sel]'), function (b) {
+      b.addEventListener('click', function () {
+        var id = b.getAttribute('data-sel');
+        regsState.touched = true;
+        regsState.sel = (regsState.sel === id) ? '' : id;
+        var z = document.getElementById('ev-tblzone');
+        if (z) z.innerHTML = regTableHtml(vm);
+        var dz = document.getElementById('ev-detailzone');
+        if (dz) dz.innerHTML = regDetailHtml(vm);
+        bindZone(vm);
+      });
+    });
+    var sa = document.getElementById('ev-showall');
+    if (sa) sa.addEventListener('click', function () {
+      regsState.showAll = true;
+      var z = document.getElementById('ev-tblzone');
+      if (z) { z.innerHTML = regTableHtml(vm); bindZone(vm); }
+    });
+  }
+
+  /* ---------- regs: 実データ → ビューモデル ---------- */
+  function buildRegRows(M, ev) {
+    if (!S.regs) return M.regsOk === false ? [] : null; // null = 読み込み中
+    var mine = arr(S.regs).filter(function (r) { return r && !r.isTest && r.eventId === ev.id && (regActive(r) || regRefundWait(r)); });
+    // 未決済 → 返金待ち → 決済済み(新しい順)
+    function rankOf(r) { return regRefundWait(r) ? 1 : (regActive(r) && !regPaid(r) ? 0 : 2); }
+    mine.sort(function (a, b) {
+      var d = rankOf(a) - rankOf(b);
+      return d !== 0 ? d : String(b.appliedAt || '').localeCompare(String(a.appliedAt || ''));
+    });
+    var pmap = {};
+    arr(S.parts).forEach(function (p) { if (p && p.id) pmap[String(p.id).trim()] = p; });
+    return mine.map(function (r) {
+      var p = pmap[String(r.userId || '').trim()];
+      var firstTag = (M.partsOk && p && num(p.events) <= 0 && !evPast(ev)) ? '初参加' : '';
+      var stCls, stLabel, how = '';
+      if (regRefundWait(r)) {
+        stCls = 'refund'; stLabel = '返金待ち';
+        var cd = dtLabel(r.cancelledAt || r.updatedAt);
+        how = (cd ? '<span class="nb">' + esc(cd) + 'キャンセル</span>' : 'キャンセル済み') + (r.actualPaymentMethod ? ' ・ ' + esc(r.actualPaymentMethod) + '決済分' : '');
+      } else if (regPaid(r)) {
+        stCls = 'paid'; stLabel = '決済済み';
+        var hp = [];
+        if (r.actualPaymentMethod) hp.push(esc(r.actualPaymentMethod));
+        if (r.paidAt) hp.push('<span class="nb">' + esc(dtLabel(r.paidAt)) + '</span>');
+        how = hp.join(' ・ ');
+      } else {
+        stCls = 'unpaid'; stLabel = '未決済';
+        if (r.note) how = esc(String(r.note).slice(0, 30));
+      }
+      var children = arr(r.companions).map(function (c) {
+        c = c || {};
+        var isChild = /child|子/.test(String(c.type || c.kind || '')) || c.age != null;
+        var label = (isChild ? '同伴の子ども' : '同伴者') + (c.age != null && c.age !== '' ? '(' + esc(c.age) + '歳)' : '');
+        if (c.name) label += ' ' + c.name;
+        return {
+          label: label,
+          how: '親と同時決済',
+          amt: (isChild && num(ev.childFee) > 0) ? money(ev.childFee) + '円' : '',
+        };
+      });
+      if (!children.length && num(r.companionsCount) > 0) {
+        for (var i = 0; i < num(r.companionsCount); i++) children.push({ label: '同伴者', how: '親と同時決済', amt: '' });
+      }
+      var dfacts = [{ dt: '申込日時', ddHtml: '<b class="nb">' + esc(dtLabel(r.appliedAt) || '—') + '</b>' }];
+      var pay = regRefundWait(r) ? '返金待ち' : (regPaid(r) ? '決済済み' : '未決済');
+      var payDd = '<b>' + pay + (num(r.amount) > 0 ? ' ― ' + money(r.amount) + '円' : '') + '</b>';
+      if (how) payDd += '<span class="note">' + how + '</span>';
+      dfacts.push({ dt: '決済', ddHtml: payDd });
+      if (children.length) dfacts.push({ dt: '同伴', ddHtml: '<span class="nb">同伴' + children.length + '名</span>' });
+      if (r.userEmail) dfacts.push({ dt: '連絡先', ddHtml: esc(r.userEmail) });
+      if (r.note) dfacts.push({ dt: '備考', ddHtml: esc(r.note) });
+      return {
+        id: r.id || (r.userId + '/' + r.appliedAt),
+        img: '', name: r.userName || '(名前未登録)', tag: firstTag,
+        when: dtLabel(r.appliedAt),
+        stCls: stCls, stLabel: stLabel, how: how,
+        amt: num(r.amount) > 0 ? money(r.amount) + '円' : '',
+        comp: children.length ? '同伴' + children.length + '名' : '',
+        canMark: stCls === 'unpaid',
+        children: children,
+        detail: {
+          sub: [p && p.nationality, p && p.city].filter(Boolean).join(' ・ '),
+          facts: dfacts,
+          email: r.userEmail || '',
+          dangerText: regPaid(r)
+            ? 'この申込を取り消すと、決済済みの' + (num(r.amount) > 0 ? money(r.amount) + '円' : '参加費') + 'は返金の手続きに入ります。'
+            : 'この申込を取り消します。未決済のため返金は発生しません。',
+        },
+      };
+    });
+  }
+  function personRows(rows) {
+    // 1名ごと: 申込者と同伴者をそれぞれ1行に展開
+    var out = [];
+    arr(rows).forEach(function (r) {
+      out.push(Object.assign({}, r, { children: [] }));
+      arr(r.children).forEach(function (c) {
+        out.push({
+          id: r.id + '::' + c.label, img: '', name: c.label + '(' + r.name + 'の同伴)', tag: '',
+          when: r.when, stCls: r.stCls, stLabel: r.stLabel, how: c.how, amt: c.amt,
+          comp: '', canMark: false, children: [], detail: r.detail,
+        });
+      });
+    });
+    return out;
+  }
+  function buildRegsModel(M, ev) {
+    var vm = buildHubModel(M, ev, 'regs');
+    var a = vm.agg;
+    vm.rows = buildRegRows(M, ev); // 申込ごとの行。1名ごと展開は描画時(regRowsFiltered)で行う
+    vm.rowsErr = (M.regsOk === false) ? '申込データを取得できませんでした。再読み込みしてください。' : '';
+    vm.counts = {
+      all: a ? a.applied : 0,
+      unpaid: a ? a.unpaid : 0,
+      refund: a ? a.refundWait : 0,
+    };
+    // 見出し下の一文(実データから言えることだけ)
+    var sf = [];
+    if (a) {
+      sf.push('申込' + a.applied + '件のうち<span class="nb">未決済が' + a.unpaid + '件</span>。');
+      if (a.refundWait > 0) sf.push('返金待ちが<span class="nb">' + a.refundWait + '件</span>あります。');
+    }
+    if (sf.length) vm.head.standfirst = sf.join('');
+    // 決済方法の内訳(actualPaymentMethod があるときだけ)
+    vm.payband = null;
+    if (a) {
+      var keys = Object.keys(a.pay);
+      var tot = 0;
+      keys.forEach(function (k) { tot += a.pay[k]; });
+      if (tot > 0) {
+        keys.sort(function (x, y) { return a.pay[y] - a.pay[x]; });
+        vm.payband = {
+          label: '決済方法の内訳(' + tot + '件)',
+          aria: keys.map(function (k) { return k + a.pay[k] + '件'; }).join(' '),
+          segs: keys.map(function (k, i) { return { cls: 'p' + Math.min(i, 3), w: Math.round(a.pay[k] / tot * 1000) / 10 }; }),
+          legendHtml: keys.map(function (k) { return '<span class="nb">' + esc(k) + ' <b>' + a.pay[k] + '件</b></span>'; }).join(' ・ '),
+        };
+      }
+    }
+    // 申込のうごき(縮小版)
+    vm.pace = null;
+    var T = vm.trend;
+    if (T && !T.empty) {
+      var np = [];
+      if (a.yesterday > 0) np.push('<span class="nb"><b>きのう+' + a.yesterday + '名</b></span>');
+      np.push('累計' + a.applied + '件');
+      if (a.cancels > 0) np.push('<span class="nb">キャンセル累計' + a.cancels + '件</span>');
+      vm.pace = {
+        hubHref: vm.tabs.base,
+        bars: T.bars.map(function (b) { return { h: b.h, hi: b.cls === 'hi' }; }),
+        noteHtml: np.join(' ― ') + '。',
+      };
+    }
+    vm.waitlist = null; // キャンセル待ちは バックエンド未実装 → 非表示(デモのみ)
+    vm.moneynote = 'この画面からの決済記録・返金の操作は試験配信では無効です。当面は console から行ってください。';
+    vm.moreHtml = '';
+    return vm;
+  }
+
+  /* ============================================================================
+     準備/当日/事後(正直な準備中表示・1行・装飾なし)
+     ============================================================================ */
+  var STUB_LABEL = { prep: '準備', day: '当日', after: '事後' };
+  function renderStub(vm, tabId) {
+    document.body.classList.toggle('has-tabbtn', !!vm.reception);
+    root.innerHTML = mastheadHtml({ mePhoto: vm.mePhoto, showHq: vm.showHq }) +
+      hubHeadHtml(vm.head, vm.tabs, vm.reception) +
+      '<p class="stub-line">「' + esc(STUB_LABEL[tabId]) + '」タブはまだ作られていません。当面は console から操作してください。</p>' +
+      colophonHtml(esc(vm.head.title));
+  }
+
+  /* ============================================================================
+     割当を編集(#/ev/<id>/staff) — この日の担当の編集ビュー
+     保存 = saveEventStaffAssignments(イベント単位の全置換)。書込は自動リトライしない。
+     ============================================================================ */
+  var ROLE_PRESETS = ['受付', '司会', '写真', '救護', '誘導'];
+  var staffEd = { evId: '', inited: false, rows: [], busy: false, err: '', notice: '' };
+  function editChrome() {
+    if (DEMO) return { mePhoto: 'https://i.pravatar.cc/56?img=47', showHq: true };
+    return { mePhoto: M.me && M.me.photo, showHq: !!(M.me && M.me.rank >= 3) };
+  }
+  function editHeadHtml(ev, h1, sub, backHref) {
+    return '<a class="back" href="' + esc(backHref) + '"><span class="mi">arrow_back</span>「' + esc(evTitle(ev)) + '」の概要へ戻る</a>' +
+      '<div class="pagehead"><h1>' + esc(h1) + '</h1><span class="count">' + sub + '</span></div>';
+  }
+  function memberLabel(m) { return memberName(m) + ' (' + String(m.id) + ')'; }
+  function staffMembers() {
+    var list = DEMO ? DEMO_MEMBERS : arr(M.members);
+    return list.filter(function (m) { return m && m.id && !/アーカイブ|退会/.test(String(m.status || '')); });
+  }
+  function labelOfMemberId(id) {
+    var list = staffMembers();
+    for (var i = 0; i < list.length; i++) if (String(list[i].id).trim() === String(id).trim()) return memberLabel(list[i]);
+    return String(id || '');
+  }
+  function resolveMemberText(text) {
+    var t = String(text || '').trim();
+    if (!t) return { id: '' }; // 空欄 = 空き枠(点線)
+    var list = staffMembers();
+    var m1 = /\(([^()]+)\)\s*$/.exec(t);
+    if (m1) {
+      var id = m1[1].trim();
+      for (var i = 0; i < list.length; i++) if (String(list[i].id).trim() === id) return { id: id };
+    }
+    var hits = list.filter(function (m) { return memberName(m) === t || String(m.id).trim() === t; });
+    if (hits.length === 1) return { id: String(hits[0].id).trim() };
+    return { err: true };
+  }
+  function staffEdInit(evId, entries) {
+    staffEd = {
+      evId: String(evId), inited: true, busy: false, err: '', notice: '',
+      rows: arr(entries).map(function (e) {
+        e = e || {};
+        return {
+          sessionId: e.sessionId || '', note: String(e.note || ''),
+          memberText: e.memberId ? labelOfMemberId(e.memberId) : '',
+          role: String(e.role || ''), slot: String(e.slot || ''),
+        };
+      }),
+    };
+    if (!staffEd.rows.length) staffEd.rows.push({ sessionId: '', note: '', memberText: '', role: '', slot: '' });
+  }
+  function staffEdKeep() {
+    staffEd.rows.forEach(function (row, i) {
+      var g = function (id) { var n = document.getElementById(id); return n && n.value != null ? String(n.value) : null; };
+      var m = g('st-m-' + i); if (m !== null) row.memberText = m;
+      var r0 = g('st-r-' + i); if (r0 !== null) row.role = r0;
+      var t = g('st-t-' + i); if (t !== null) row.slot = t;
+    });
+  }
+  function renderStaffEdit(ev, staffData) {
+    document.body.classList.remove('has-tabbtn');
+    var base = '#/ev/' + encodeURIComponent(ev.id);
+    var head = mastheadHtml(editChrome());
+    if (!DEMO && M.me && M.me.rank < 2) {
+      root.innerHTML = head + editHeadHtml(ev, 'この日の担当', '割当の編集', base) +
+        '<p class="stub-line">担当の割当の閲覧・編集にはアシスタントマネージャー以上の権限が必要です。</p>' + colophonHtml(esc(evTitle(ev)));
+      return;
+    }
+    if (staffEd.evId !== String(ev.id) || !staffEd.inited) {
+      if (staffData === null) { // 取得待ち(到着したら loadExtras 側が再render)
+        root.innerHTML = head + editHeadHtml(ev, 'この日の担当', '割当の編集', base) +
+          '<div class="state-line">読み込み中…</div>' + colophonHtml(esc(evTitle(ev)));
+        return;
+      }
+      staffEdInit(ev.id, staffData);
+    }
+    var st = staffEd;
+    var rowsHtml = st.rows.map(function (row, i) {
+      return '<div class="sr">' +
+        '<input id="st-m-' + i + '" list="dl-members" value="' + esc(row.memberText) + '" placeholder="名前で検索(空欄=空き枠)" autocomplete="off" aria-label="メンバー">' +
+        '<input id="st-r-' + i + '" list="dl-roles" value="' + esc(row.role) + '" placeholder="受付・司会など" autocomplete="off" aria-label="役割">' +
+        '<input id="st-t-' + i + '" value="' + esc(row.slot) + '" placeholder="11:30–13:30 など" autocomplete="off" aria-label="時間帯">' +
+        '<button type="button" class="sr-del" data-sdel="' + i + '" aria-label="' + (i + 1) + '行目を削除"><span class="mi">close</span></button>' +
+        '</div>';
+    }).join('');
+    root.innerHTML = head +
+      editHeadHtml(ev, 'この日の担当', '割当の編集 ・ ' + esc(evTitle(ev)), base) +
+      '<p class="edit-note">保存すると、この一覧の内容で<span class="nb">この日の担当</span>を<span class="nb">まるごと置き換えます</span>。メンバーを空欄にした行は<span class="nb">「未定」の空き枠</span>として残ります。</p>' +
+      '<div class="staffed">' +
+      '<div class="sr head"><span>メンバー</span><span>役割</span><span>時間帯</span><span></span></div>' +
+      rowsHtml +
+      '</div>' +
+      '<button type="button" class="sr-add" id="st-add"><span class="mi">add</span>行を追加</button>' +
+      '<datalist id="dl-members">' + staffMembers().map(function (m) { return '<option value="' + esc(memberLabel(m)) + '"></option>'; }).join('') + '</datalist>' +
+      '<datalist id="dl-roles">' + ROLE_PRESETS.map(function (r) { return '<option value="' + esc(r) + '"></option>'; }).join('') + '</datalist>' +
+      (st.err ? '<p class="edit-err">' + esc(st.err) + '</p>' : '') +
+      (st.notice ? '<p class="opnote" role="status">' + esc(st.notice) + '</p>' : '') +
+      '<div class="edit-cta"><button type="button" class="btn" id="st-save"' + (st.busy ? ' disabled' : '') + '>' + (st.busy ? '保存中…' : '保存する') + '</button>' +
+      '<a class="btn sub" href="' + esc(base) + '">保存せずに戻る</a></div>' +
+      colophonHtml(esc(evTitle(ev)) + ' ・ 割当の編集');
+    // 操作の束ね
+    Array.prototype.forEach.call(root.querySelectorAll('[data-sdel]'), function (b) {
+      b.addEventListener('click', function () {
+        staffEdKeep();
+        st.rows.splice(Number(b.getAttribute('data-sdel')), 1);
+        if (!st.rows.length) st.rows.push({ sessionId: '', note: '', memberText: '', role: '', slot: '' });
+        st.err = ''; st.notice = '';
+        renderStaffEdit(ev, staffData);
+      });
+    });
+    var add = document.getElementById('st-add');
+    if (add) add.addEventListener('click', function () {
+      staffEdKeep();
+      st.rows.push({ sessionId: '', note: '', memberText: '', role: '', slot: '' });
+      st.err = ''; st.notice = '';
+      renderStaffEdit(ev, staffData);
+    });
+    var save = document.getElementById('st-save');
+    if (save) save.addEventListener('click', function () { staffEdSave(ev, staffData); });
+  }
+  function staffEdSave(ev, staffData) {
+    var st = staffEd;
+    if (st.busy) return;
+    staffEdKeep();
+    var entries = [];
+    var err = '';
+    st.rows.forEach(function (row, i) {
+      var hasAny = String(row.memberText || '').trim() || String(row.role || '').trim() || String(row.slot || '').trim();
+      if (!hasAny) return; // 完全な空行は保存しない
+      var m = resolveMemberText(row.memberText);
+      if (m.err) { err = err || (i + 1) + '行目のメンバーが見つかりません。候補から選ぶか、空欄(空き枠)にしてください。'; return; }
+      if (!String(row.role || '').trim()) { err = err || (i + 1) + '行目の役割を入力してください。'; return; }
+      var e = { memberId: m.id, role: String(row.role).trim() };
+      if (String(row.slot || '').trim()) e.slot = String(row.slot).trim();
+      if (row.note) e.note = row.note;
+      if (row.sessionId) e.sessionId = row.sessionId;
+      entries.push(e);
+    });
+    if (err) { st.err = err; st.notice = ''; renderStaffEdit(ev, staffData); return; }
+    if (DEMO) {
+      st.notice = 'デモ表示のため保存は行われません。実データでは、この内容で担当をまるごと置き換えます。';
+      renderStaffEdit(ev, staffData);
+      return;
+    }
+    st.busy = true; st.err = ''; st.notice = '';
+    renderStaffEdit(ev, staffData);
+    API.postData('saveEventStaffAssignments', { eventId: ev.id, entries: entries }).then(function () {
+      // 書込成功 → 該当キャッシュを無効化して再取得(再取得に失敗しても送信済みの内容で表示)
+      var x = EX[ev.id] || (EX[ev.id] = { staff: null, expenses: null, staffErr: false, expErr: false, fetched: false, loading: false });
+      return API.fetchData('listEventStaffAssignments', { eventId: ev.id }).then(
+        function (d) { x.staff = arr(d); x.staffErr = false; },
+        function () { x.staff = entries; }
+      );
+    }).then(function () {
+      var x = EX[ev.id];
+      if (x) x.fetched = true;
+      cacheSave();
+      staffEd = { evId: '', inited: false, rows: [], busy: false, err: '', notice: '' };
+      location.hash = '#/ev/' + encodeURIComponent(ev.id); // 成功で概要へ戻る
+      render();
+    }).catch(function (e) {
+      st.busy = false;
+      if (e && e._auth) return;
+      st.err = ((e && e.message) || '保存に失敗しました。') +
+        ' 入力した内容は消えていません。通信環境を確認して、もう一度「保存する」を押してください。';
+      renderStaffEdit(ev, staffData);
+    });
+  }
+
+  /* ============================================================================
+     支出を記録(#/ev/<id>/expenses) — 収支の見込みの支出側の編集ビュー
+     追加 = addEventExpense / 削除 = removeEventExpense(確認つき)。自動リトライなし。
+     ============================================================================ */
+  var expEd = { evId: '', ready: false, busy: false, err: '', notice: '', confirmId: '', label: '', amount: '', memo: '' };
+  function expEdKeep() {
+    var g = function (id) { var n = document.getElementById(id); return n && n.value != null ? String(n.value) : null; };
+    var l = g('ex-label'); if (l !== null) expEd.label = l;
+    var a = g('ex-amount'); if (a !== null) expEd.amount = a;
+    var m = g('ex-memo'); if (m !== null) expEd.memo = m;
+  }
+  function renderExpEdit(ev, expData) {
+    document.body.classList.remove('has-tabbtn');
+    var base = '#/ev/' + encodeURIComponent(ev.id);
+    var head = mastheadHtml(editChrome());
+    if (!DEMO && M.me && M.me.rank < 2) {
+      root.innerHTML = head + editHeadHtml(ev, '支出の記録', esc(evTitle(ev)), base) +
+        '<p class="stub-line">支出の閲覧・記録にはアシスタントマネージャー以上の権限が必要です。</p>' + colophonHtml(esc(evTitle(ev)));
+      return;
+    }
+    if (expEd.evId !== String(ev.id)) {
+      expEd = { evId: String(ev.id), ready: false, busy: false, err: '', notice: '', confirmId: '', label: '', amount: '', memo: '' };
+    }
+    if (expData === null) { // 取得待ち(到着したら loadExtras 側が再render)
+      root.innerHTML = head + editHeadHtml(ev, '支出の記録', esc(evTitle(ev)), base) +
+        '<div class="state-line">読み込み中…</div>' + colophonHtml(esc(evTitle(ev)));
+      return;
+    }
+    expEd.ready = true;
+    var st = expEd;
+    var exps = arr(expData);
+    var total = 0;
+    exps.forEach(function (r) { total += num(r && r.amount); });
+    var listHtml;
+    if (!exps.length) {
+      listHtml = '<div class="tbl-empty">まだ支出の記録はありません。下の欄に名目と金額を入れて追加すると、概要の「収支の見込み」に反映されます。</div>';
+    } else {
+      listHtml = '<div class="expl">' + exps.map(function (r) {
+        var id = String(r.id || '');
+        var op = (st.confirmId === id)
+          ? '<span class="xconfirm"><span class="nb">この記録を削除しますか?</span><button type="button" class="yes nb" data-xdelyes="' + esc(id) + '">' + (st.busy ? '削除中…' : '削除する') + '</button><button type="button" class="no" data-xdelno="' + esc(id) + '">やめる</button></span>'
+          : '<button type="button" class="xdel nb" data-xdel="' + esc(id) + '">削除</button>';
+        return '<div class="xr"><div class="xl"><b>' + esc(r.label || '(名目なし)') + '</b>' +
+          (r.note ? '<span class="xn">' + esc(r.note) + '</span>' : '') + '</div>' +
+          '<span class="xa">−' + money(r.amount) + '円</span>' + op + '</div>';
+      }).join('') +
+        '<div class="xr total"><span>支出合計(' + exps.length + '件)</span><span class="xa">−' + money(total) + '円</span></div></div>';
+    }
+    root.innerHTML = head +
+      editHeadHtml(ev, '支出の記録', esc(evTitle(ev)), base) +
+      listHtml +
+      '<div class="xadd">' +
+      '<input id="ex-label" value="' + esc(st.label) + '" placeholder="名目(例: 食材・備品)" aria-label="名目">' +
+      '<input id="ex-amount" value="' + esc(st.amount) + '" inputmode="numeric" placeholder="金額(円)" aria-label="金額">' +
+      '<input id="ex-memo" value="' + esc(st.memo) + '" placeholder="メモ(任意)" aria-label="メモ">' +
+      '<button type="button" class="btn nb" id="ex-add"' + (st.busy ? ' disabled' : '') + '>' + (st.busy ? '記録中…' : '追加する') + '</button>' +
+      '</div>' +
+      (st.err ? '<p class="edit-err">' + esc(st.err) + '</p>' : '') +
+      (st.notice ? '<p class="opnote" role="status">' + esc(st.notice) + '</p>' : '') +
+      '<p class="moneynote">参加費の収入とあわせた見込みは、概要の「収支の見込み」に載ります。</p>' +
+      colophonHtml(esc(evTitle(ev)) + ' ・ 支出の記録');
+    bindExpEdit(ev, expData);
+  }
+  function expRefetch(ev) {
+    // 書込成功後: 該当キャッシュを無効化して再取得
+    var x = EX[ev.id] || (EX[ev.id] = { staff: null, expenses: null, staffErr: false, expErr: false, fetched: false, loading: false });
+    return API.fetchData('listEventExpenses', { eventId: ev.id }).then(
+      function (d) { x.expenses = arr(d); x.expErr = false; },
+      function () { x.expenses = null; x.fetched = false; } // 取れなければ次の表示で再取得
+    ).then(function () { cacheSave(); return x.expenses; });
+  }
+  function bindExpEdit(ev, expData) {
+    var st = expEd;
+    Array.prototype.forEach.call(root.querySelectorAll('[data-xdel]'), function (b) {
+      b.addEventListener('click', function () {
+        expEdKeep();
+        st.confirmId = b.getAttribute('data-xdel');
+        st.err = ''; st.notice = '';
+        renderExpEdit(ev, expData);
+      });
+    });
+    Array.prototype.forEach.call(root.querySelectorAll('[data-xdelno]'), function (b) {
+      b.addEventListener('click', function () {
+        expEdKeep();
+        st.confirmId = '';
+        renderExpEdit(ev, expData);
+      });
+    });
+    Array.prototype.forEach.call(root.querySelectorAll('[data-xdelyes]'), function (b) {
+      b.addEventListener('click', function () {
+        if (st.busy) return;
+        expEdKeep();
+        var id = b.getAttribute('data-xdelyes');
+        if (DEMO) {
+          st.confirmId = '';
+          st.notice = 'デモ表示のため削除は行われません。';
+          renderExpEdit(ev, expData);
+          return;
+        }
+        st.busy = true; st.err = ''; st.notice = '';
+        renderExpEdit(ev, expData);
+        API.postData('removeEventExpense', { id: id }).then(function () {
+          return expRefetch(ev);
+        }).then(function (list) {
+          st.busy = false; st.confirmId = ''; st.notice = '削除しました。';
+          renderExpEdit(ev, list === null ? [] : list);
+        }).catch(function (e) {
+          st.busy = false;
+          if (e && e._auth) return;
+          st.err = ((e && e.message) || '削除に失敗しました。') + ' 記録はそのまま残っています。もう一度お試しください。';
+          renderExpEdit(ev, expData);
+        });
+      });
+    });
+    var add = document.getElementById('ex-add');
+    if (add) add.addEventListener('click', function () {
+      if (st.busy) return;
+      expEdKeep();
+      var label = st.label.trim();
+      var amount = Number(String(st.amount).replace(/[,，円\s]/g, ''));
+      if (!label) { st.err = '名目を入力してください。'; st.notice = ''; renderExpEdit(ev, expData); return; }
+      if (!isFinite(amount) || amount <= 0) { st.err = '金額は1円以上の数字で入力してください。'; st.notice = ''; renderExpEdit(ev, expData); return; }
+      if (DEMO) {
+        st.err = ''; st.notice = 'デモ表示のため記録は行われません。';
+        renderExpEdit(ev, expData);
+        return;
+      }
+      st.busy = true; st.err = ''; st.notice = '';
+      renderExpEdit(ev, expData);
+      var payload = { eventId: ev.id, label: label, amount: Math.round(amount) };
+      if (st.memo.trim()) payload.note = st.memo.trim();
+      API.postData('addEventExpense', payload).then(function () {
+        return expRefetch(ev);
+      }).then(function (list) {
+        st.busy = false; st.label = ''; st.amount = ''; st.memo = '';
+        st.notice = '記録しました。';
+        renderExpEdit(ev, list === null ? [] : list);
+      }).catch(function (e) {
+        st.busy = false;
+        if (e && e._auth) return;
+        st.err = ((e && e.message) || '記録に失敗しました。') + ' 入力した内容は残っています。もう一度「追加する」を押してください。';
+        renderExpEdit(ev, expData);
+      });
+    });
+  }
+
+  /* ============================================================================
+     状態: 読込中 / エラー / ログイン / 見つからない
+     ============================================================================ */
+  function renderLoading() {
+    document.body.classList.remove('has-tabbtn');
+    root.innerHTML = mastheadHtml({}) +
+      '<div class="pagehead"><h1>イベント</h1></div>' +
+      '<div class="state-line">読み込み中…</div>' + colophonHtml('');
+  }
+  function renderError(msg) {
+    document.body.classList.remove('has-tabbtn');
+    root.innerHTML = mastheadHtml({}) +
+      '<main class="state-error"><div class="kicker">イベント</div>' +
+      '<h1>データを取得できませんでした</h1>' +
+      '<p>' + esc(msg || '通信に失敗しました。') + '</p>' +
+      '<p>通信環境をご確認のうえ再読み込みしてください。解決しない場合は再ログインをお試しください。</p>' +
+      '<div class="cta"><button class="btn" id="retry">再読み込み</button>' +
+      '<button class="btn sub" id="relogin">再ログイン</button></div></main>' + colophonHtml('');
+    document.getElementById('retry').addEventListener('click', function () { reload(); });
+    document.getElementById('relogin').addEventListener('click', function () { API.clearSession(); cacheClear(); renderLogin(''); });
+  }
+  function renderNotFound() {
+    document.body.classList.remove('has-tabbtn');
+    root.innerHTML = mastheadHtml({ mePhoto: M.me && M.me.photo, showHq: M.me && M.me.rank >= 3 }) +
+      '<main class="state-error"><div class="kicker">イベント</div>' +
+      '<h1>このイベントは見つかりませんでした</h1>' +
+      '<p>削除されたか、URLが古い可能性があります。</p>' +
+      '<div class="cta"><a class="btn sub" href="#/">イベント一覧へ戻る</a></div></main>' + colophonHtml('');
+  }
+  function renderLogin(note) {
+    document.body.classList.remove('has-tabbtn');
+    var state = { mode: 'login', err: note || '', busy: false, id: '', pw: '', npw: '', npw2: '' };
+    function paint() {
+      var f;
+      if (state.mode === 'setpw') {
+        f = '<label>新しいパスワード<input type="password" id="f-npw" value="' + esc(state.npw) + '" autocomplete="new-password">' +
+          '<span class="hint">10文字以上で設定してください</span></label>' +
+          '<label>パスワード(確認)<input type="password" id="f-npw2" value="' + esc(state.npw2) + '" autocomplete="new-password"></label>' +
+          '<button class="btn" id="f-go">' + (state.busy ? '設定中…' : '設定してログイン') + '</button>' +
+          '<button type="button" class="login-alt" id="f-back">ログインに戻る</button>';
+      } else {
+        f = '<label>メンバーコード または メール<input id="f-id" value="' + esc(state.id) + '" autocomplete="username" placeholder="CN0001 / you@example.com"></label>' +
+          '<label>パスワード<input type="password" id="f-pw" value="' + esc(state.pw) + '" autocomplete="current-password">' +
+          '<span class="hint"><span class="nb">初回(未設定)の場合は</span><span class="nb">空のままログインしてください</span></span></label>' +
+          '<button class="btn" id="f-go">' + (state.busy ? '認証中…' : 'ログイン') + '</button>';
+      }
+      root.innerHTML = mastheadHtml({ nav: false }) +
+        '<main class="login-main"><div class="kicker">運営メンバー専用</div>' +
+        '<h1 class="login-h">' + (state.mode === 'setpw' ? 'パスワードの設定' : 'ログイン') + '</h1>' +
+        '<p class="login-sub">' + (state.mode === 'setpw'
+          ? '初回ログインです。ご自身のパスワードを設定してください。'
+          : 'console と同じ<span class="nb">メンバーコード(またはメール)</span>と<span class="nb">パスワードで入れます</span>。') + '</p>' +
+        '<form class="login-card glass" id="f">' + f +
+        (state.err ? '<div class="login-err">' + esc(state.err) + '</div>' : '') +
+        '</form></main>' + colophonHtml('');
+      bind();
+    }
+    function keep() {
+      var g = function (id) { var n = document.getElementById(id); return n ? n.value : ''; };
+      if (state.mode === 'setpw') { state.npw = g('f-npw'); state.npw2 = g('f-npw2'); }
+      else { state.id = g('f-id'); state.pw = g('f-pw'); }
+    }
+    function submit() {
+      keep();
+      if (state.busy) return;
+      if (state.mode === 'setpw') {
+        if (state.npw !== state.npw2) { state.err = '確認用パスワードが一致しません。'; paint(); return; }
+        if (state.npw.length < 10) { state.err = 'パスワードは10文字以上にしてください。'; paint(); return; }
+        state.busy = true; state.err = ''; paint();
+        API.setPassword(state.id.trim(), state.npw).then(function (r) {
+          if (r && r.ok === false) { state.busy = false; state.err = r.error || 'パスワードの設定に失敗しました。'; paint(); return; }
+          if (API.finishLogin(r, state.id)) { boot(); return; }
+          state.busy = false; state.mode = 'login'; state.pw = '';
+          state.err = '設定は完了しました。設定したパスワードでログインしてください。'; paint();
+        }).catch(function (e) { state.busy = false; state.err = (e && e.message) || 'パスワードの設定に失敗しました。'; paint(); });
+        return;
+      }
+      if (!state.id.trim()) { state.err = 'メンバーコードまたはメールを入力してください。'; paint(); return; }
+      state.busy = true; state.err = ''; paint();
+      API.login(state.id.trim(), state.pw).then(function (r) {
+        if (r && r.needsPasswordSet) { state.busy = false; state.mode = 'setpw'; state.npw = ''; state.npw2 = ''; state.err = ''; paint(); return; }
+        if (API.finishLogin(r, state.id)) { boot(); return; }
+        state.busy = false; state.err = (r && r.error) || 'ID またはパスワードが違います。ご確認ください。'; paint();
+      }).catch(function (e) { state.busy = false; state.err = (e && e.message) || 'ログインに失敗しました。'; paint(); });
+    }
+    function bind() {
+      var form = document.getElementById('f');
+      form.addEventListener('submit', function (ev) { ev.preventDefault(); submit(); });
+      document.getElementById('f-go').addEventListener('click', function (ev) { ev.preventDefault(); submit(); });
+      var back = document.getElementById('f-back');
+      if (back) back.addEventListener('click', function () { keep(); state.mode = 'login'; state.err = ''; paint(); });
+    }
+    paint();
+  }
+  function bindRetry() {
+    var r = document.getElementById('ev-retry');
+    if (r) r.addEventListener('click', function () { reload(); });
+  }
+  function reload() { if (!DEMO && !loading && API.hasSession()) loadReal(); }
+
+  /* ============================================================================
+     デモ(?demo=1): 正典モックと同じ「みずき・ピクニック当日」の一式
+     ============================================================================ */
+  var DEMO_ID = 'EV-PIC';
+  // 編集ビュー用のデモデータ(ハブのモック表示と同じ顔ぶれ・同じ合計)
+  var DEMO_MEMBERS = [
+    { id: 'CN0047', name: 'みずき', photoUrl: 'https://i.pravatar.cc/132?img=47' },
+    { id: 'CN0012', name: 'ケンタ', photoUrl: 'https://i.pravatar.cc/132?img=12' },
+    { id: 'CN0044', name: 'ユイ', photoUrl: 'https://i.pravatar.cc/132?img=44' },
+    { id: 'CN0032', name: 'リナ', photoUrl: 'https://i.pravatar.cc/132?img=32' },
+    { id: 'CN0068', name: 'アイシャ', photoUrl: 'https://i.pravatar.cc/132?img=68' },
+    { id: 'CN0005', name: 'ハルナ', photoUrl: 'https://i.pravatar.cc/132?img=5' },
+  ];
+  var DEMO_STAFF = [
+    { memberId: 'CN0047', role: '受付', slot: '11:30–13:30' },
+    { memberId: 'CN0012', role: '受付', slot: '13:30–15:00' },
+    { memberId: 'CN0044', role: '司会', slot: '', note: '進行表 確定' },
+    { memberId: 'CN0032', role: '写真', slot: '', note: '交代相談あり' },
+    { memberId: 'CN0068', role: '救護・案内', slot: '', note: '初運営' },
+    { memberId: '', role: '誘導', slot: '', note: '1枠あいています' },
+  ];
+  var DEMO_EXPENSES = [
+    { id: 'X1', label: '食材・飲み物', amount: 9800, note: 'まとめ買い ・ 8/30' },
+    { id: 'X2', label: 'レジャーシート・備品', amount: 4600 },
+    { id: 'X3', label: '名札・文具', amount: 2400 },
+    { id: 'X4', label: '救急セット補充', amount: 1600 },
+  ];
+  function demoChrome(vm) {
+    vm.demo = true;
+    vm.mePhoto = 'https://i.pravatar.cc/56?img=47';
+    vm.showHq = true;
+    return vm;
+  }
+  function demoListModel() {
+    return demoChrome({
+      countLine: '開催予定 3件 ・ 過去 14件',
+      feature: {
+        kicker: 'きょう開催 ・ 進行中',
+        title: '国際交流ピクニック',
+        metaHtml: '<span class="nb">12:00–15:00</span> ・ 代々木公園 ・ <span class="nb">定員50名</span>',
+        photo: { src: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=1100&q=80', cap: '前回(7月)のようす' },
+        nums: [
+          { v: '42', unit: '名', labelHtml: '申込' },
+          { v: '38', unit: '名', labelHtml: '決済済み' },
+          { v: '4', unit: '名', labelHtml: '未決済', hot: true },
+          { v: '3', unit: '名', labelHtml: '<span class="nb">キャンセル待ち</span>' },
+        ],
+        crew: [
+          { facesHtml: [47, 12, 44, 32, 68].map(function (i) { return '<img src="https://i.pravatar.cc/56?img=' + i + '" alt="">'; }).join(''), textHtml: '担当5名 ・ 誘導が<span class="nb">1枠 未定</span>' },
+          { facesHtml: [5, 25, 36, 51].map(function (i) { return '<img src="https://i.pravatar.cc/56?img=' + i + '" alt="">'; }).join(''), textHtml: '参加者は常連28名+初参加<span class="nb">14名</span>(11カ国) ・ きのう<span class="nb">+6名</span>' },
+        ],
+        ctaHref: '#/ev/' + DEMO_ID,
+      },
+      upcoming: [
+        { href: '#/ev/' + DEMO_ID, img: 'https://images.unsplash.com/photo-1543269865-cbf427effbad?w=340&q=70', dateV: '9/14', dateSmall: '日曜', ttl: '日本語カフェ vol.12', st: { cls: 'pub', label: '公開中' }, subHtml: '申込 18/30 ― きのう<span class="nb">+3名</span>・初参加が4割。<span class="nb">9/10に満員</span>の見込み。', facesHtml: '<img src="https://i.pravatar.cc/40?img=44" alt=""><img src="https://i.pravatar.cc/40?img=15" alt="">' },
+        { href: '#/ev/' + DEMO_ID, img: 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=340&q=70', dateV: '10/5', dateSmall: '月曜', ttl: 'バディプログラム発足会', st: { cls: 'draft', label: '下書き' }, subHtml: '<span class="warn-t">公開前チェック2件</span> ― 料金未設定・写真なし。担当はまだ決まっていません。', facesHtml: '<img src="https://i.pravatar.cc/40?img=12" alt="">' },
+        { href: '#/ev/' + DEMO_ID, img: null, dateV: '10/19', dateSmall: '日曜', ttl: '秋の紅葉ハイキング', st: { cls: 'draft', label: '下書き' }, subHtml: '7月ピクニックの複製から作成中 ・ 会場未定 ― 会場ライブラリに候補2件。', facesHtml: '' },
+      ],
+      past: {
+        total: 14,
+        rows: [
+          { href: '#/ev/' + DEMO_ID, img: 'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?w=260&q=70', date: '8/24', ttl: 'ボードゲーム交流会', m1: '参加 <b>32</b>名', m2: '出席率 <b>91</b>%', m3: 'NPS <b>62</b>' },
+          { href: '#/ev/' + DEMO_ID, img: 'https://images.unsplash.com/photo-1528605248644-14dd04022da1?w=260&q=70', date: '7/20', ttl: '夏の国際交流ピクニック', m1: '参加 <b>30</b>名', m2: '出席率 <b>87</b>%', m3: '写真公開済み' },
+          { href: '#/ev/' + DEMO_ID, img: 'https://images.unsplash.com/photo-1543269865-cbf427effbad?w=260&q=70', date: '7/6', ttl: '日本語カフェ vol.11', m1: '参加 <b>24</b>名', m2: '出席率 <b>92</b>%', m3: 'NPS <b>58</b>' },
+        ],
+      },
+    });
+  }
+  function demoHead() {
+    return {
+      kicker: 'きょう開催', title: '国際交流ピクニック',
+      metaHtml: '<span class="nb">9月1日(火) 12:00–15:00</span> ・ 代々木公園 ・ <span class="nb">定員50名</span>',
+      stateCls: '', stateLabel: '公開中',
+      standfirst: '7月の30名を超えて、これまでで<span class="nb">いちばん大きな</span>ピクニックになります。初参加が14名 ― はじめましての空気づくりを意識して。',
+      photo: { src: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=760&q=80', cap: '前回(7月)のようす' },
+    };
+  }
+  function demoNums() {
+    return [
+      { v: '42', unit: '名', labelHtml: '申込' },
+      { v: '38', unit: '名', labelHtml: '決済済み' },
+      { v: '4', unit: '名', labelHtml: '<span class="nb">未決済 ―</span> <span class="nb">受付で案内</span>', hot: true, href: '#/ev/' + DEMO_ID + '/regs' },
+      { v: '8', unit: '枠', labelHtml: '残り' },
+      { v: '3', unit: '名', labelHtml: '<span class="nb">キャンセル待ち</span>' },
+    ];
+  }
+  var DEMO_TREND_BARS = [
+    { h: 22, cls: 'mark', em: '公開' }, { h: 10 }, { h: 8 }, { h: 14 }, { h: 10 }, { h: 6 }, { h: 12 },
+    { h: 9 }, { h: 16 }, { h: 12 }, { h: 64, cls: 'mark', em: '告知メール +9' }, { h: 38 }, { h: 30 }, { h: 24 },
+    { h: 20 }, { h: 28 }, { h: 78, cls: 'hi' }, { h: 100, cls: 'hi', em: 'きのう +6' },
+  ];
+  function demoHubModel(active) {
+    var vm = demoChrome({
+      head: demoHead(),
+      tabs: { base: '#/ev/' + DEMO_ID, active: active || 'hub', unpaid: 4 },
+      reception: true,
+      nums: demoNums(), numsNote: null,
+      facts: [
+        { dt: '日時', ddHtml: '<b><span class="nb">9月1日(火)</span> <span class="nb">12:00–15:00</span></b><span class="note">受付開始 11:30 ・ 運営集合 <span class="nb">11:00 原宿門</span></span>' },
+        { dt: '会場', ddHtml: '<b>代々木公園 中央広場</b><span class="venue-src">会場ライブラリから</span><span class="note">入園自由 ・ 雨天時は原宿門インフォメーション前に変更 ・ <a href="#">地図を開く</a></span>' },
+        { dt: '参加費', ddHtml: '<b>1,500円</b> ／ 同伴の子ども <b>500円</b><span class="note">同伴者の受付 ON ・ 決済は<span class="nb">クレジット/PayPay/現金</span></span>' },
+        { dt: '公開', ddHtml: '8月1日から公開中 ・ <a href="#">参加者ページを見る</a>' },
+        { dt: '担当部署', ddHtml: 'イベント運営部(主担) ・ 広報部(集客)' },
+      ],
+      trend: {
+        bars: DEMO_TREND_BARS,
+        x: ['8/1 公開', '8/25', 'きのう'],
+        notes: [{ cls: '', text: '告知メールの日に伸びる' }, { cls: 'hi', text: '前日リマインド後 +6名' }],
+        mixHtml: '42名の内訳 ― 初参加<b>14名</b> ・ リピーター<b>28名</b> ・ <b>11カ国</b> ・ 子ども同伴<b>3組</b> ・ キャンセル累計2名。前回7月の同時点より<b>1.4倍</b>の集まりです。',
+        crowdHtml: '<span class="faces">' + [5, 15, 25, 36, 51, 57, 20].map(function (i) { return '<img src="https://i.pravatar.cc/60?img=' + i + '" alt="">'; }).join('') + '</span>' +
+          '<span>ほか35名 ― 常連のハルトさん・初参加のサラさんも。<a href="#/ev/' + DEMO_ID + '/regs" style="color:var(--deep);font-weight:700;text-decoration:none">名簿を見る</a></span>',
+      },
+      crew: {
+        editHref: '#/ev/' + DEMO_ID + '/staff',
+        rows: [
+          { img: 'https://i.pravatar.cc/132?img=47', role: '受付・前半', nm: 'みずき', nt: '11:30–13:30' },
+          { img: 'https://i.pravatar.cc/132?img=12', role: '受付・後半', nm: 'ケンタ', nt: '13:30–15:00' },
+          { img: 'https://i.pravatar.cc/132?img=44', role: '司会', nm: 'ユイ', nt: '進行表 確定' },
+          { img: 'https://i.pravatar.cc/132?img=32', role: '写真', nm: 'リナ', nt: '交代相談あり' },
+          { img: 'https://i.pravatar.cc/132?img=68', role: '救護・案内', nm: 'アイシャ', nt: '初運営' },
+          { empty: true, role: '誘導 ― 未定', nt: '1枠あいています' },
+        ],
+      },
+      timeline: [
+        { cls: 'sent', when: '8/25 18:00', bodyHtml: '<b>公開告知メール</b> ― 参加者・過去参加者 214名', stCls: 'ok', stLabel: '送信済み ・ 開封58%' },
+        { cls: 'sent', when: '8/31 20:00', bodyHtml: '<b>前日リマインド</b> ― 申込者42名(持ち物・集合)', stCls: 'ok', stLabel: '送信済み' },
+        { cls: 'next', when: 'きょう 10:00', bodyHtml: '<b>未決済の案内</b> ― 未決済4名(当日決済の方法)', stCls: 'next', stLabel: 'まもなく送信' },
+        { cls: '', when: '9/3 18:00', bodyHtml: '<b>お礼+満足度アンケート</b> ― 参加者全員', stCls: 'plan', stLabel: '予定' },
+        { cls: '', when: '9/6 12:00', bodyHtml: '<b>記念写真の公開通知</b> ― 参加者全員', stCls: 'plan', stLabel: '予定' },
+      ],
+      aside: {
+        flow: [
+          { html: '11:00 運営集合<span class="sub2">原宿門 ・ 5名</span>' },
+          { html: '11:30 受付開始<span class="sub2">みずきさん(前半)</span>' },
+          { html: '12:00 開場 ― あいさつ ユイさん' },
+          { html: '13:30 グループ交流<span class="sub2">班分けは準備タブで確定済み(7班)</span>' },
+          { html: '14:40 記念写真 ― リナさん' },
+        ],
+        checks: [
+          { html: 'タイムテーブル 確定<span class="sub2">ユイさんが最終更新</span>', time: '8/30' },
+          { html: '持ち物リスト 配信済み<span class="sub2">参加者42名へ</span>', time: '昨日' },
+          { html: '運営ブリーフ 共有済み<span class="sub2">担当5名中4名が確認</span>', time: '昨日' },
+          { html: 'Instagram投稿の最終確認<span class="sub2">みずきさん ― 予約 11:00</span>', time: 'きょう', todo: true },
+        ],
+        ledger: {
+          editHref: '#/ev/' + DEMO_ID + '/expenses',
+          rows: [['参加費(決済済み38名)', '57,000円'], ['支出(材料・備品 4件)', '−18,400円']],
+          total: ['見込み収支', '+38,600円'],
+          note: '未決済4名が決済されると <span class="nb">+6,000円</span>。',
+        },
+      },
+    });
+    return vm;
+  }
+  function demoRegRow(o) {
+    return {
+      id: o.id, img: o.img, name: o.name, tag: o.tag || '',
+      when: o.when, stCls: o.st, stLabel: { paid: '決済済み', unpaid: '未決済', refund: '返金待ち' }[o.st],
+      how: o.how || '', amt: o.amt, comp: o.comp || '', canMark: o.st === 'unpaid',
+      children: o.children || [],
+      detail: o.detail || { sub: '', facts: [{ dt: '申込日時', ddHtml: '<b class="nb">' + esc(o.when) + '</b>' }], email: '' },
+    };
+  }
+  function demoRegsModel() {
+    if (!regsState.sel && !regsState.touched) regsState.sel = 'R1'; // 正典どおり先頭の申込を選択表示
+    var vm = demoHubModel('regs');
+    vm.head.standfirst = '申込42件のうち<span class="nb">未決済が4件</span>。開催当日なので、回収は受付での案内が確実です。返金が必要な申込は<span class="nb">カナさん1件</span>(<span class="nb">8/29キャンセル</span>)。';
+    vm.crew = null; vm.timeline = null; vm.aside = null; vm.facts = null;
+    vm.counts = { all: 42, unpaid: 4, refund: 1 };
+    vm.payband = {
+      label: '決済方法の内訳(38件)',
+      aria: 'クレジット26件 PayPay10件 現金2件',
+      segs: [{ cls: 'p0', w: 68.4 }, { cls: 'p1', w: 26.3 }, { cls: 'p2', w: 5.3 }],
+      legendHtml: '<span class="nb">クレジット <b>26件</b></span> ・ <span class="nb">PayPay <b>10件</b></span> ・ <span class="nb">現金 <b>2件</b></span>',
+    };
+    vm.pace = {
+      hubHref: vm.tabs.base,
+      bars: DEMO_TREND_BARS.map(function (b) { return { h: b.h, hi: b.cls === 'hi' }; }),
+      noteHtml: '<span class="nb"><b>きのう+6名</b></span> ― 前日リマインド後に集中。<span class="nb">8/1公開</span>から42件、<span class="nb">キャンセル累計2件</span>。',
+    };
+    vm.rows = [
+      demoRegRow({
+        id: 'R1', img: 'https://i.pravatar.cc/64?img=5', name: 'サラ・ミラー', tag: '初参加', when: '8/31 21:04',
+        st: 'paid', how: 'クレジット ・ <span class="nb">8/31 21:06</span>', amt: '2,000円', comp: '子ども1名',
+        children: [{ label: '同伴の子ども(5歳)', how: '親と同時決済', amt: '500円' }],
+        detail: {
+          sub: 'アメリカ ・ 世田谷区',
+          facts: [
+            { dt: '申込日時', ddHtml: '<b class="nb">8/31 21:04</b><span class="note">前日リマインドのリンクから</span>' },
+            { dt: '決済', ddHtml: '<b>決済済み ― 2,000円</b><span class="note">クレジット ・ <span class="nb">8/31 21:06</span></span>' },
+            { dt: '内訳', ddHtml: '大人 1,500円 ＋ <span class="nb">子ども(5歳)</span> 500円' },
+            { dt: '同伴', ddHtml: '<span class="nb">子ども1名(5歳)</span><span class="note">子ども料金で受付済みの申込</span>' },
+            { dt: '写真', ddHtml: '撮影OK(本人・子どもとも)' },
+            { dt: '連絡先', ddHtml: 'sara.m@example.com' },
+          ],
+          email: 'sara.m@example.com',
+          dangerText: 'この申込を取り消すと、決済済みの2,000円は返金の手続きに入ります。実行前に金額と理由の確認画面が入ります。',
+        },
+      }),
+      demoRegRow({ id: 'R2', img: 'https://i.pravatar.cc/64?img=15', name: 'ハルト', tag: '常連', when: '8/25 18:22', st: 'paid', how: 'PayPay', amt: '1,500円' }),
+      demoRegRow({ id: 'R3', img: 'https://i.pravatar.cc/64?img=25', name: 'ミゲル', when: '8/30 12:10', st: 'unpaid', how: '当日現金の予定と連絡あり', amt: '1,500円' }),
+      demoRegRow({ id: 'R4', img: 'https://i.pravatar.cc/64?img=36', name: 'ファティマ', when: '8/26 09:41', st: 'paid', how: 'クレジット', amt: '1,500円' }),
+      demoRegRow({
+        id: 'R5', img: 'https://i.pravatar.cc/64?img=44', name: 'リン・チェン', when: '8/28 20:15', st: 'unpaid',
+        how: 'きのうのリマインドは開封済み', amt: '2,000円', comp: '子ども1名',
+        children: [{ label: '同伴の子ども(7歳)', how: '親と同時決済', amt: '500円' }],
+      }),
+      demoRegRow({ id: 'R6', img: 'https://i.pravatar.cc/64?img=51', name: 'トム', tag: '初参加', when: '8/31 08:57', st: 'unpaid', how: '連絡なし ― 受付で案内', amt: '1,500円' }),
+      demoRegRow({ id: 'R7', img: 'https://i.pravatar.cc/64?img=57', name: 'ソフィア', when: '8/27 15:03', st: 'paid', how: '現金 ・ 7月イベント受付で', amt: '1,500円' }),
+      demoRegRow({ id: 'R8', img: 'https://i.pravatar.cc/64?img=20', name: 'ダニエル', when: '8/31 23:12', st: 'unpaid', how: '締切間際の申込 ― 受付で案内', amt: '1,500円' }),
+      demoRegRow({ id: 'R9', img: 'https://i.pravatar.cc/64?img=31', name: 'カナ', when: '8/20 11:30', st: 'refund', how: '<span class="nb">8/29キャンセル</span> ・ クレジット決済分', amt: '1,500円' }),
+    ];
+    vm.moreHtml = 'ほか33件は決済済み ・ <a href="#">すべての申込を表示</a>';
+    vm.moneynote = '「決済済みにする」は現金受領の記録です。金額と受領者の確認画面をはさんで確定します。返金の操作は各申込の詳細の下段にあります。';
+    vm.waitlist = {
+      note: '満席だった<span class="nb">8/30〜31</span>の間に登録された3名。キャンセルが2件出て<span class="nb">いまは残8枠</span> ― 登録順にすぐ案内できます。',
+      items: [
+        { ord: '1', img: 'https://i.pravatar.cc/80?img=59', nm: 'ユスフ', tag: '初参加', at: '8/30 14:12 登録' },
+        { ord: '2', img: 'https://i.pravatar.cc/80?img=48', nm: 'マリア', tag: '', at: '8/31 09:05 登録' },
+        { ord: '3', img: 'https://i.pravatar.cc/80?img=61', nm: 'ジン', tag: '', at: '8/31 21:40 登録' },
+      ],
+    };
+    return vm;
+  }
+
+  /* ============================================================================
+     永続キャッシュ(SWR)。listRegistrations 由来の個人名は保存しない:
+     保存対象=イベント行(ホワイトリスト)+イベント別集計(件数・日次カウント)+自分の情報。
+     ============================================================================ */
+  var CACHE_KEY = 'admin2.event.v2'; // v2: staffBy/expBy/members を追加(担当・支出のSWR)
+  var CACHE_TTL = 24 * 60 * 60 * 1000;
+  var EV_KEEP = ['id', 'title', 'date', 'time', 'endTime', 'endDate', 'venue', 'address', 'capacity', 'status', 'category',
+    'fee', 'feeType', 'childFee', 'allowCompanions', 'paymentMethod', 'paymentMethods', 'summary', 'heroImageUrl', 'posterUrl',
+    'format', 'sessions', 'publishAt', 'regOpenDate', 'regCloseDate', 'mementoPhotoUrl'];
+  // 担当/支出/メンバー名簿もホワイトリスト保存(スタッフ=console同等のPII方針。参加者PIIは引き続き保存しない)
+  var STAFF_KEEP = ['id', 'sessionId', 'memberId', 'role', 'slot', 'note', 'ackAt'];
+  var EXP_KEEP = ['id', 'label', 'amount', 'note', 'createdAt'];
+  var MEM_KEEP = ['id', 'name', 'nickname', 'photoUrl', 'avatarUrl', 'status'];
+  function pickKeys(list, keys) {
+    return arr(list).map(function (o) {
+      var r = {};
+      keys.forEach(function (k) { if (o && o[k] !== undefined && o[k] !== '' && o[k] !== null) r[k] = o[k]; });
+      return r;
+    });
+  }
+  function sanitizeEvents(events) { return pickKeys(events, EV_KEEP); }
+  function cacheSave() {
+    try {
+      var staffBy = {}, expBy = {};
+      Object.keys(EX).forEach(function (id) {
+        if (EX[id] && Array.isArray(EX[id].staff)) staffBy[id] = pickKeys(EX[id].staff, STAFF_KEEP);
+        if (EX[id] && Array.isArray(EX[id].expenses)) expBy[id] = pickKeys(EX[id].expenses, EXP_KEEP);
+      });
+      localStorage.setItem(CACHE_KEY, JSON.stringify({
+        mid: API.mid(), t: Date.now(),
+        vm: {
+          events: sanitizeEvents(M.events), aggs: M.aggs, me: M.me, regsOk: M.regsOk, partsOk: M.partsOk,
+          members: M.members === null ? null : pickKeys(M.members, MEM_KEEP),
+          staffBy: staffBy, expBy: expBy,
+        },
+      }));
+    } catch (e) {}
+  }
+  function cacheLoad() {
+    try {
+      var raw = localStorage.getItem(CACHE_KEY);
+      if (!raw) return null;
+      var o = JSON.parse(raw);
+      if (!o || !o.vm || o.mid !== API.mid() || !o.t || Date.now() - o.t > CACHE_TTL) {
+        localStorage.removeItem(CACHE_KEY);
+        return null;
+      }
+      return o.vm;
+    } catch (e) { return null; }
+  }
+  function cacheClear() { try { localStorage.removeItem(CACHE_KEY); localStorage.removeItem('admin2.event.v1'); } catch (e) {} }
+
+  /* ============================================================================
+     読込+ルーティング
+     M = 描画用モデル(イベント+集計。キャッシュ可) / S = 生データ(PII含む。メモリのみ)
+     一覧⇔ハブはメモリ共有=同一ページ内遷移で再fetchしない。
+     ============================================================================ */
+  var M = { events: null, aggs: null, me: null, regsOk: true, partsOk: false, members: null, membersFetched: false };
+  var S = { regs: null, parts: null };
+  var EX = {}; // eventId -> { staff, expenses, staffErr, expErr, fetched, loading }(担当/支出はイベント単位で遅延読取)
+  var loadedOnce = false, loading = false, unauthShown = false;
+  var membersLoading = null;
+
+  function ensureMembers() {
+    if (DEMO) return Promise.resolve();
+    if (M.membersFetched) return Promise.resolve();
+    if (membersLoading) return membersLoading;
+    membersLoading = API.fetchData('listMembers', {}).then(function (d) {
+      M.members = arr(d);
+      M.membersFetched = true;
+      membersLoading = null;
+    }, function () {
+      membersLoading = null;
+      if (M.members === null) M.members = []; // 顔・名前が引けないだけ(IDで表示)。画面は壊さない
+    });
+    return membersLoading;
+  }
+  // 担当/支出の遅延読取(ハブ・編集ビューを開いたイベントだけ)。SWR: キャッシュ表示→裏で更新。
+  function loadExtras(evId) {
+    if (DEMO) return;
+    if (!M.me || M.me.rank < 2) return; // アシマネ+のみ(それ未満はセクションごと非表示)
+    var x = EX[evId] || (EX[evId] = { staff: null, expenses: null, staffErr: false, expErr: false, fetched: false, loading: false });
+    if (x.loading || x.fetched) return;
+    x.loading = true;
+    var pS = API.fetchData('listEventStaffAssignments', { eventId: evId }).then(
+      function (d) { x.staff = arr(d); x.staffErr = false; },
+      function () { x.staffErr = true; if (x.staff === null) x.staff = []; } // キャッシュがあればそのまま(SWR)
+    );
+    var pE = API.fetchData('listEventExpenses', { eventId: evId }).then(
+      function (d) { x.expenses = arr(d); x.expErr = false; },
+      function () { x.expErr = true; if (x.expenses === null) x.expenses = []; }
+    );
+    Promise.all([pS, pE, ensureMembers()]).then(function () {
+      x.loading = false;
+      x.fetched = true;
+      cacheSave();
+      if (unauthShown) return;
+      var r = route();
+      if (String(r.id) !== String(evId)) return;
+      if (r.view === 'hub') { render(); return; }
+      // 編集ビューは入力中の再描画を避ける(未初期化=読み込み中表示のときだけ差し替え)
+      if (r.view === 'staff' && (!staffEd.inited || staffEd.evId !== String(evId))) { render(); return; }
+      if (r.view === 'expenses' && !(expEd.ready && expEd.evId === String(evId))) { render(); return; }
+    });
+  }
+
+  function findEvent(id) {
+    var hit = null;
+    arr(M.events).forEach(function (e) { if (e && String(e.id) === String(id)) hit = e; });
+    return hit;
+  }
+  function route() {
+    var h = location.hash || '#/';
+    var m = /^#\/ev\/([^\/]+)(?:\/([a-z]+))?/.exec(h);
+    if (m) return { view: m[2] || 'hub', id: decodeURIComponent(m[1]) };
+    return { view: 'list' };
+  }
+  function render() {
+    var r = route();
+    if (DEMO) {
+      if (r.view === 'list') { renderList(demoListModel()); return; }
+      resetRegsState(r.id);
+      if (r.view === 'regs') { renderRegs(demoRegsModel()); return; }
+      if (r.view === 'staff') { renderStaffEdit({ id: DEMO_ID, title: '国際交流ピクニック' }, DEMO_STAFF); return; }
+      if (r.view === 'expenses') { renderExpEdit({ id: DEMO_ID, title: '国際交流ピクニック' }, DEMO_EXPENSES); return; }
+      if (r.view === 'prep' || r.view === 'day' || r.view === 'after') { renderStub(demoHubModel(r.view), r.view); return; }
+      renderHub(demoHubModel('hub'));
+      return;
+    }
+    if (M.events === null) { renderLoading(); return; }
+    if (r.view === 'list') { renderList(buildListModel(M)); return; }
+    var ev = findEvent(r.id);
+    if (!ev) {
+      if (!loadedOnce) { renderLoading(); return; } // 深いリンク直開き: 実データ到着待ち
+      renderNotFound();
+      return;
+    }
+    resetRegsState(r.id);
+    if (r.view === 'hub' || r.view === 'staff' || r.view === 'expenses') loadExtras(ev.id); // 担当/支出の遅延読取
+    if (r.view === 'regs') { renderRegs(buildRegsModel(M, ev)); return; }
+    if (r.view === 'staff') {
+      var xs = EX[ev.id];
+      renderStaffEdit(ev, xs && xs.staff !== undefined ? xs.staff : null);
+      return;
+    }
+    if (r.view === 'expenses') {
+      var xe = EX[ev.id];
+      renderExpEdit(ev, xe && xe.expenses !== undefined ? xe.expenses : null);
+      return;
+    }
+    if (r.view === 'prep' || r.view === 'day' || r.view === 'after') { renderStub(buildHubModel(M, ev, r.view), r.view); return; }
+    renderHub(buildHubModel(M, ev, 'hub'));
+  }
+
+  function meModel() {
+    var u = window.currentUser;
+    var m = (u && u.member) || {};
+    return {
+      name: m.nickname || m.name || '',
+      role: (u && u.highestRole) || '',
+      rank: API.myRank(),
+      photo: m.photoUrl || m.avatarUrl || '',
+    };
+  }
+  function loadReal() {
+    if (loading) return;
+    loading = true;
+    unauthShown = false;
+    var cached = cacheLoad();
+    if (cached) {
+      M.events = arr(cached.events);
+      M.aggs = cached.aggs || null;
+      M.me = cached.me || null;
+      M.regsOk = cached.regsOk !== false;
+      M.partsOk = cached.partsOk === true;
+      if (Array.isArray(cached.members)) M.members = cached.members; // membersFetched=false のまま=次のextras読取で裏更新
+      var ids = {};
+      Object.keys(cached.staffBy || {}).forEach(function (k) { ids[k] = 1; });
+      Object.keys(cached.expBy || {}).forEach(function (k) { ids[k] = 1; });
+      Object.keys(ids).forEach(function (k) {
+        EX[k] = {
+          staff: (cached.staffBy && cached.staffBy[k]) || null,
+          expenses: (cached.expBy && cached.expBy[k]) || null,
+          staffErr: false, expErr: false, fetched: false, loading: false,
+        };
+      });
+    }
+    render(); // キャッシュがあれば 0ms で紙面 / なければローディング
+
+    var regsOk = true, partsOk = true;
+    var pEvents = API.fetchData('listEvents', {});
+    var pRegs = API.fetchData('listRegistrations', {}).then(function (r) { return r; }, function () { regsOk = false; return []; });
+    var pParts = API.fetchData('listParticipants', {}).then(function (r) { return r; }, function () { partsOk = false; return []; });
+
+    // 段階レンダリング: キャッシュなし初回は 速い2本(events+regs)で先に描画
+    var doneAll = false;
+    if (!cached) {
+      Promise.all([pEvents, pRegs]).then(function (res) {
+        if (doneAll || unauthShown) return;
+        M.events = arr(res[0]);
+        S.regs = arr(res[1]);
+        M.regsOk = regsOk;
+        M.partsOk = false;
+        M.aggs = regsOk ? buildAggs(S.regs, null) : null;
+        M.me = meModel();
+        render();
+      }).catch(function () { /* エラーは全体待ちで一元処理 */ });
+    }
+    Promise.all([pEvents, pRegs, pParts]).then(function (res) {
+      doneAll = true;
+      loading = false;
+      if (unauthShown) return;
+      M.events = arr(res[0]);
+      S.regs = arr(res[1]);
+      S.parts = arr(res[2]);
+      M.regsOk = regsOk;
+      M.partsOk = partsOk;
+      M.aggs = regsOk ? buildAggs(S.regs, partsOk ? S.parts : null) : null;
+      M.me = meModel();
+      loadedOnce = true;
+      render();
+      cacheSave();
+    }).catch(function (e) {
+      doneAll = true;
+      loading = false;
+      if (unauthShown || (e && e._auth)) return;
+      if (cached) return; // 24h以内の前回紙面 > 全面エラー
+      renderError((e && e.message) || String(e));
+    });
+  }
+
+  /* ---------- 起動 ---------- */
+  API.setOnUnauthorized(function () {
+    unauthShown = true;
+    API.clearSession();
+    cacheClear();
+    renderLogin('セッションが切れました。再度ログインしてください。');
+  });
+  window.addEventListener('hashchange', function () {
+    if (DEMO) { render(); return; }
+    if (!API.hasSession()) return; // ログイン画面のまま
+    render();
+  });
+  function boot() {
+    if (DEMO) { render(); return; }
+    if (!API.hasSession()) { cacheClear(); renderLogin(''); return; }
+    if (loadedOnce) { render(); return; }
+    loadReal();
+  }
+  boot();
+})();
+
+</script>
+</body>
+</html>
