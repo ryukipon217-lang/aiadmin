@@ -245,6 +245,11 @@ h1.pg{font-family:var(--serif);font-weight:600;font-size:clamp(24px,4vw,32px);li
 
 <script>
 var GAS='https://script.google.com/macros/s/AKfycbxLs1eXm39MHM0lSioBf9ghVFL8p8fIhIdYJpBBweBTCLOFDqWclPhoF66c0FgfrbHg/exec';
+/* 軽量読取API(read-api @10+)。本体GAS(2MB=固定費~3.4s)を経ない小型スクリプトで、
+   対応アクションのみ先に試し、未対応・失敗時は本体へ自動フォールバック(2回失敗で以後は本体直行)。 */
+var LITE='https://script.google.com/macros/s/AKfycbxm-_IBapGbmilVQSzPhsLhL6cMwm8_bIwxyq8Wh8j3IxXjGjBz234EwEohFe18EAY/exec';
+var LITE_ACTIONS={getRecruitConsoleBundle:1,getRecruitDetailBundle:1};
+var _liteFails=0;
 var SKEY='recruitSession-v2';
 var S=null; try{S=JSON.parse(localStorage.getItem(SKEY)||'null')}catch(e){}
 var CACHE={bundle:null,bundleAt:0,templates:null};
@@ -281,7 +286,15 @@ function copyText(v){try{navigator.clipboard.writeText(v).then(function(){toast(
 window.__copy=copyText;
 
 async function apiGet(action,params){
-  var q=GAS+'?action='+encodeURIComponent(action)+'&params='+encodeURIComponent(JSON.stringify(params||{}))+'&memberId='+encodeURIComponent(S?S.memberId:'')+'&token='+encodeURIComponent(S?S.token:'');
+  var mkQ=function(base){return base+'?action='+encodeURIComponent(action)+'&params='+encodeURIComponent(JSON.stringify(params||{}))+'&memberId='+encodeURIComponent(S?S.memberId:'')+'&token='+encodeURIComponent(S?S.token:'')};
+  if(LITE_ACTIONS[action]&&_liteFails<2){
+    var j0=null;
+    try{var r0=await fetch(mkQ(LITE));if(r0.ok)j0=await r0.json()}catch(e){}
+    if(j0&&j0.unauthorized){logout();throw new Error('セッションの有効期限が切れました。もう一度ログインしてください')}
+    if(j0&&j0.ok)return j0.data;
+    _liteFails++;
+  }
+  var q=mkQ(GAS);
   var r=await fetch(q);
   if(!r.ok)throw new Error('HTTP '+r.status);
   var j=await r.json();
