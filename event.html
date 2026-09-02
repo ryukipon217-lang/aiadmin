@@ -3396,7 +3396,10 @@ window.AdminAPI = (function () {
     var P = vm.prep;
     var main;
     if (!P.canEdit) {
-      main = '<p class="stub-line">準備タブの閲覧・編集にはアシスタントマネージャー以上の権限が必要です。当面は console から操作してください。</p>';
+      var rankUnknown = API.hasSession() && !(window.currentUser && window.currentUser.member) && !(M.me && M.me.rank);
+      main = rankUnknown
+        ? '<p class="stub-line">権限を確認しています…</p>'
+        : '<p class="stub-line">準備タブの閲覧・編集にはアシスタントマネージャー以上の権限が必要です。当面は console から操作してください。</p>';
       root.innerHTML = mastheadHtml({ mePhoto: vm.mePhoto, showHq: vm.showHq }) +
         hubHeadHtml(vm.head, vm.tabs, vm.reception) + (vm.dayseg || '') + main + colophonHtml(esc(vm.head.title));
       if (vm.dayseg) bindDaySeg({ id: vm.evId });
@@ -4748,6 +4751,14 @@ window.AdminAPI = (function () {
     if (loading) return;
     loading = true;
     unauthShown = false;
+    /* (hotfix 2026-09-02) 読取が軽量API(user同梱なし)に寄ったため、直接event.htmlを開くと役職不明のまま
+       準備タブ等のアシマネ+ゲートが誤発動していた(代表でも拒否)。セッションがあり役職未判明なら
+       本体GASの超軽量 getDataGen(認証済み応答にuserが同梱される)で役職を解決し再描画する。 */
+    if (API.hasSession() && !(window.currentUser && window.currentUser.member)) {
+      API.fetchData('getDataGen', {}).then(function () {
+        if (window.currentUser && window.currentUser.member) { M.me = meModel(); try { render(); } catch (e) {} }
+      }, function () {});
+    }
     var cached = cacheLoad();
     if (cached) {
       M.events = arr(cached.events);
