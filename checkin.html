@@ -6,7 +6,7 @@
 <meta name="robots" content="noindex">
 <title>当日受付 — connec+a 運営ポータル</title>
 <meta name="description" content="connec+a 運営ポータル — 当日受付(iPad・カメラ全画面)">
-<script>window.__ADMIN2_BUILD='20260902031853';</script>
+<script>window.__ADMIN2_BUILD='20260902042348';</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://script.google.com" crossorigin>
@@ -83,18 +83,94 @@ a:focus-visible,button:focus-visible{outline:2.5px solid #fff;outline-offset:2px
     linear-gradient(174deg, #2a3550, #1b2439 58%, #151d30)}
 .feed video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .feed.mirror video{transform:scaleX(-1)}
-/* 中央の読み取りガイド */
+/* (上質化) 実カメラの白飛びでも文字が沈まないシネマ調ビネット(上下の暗帯+周辺減光) */
+.feed::after{content:'';position:absolute;inset:0;pointer-events:none;
+  background:
+    linear-gradient(180deg, rgba(9,14,26,.62), rgba(9,14,26,.18) 18%, transparent 30%),
+    linear-gradient(0deg, rgba(9,14,26,.66), rgba(9,14,26,.2) 20%, transparent 34%),
+    radial-gradient(ellipse 130% 96% at 50% 44%, transparent 56%, rgba(9,14,26,.42) 100%)}
+/* 中央の読み取りガイド(枠外をそっと沈め、視線を読取域へ) */
 .guidebox{position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);width:min(56vw,460px);aspect-ratio:1;border:0;background:none;padding:0}
-.guidebox .dash{position:absolute;inset:0;border:2px dashed rgba(255,255,255,.42);border-radius:10px}
-.guidebox .corner{position:absolute;width:40px;height:40px;border:4.5px solid var(--accent)}
-.guidebox .corner.tl{top:-3px;left:-3px;border-right:0;border-bottom:0;border-radius:10px 0 0 0}
-.guidebox .corner.tr{top:-3px;right:-3px;border-left:0;border-bottom:0;border-radius:0 10px 0 0}
-.guidebox .corner.bl{bottom:-3px;left:-3px;border-right:0;border-top:0;border-radius:0 0 0 10px}
-.guidebox .corner.br{bottom:-3px;right:-3px;border-left:0;border-top:0;border-radius:0 0 10px 0}
-.callout{position:absolute;left:0;right:0;top:9%;text-align:center;color:#fff;text-shadow:0 1px 10px rgba(10,16,30,.5)}
+.guidebox::before{content:'';position:absolute;inset:0;border-radius:16px;pointer-events:none;
+  box-shadow:0 0 0 200vmax rgba(8,13,24,.26)}
+.guidebox .dash{position:absolute;inset:0;border:1.5px dashed rgba(255,255,255,.32);border-radius:16px;
+  box-shadow:inset 0 0 34px rgba(110,134,224,.12)}
+.guidebox .corner{position:absolute;width:44px;height:44px;border:3.5px solid #93a7ec;
+  filter:drop-shadow(0 0 7px rgba(110,134,224,.55))}
+.guidebox .corner.tl{top:-2px;left:-2px;border-right:0;border-bottom:0;border-radius:14px 0 0 0}
+.guidebox .corner.tr{top:-2px;right:-2px;border-left:0;border-bottom:0;border-radius:0 14px 0 0}
+.guidebox .corner.bl{bottom:-2px;left:-2px;border-right:0;border-top:0;border-radius:0 0 0 14px}
+.guidebox .corner.br{bottom:-2px;right:-2px;border-left:0;border-top:0;border-radius:0 0 14px 0}
+/* 走査線: ゆっくり往復する細い光(動きは控えめ・reduced-motionでは共通ルールで停止) */
+.scanline{position:absolute;left:7%;right:7%;top:12%;height:2px;border-radius:2px;pointer-events:none;
+  background:linear-gradient(90deg, transparent, rgba(154,173,238,.9), transparent);
+  box-shadow:0 0 16px 3px rgba(110,134,224,.4);
+  animation:ck-sweep 3.2s cubic-bezier(.45,.05,.55,.95) infinite alternate}
+@keyframes ck-sweep{from{top:9%}to{top:89%}}
+.callout{position:absolute;left:0;right:0;top:9%;text-align:center;color:#fff;text-shadow:0 1px 12px rgba(9,14,26,.6)}
 .callout h1{font-family:var(--serif);font-size:30px;font-weight:600;letter-spacing:.08em;line-height:1.5}
 .callout p{font-size:15px;color:rgba(255,255,255,.75);margin-top:4px}
-.camstate{position:absolute;left:50%;top:63.5%;transform:translateX(-50%);font-size:12.5px;letter-spacing:.16em;color:rgba(255,255,255,.6)}
+/* 状態ピル(ガラス+呼吸するドット)。文字だけの状態表示をやめて上質に */
+.camstate{position:absolute;left:50%;top:63.5%;transform:translateX(-50%);display:inline-flex;align-items:center;gap:9px;
+  max-width:88%;padding:8px 17px;border-radius:999px;font-size:12px;letter-spacing:.14em;color:rgba(255,255,255,.8);white-space:nowrap;
+  background:rgba(16,24,42,.46);border:1px solid rgba(255,255,255,.2);
+  -webkit-backdrop-filter:blur(12px) saturate(1.15);backdrop-filter:blur(12px) saturate(1.15);
+  box-shadow:0 10px 26px -14px rgba(9,14,26,.7), inset 0 1px 0 rgba(255,255,255,.14)}
+.camstate.wide{white-space:normal;letter-spacing:.04em;line-height:1.6;border-radius:14px;text-align:left}
+.camdot{width:7px;height:7px;border-radius:50%;flex:none;background:#8fe3b0;box-shadow:0 0 9px rgba(143,227,176,.85);
+  animation:ck-pulse 1.8s ease-in-out infinite}
+.camdot.warn{background:#f0c987;box-shadow:0 0 9px rgba(240,201,135,.85)}
+.camdot.info{background:#93a7ec;box-shadow:0 0 9px rgba(147,167,236,.85)}
+@keyframes ck-pulse{0%,100%{opacity:.45}50%{opacity:1}}
+
+/* ===== 決済係(2台で分担・受信側)。カメラなしの決済カウンター ===== */
+.desk{position:absolute;left:0;right:0;top:44%;transform:translateY(-50%);margin:0 auto;width:min(92%,720px);text-align:center;color:#fff}
+.desk .kick{font-size:11px;letter-spacing:.3em;color:rgba(255,255,255,.55)}
+.desk .kick.amber{color:#f0c987}
+.desk .kick.ok{color:#8fe3b0}
+.desk h1{font-family:var(--serif);font-size:34px;font-weight:600;letter-spacing:.06em;line-height:1.5;margin-top:12px}
+.desk .sub{font-size:14px;color:rgba(255,255,255,.62);margin-top:8px;line-height:1.9}
+.desk .bigname{font-size:44px;font-weight:700;letter-spacing:.02em;line-height:1.35;margin-top:10px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 1px 14px rgba(9,14,26,.6)}
+.desk .bigamt{font-family:var(--serif);font-size:74px;font-weight:600;font-variant-numeric:tabular-nums;line-height:1.15;
+  color:#ffd9a8;margin-top:2px}
+.desk .bigamt small{font-size:26px;font-weight:500;margin-left:2px}
+.desk .tagline{font-size:15px;color:rgba(255,255,255,.75);margin-top:4px}
+.desk .paywrap{margin-top:20px;display:flex;flex-direction:column;gap:12px;align-items:center}
+.desk .methods{justify-content:center}
+.desk .mchip{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.3);color:rgba(255,255,255,.85)}
+.desk .mchip small{color:rgba(255,255,255,.55)}
+.desk .mchip[aria-pressed="true"]{background:var(--deep);border-color:#93a7ec;color:#fff}
+.desk .confirm{flex:none;width:min(100%,420px)}
+.desk .hold{margin-left:0;color:rgba(255,255,255,.75);border-color:rgba(255,255,255,.3)}
+.desk .hold:hover{background:rgba(255,255,255,.1)}
+.desk .err{font-size:13px;color:#ffb3a6;font-weight:700;margin-top:10px}
+.desk .okring{width:88px;height:88px;margin:18px auto 0;border-radius:50%;border:2.5px solid rgba(143,227,176,.85);
+  display:flex;align-items:center;justify-content:center;box-shadow:0 0 30px rgba(143,227,176,.25)}
+/* 受信待ちの呼吸リング */
+.listen{width:104px;height:104px;margin:26px auto 0;position:relative}
+.listen i{position:absolute;inset:0;border-radius:50%;border:1.5px solid rgba(147,167,236,.5);
+  animation:ck-ring 2.6s ease-out infinite}
+.listen i:nth-child(2){animation-delay:1.3s}
+.listen b{position:absolute;left:50%;top:50%;width:12px;height:12px;transform:translate(-50%,-50%);
+  border-radius:50%;background:#93a7ec;box-shadow:0 0 14px rgba(147,167,236,.9)}
+@keyframes ck-ring{0%{transform:scale(.3);opacity:.9}100%{transform:scale(1.15);opacity:0}}
+/* 保留中の呼び出しチップ(下部・横スクロール) */
+.heldrail{position:absolute;left:14px;right:14px;bottom:96px;z-index:5;display:flex;gap:9px;align-items:center;overflow-x:auto;
+  -webkit-overflow-scrolling:touch;padding:6px 2px}
+.heldrail .cap{flex:none;font-size:11px;letter-spacing:.12em;color:rgba(255,255,255,.55);white-space:nowrap}
+.heldrail button{flex:none;min-height:46px;padding:8px 15px;border-radius:11px;font-size:13.5px;font-weight:700;color:#fff;
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.24);cursor:pointer;white-space:nowrap}
+.heldrail button b{color:#ffd9a8;font-weight:700;margin-left:7px;font-size:12px}
+.heldrail button:hover{background:rgba(255,255,255,.16)}
+/* 役割ボタン(2台で分担)・開始画面の副導線 */
+.rolerows{display:flex;flex-direction:column;gap:8px;margin-top:16px}
+.rolerows button{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;min-height:64px;width:100%;
+  padding:12px 16px;border-radius:10px;cursor:pointer;border:1.5px solid var(--line);background:rgba(255,255,255,.7)}
+.rolerows button .rn{font-size:15.5px;font-weight:700;color:var(--ink2)}
+.rolerows button .rd{font-size:12.5px;color:var(--ink4);line-height:1.7}
+.rolerows button[aria-pressed="true"]{border-color:var(--deep);background:#fff;box-shadow:0 8px 20px -10px rgba(79,99,196,.5)}
+.pane .devnote{font-size:12px;color:var(--ink5);margin-top:12px}
 
 /* 左上: 終了(副操作・控えめ) */
 .quit{position:absolute;top:16px;left:16px;z-index:6;display:inline-flex;align-items:center;gap:7px;min-height:44px;padding:8px 15px;
@@ -262,6 +338,11 @@ a:focus-visible,button:focus-visible{outline:2.5px solid #fff;outline-offset:2px
   .findbtn{min-height:48px;font-size:14.5px;padding:0 14px}
   .findbtn small{display:none}
   .modeseg button{min-height:40px;padding:5px 11px;font-size:12px}
+  .desk h1{font-size:24px}
+  .desk .bigname{font-size:30px}
+  .desk .bigamt{font-size:52px}
+  .desk .methods{width:100%}
+  .heldrail{bottom:118px}
 }
 
 </style>
@@ -486,10 +567,13 @@ window.AdminAPI = (function () {
    - 別日QR=無音の案内トースト(同一ユーザーの当日行があればそちらで受付を続行=Day1メールQR対策)。
    - 複数日=日程(Day)選択必須(きょうのDayを既定)。日付跨ぎは1分毎+タブ復帰時に追随
      (自動選択のみ。手動選択は尊重して案内だけ)。
-   - solo/duo: solo=この端末で確定(processCode)。duo=2台で分担=この端末は読むだけ
-     (qrPushScan {code,eventId,device} 送信・チェックインしない・重複は無音再送なし)。
-     確定は受信側端末(console 受付タブの受信モード=qrLivePoll+自動チェックイン)が行う。
-     カメラ向きも console と同じ: solo=外(environment)/duo=内(user・プレビューのみ鏡像)。
+   - solo/duo: solo=この端末で確定(processCode)。duo=2台で分担は役割を選ぶ:
+       読み取り(push)=qrPushScan {code,eventId,device} 送信のみ・チェックインしない・重複は無音再送なし。
+         カメラは console と同じ内向き(user・プレビューのみ鏡像=画面を参加者に向ける)。
+       決済係(recv)=カメラなし。qrLivePoll {eventId,since} を1秒間隔でポーリング(console 受信モード)し、
+         届いたスキャンを自動で processCode({auto:true})=チェックイン。未決済はこの画面の
+         決済カウンター(console confirmFull 相当)で方法を選んで確定。保留はレールから呼び出せる。
+         受信相手は本アプリの読み取り端末でも console 受付タブの読み取る側でもよい(同じ中継)。
    - スキャン=BarcodeDetector優先→jsQR(unpkg jsqr@1.4.0 遅延ロード)フォールバック。
      同一コード3秒デバウンス・検出中ロック・スキャン中はWake Lock。
    ============================================================================ */
@@ -587,7 +671,9 @@ window.AdminAPI = (function () {
   var UI = {
     phase: 'boot',      // boot | login | perm | notfound | ready(start前) | scan(受付中)
     camErr: '',
-    mode: 'solo',       // solo=この端末で確定 / duo=2台で分担(読むだけ)
+    mode: 'solo',       // solo=この端末で確定 / duo=2台で分担
+    duoRole: 'push',    // duoの役割: push=読み取り(送信のみ) / recv=決済係(受信+この画面で確定)
+    roleOpen: false,    // 役割選択パネル(2台で分担をタップで開く)
     sel: '',            // 複数日: 選択中 sessionId(''=未選択)
     selBy: 'auto',      // auto=システムが本日を選択 / manual=担当者が選択
     dayOpen: false,     // 日程選択パネル
@@ -610,6 +696,9 @@ window.AdminAPI = (function () {
   var unauthShown = false;
   var reloadTimer = null, toastTimer = null, sheetTimer = null, dayTimer = null;
   var device = lsGet('connecta.scanDevice') || 'scanner-1'; // consoleと同一キー(2台分担の端末名)
+  function recvActive() { return UI.mode === 'duo' && UI.duoRole === 'recv'; }
+  // 決済係(受信側)の状態: qrLivePoll のカーソル/受信済みseq/受信件数(console cursor/scans と同義)
+  var recvTimer = 0, recvBusy = false, recvCursor = 0, recvSeen = {}, recvCount = 0;
 
   /* ---------- 通信(デモは同じコードパスのまま端末内サーバへ) ---------- */
   function svcFetch(action, params) {
@@ -805,11 +894,11 @@ window.AdminAPI = (function () {
       if (first || opts.manual) { chimed[reg.id] = 1; chime('dup'); }
       var pt0 = payTargetOf(reg);
       var stillUnpaid = !pt0.paidNow && payMark[pt0.target.id] !== 'done';
-      if (stillUnpaid) setSheet(sheetFor(reg, UI.mode === 'duo' ? 'push' : 'unpaid', { dupNote: true }));
+      if (stillUnpaid) setSheet(sheetFor(reg, (UI.mode === 'duo' && UI.duoRole === 'push') ? 'push' : 'unpaid', { dupNote: true }));
       else setSheet(sheetFor(reg, 'dup'), 2200);
       return { matched: true };
     }
-    if (UI.mode === 'duo') return pushCode(reg, p, text);
+    if (UI.mode === 'duo' && UI.duoRole === 'push') return pushCode(reg, p, text);
 
     // ---- solo: 楽観チェックイン(console 32014-32038) ----
     var pt = payTargetOf(reg);
@@ -1106,6 +1195,39 @@ window.AdminAPI = (function () {
   }
   function faceForMode() { return UI.mode === 'duo' ? 'user' : 'environment'; } // console: 連携=内カメラ/通常=外カメラ
 
+  /* ---------- 決済係(受信側): qrLivePoll を1秒間隔でポーリング(console 32291-32330) ----------
+     多重実行は recvBusy で防ぎ、cursor(since)で新着だけ受け取る。届いたスキャンは
+     processCode({auto:true}) で自動チェックイン=console の「自動チェックインON」と同じ。
+     受信済み seq は再処理しない。通信エラーは次周期で静かに回復(consoleと同じ)。 */
+  function startRecv() {
+    stopCam();
+    if (recvTimer) return;
+    pollRecv();
+    if (typeof setInterval === 'function') recvTimer = setInterval(pollRecv, 1000);
+    acquireWake(); // カウンター端末もスリープさせない
+  }
+  function stopRecv() {
+    if (recvTimer) { try { clearInterval(recvTimer); } catch (e) {} recvTimer = 0; }
+    recvBusy = false;
+    if (!scanOn) { try { if (wakeLock && wakeLock.release) wakeLock.release(); } catch (e) {} wakeLock = null; }
+  }
+  function pollRecv() {
+    if (recvBusy || !S.ev || !recvActive() || UI.phase !== 'scan') return;
+    recvBusy = true;
+    svcFetch('qrLivePoll', { eventId: S.ev.id, since: recvCursor || 0 }).then(function (r) {
+      r = r || {};
+      if (r.cursor != null) recvCursor = Number(r.cursor) || recvCursor;
+      var fresh = arr(r.scans).filter(function (s) { return s && s.code && !recvSeen[String(s.seq)]; });
+      fresh.forEach(function (s) {
+        recvSeen[String(s.seq)] = 1;
+        recvCount++;
+        try { processCode(String(s.code), { auto: true }); } catch (e) {}
+      });
+      recvBusy = false;
+      if (fresh.length) paintCallout();
+    }, function () { recvBusy = false; /* 一時的な通信エラーは次周期で回復 */ });
+  }
+
   /* ---------- 日付跨ぎ(1分毎+タブ復帰。自動選択のみ本日へ追随) ---------- */
   function recomputeToday(forced) {
     var next = forced || ymd(new Date());
@@ -1148,6 +1270,7 @@ window.AdminAPI = (function () {
   }
   function quit() {
     stopCam();
+    stopRecv();
     location.href = './event.html' + QS + '#/ev/' + encodeURIComponent((S.ev && S.ev.id) || route().id || '') + '/day';
   }
   function paintAll() { paintCallout(); paintTop(); paintToast(); paintSheet(); paintBar(); paintPane(); }
@@ -1156,24 +1279,135 @@ window.AdminAPI = (function () {
     var el = document.getElementById('ck-callout');
     if (!el) return;
     if (UI.phase !== 'scan') { el.innerHTML = ''; return; }
-    var duo = UI.mode === 'duo';
+    if (recvActive()) { el.innerHTML = deskHtml(); bindDesk(); mirrorFeed(); return; }
+    var push = UI.mode === 'duo' && UI.duoRole === 'push';
     var h = '<div class="callout">' +
       '<h1><span class="nb">参加者のQRを</span><span class="nb">かざしてください</span></h1>' +
-      '<p class="nb">' + (duo ? '読み取り専用 ― 確定は受信側の端末で行われます' : '読み取りは自動です ― ボタンを押す必要はありません') + '</p></div>';
+      '<p class="nb">' + (push ? '読み取り専用 ― 確定は決済係の端末で行われます' : '読み取りは自動です ― ボタンを押す必要はありません') + '</p></div>';
+    var guideInner = '<span class="dash"></span><span class="scanline"></span>' +
+      '<span class="corner tl"></span><span class="corner tr"></span><span class="corner bl"></span><span class="corner br"></span>';
     if (DEMO) {
-      h += '<button type="button" class="guidebox" id="ck-demo-scan" aria-label="デモ: タップでスキャンを再現">' +
-        '<span class="dash"></span><span class="corner tl"></span><span class="corner tr"></span><span class="corner bl"></span><span class="corner br"></span></button>';
+      h += '<button type="button" class="guidebox" id="ck-demo-scan" aria-label="デモ: タップでスキャンを再現">' + guideInner + '</button>';
     } else {
-      h += '<div class="guidebox" aria-hidden="true"><span class="dash"></span><span class="corner tl"></span><span class="corner tr"></span><span class="corner bl"></span><span class="corner br"></span></div>';
+      h += '<div class="guidebox" aria-hidden="true">' + guideInner + '</div>';
     }
-    h += '<div class="camstate nb">' + (DEMO ? 'デモ ― 枠をタップするとスキャンを再現します'
+    // 状態ピル: ドットの色で一目(緑=カメラ動作中/琥珀=カメラ不可/藍=デモ)
+    var dot = DEMO ? 'info' : UI.camErr ? 'warn' : '';
+    var msg = DEMO ? 'デモ ― 枠をタップするとスキャンを再現します'
       : UI.camErr ? esc(UI.camErr)
-      : (duo ? 'カメラ動作中(内向き) ・ 端末名 ' + esc(device) : 'カメラ動作中')) + '</div>';
+      : (push ? 'カメラ動作中(内向き) ・ 端末名 ' + esc(device) : 'カメラ動作中 ― 自動で読み取ります');
+    h += '<div class="camstate' + (UI.camErr ? ' wide' : ' nb') + '"><span class="camdot ' + dot + '"></span>' + msg + '</div>';
     el.innerHTML = h;
-    var fd = document.getElementById('ck-feed');
-    if (fd) fd.className = 'feed' + (UI.mode === 'duo' ? ' mirror' : '');
+    mirrorFeed();
     var db = document.getElementById('ck-demo-scan');
     if (db) db.addEventListener('click', demoTap);
+  }
+  function mirrorFeed() {
+    var fd = document.getElementById('ck-feed');
+    if (fd) fd.className = 'feed' + ((UI.mode === 'duo' && UI.duoRole === 'push') ? ' mirror' : '');
+  }
+
+  /* ---- 決済カウンター(決済係)。console confirmFull の状態機械を desk 描画で ---- */
+  function heldRows() {
+    var seen = {};
+    var out = [];
+    dayRegs().forEach(function (r) {
+      if (!regActive(r) || seen[r.id]) return;
+      var heldNow = regHeld(r) || localChecked[r.id] === 'hold';
+      if (!heldNow) return;
+      var pt = payTargetOf(r);
+      if (pt.paidNow || payMark[pt.target.id] === 'done') return;
+      seen[r.id] = 1;
+      out.push({ reg: r, amount: num(pt.target.amount) });
+    });
+    return out;
+  }
+  function collectedSum() { // その場決済の回収合計(console cfCollected)
+    var sum = 0, n = 0;
+    Object.keys(payMark).forEach(function (id) {
+      if (payMark[id] !== 'done') return;
+      eventRegs().forEach(function (r) { if (r.id === id) { sum += num(r.amount); n++; } });
+    });
+    return { sum: sum, n: n };
+  }
+  function deskHtml() {
+    var sh = UI.sheet;
+    var h = '';
+    if (!sh) {
+      var col = collectedSum();
+      h = '<div class="desk"><div class="kick nb">2台で分担 ・ 決済係</div>' +
+        '<h1><span class="nb">読み取りを</span><span class="nb">待っています</span></h1>' +
+        '<div class="listen" aria-hidden="true"><i></i><i></i><b></b></div>' +
+        '<p class="sub"><span class="nb">読み取り端末でQRが読まれると、ここに表示されます。</span><br>' +
+        '<span class="nb">未決済の方は、この画面でそのまま決済を確定できます。</span></p>' +
+        '<p class="sub"><span class="nb">受信 ' + recvCount + '件</span>' +
+        (col.n > 0 ? ' <span class="nb">・ その場決済の回収 ' + money(col.sum) + '円(' + col.n + '件)</span>' : '') + '</p>' +
+        (DEMO ? '<div style="margin-top:14px"><button type="button" class="findbtn nb" id="ck-demo-live">デモ ― 読み取りの到着を再現</button></div>' : '') +
+        '</div>';
+    } else if (sh.kind === 'unpaid' || sh.kind === 'confirming') {
+      var busy = sh.kind === 'confirming';
+      var sel = sh.method || (sh.declared === 'PayPay' ? 'PayPay' : '現金');
+      h = '<div class="desk"><div class="kick amber nb">未決済 ― 決済の確認</div>' +
+        '<div class="bigname nb">' + esc(sh.name) + 'さん</div>' +
+        (sh.tagsHtml ? '<div class="tagline">' + sh.tagsHtml + '</div>' : '') +
+        '<div class="bigamt nb">' + money(sh.amount) + '<small>円</small></div>' +
+        (sh.declared ? '<div class="tagline nb">申告: ' + esc(sh.declared) + '</div>' : '') +
+        '<div class="paywrap">' + methodChips(sel) +
+        '<button type="button" class="confirm" id="ck-confirm"' + (busy ? ' disabled' : '') + '>' + (busy ? '確定しています…' : 'その場で決済を確定') + '</button>' +
+        '<button type="button" class="hold" id="ck-hold"' + (busy ? ' disabled' : '') + '><span class="nb">保留のまま次の方へ</span></button></div>' +
+        (sh.note ? '<p class="sub">' + esc(sh.note) + '</p>' : '') +
+        (sh.err ? '<div class="err">' + esc(sh.err) + '</div>' : '') +
+        '</div>';
+    } else if (sh.kind === 'confirmed') {
+      h = '<div class="desk"><div class="kick ok nb">決済を確認しました</div>' +
+        '<div class="okring" aria-hidden="true"><svg width="46" height="46" viewBox="0 0 52 52" fill="none"><path d="M14 27l8 8 16-17" stroke="#8fe3b0" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>' +
+        '<div class="bigname nb">' + esc(sh.name) + 'さん ― 入場確定</div>' +
+        '<p class="sub nb">決済(' + esc(sh.method || '当日確認') + ')を確認しました</p>' +
+        (sh.note ? '<p class="sub">' + esc(sh.note) + '</p>' : '') + '</div>';
+    } else if (sh.kind === 'dup') {
+      h = '<div class="desk"><div class="kick ok nb">受付済み</div>' +
+        '<div class="bigname nb">' + esc(sh.name) + 'さん</div>' +
+        '<p class="sub nb">すでに受付済みです(重複スキャン)</p></div>';
+    } else { // ok
+      h = '<div class="desk"><div class="kick ok nb">受付しました</div>' +
+        '<div class="okring" aria-hidden="true"><svg width="46" height="46" viewBox="0 0 52 52" fill="none"><path d="M14 27l8 8 16-17" stroke="#8fe3b0" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>' +
+        '<div class="bigname nb">' + esc(sh.name) + 'さん ― ようこそ</div>' +
+        '<p class="sub nb">決済済み ・ そのままお通しください</p></div>';
+    }
+    // 保留中の呼び出しレール(タップで決済カウンターに表示 — console confirmFull下部と同じ)
+    var held = heldRows();
+    if (held.length) {
+      h += '<div class="heldrail" aria-label="保留中"><span class="cap nb">保留中 ' + held.length + '名 ― タップで表示</span>' +
+        held.map(function (x) {
+          return '<button type="button" data-heldreg="' + esc(x.reg.id) + '"><span class="nb">' + esc(x.reg.userName || x.reg.id) + '</span>' +
+            (x.amount > 0 ? '<b class="nb">' + money(x.amount) + '円</b>' : '') + '</button>';
+        }).join('') + '</div>';
+    }
+    return h;
+  }
+  function bindDesk() {
+    Array.prototype.forEach.call(root.querySelectorAll('[data-method]'), function (b) {
+      b.addEventListener('click', function () {
+        if (UI.sheet && UI.sheet.kind === 'unpaid') { UI.sheet.method = b.getAttribute('data-method'); paintCallout(); } // paintCallout が bindDesk を再実行する(二重バインド禁止)
+      });
+    });
+    var cb = document.getElementById('ck-confirm');
+    if (cb) cb.addEventListener('click', function () {
+      var s2 = UI.sheet;
+      confirmPay((s2 && s2.method) || (s2 && s2.declared === 'PayPay' ? 'PayPay' : '現金'));
+    });
+    var hb = document.getElementById('ck-hold');
+    if (hb) hb.addEventListener('click', function () { UI.sheet = null; paintSheet(); });
+    Array.prototype.forEach.call(root.querySelectorAll('[data-heldreg]'), function (b) {
+      b.addEventListener('click', function () {
+        var id = b.getAttribute('data-heldreg');
+        var reg = null;
+        dayRegs().forEach(function (r) { if (!reg && r.id === id) reg = r; });
+        if (reg) setSheet(sheetFor(reg, 'unpaid'));
+      });
+    });
+    var dl = document.getElementById('ck-demo-live');
+    if (dl) dl.addEventListener('click', demoLivePush);
   }
 
   function paintTop() {
@@ -1207,6 +1441,7 @@ window.AdminAPI = (function () {
   function paintSheet() {
     var el = document.getElementById('ck-sheet');
     if (!el) return;
+    if (recvActive()) { el.innerHTML = ''; paintCallout(); return; } // 決済係は中央の決済カウンターに描く
     var sh = UI.sheet;
     if (!sh) { el.innerHTML = ''; return; }
     var who = '<div class="who">' +
@@ -1311,13 +1546,30 @@ window.AdminAPI = (function () {
   }
 
   function switchMode(mode) {
-    if (mode !== 'solo' && mode !== 'duo') return;
-    if (UI.mode === mode) return;
-    UI.mode = mode;
+    if (mode === 'duo') {
+      // 2台で分担は役割(読み取り/決済係)を選んでから。再タップで役割の切替もできる。
+      UI.roleOpen = true;
+      paintPane();
+      return;
+    }
+    if (mode !== 'solo' || UI.mode === 'solo') return;
+    UI.mode = 'solo';
+    stopRecv();
     UI.sheet = null; // モード切替で前モードの案内は消す(consoleは切替でカメラ停止=表示リセット)
-    if (UI.phase === 'scan' && stream) {
-      // consoleと同じ向き規約(solo=外/duo=内)でカメラを付け替える
-      startCam(faceForMode());
+    if (UI.phase === 'scan' && !DEMO && hasCam()) startCam('environment'); // consoleと同じ向き規約へ戻す
+    paintAll();
+  }
+  function setDuoRole(role) {
+    if (role !== 'push' && role !== 'recv') return;
+    UI.roleOpen = false;
+    UI.mode = 'duo';
+    UI.duoRole = role;
+    UI.sheet = null;
+    if (role === 'recv') {
+      startRecv(); // カメラを止めて受信専用へ(決済カウンター)
+    } else {
+      stopRecv();
+      if (UI.phase === 'scan' && !DEMO && hasCam()) startCam('user'); // 読み取り側=内カメラ(console規約)
     }
     paintAll();
   }
@@ -1352,8 +1604,34 @@ window.AdminAPI = (function () {
       return;
     }
     if (UI.findOpen) { el.innerHTML = findHtml(); bindFind(); return; }
+    if (UI.roleOpen) { el.innerHTML = roleHtml(); bindRole(); return; }
     if (UI.phase === 'ready' || UI.dayOpen) { el.innerHTML = startHtml(); bindStart(); return; }
     el.innerHTML = '';
+  }
+
+  /* ---- 2台で分担: 役割選択(読み取り/決済係) ---- */
+  function roleHtml() {
+    return '<div class="pane"><div class="card"><div class="kicker">2台で分担</div>' +
+      '<h2>この端末の役割を選んでください</h2>' +
+      '<p class="sub"><span class="nb">読み取りと確定を2台に分けると、</span><span class="nb">列が止まりません。</span></p>' +
+      '<div class="rolerows">' +
+      '<button type="button" data-role="push" aria-pressed="' + (UI.mode === 'duo' && UI.duoRole === 'push') + '">' +
+      '<span class="rn nb">QRを読み取る(スキャン係)</span>' +
+      '<span class="rd"><span class="nb">画面を参加者に向けて、かざされたQRを読むだけ。</span><span class="nb">チェックインはしません(内カメラ)。</span></span></button>' +
+      '<button type="button" data-role="recv" aria-pressed="' + (UI.mode === 'duo' && UI.duoRole === 'recv') + '">' +
+      '<span class="rn nb">受付・決済を確定する(決済係)</span>' +
+      '<span class="rd"><span class="nb">読み取りの到着を待ち、この画面でチェックイン。</span><span class="nb">未決済はその場で決済を確定できます(カメラなし)。</span></span></button>' +
+      '</div>' +
+      '<p class="devnote"><span class="nb">読み取り端末名: ' + esc(device) + '</span> <span class="nb">・ consoleの受付タブ(読み取る側/受信する側)とも相互につながります。</span></p>' +
+      '<div class="cta"><button type="button" class="rowlink" id="ck-rolecancel">やめる(いまのままにする)</button></div>' +
+      '</div></div>';
+  }
+  function bindRole() {
+    Array.prototype.forEach.call(root.querySelectorAll('[data-role]'), function (b) {
+      b.addEventListener('click', function () { setDuoRole(b.getAttribute('data-role')); });
+    });
+    var cb = document.getElementById('ck-rolecancel');
+    if (cb) cb.addEventListener('click', function () { UI.roleOpen = false; paintPane(); });
   }
 
   function startHtml() {
@@ -1380,7 +1658,8 @@ window.AdminAPI = (function () {
     h += '<div class="cta">' +
       '<button type="button" class="btn" id="ck-start"' + ((multi && !UI.sel) || !rankKnown ? ' disabled' : '') + '><span class="nb">' +
       (UI.phase === 'scan' ? 'この日程に切り替える' : '受付をはじめる(カメラを起動)') + '</span></button>' +
-      (UI.phase === 'scan' ? '<button type="button" class="rowlink" id="ck-daycancel">やめる(いまの日程のまま)</button>' : '') +
+      (UI.phase === 'scan' ? '<button type="button" class="rowlink" id="ck-daycancel">やめる(いまの日程のまま)</button>'
+        : '<button type="button" class="rowlink" id="ck-startrecv"' + ((multi && !UI.sel) || !rankKnown ? ' disabled' : '') + '><span class="nb">決済係としてはじめる(2台で分担・カメラなし)</span></button>') +
       '</div></div></div>';
     return h;
   }
@@ -1401,6 +1680,15 @@ window.AdminAPI = (function () {
       if (DEMO) { UI.phase = 'scan'; paintAll(); return; } // デモはダミー地のまま
       startCam(faceForMode());
       paintPane();
+    });
+    // 決済係専用の端末(カメラ許可も不要)として直接はじめる
+    var rb = document.getElementById('ck-startrecv');
+    if (rb) rb.addEventListener('click', function () {
+      if (isMulti() && !UI.sel) return;
+      UI.dayOpen = false;
+      UI.sheet = null;
+      UI.phase = 'scan';
+      setDuoRole('recv');
     });
     var cb = document.getElementById('ck-daycancel');
     if (cb) cb.addEventListener('click', function () { UI.dayOpen = false; paintPane(); });
@@ -1646,6 +1934,7 @@ window.AdminAPI = (function () {
         { id: 'PU1', events: 3, photoUrl: 'https://i.pravatar.cc/192?img=15' },
         { id: 'CU2', events: 0, photoUrl: 'https://i.pravatar.cc/192?img=44' },
       ],
+      live: [], // 2台分担の中継キュー(qrPushScan→qrLivePoll。実BEのCacheServiceキューと同じ形)
     };
     return DEMO_DB;
   }
@@ -1683,7 +1972,17 @@ window.AdminAPI = (function () {
           if (!paidIds.length) return reject(new Error('決済済化できる reg がありません'));
           return resolve({ applicationId: payload.applicationId, paidRegIds: paidIds });
         }
-        if (action === 'qrPushScan') return resolve({ ok: true });
+        if (action === 'qrPushScan') { // 実BE(Code.gs qrPushScan)と同じ: seq採番してキューへ
+          var seq = (db.live.length ? num(db.live[db.live.length - 1].seq) : 0) + 1;
+          db.live.push({ seq: seq, code: String(payload.code || ''), device: String(payload.device || ''), at: new Date().toISOString() });
+          return resolve({ ok: true, seq: seq });
+        }
+        if (action === 'qrLivePoll') { // 実BE(Code.gs qrLivePoll)と同じ: since より新しい scans + cursor
+          var since = num(params && params.since);
+          var out = db.live.filter(function (s) { return num(s.seq) > since; });
+          var last = db.live.length ? num(db.live[db.live.length - 1].seq) : since;
+          return resolve({ scans: out, cursor: Math.max(since, last) });
+        }
         if (action === 'listEvents') return resolve(db.events);
         if (action === 'listRegistrations') return resolve(db.regs);
         if (action === 'listParticipants') return resolve(db.parts);
@@ -1691,15 +1990,25 @@ window.AdminAPI = (function () {
       }, 120);
     });
   }
-  var demoScript = { i: 0 };
-  function demoTap() {
+  var demoScript = { i: 0, j: 0 };
+  function demoSeq() {
     // 正典モックの一連の流れ: 決済済み→サラ(未決済・こども同伴)→重複→別日QR(合宿はDay2到着も)
-    var seq = S.ev && S.ev.id === 'EV-CAMP'
+    return S.ev && S.ev.id === 'EV-CAMP'
       ? ['CR6', 'CR5', 'CR1', 'CR8', 'CR6']  // ハンナ(済)/ミオDay2到着(課金=Day1)/ユスフのDay1QR(当日行で続行)/レオ(Day3=別日)/重複
-      : ['PR1', 'R-90001', 'PR1', 'R-90002']; // ハルト(済)/サラ(未決済)/重複/ミゲル(未決済PayPay申告)
+      : ['PR36', 'R-90001', 'PR36', 'R-90002']; // ノア(済)/サラ(未決済)/重複/ミゲル(未決済PayPay申告)
+  }
+  function demoTap() {
+    var seq = demoSeq();
     var code = seq[demoScript.i % seq.length];
     demoScript.i++;
     processCode(code, {});
+  }
+  function demoLivePush() {
+    // 決済係のデモ: 読み取り端末からの到着を再現(中継キューに積む→実物の受信ループが拾う)
+    var seq = demoSeq();
+    var code = seq[demoScript.j % seq.length];
+    demoScript.j++;
+    demoServer('qrPushScan', null, { code: code, eventId: S.ev ? S.ev.id : '', device: 'scanner-demo' });
   }
   function loadDemo() {
     var db = demoSeed();
@@ -1719,20 +2028,23 @@ window.AdminAPI = (function () {
     paintAll();
   }
 
-  /* ---------- QAブリッジ(オフライン検証/スクショ用。スキャナと同じ入口しか触れない) ---------- */
+  /* ---------- QAブリッジ(オフライン検証/スクショ用。スキャナ/受信と同じ入口しか触れない) ---------- */
   window.__ckScan = function (text, opts) { return processCode(text, opts || {}); };
   window.__ckState = function () {
     return {
-      phase: UI.phase, mode: UI.mode, sel: UI.sel, selBy: UI.selBy,
+      phase: UI.phase, mode: UI.mode, duoRole: UI.duoRole, roleOpen: UI.roleOpen, sel: UI.sel, selBy: UI.selBy,
       sheet: UI.sheet ? { kind: UI.sheet.kind, regId: UI.sheet.regId, payRegId: UI.sheet.payRegId, name: UI.sheet.name, amount: UI.sheet.amount, method: UI.sheet.method, err: UI.sheet.err } : null,
       tally: S.ev ? tallyNow() : null,
       count: UI.count, pushCount: pushCount, syncFailed: UI.syncFailed,
+      recvCount: recvCount, recvCursor: recvCursor, recvOn: !!recvTimer,
       toast: UI.toastMsg ? UI.toastMsg.html : '',
       dayOpen: UI.dayOpen, findOpen: UI.findOpen, camErr: UI.camErr, today: todayYmd,
     };
   };
   window.__ckSetToday = function (y) { recomputeToday(String(y)); };
   window.__ckStart = function () { UI.phase = 'scan'; UI.dayOpen = false; paintAll(); };
+  window.__ckRole = function (role) { UI.phase = 'scan'; UI.dayOpen = false; setDuoRole(role); };
+  window.__ckLive = function (code) { if (DEMO) demoServer('qrPushScan', null, { code: String(code || ''), eventId: S.ev ? S.ev.id : '', device: 'scanner-demo' }); };
 
   /* ---------- 起動 ---------- */
   API.setOnUnauthorized(function () {
@@ -1752,11 +2064,14 @@ window.AdminAPI = (function () {
     loadReal();
   }
   window.addEventListener('hashchange', function () {
-    // イベントを跨いだら受付状態をリセット(consoleはイベント切替でchimed/pushed等をリセット)
+    // イベントを跨いだら受付状態をリセット(consoleはイベント切替で cursor/chimed/pushed 等をリセット)
     stopCam();
+    stopRecv();
     S.ev = null; S.regs = null;
     localChecked = {}; chimed = {}; payMark = {}; pushed = {};
+    recvCursor = 0; recvSeen = {}; recvCount = 0;
     UI.sel = ''; UI.selBy = 'auto'; UI.sheet = null; UI.count = 0; UI.dayOpen = false; UI.findOpen = false;
+    UI.roleOpen = false; UI.mode = 'solo'; UI.duoRole = 'push';
     UI.phase = 'boot';
     boot();
   });
@@ -1766,7 +2081,7 @@ window.AdminAPI = (function () {
   try {
     document.addEventListener('visibilitychange', function () {
       recomputeToday();
-      if (document.visibilityState === 'visible' && scanOn) acquireWake(); // Wake Lockは背面化で自動解放される
+      if (document.visibilityState === 'visible' && (scanOn || recvTimer)) acquireWake(); // Wake Lockは背面化で自動解放される
     });
   } catch (e) {}
   boot();

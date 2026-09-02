@@ -6,7 +6,7 @@
 <meta name="robots" content="noindex">
 <title>イベント — connec+a 運営ポータル</title>
 <meta name="description" content="connec+a 運営ポータル — イベント面">
-<script>window.__ADMIN2_BUILD='20260902031853';</script>
+<script>window.__ADMIN2_BUILD='20260902042348';</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://script.google.com" crossorigin>
@@ -864,6 +864,84 @@ table.regs{width:100%;border-collapse:collapse;min-width:680px;font-size:13.5px}
   .briefpage{max-width:none}
 }
 
+/* ============ 作成ウィザード(#/new) ============
+   フォーム規則(_admin-design-rules.md): 白カード縦積みにしない=見出し(h2.sec)+余白で
+   意味のあるグループ分け・必須/任意を明示・エラーは項目の近く・現在位置と残りを常時表示。 */
+.wz-steps{display:flex;align-items:center;gap:6px;margin:18px 0 6px;padding:8px 10px;border-radius:8px;max-width:760px}
+.wz-steps button{display:inline-flex;align-items:center;gap:8px;border:0;background:none;font-family:var(--sans);font-size:13px;color:var(--ink4);cursor:pointer;padding:8px 10px;min-height:42px;border-radius:6px;flex:none}
+.wz-steps button .n{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;border:1.5px solid var(--line);font-size:12.5px;font-weight:700;background:rgba(255,255,255,.6);flex:none}
+.wz-steps button.now{color:var(--deep);font-weight:700}
+.wz-steps button.now .n{background:var(--deep);border-color:var(--deep);color:#fff}
+.wz-steps button.done{color:var(--ink3)}
+.wz-steps button.done .n{border-color:var(--ok);color:var(--ok)}
+.wz-steps .sep{flex:1;height:1px;background:var(--line);min-width:8px}
+.wz-pos{font-size:12px;color:var(--ink4);margin:0 0 6px}
+.wz{max-width:760px}
+.wz .sec{margin-top:26px}
+.wf{margin:12px 0 14px;max-width:560px}
+.wf .wf-l,.wz-vlibrow .wf-l{display:flex;align-items:baseline;gap:8px;font-size:12.5px;font-weight:700;letter-spacing:.05em;color:var(--ink3);margin-bottom:4px}
+em.wz-req,em.wz-pub,em.wz-opt{font-style:normal;font-size:10.5px;font-weight:700;letter-spacing:.08em;padding:1px 8px;border-radius:99px;flex:none}
+em.wz-req{color:#fff;background:var(--warn)}
+em.wz-pub{color:var(--amber);border:1px solid rgba(138,106,47,.45);background:rgba(138,106,47,.08)}
+em.wz-opt{color:var(--ink4);border:1px solid var(--line)}
+.wf input,.wf select,.wf textarea{display:block;width:100%;font:inherit;font-size:14px;color:var(--ink);padding:9px 11px;min-height:42px;border:1px solid var(--line);border-radius:6px;background:rgba(255,255,255,.72)}
+.wf textarea{resize:vertical;line-height:1.7}
+.wf input::placeholder,.wf textarea::placeholder{color:var(--ink5);font-size:12.5px}
+.wf-hint{font-size:11.5px;color:var(--ink5);margin-top:4px;line-height:1.7;max-width:60ch}
+.wz-warnline{color:var(--amber)}
+.wz-note{font-size:12.5px;color:var(--ink3);max-width:60ch;margin:2px 0 10px;line-height:1.8}
+.wz-grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 22px;max-width:640px}
+.wz-grid2 .wf{max-width:none}
+.wz-seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:rgba(255,255,255,.55);margin:2px 0 6px}
+.wz-seg button{border:0;background:none;font-family:var(--sans);font-size:13.5px;font-weight:700;color:var(--ink3);padding:10px 22px;min-height:44px;cursor:pointer}
+.wz-seg button[aria-pressed="true"]{background:var(--deep);color:#fff}
+.wz-chk{display:inline-flex;align-items:center;gap:9px;border:1px solid var(--line);border-radius:8px;background:rgba(255,255,255,.6);font-family:var(--sans);font-size:13.5px;color:var(--ink2);padding:9px 14px;min-height:44px;cursor:pointer;text-align:left}
+.wz-chk .bx{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border:1.5px solid var(--line);border-radius:5px;background:#fff;font-size:13px;font-weight:700;color:#fff;flex:none}
+.wz-chk.on{border-color:var(--deep);color:var(--deep);font-weight:700}
+.wz-chk.on .bx{background:var(--deep);border-color:var(--deep)}
+.wz-chk .sub{font-size:11px;font-weight:400;color:var(--ink5);margin-left:4px}
+.wz-pms{display:flex;flex-wrap:wrap;gap:8px}
+.wz-pms .wz-chk{min-height:42px;padding:7px 12px;font-size:12.5px}
+.wz-dup,.wz-vlib{display:flex;gap:10px;align-items:center;flex-wrap:wrap;max-width:680px}
+.wz-dup select,.wz-vlib select{flex:1;min-width:220px;font:inherit;font-size:13.5px;padding:9px 11px;min-height:42px;border:1px solid var(--line);border-radius:6px;background:rgba(255,255,255,.72);color:var(--ink)}
+.wz-vlibrow{margin:12px 0 14px}
+.wz-sess{margin-top:4px;max-width:760px}
+.wz-sess .sr{display:grid;grid-template-columns:150px 104px 104px 1fr 1fr 44px;gap:8px;align-items:center;padding:7px 0;border-bottom:1px dashed var(--line)}
+.wz-sess .sr.head{padding:0 0 5px;border-bottom:1.5px solid var(--rule);font-size:11.5px;color:var(--ink4);letter-spacing:.08em}
+.wz-sess input{font:inherit;font-size:13.5px;padding:8px 9px;min-height:42px;border:1px solid var(--line);border-radius:6px;background:rgba(255,255,255,.72);color:var(--ink);width:100%}
+.wz-sess input::placeholder{color:var(--ink5);font-size:12px}
+.wz-warn{margin:14px 0 4px;padding:12px 16px;border:1px solid rgba(138,106,47,.4);border-left:4px solid var(--amber);border-radius:6px;background:rgba(244,232,196,.3);font-size:13px}
+.wz-warn b{color:var(--amber)}
+.wz-warn ul{margin:6px 0 2px;padding:0;list-style:none}
+.wz-warn li{padding:3px 0;line-height:1.7}
+.wz-warn p{font-size:11.5px;color:var(--ink4);margin-top:6px}
+.wz-ok{margin:14px 0 4px;padding:11px 16px;border:1px solid rgba(63,125,92,.35);border-left:4px solid var(--ok);border-radius:6px;background:rgba(63,125,92,.07);font-size:13px;font-weight:700;color:var(--ok)}
+.wz-facts{margin-top:6px}
+.wz-comms{display:flex;flex-direction:column;gap:8px;max-width:560px;align-items:flex-start}
+.wz-cta{display:flex;gap:12px;align-items:center;margin:26px 0 8px;flex-wrap:wrap}
+.wz-foot{display:flex;gap:12px;align-items:center;margin:26px 0 10px;padding:14px 0 0;border-top:1.5px solid var(--rule);max-width:760px;flex-wrap:wrap}
+.wz-foot .spacer{flex:1}
+/* ハブ概要: 複製(副操作)の静かな1行 */
+.hub-ops{margin-top:26px;padding-top:10px;border-top:1px dashed var(--line);display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.hub-ops .hub-opsnote{font-size:11.5px;color:var(--ink5)}
+@media(max-width:640px){
+  .wz-steps{flex-wrap:wrap;gap:2px;padding:6px}
+  .wz-steps .sep{display:none}
+  .wz-steps button{padding:7px 8px;min-height:40px}
+  .wz-grid2{grid-template-columns:1fr}
+  .wz-sess .sr{grid-template-columns:1fr 1fr 44px}
+  .wz-sess .sr.head{display:none}
+  .wz-sess .sr input[id^="wz-sd-"]{grid-column:1 / 3}
+  .wz-sess .sr .sr-del{grid-column:3;grid-row:1}
+  .wz-sess .sr input[id^="wz-sn-"],.wz-sess .sr input[id^="wz-sv-"]{grid-column:1 / -1}
+  .wz-dup select,.wz-vlib select{min-width:0;flex:1 1 100%}
+  .wz-foot .btn,.wz-cta .btn{width:100%;justify-content:center}
+  .wz-foot{gap:10px}
+  .wz-cta{flex-direction:column;align-items:stretch}
+}
+/* ウィザード内の押せない状態(前へ@①・busy中)を見た目でも示す */
+.wz-foot [disabled],.wz-cta [disabled],.wz-vlibrow [disabled]{opacity:.45;cursor:default}
+
 </style>
 </head>
 <body>
@@ -1371,20 +1449,13 @@ window.AdminAPI = (function () {
     document.body.classList.remove('has-tabbtn');
     root.innerHTML = mastheadHtml({ mePhoto: vm.mePhoto, showHq: vm.showHq }) +
       '<div class="pagehead"><h1>イベント</h1><span class="count">' + esc(vm.countLine || '') + '</span>' +
-      '<span class="spacer"></span><a class="btn" href="#" id="ev-new"><span class="mi">add</span>新しいイベント</a></div>' +
-      '<div id="ev-new-note"></div>' +
+      '<span class="spacer"></span><a class="btn" href="#/new" id="ev-new"><span class="mi">add</span>新しいイベント</a></div>' +
       (vm.feature ? featureHtml(vm.feature)
         : '<div class="feature nophoto"><div class="f-body"><div class="kicker">イベント</div>' +
           '<h2>' + esc(vm.featureEmpty || '開催予定のイベントはありません。') + '</h2>' +
           '<div class="meta">「新しいイベント」から作成すると、ここに特集として載ります。</div></div></div>') +
       upcomingHtml(vm) + pastHtml(vm) + colophonHtml('');
     bindRetry();
-    var nb = document.getElementById('ev-new');
-    if (nb) nb.addEventListener('click', function (e) {
-      e.preventDefault();
-      document.getElementById('ev-new-note').innerHTML =
-        '<p class="opnote">イベントの作成はこの画面ではまだできません。当面は console から作成してください。</p>';
-    });
   }
 
   /* ---------- 一覧: 実データ → ビューモデル ---------- */
@@ -1680,6 +1751,7 @@ window.AdminAPI = (function () {
       trendHtml(vm.trend, regsHref) +
       crewRailHtml(vm.crew) +
       timelineHtml(vm.timeline, vm.demo ? vm.tabs.base + '/comms' : '') +
+      (vm.dupHref ? '<div class="hub-ops"><a class="rowlink nb" href="' + esc(vm.dupHref) + '"><span class="mi" style="font-size:16px">content_copy</span>このイベントを複製</a><span class="hub-opsnote">全項目を流し込み、日付と公開設定を変えて新しい下書きを作ります。</span></div>' : '') +
       '</main>';
     root.innerHTML = mastheadHtml({ mePhoto: vm.mePhoto, showHq: vm.showHq }) +
       hubHeadHtml(vm.head, vm.tabs, vm.reception) +
@@ -1995,6 +2067,7 @@ window.AdminAPI = (function () {
       crew: hubCrewModel(ev, base),
       timeline: hubTimelineModel(ev, base), // 配信タイムライン(B3 実結線)
       aside: ledger ? { ledger: ledger } : null, // きょうの流れ/準備チェックは未実装のまま
+      dupHref: canStaff() ? '#/new?from=' + encodeURIComponent(ev.id) : '', // 複製(副操作)→ウィザードへ
       agg: a,
     };
   }
@@ -2076,6 +2149,7 @@ window.AdminAPI = (function () {
         '<td class="st ' + stCls + '">' + esc(r.stLabel) + (r.how ? '<span class="how">' + r.how + '</span>' : '') + '</td>' +
         '<td class="amt">' + (r.amt || '―') + '</td>' +
         '<td class="' + (r.comp ? 'comp' : 'none') + '">' + (r.comp ? '<span class="nb">' + esc(r.comp) + '</span>' : '―') + '</td>' +
+        /* (2026-09-02実障害) canMark分岐が詳細ボタンを排他し未決済者の詳細が開けなかった→両方表示 */
         '<td>' + (r.canMark ? '<button type="button" class="rowbtn nb" data-mark="' + esc(r.id) + '">決済済みにする</button> ' : '') +
           '<button type="button" class="rowlink" data-sel="' + esc(r.id) + '">' + (sel ? '詳細を閉じる' : '詳細') + '</button></td></tr>';
       if (st.mode === 'group') {
@@ -5251,6 +5325,848 @@ window.AdminAPI = (function () {
   }
 
   /* ============================================================================
+     作成ウィザード(#/new) — 4段階(基本 → 日程・会場 → 料金・受付 → 公開と確認)
+     - BEに送る形は console.html の EventForm と完全一致(フィールドを発明しない):
+         createEvent = fields直渡し(応答 r.event.id) / updateEvent = {eventId, fields} /
+         セッション同期 = createEventSession(sp) / updateEventSession {sessionId, fields:sp} /
+         deleteEventSession {sessionId}。既存セッションIDは 'ES-' 始まり。
+         複数日の親 date/endDate/time はセッション日付から導出(consoleと同じ)。
+     - 途中保存 = createEvent(status:下書き)を確認つきで即作成 → 以降 updateEvent(確認なし)。
+       公開(status:公開中)は「公開する」明示ボタン+確認ステップのみ。書込は自動リトライなし。
+     - 複製 = listEvents の行(フル投影)を流し込み。事後系(記念写真)・公開予約・状態は
+       引き継がない(古い公開予約/前回の記念写真の事故防止)。multiは listEventSessions で
+       全量(住所・備考・個別料金)を追読して置き換え(行を触る前に届いたときだけ)。
+     - 会場 = 会場ライブラリ(listVenues)から選択=名前/住所をスナップショット文字列として書写。
+       「ライブラリに保存」= saveVenue(マネージャー+のみ表示)。
+     - ④完了時 = 配信の下書き提案(前日リマインド/お礼+アンケート・既定ON)を
+       saveEventComm(status:draft)で作成(cmTemplateの雛形を再利用)→ #/ev/<id> へ。
+     - デモ(?demo=1)は全段階を同じ描画関数で通し、書込だけ案内文に差し替え。
+     ============================================================================ */
+  var wzEd = { inited: false };
+  var WZX = { depts: null, err: false, fetched: false, loading: false }; // listDepartments(カテゴリ選択)
+  var WZ_PMS = ['PayPay', '現金', 'クレジットカード', '銀行振込', '事前決済', 'その他']; // consoleと同じ6種
+  var WZ_STEPS = ['基本', '日程・会場', '料金・受付', '公開と確認'];
+  var DEMO_DEPTS = [
+    { id: 'DP1', abbr: 'IFT', name: '国際交流ツアー', color: '#6e86e0' },
+    { id: 'DP2', abbr: 'community', name: 'コミュニティ', color: '#4c8f6a' },
+    { id: 'DP3', abbr: 'hub', name: 'hub', color: '#b08430' },
+  ];
+  function wzBlankF() {
+    var f = {
+      title: '', category: '', tags: '', summary: '', heroImageUrl: '', posterUrl: '',
+      format: 'single', date: '', time: '', endDate: '', endTime: '', online: false, zoomURL: '',
+      venue: '', address: '', geo: '', area: '', capacity: '0', regOpenDate: '', regCloseDate: '', publishAt: '',
+      requirements: '', belongings: '', customQuestions: '', eligibilityRule: '', eligibilityStrength: '',
+      fee: '0', feeType: '', feeMode: 'uniform', paymentMethods: ['PayPay'],
+      paymentUrl: '', paymentUrl_paypay: '', paymentUrl_stripe: '', paymentUrl_bank: '', paymentUrl_other: '',
+      earlyBird: '', cancelPolicy: '', cancelPolicyRule: '',
+      allowCompanions: false, childFee: '', childAgeMax: '12', maxCompanions: '0', companionCountsToCapacity: true,
+      policy_ja: '', policy_en: '', policy_easy: '', snsCopy: '', sealType: '', sealPos: '',
+      mementoPhotoUrl: '', mementoPublishAt: '', heroOverlay: '', accent: '', status: '下書き',
+    };
+    ['venue', 'summary', 'category', 'requirements', 'customQuestions', 'earlyBird', 'cancelPolicy', 'snsCopy']
+      .forEach(function (k) { f[k + '_easy'] = ''; f[k + '_en'] = ''; });
+    return f;
+  }
+  function wzSourceList() {
+    return (DEMO ? demoWizEvents() : arr(M.events))
+      .filter(function (e) { return e && !/アーカイブ/.test(evStatus(e)); })
+      .slice().sort(function (a, b) { return (evDate(b) || '').localeCompare(evDate(a) || ''); });
+  }
+  function wzFindSource(id) {
+    var hit = null;
+    wzSourceList().forEach(function (e) { if (e && String(e.id) === String(id)) hit = e; });
+    return hit;
+  }
+  function wizInit(fromId) {
+    wzEd = {
+      inited: true, from: String(fromId || ''), fromTitle: '', step: 1, draftId: '', savedAt: '',
+      busy: false, err: '', errStep: 0, notice: '', confirm: '', done: false, doneId: '',
+      commReminder: true, commThanks: true, dupSel: '', vlibSel: '', srcLoading: false, sessTouched: false,
+      f: wzBlankF(), sessions: [], delSess: [], sessK: 0,
+    };
+    if (fromId) {
+      var src = wzFindSource(fromId);
+      if (src) { wzApplySource(src); wzEd.dupSel = String(fromId); }
+      else wzEd.notice = '複製元(' + fromId + ')が見つからないため、空の状態から始めます。';
+    }
+  }
+  function wzNewRow() {
+    return { _k: ++wzEd.sessK, id: '', name: '', date: '', startTime: '', endTime: '', venue: '', address: '',
+      online: false, zoomURL: '', capacity: 0, fee: 0, notes: '', timetable: '', geo: '', region: '',
+      name_easy: '', name_en: '', venue_easy: '', venue_en: '', notes_easy: '', notes_en: '' };
+  }
+  function wzRowFromSession(s) {
+    s = s || {};
+    var r = wzNewRow();
+    r.name = s.name || ''; r.date = String(s.date || '').slice(0, 10);
+    r.startTime = s.startTime || ''; r.endTime = s.endTime || '';
+    r.venue = s.venue || ''; r.address = s.address || '';
+    r.online = s.online === true || s.online === 'true' || s.online === 'TRUE'; r.zoomURL = s.zoomURL || '';
+    r.capacity = num(s.capacity); r.fee = num(s.fee); r.notes = s.notes || ''; r.timetable = s.timetable || '';
+    r.geo = s.geo || ''; r.region = s.region || '';
+    r.name_easy = s.name_easy || ''; r.name_en = s.name_en || '';
+    r.venue_easy = s.venue_easy || ''; r.venue_en = s.venue_en || '';
+    r.notes_easy = s.notes_easy || ''; r.notes_en = s.notes_en || '';
+    return r; // 複製した行は id を持たない=新規作成される
+  }
+  /* 複製の流し込み(consoleのEventForm初期化と同じ読み方)。listEventsの行=フル投影。 */
+  function wzApplySource(src) {
+    var f = wzEd.f;
+    var b = function (v) { return v === true || v === 'true' || v === 'TRUE'; };
+    f.title = src.title || ''; f.category = src.category || ''; f.tags = String(src.tags || '');
+    f.summary = src.summary || ''; f.heroImageUrl = src.heroImageUrl || ''; f.posterUrl = src.posterUrl || '';
+    f.format = src.format === 'multi' ? 'multi' : 'single';
+    f.date = String(src.date || '').slice(0, 10); f.time = src.time || '';
+    f.endDate = String(src.endDate || '').slice(0, 10); f.endTime = src.endTime || '';
+    f.online = b(src.online); f.zoomURL = src.zoomURL || '';
+    f.venue = src.venue || ''; f.address = src.address || ''; f.geo = src.geo || ''; f.area = src.area || '';
+    f.capacity = String(num(src.capacity));
+    f.regOpenDate = String(src.regOpenDate || '').slice(0, 10); f.regCloseDate = String(src.regCloseDate || '').slice(0, 10);
+    f.publishAt = ''; // 引き継がない: 過去の公開予約日時をコピーすると即時自動公開の事故になる
+    f.requirements = src.requirements || ''; f.belongings = src.belongings || ''; f.customQuestions = src.customQuestions || '';
+    f.eligibilityRule = (typeof src.eligibilityRule === 'string') ? src.eligibilityRule
+      : (src.eligibilityRule ? JSON.stringify(src.eligibilityRule) : '');
+    f.eligibilityStrength = src.eligibilityStrength || '';
+    f.fee = String(num(src.fee));
+    f.feeType = src.feeType || (num(src.fee) > 0 ? 'paid' : '');
+    f.feeMode = src.feeMode || 'uniform';
+    var methods = ['PayPay'];
+    var raw = src.paymentMethods || src.paymentMethod || '';
+    if (raw) { var mm = String(raw).split(',').map(function (s) { return s.trim(); }).filter(Boolean); if (mm.length) methods = mm; }
+    f.paymentMethods = methods;
+    f.paymentUrl = src.paymentUrl || ''; f.paymentUrl_paypay = src.paymentUrl_paypay || '';
+    f.paymentUrl_stripe = src.paymentUrl_stripe || ''; f.paymentUrl_bank = src.paymentUrl_bank || ''; f.paymentUrl_other = src.paymentUrl_other || '';
+    f.earlyBird = src.earlyBird || ''; f.cancelPolicy = src.cancelPolicy || '';
+    f.cancelPolicyRule = (typeof src.cancelPolicyRule === 'string') ? src.cancelPolicyRule
+      : (src.cancelPolicyRule && src.cancelPolicyRule.length ? JSON.stringify(src.cancelPolicyRule) : '');
+    f.allowCompanions = b(src.allowCompanions);
+    f.childFee = (src.childFee != null && src.childFee !== '') ? String(src.childFee) : '';
+    f.childAgeMax = (src.childAgeMax != null && src.childAgeMax !== '') ? String(src.childAgeMax) : '12';
+    f.maxCompanions = (src.maxCompanions != null && src.maxCompanions !== '') ? String(src.maxCompanions) : '0';
+    f.companionCountsToCapacity = !(src.companionCountsToCapacity === false || src.companionCountsToCapacity === 'false' || src.companionCountsToCapacity === 'FALSE');
+    f.policy_ja = src.policy_ja || src.policy || ''; f.policy_en = src.policy_en || ''; f.policy_easy = src.policy_easy || '';
+    f.snsCopy = src.snsCopy || '';
+    f.sealType = src.sealType || ''; f.sealPos = String(src.sealPos || '');
+    f.heroOverlay = (typeof src.heroOverlay === 'string') ? src.heroOverlay
+      : (src.heroOverlay ? JSON.stringify(src.heroOverlay) : '');
+    f.accent = src.accent || '';
+    // 事後系・状態は引き継がない(前回の記念写真・公開予約・満員/終了ステータスの事故防止)
+    f.mementoPhotoUrl = ''; f.mementoPublishAt = ''; f.status = '下書き';
+    ['venue', 'summary', 'category', 'requirements', 'customQuestions', 'earlyBird', 'cancelPolicy', 'snsCopy']
+      .forEach(function (k) { f[k + '_easy'] = src[k + '_easy'] || ''; f[k + '_en'] = src[k + '_en'] || ''; });
+    wzEd.delSess = []; wzEd.sessTouched = false;
+    wzEd.fromTitle = evTitle(src);
+    if (f.format === 'multi') {
+      wzEd.sessions = arr(src.sessions).map(wzRowFromSession); // まず軽量形(listEvents同梱)で
+      if (!DEMO) { // 全量(住所/備考/個別料金/タイムテーブル)は EventSessions にしか無い
+        wzEd.srcLoading = true;
+        API.fetchData('listEventSessions', { eventId: src.id }).then(function (rows) {
+          if (wzEd.inited && !wzEd.sessTouched && Array.isArray(rows) && rows.length) {
+            wzEd.sessions = rows.map(wzRowFromSession);
+          }
+        }, function () { /* 軽量形のまま続行(名前と日付は既にある) */ }).then(function () {
+          wzEd.srcLoading = false;
+          if (route().view === 'new') { wzKeep(); render(); }
+        });
+      }
+    } else {
+      wzEd.sessions = [];
+    }
+  }
+  /* 入力値の退避: 再描画の前に必ず呼ぶ(vanillaはrenderでDOMが作り直されるため) */
+  function wzg(id) { var n = document.getElementById(id); return n && n.value != null ? String(n.value) : null; }
+  function wzKeep() {
+    if (!wzEd.inited) return;
+    var f = wzEd.f;
+    [['wz-title', 'title'], ['wz-cat', 'category'], ['wz-tags', 'tags'], ['wz-summary', 'summary'], ['wz-hero', 'heroImageUrl'],
+      ['wz-date', 'date'], ['wz-time', 'time'], ['wz-enddate', 'endDate'], ['wz-endtime', 'endTime'], ['wz-zoom', 'zoomURL'],
+      ['wz-venue', 'venue'], ['wz-addr', 'address'], ['wz-cap', 'capacity'], ['wz-fee', 'fee'], ['wz-paypay', 'paymentUrl_paypay'],
+      ['wz-childfee', 'childFee'], ['wz-childage', 'childAgeMax'], ['wz-maxcomp', 'maxCompanions'], ['wz-policy', 'policy_ja'],
+      ['wz-pubat', 'publishAt']].forEach(function (kv) { var v = wzg(kv[0]); if (v !== null) f[kv[1]] = v; });
+    var dv = wzg('wz-dup'); if (dv !== null) wzEd.dupSel = dv;
+    var vv = wzg('wz-vlib'); if (vv !== null) wzEd.vlibSel = vv;
+    wzEd.sessions.forEach(function (s, i) {
+      var m = wzg('wz-sn-' + i); if (m !== null) s.name = m;
+      var d = wzg('wz-sd-' + i); if (d !== null) s.date = d;
+      var a = wzg('wz-sst-' + i); if (a !== null) s.startTime = a;
+      var e2 = wzg('wz-set-' + i); if (e2 !== null) s.endTime = e2;
+      var v2 = wzg('wz-sv-' + i); if (v2 !== null) s.venue = v2;
+    });
+  }
+  function wzDatedSessions() {
+    return wzEd.sessions.filter(function (s) { return String(s.date || '').trim(); })
+      .slice().sort(function (a, b) { return String(a.date).localeCompare(String(b.date)); });
+  }
+  /* 保存ペイロード(consoleのEventForm.saveのfieldsと同一キー・同一整形) */
+  function wzFields(status) {
+    var f = wzEd.f;
+    var dated = wzDatedSessions();
+    if (f.format === 'multi' && dated.length) { // consoleと同じ導出: 親date=初日 / endDate=最終日 / time=初日の開始
+      f.date = String(dated[0].date).slice(0, 10);
+      f.endDate = String(dated[dated.length - 1].date).slice(0, 10);
+      if (dated[0].startTime) f.time = dated[0].startTime;
+    }
+    var deptMap = {};
+    arr(DEMO ? DEMO_DEPTS : WZX.depts).forEach(function (d) { var k = d && (d.abbr || d.name); if (k && d.color) deptMap[k] = d.color; });
+    var accent = deptMap[f.category] || f.accent || 'ink';
+    var tags = String(f.tags || '').split(',').map(function (s) { return s.trim().replace(/,/g, ''); }).filter(Boolean)
+      .filter(function (v, i, a) { return a.indexOf(v) === i; }).join(',');
+    var adminId = ((window.currentUser || {}).member || {}).id || '';
+    var sealPos = String(f.sealPos || '');
+    if (!/^\d/.test(sealPos)) sealPos = '0.260,0.800'; // console既定(0.26, 0.80)
+    return {
+      title: String(f.title || '').trim(), category: f.category, accent: accent, summary: f.summary || '',
+      tags: tags,
+      date: f.date || '', time: f.time || '', endDate: f.endDate || '', endTime: f.endTime || '', venue: f.venue || '', address: f.address || '',
+      capacity: num(f.capacity), regOpenDate: f.regOpenDate || '', regCloseDate: f.regCloseDate || '', publishAt: f.publishAt || '',
+      requirements: f.requirements || '',
+      belongings: f.belongings || '',
+      geo: f.geo || '',
+      eligibilityRule: f.eligibilityRule || '',
+      eligibilityStrength: f.eligibilityStrength || '', customQuestions: f.customQuestions || '',
+      fee: num(f.fee), paymentMethod: f.paymentMethods.join(', '), paymentMethods: f.paymentMethods.join(','),
+      paymentUrl: f.paymentUrl || '', paymentUrl_paypay: f.paymentUrl_paypay || '', paymentUrl_stripe: f.paymentUrl_stripe || '', paymentUrl_bank: f.paymentUrl_bank || '', paymentUrl_other: f.paymentUrl_other || '',
+      adminMemberId: adminId, earlyBird: f.earlyBird || '', cancelPolicy: f.cancelPolicy || '',
+      cancelPolicyRule: f.cancelPolicyRule || '',
+      allowCompanions: !!f.allowCompanions, childFee: num(f.childFee), childAgeMax: num(f.childAgeMax) || 12, maxCompanions: num(f.maxCompanions), companionCountsToCapacity: !!f.companionCountsToCapacity,
+      policy_ja: f.policy_ja || '', policy_en: f.policy_en || '', policy_easy: f.policy_easy || '',
+      snsCopy: f.snsCopy || '', posterUrl: f.posterUrl || '', heroImageUrl: f.heroImageUrl || '',
+      mementoPhotoUrl: f.mementoPhotoUrl || '', sealType: f.sealType || '', sealPos: sealPos, mementoPublishAt: f.mementoPublishAt || '',
+      heroOverlay: f.heroOverlay || '[]',
+      area: f.area || '', feeType: f.feeType || '', feeMode: f.feeMode || 'uniform',
+      online: !!f.online, zoomURL: f.online ? (f.zoomURL || '') : '', format: f.format, status: status || f.status || '下書き',
+      venue_easy: f.venue_easy || '', venue_en: f.venue_en || '', summary_easy: f.summary_easy || '', summary_en: f.summary_en || '',
+      category_easy: f.category_easy || '', category_en: f.category_en || '', requirements_easy: f.requirements_easy || '', requirements_en: f.requirements_en || '',
+      customQuestions_easy: f.customQuestions_easy || '', customQuestions_en: f.customQuestions_en || '', earlyBird_easy: f.earlyBird_easy || '', earlyBird_en: f.earlyBird_en || '',
+      cancelPolicy_easy: f.cancelPolicy_easy || '', cancelPolicy_en: f.cancelPolicy_en || '', snsCopy_easy: f.snsCopy_easy || '', snsCopy_en: f.snsCopy_en || ''
+    };
+  }
+  /* 設定漏れ検知(④)。基準=一覧のdraftChecks+consoleの公開前チェック+同伴/ポリシーの整合 */
+  function wzChecks() {
+    var f = wzEd.f, c = [];
+    var dated = wzDatedSessions();
+    if (!String(f.title || '').trim()) c.push({ t: 'タイトル未入力', s: 1 });
+    if (!f.category) c.push({ t: 'カテゴリ(担当部署)未選択', s: 1 });
+    if (!(f.heroImageUrl || f.posterUrl)) c.push({ t: '写真なし ― 一覧と参加者ページに写真が出ません', s: 1 });
+    if (f.format === 'multi') {
+      if (!wzEd.sessions.length) c.push({ t: '開催日(日程の行)が0件', s: 2 });
+      else if (wzEd.sessions.length > dated.length) c.push({ t: '日付未入力の日程 ― Day表示やカレンダーから消えます', s: 2 });
+      if (dated.length && !dated.some(function (s) { return String(s.date).slice(0, 10) >= TODAY; })) c.push({ t: '開催日がすべて過去の日付 ― 複製したままではありませんか', s: 2 });
+      if (!f.venue && !dated.some(function (s) { return s.venue; })) c.push({ t: '会場未定', s: 2 });
+    } else {
+      if (!f.date) c.push({ t: '開催日未設定', s: 2 });
+      else if (String(f.date).slice(0, 10) < TODAY) c.push({ t: '開催日が過去の日付 ― 複製したままではありませんか', s: 2 });
+      if (!f.online && !f.venue) c.push({ t: '会場未定', s: 2 });
+      if (!(num(f.capacity) > 0)) c.push({ t: '定員未設定 ― 満席判定に必要', s: 3 });
+    }
+    if (!(num(f.fee) > 0) && !f.feeType) c.push({ t: '料金未設定 ― 無料なら③で「無料」を選択', s: 3 });
+    if (num(f.fee) > 0 && f.feeType !== 'free' && !arr(f.paymentMethods).length) c.push({ t: '決済方法が未選択', s: 3 });
+    if (!f.allowCompanions && num(f.childFee) > 0) c.push({ t: '同伴受付OFFのまま子ども料金あり ― こども連れを受けるならON', s: 3 });
+    if (!String(f.policy_ja || '').trim()) c.push({ t: '申込時の同意事項(ポリシー)未設定 ― 未設定だと参加者は申込できません', s: 3 });
+    return c;
+  }
+  /* 保存できない不足(consoleの保存時バリデーションと同じ)だけ止める。漏れ検知は警告どまり。 */
+  function wzValidate(kind) {
+    var f = wzEd.f;
+    if (!String(f.title || '').trim()) return { s: 1, m: 'タイトルは必須です。' };
+    if (!f.category) return { s: 1, m: 'カテゴリ(担当部署)は必須です。' };
+    if (kind !== 'mid' && f.format === 'multi') {
+      if (!wzEd.sessions.length) return { s: 2, m: '複数日の保存には日程が1行以上必要です。' };
+      if (wzEd.sessions.some(function (s) { return !String(s.date || '').trim(); })) return { s: 2, m: '日付が未入力の日程があります(日付が無いとDay表示やカレンダーから消えます)。' };
+    }
+    return null;
+  }
+  /* 保存成功のローカル反映(一覧・ハブが再fetchなしで新イベントを描けるように) */
+  function wzMergeLocal(id, fields) {
+    var row = {
+      id: id, title: fields.title, date: fields.date, time: fields.time, endDate: fields.endDate, endTime: fields.endTime,
+      venue: fields.venue, address: fields.address, capacity: fields.capacity, status: fields.status, category: fields.category,
+      fee: fields.fee, feeType: fields.feeType, childFee: fields.childFee, allowCompanions: fields.allowCompanions,
+      paymentMethod: fields.paymentMethod, paymentMethods: fields.paymentMethods, summary: fields.summary,
+      heroImageUrl: fields.heroImageUrl, posterUrl: fields.posterUrl, format: fields.format, publishAt: fields.publishAt,
+      regOpenDate: fields.regOpenDate, regCloseDate: fields.regCloseDate, belongings: fields.belongings,
+    };
+    if (fields.format === 'multi') {
+      row.sessions = wzDatedSessions().map(function (s) {
+        return { id: s.id || '', name: s.name || '', date: String(s.date).slice(0, 10), startTime: s.startTime || '', endTime: s.endTime || '', venue: s.venue || '' };
+      });
+    }
+    var hit = false;
+    M.events = arr(M.events).map(function (e) { if (e && String(e.id) === String(id)) { hit = true; return Object.assign({}, e, row); } return e; });
+    if (!hit) M.events.unshift(row);
+  }
+  /* ---- 書込(確認つき・二重送信ガード・失敗時非破壊・自動リトライなし) ---- */
+  function wzSave(kind) { // kind: 'mid'(途中保存) / 'final'(下書きとして保存) / 'publish'(公開する)
+    if (wzEd.busy) return;
+    wzKeep();
+    var bad = wzValidate(kind);
+    if (bad) { wzEd.confirm = ''; wzEd.err = bad.m; wzEd.errStep = bad.s; wzEd.step = bad.s; render(); return; }
+    if (DEMO) {
+      wzEd.confirm = '';
+      wzEd.notice = kind === 'mid'
+        ? 'デモ表示のため保存は行われません。実データでは下書きとして作成され、以降は同じ下書きへ上書き保存されます。'
+        : 'デモ表示のため作成は行われません。実データでは' + (kind === 'publish' ? '「公開中」で保存されて参加者サイトに掲載' : '下書きとして保存') + 'され、選択した配信下書きが作られ、イベントのページへ移動します。';
+      render();
+      return;
+    }
+    wzEd.busy = true; wzEd.err = ''; wzEd.errStep = 0; wzEd.notice = '';
+    render();
+    wzSaveRun(kind).catch(function (e) {
+      wzEd.busy = false; wzEd.confirm = '';
+      if (e && e._auth) return;
+      wzEd.err = ((e && e.message) || '保存に失敗しました。') + ' 入力した内容は消えていません。もう一度お試しください(二重送信を避けるため自動での再送はしていません)。';
+      render();
+    });
+  }
+  async function wzSaveRun(kind) {
+    var fields = wzFields(kind === 'publish' ? '公開中' : '下書き');
+    var id = wzEd.draftId;
+    if (!id) {
+      var r = await API.postData('createEvent', fields); // consoleと同じ: fields直渡し
+      id = (r && r.event && r.event.id) || (r && r.id) || '';
+      if (!id) throw new Error('作成の応答にイベントIDがありません');
+      wzEd.draftId = id;
+    } else {
+      await API.postData('updateEvent', { eventId: id, fields: fields });
+    }
+    var sessFail = 0;
+    if (fields.format === 'multi') sessFail = await wzSyncSessions(id);
+    wzMergeLocal(id, fields);
+    cacheSave();
+    var d = new Date();
+    wzEd.savedAt = d.getHours() + ':' + pad2(d.getMinutes());
+    wzEd.busy = false;
+    wzEd.confirm = '';
+    if (sessFail > 0) { // 本体は保存済み。未保存の行だけ次の保存で再送される(IDが付いた行は更新になる)
+      wzEd.err = 'イベント本体は保存しましたが、日程' + sessFail + '行の保存に失敗しました。もう一度保存すると未保存の行だけ再送します。';
+      render();
+      return;
+    }
+    if (kind === 'mid') {
+      wzEd.notice = '下書きとして保存しました(' + wzEd.savedAt + ')。このまま続けられます。';
+      render();
+      return;
+    }
+    var cmFail = await wzCreateComms(id, fields);
+    if (cmFail > 0) { // イベントは保存済み=偽完了にせず正直に告知して留まる
+      wzEd.notice = (kind === 'publish' ? '公開しました。' : '下書きとして保存しました。') +
+        'ただし配信下書き' + cmFail + '件の作成に失敗しました ― ハブの配信タイムラインから追加できます。';
+      wzEd.doneId = id;
+      render();
+      return;
+    }
+    wzEd.done = true; // 次に #/new を開いたら新規から
+    location.hash = '#/ev/' + encodeURIComponent(id);
+  }
+  async function wzSyncSessions(id) {
+    var dels = wzEd.delSess.slice();
+    for (var i = 0; i < dels.length; i++) { // 削除は逐次(consoleと同じ安全側)
+      var sid = dels[i];
+      try {
+        await API.postData('deleteEventSession', { sessionId: sid });
+        wzEd.delSess = wzEd.delSess.filter(function (x) { return x !== sid; });
+      } catch (e) { /* 次回の保存で再試行 */ }
+    }
+    var rows = wzDatedSessions(); // 日付のある行だけ書く(consoleの保存時バリデーションと同じ理由)
+    var rs = await Promise.allSettled(rows.map(function (s, i2) {
+      var sp = { eventId: id, order: i2 + 1, name: s.name || '', date: s.date || '', startTime: s.startTime || '', endTime: s.endTime || '',
+        venue: s.venue || '', address: s.address || '', online: !!s.online, zoomURL: s.zoomURL || '', capacity: num(s.capacity), fee: num(s.fee),
+        notes: s.notes || '', timetable: s.timetable || '', geo: s.geo || '', region: s.region || '',
+        name_easy: s.name_easy || '', name_en: s.name_en || '', venue_easy: s.venue_easy || '', venue_en: s.venue_en || '',
+        notes_easy: s.notes_easy || '', notes_en: s.notes_en || '' };
+      return (s.id && String(s.id).indexOf('ES-') === 0)
+        ? API.postData('updateEventSession', { sessionId: s.id, fields: sp })
+        : API.postData('createEventSession', sp).then(function (r) {
+          var sid2 = r && r.session && r.session.id;
+          if (sid2) s.id = sid2; // 以降の保存は更新になる(二重作成の防止)
+        });
+    }));
+    return rs.filter(function (x) { return x.status === 'rejected'; }).length;
+  }
+  async function wzCreateComms(id, fields) {
+    var keys = [];
+    if (wzEd.commReminder) keys.push('reminder');
+    if (wzEd.commThanks) keys.push('thanks');
+    if (!keys.length) return 0;
+    var evLike = { id: id, title: fields.title, date: fields.date, endDate: fields.endDate, time: fields.time, endTime: fields.endTime,
+      venue: fields.venue, address: fields.address, belongings: fields.belongings };
+    var rs = await Promise.allSettled(keys.map(function (k) {
+      var t = cmTemplate(evLike, k); // commsタブと同じ雛形(sendAt=前日20:00 / 翌日18:00)
+      return API.postData('saveEventComm', { eventId: id, kind: t.kind, sendAt: t.sendAt || '', audience: t.audience, subject: t.subject, body: t.body, status: 'draft' });
+    }));
+    delete CM[id]; // 次にハブを開いたとき取得し直す
+    return rs.filter(function (x) { return x.status === 'rejected'; }).length;
+  }
+  function wzVenueSave() {
+    if (wzEd.busy) return;
+    wzKeep();
+    var f = wzEd.f;
+    if (!String(f.venue || '').trim()) { wzEd.confirm = ''; wzEd.err = 'ライブラリに保存するには、先に会場名を入れてください。'; wzEd.errStep = 2; render(); return; }
+    if (DEMO) { wzEd.confirm = ''; wzEd.notice = 'デモ表示のため保存は行われません。実データでは会場ライブラリに追加されます。'; render(); return; }
+    wzEd.busy = true; wzEd.err = ''; wzEd.errStep = 0; wzEd.notice = '';
+    render();
+    API.postData('saveVenue', { name: String(f.venue).trim(), address: f.address || '' }).then(function () {
+      wzEd.busy = false; wzEd.confirm = '';
+      wzEd.notice = '会場「' + String(f.venue).trim() + '」をライブラリに保存しました。';
+      VN.fetched = false; VN.err = false;
+      loadWizExtras();
+      render();
+    }, function (e) {
+      wzEd.busy = false; wzEd.confirm = '';
+      if (e && e._auth) return;
+      wzEd.err = ((e && e.message) || '会場の保存に失敗しました。') + ' 入力した内容は消えていません。';
+      render();
+    });
+  }
+  function loadWizExtras() { // カテゴリ(listDepartments)+会場ライブラリ(listVenues)。アシマネ+のみ
+    if (DEMO) return;
+    if (!M.me || M.me.rank < 2) return; // 役職未判明のうちはfetchしない(他ローダーと同じ)
+    var jobs = [];
+    if (!WZX.loading && !WZX.fetched) {
+      WZX.loading = true;
+      jobs.push(API.fetchData('listDepartments', {}).then(
+        function (d) { WZX.depts = arr(d); WZX.err = false; },
+        function () { WZX.err = true; if (WZX.depts === null) WZX.depts = []; }
+      ).then(function () { WZX.loading = false; WZX.fetched = true; }));
+    }
+    if (!VN.loading && !VN.fetched) {
+      VN.loading = true;
+      jobs.push(API.fetchData('listVenues', {}).then(
+        function (d) { VN.venues = arr(d); VN.err = false; },
+        function () { VN.err = true; if (VN.venues === null) VN.venues = []; }
+      ).then(function () { VN.loading = false; VN.fetched = true; }));
+    }
+    if (!jobs.length) return;
+    Promise.all(jobs).then(function () {
+      if (unauthShown) return;
+      if (route().view === 'new') { wzKeep(); render(); } // 入力を退避してから差し替え
+    });
+  }
+  /* ---- 描画 ---- */
+  function wzErrline(n) { return (wzEd.err && wzEd.errStep === n) ? '<p class="edit-err">' + esc(wzEd.err) + '</p>' : ''; }
+  function wfld(id, label, req, inner, hint) {
+    var badge = req === 'req' ? '<em class="wz-req nb">必須</em>' : req === 'pub' ? '<em class="wz-pub nb">公開までに</em>' : req === 'opt' ? '<em class="wz-opt nb">任意</em>' : '';
+    return '<div class="wf"><label class="wf-l" for="' + id + '">' + label + badge + '</label>' + inner +
+      (hint ? '<p class="wf-hint">' + hint + '</p>' : '') + '</div>';
+  }
+  function winput(id, val, type, ph) {
+    return '<input id="' + id + '" type="' + (type || 'text') + '" value="' + esc(val == null ? '' : val) + '"' + (ph ? ' placeholder="' + esc(ph) + '"' : '') + '>';
+  }
+  function wzStepsHtml() {
+    var h = '<div class="wz-steps glass" role="group" aria-label="作成の段階">';
+    WZ_STEPS.forEach(function (t, i) {
+      var n = i + 1;
+      h += '<button type="button" data-wzstep="' + n + '"' + (wzEd.step === n ? ' aria-current="step"' : '') +
+        ' class="' + (n < wzEd.step ? 'done' : n === wzEd.step ? 'now' : '') + '">' +
+        '<span class="n">' + (n < wzEd.step ? '✓' : n) + '</span><span class="t nb">' + t + '</span></button>';
+      if (n < 4) h += '<span class="sep" aria-hidden="true"></span>';
+    });
+    h += '</div><p class="wz-pos">4段階中の' + wzEd.step + '段階め' +
+      (wzEd.step < 4 ? ' ― <span class="nb">残り' + (4 - wzEd.step) + '段階</span>。途中でも下書き保存できます。' : ' ― 最後に内容を確かめてから保存/公開します。') + '</p>';
+    return h;
+  }
+  function wzStep1Html() {
+    var f = wzEd.f;
+    var dupOpts = '<option value="">選んでください</option>' + wzSourceList().map(function (e) {
+      var d = parseYmd(evDate(e));
+      return '<option value="' + esc(e.id) + '"' + (wzEd.dupSel === String(e.id) ? ' selected' : '') + '>' +
+        esc((d ? dateSlash(d) + ' ' : '') + evTitle(e)) + '</option>';
+    }).join('');
+    var deptList = (DEMO ? DEMO_DEPTS : arr(WZX.depts)).filter(function (d) { return d && d.status !== 'archived' && d.status !== 'アーカイブ'; });
+    var seen = false;
+    var catOpts = '<option value="">選んでください</option>' + deptList.map(function (d) {
+      var k = d.abbr || d.name;
+      if (!k) return '';
+      if (k === f.category) seen = true;
+      return '<option value="' + esc(k) + '"' + (f.category === k ? ' selected' : '') + '>' +
+        esc(d.abbr ? d.abbr + (d.name && d.name !== d.abbr ? '(' + d.name + ')' : '') : d.name) + '</option>';
+    }).join('');
+    if (f.category && !seen) catOpts += '<option value="' + esc(f.category) + '" selected>' + esc(f.category) + '</option>';
+    var catInner;
+    // 読み込み中のselectには wz-cat のIDを与えない(wzKeepが「読み込み中…」をカテゴリとして拾う事故防止)
+    if (!DEMO && WZX.depts === null) catInner = '<select id="wz-cat-loading" disabled aria-label="カテゴリ"><option>部署を読み込み中…</option></select>';
+    else if (!DEMO && WZX.err && !deptList.length) catInner = winput('wz-cat', f.category, 'text', '部署の略称(例: IFT)'); // 取得失敗でも作成は止めない
+    else catInner = '<select id="wz-cat">' + catOpts + '</select>';
+    return '<section class="wz-step" aria-label="基本">' + wzErrline(1) +
+      '<h2 class="sec">前回から複製</h2>' +
+      '<div class="wz-dup">' +
+      '<select id="wz-dup" aria-label="複製元のイベント">' + dupOpts + '</select>' +
+      '<button type="button" class="rowbtn nb" data-wzdup="1">この内容を流し込む</button>' +
+      (wzEd.srcLoading ? '<span class="wf-hint nb">複製元の日程を読み込み中…</span>' : '') +
+      '</div>' +
+      '<p class="wf-hint">タイトル・説明・料金・同伴設定など全項目が入ります。日付は前回のままなので、②で新しい日付に変えてください。</p>' +
+      '<h2 class="sec">このイベントについて</h2>' +
+      wfld('wz-title', 'タイトル', 'req', winput('wz-title', f.title, 'text', '例: 秋の国際交流ピクニック')) +
+      wfld('wz-cat', 'カテゴリ(担当部署)', 'req', catInner) +
+      wfld('wz-tags', '区分タグ', 'opt', winput('wz-tags', f.tags, 'text', '例: 交流会, 文化体験(カンマ区切り)'), 'KPIの種別分析で使われます。') +
+      wfld('wz-summary', '説明', 'opt', '<textarea id="wz-summary" rows="4" placeholder="イベントの内容・見どころ・対象者など">' + esc(f.summary) + '</textarea>') +
+      wfld('wz-hero', '写真URL(横長)', 'pub', winput('wz-hero', f.heroImageUrl, 'url', 'https://…(16:9推奨)'), '一覧の特集と参加者ページの背景に使われます。アップロードで載せる場合は console から。') +
+      '</section>';
+  }
+  function wzVenueLibHtml() {
+    var vs = arr(VN.venues).filter(function (v) { return v && v.active !== false; });
+    var inner;
+    if (!DEMO && VN.venues === null) inner = '<p class="wf-hint">会場ライブラリを読み込み中…</p>';
+    else if (!vs.length) inner = '<p class="wf-hint">登録された会場はまだありません。会場名と住所を入れて「ライブラリに保存」(マネージャー以上)で、次回から使い回せます。</p>';
+    else {
+      var opts = '<option value="">選んでください</option>' + vs.map(function (v) {
+        return '<option value="' + esc(v.id) + '"' + (wzEd.vlibSel === String(v.id) ? ' selected' : '') + '>' +
+          esc(v.name + (v.address ? ' ― ' + v.address : '')) + '</option>';
+      }).join('');
+      inner = '<div class="wz-vlib"><select id="wz-vlib" aria-label="会場ライブラリ">' + opts + '</select>' +
+        '<button type="button" class="rowbtn nb" data-wzvuse="1">この会場を入れる</button></div>' +
+        '<p class="wf-hint">選ぶと下の会場名・住所に書き写します(イベントには文字として保存されます)。</p>';
+    }
+    var save = '';
+    if (DEMO || (M.me && M.me.rank >= 3)) { // saveVenue はマネージャー+
+      save = wzEd.confirm === 'venue'
+        ? '<span class="xconfirm"><span>会場「' + esc(String(wzEd.f.venue || '').trim() || '(未入力)') + '」をライブラリに保存しますか?</span>' +
+          '<button type="button" class="yes nb" data-wzgo="venue"' + (wzEd.busy ? ' disabled' : '') + '>' + (wzEd.busy ? '保存中…' : '保存する') + '</button>' +
+          '<button type="button" class="no" data-wzno="1">やめる</button></span>'
+        : '<button type="button" class="rowlink nb" data-wzvsave="1">いまの会場をライブラリに保存</button>';
+    }
+    return '<div class="wz-vlibrow"><span class="wf-l">会場ライブラリ<em class="wz-opt nb">任意</em></span>' + inner + save + '</div>';
+  }
+  function wzSessRowsHtml() {
+    var h = '<div class="wz-sess">';
+    if (wzEd.sessions.length) {
+      h += '<div class="sr head"><span>日付</span><span>開始</span><span>終了</span><span>名前</span><span>会場</span><span></span></div>';
+      wzEd.sessions.forEach(function (s, i) {
+        h += '<div class="sr">' +
+          '<input id="wz-sd-' + i + '" type="date" value="' + esc(s.date || '') + '" aria-label="Day' + (i + 1) + 'の日付">' +
+          '<input id="wz-sst-' + i + '" type="time" value="' + esc(s.startTime || '') + '" aria-label="開始時刻">' +
+          '<input id="wz-set-' + i + '" type="time" value="' + esc(s.endTime || '') + '" aria-label="終了時刻">' +
+          '<input id="wz-sn-' + i + '" value="' + esc(s.name || '') + '" placeholder="' + (i + 1) + '日目" aria-label="名前">' +
+          '<input id="wz-sv-' + i + '" value="' + esc(s.venue || '') + '" placeholder="会場" aria-label="会場">' +
+          '<button type="button" class="sr-del" data-wzsdel="' + s._k + '" aria-label="この日を削除"><span class="mi">close</span></button>' +
+          '</div>';
+      });
+    } else {
+      h += '<p class="wf-hint">「日を追加」で開催日を1日ずつ足します(例: 2泊3日の合宿=3行)。</p>';
+    }
+    h += '</div><button type="button" class="sr-add" data-wzsadd="1"><span class="mi">add</span>日を追加</button>';
+    return h;
+  }
+  function wzStep2Html() {
+    var f = wzEd.f;
+    var seg = '<div class="wz-seg" role="group" aria-label="開催形式">' +
+      '<button type="button" data-wzfmt="single" aria-pressed="' + (f.format !== 'multi') + '">単日</button>' +
+      '<button type="button" data-wzfmt="multi" aria-pressed="' + (f.format === 'multi') + '">複数日</button></div>';
+    var h = '<section class="wz-step" aria-label="日程・会場">' + wzErrline(2) +
+      '<h2 class="sec">開催形式</h2>' + seg;
+    if (f.format === 'multi') {
+      h += '<h2 class="sec">開催日(複数日)</h2>' + wzSessRowsHtml() +
+        '<p class="wf-hint">日付の順に<span class="nb">Day1, Day2…</span>と数えます。参加費は③で決める一律(何日選んでも同額・初日に計上)。Day個別の料金・定員は console から。</p>' +
+        '<h2 class="sec">代表の会場</h2>' + wzVenueLibHtml() +
+        wfld('wz-venue', '会場名(一覧・案内に出ます)', 'pub', winput('wz-venue', f.venue, 'text', '例: 河口湖 青少年交流の家')) +
+        wfld('wz-addr', '住所', 'opt', winput('wz-addr', f.address, 'text', '例: 山梨県南都留郡…'));
+    } else {
+      h += '<h2 class="sec">日どり</h2>' +
+        '<div class="wz-grid2">' +
+        wfld('wz-date', '開催日', 'pub', winput('wz-date', f.date, 'date')) +
+        wfld('wz-time', '開始時刻', 'opt', winput('wz-time', f.time, 'time')) +
+        wfld('wz-enddate', '終了日(泊まりのみ)', 'opt', winput('wz-enddate', f.endDate, 'date')) +
+        wfld('wz-endtime', '終了時刻', 'opt', winput('wz-endtime', f.endTime, 'time')) +
+        '</div>' +
+        '<h2 class="sec">会場</h2>' +
+        '<div class="wf"><span class="wf-l">開催のかたち</span>' +
+        '<button type="button" class="wz-chk' + (f.online ? ' on' : '') + '" data-wztgl="online" aria-pressed="' + !!f.online + '"><span class="bx">' + (f.online ? '✓' : '') + '</span>オンラインで開催する</button></div>';
+      if (f.online) {
+        h += wfld('wz-zoom', 'Zoom URL', 'opt', winput('wz-zoom', f.zoomURL, 'url', 'https://zoom.us/j/…'));
+      } else {
+        h += wzVenueLibHtml() +
+          wfld('wz-venue', '会場名', 'pub', winput('wz-venue', f.venue, 'text', '例: 代々木公園 中央広場')) +
+          wfld('wz-addr', '住所', 'opt', winput('wz-addr', f.address, 'text', '例: 東京都渋谷区…'), '地図と当日の案内に使われます。');
+      }
+    }
+    return h + '</section>';
+  }
+  function wzStep3Html() {
+    var f = wzEd.f;
+    var segFee = '<div class="wz-seg" role="group" aria-label="料金タイプ">' +
+      '<button type="button" data-wzfee="paid" aria-pressed="' + (f.feeType === 'paid') + '">有料</button>' +
+      '<button type="button" data-wzfee="free" aria-pressed="' + (f.feeType === 'free') + '">無料</button></div>';
+    var h = '<section class="wz-step" aria-label="料金・受付">' + wzErrline(3) +
+      '<h2 class="sec">参加費</h2>' + segFee;
+    if (f.feeType === 'free') {
+      h += '<p class="wf-hint">無料イベントとして案内されます。</p>';
+    } else {
+      var pmBtns = WZ_PMS.map(function (p) {
+        var on = f.paymentMethods.indexOf(p) >= 0;
+        return '<button type="button" class="wz-chk' + (on ? ' on' : '') + '" data-wzpm="' + esc(p) + '" aria-pressed="' + on + '"><span class="bx">' + (on ? '✓' : '') + '</span>' + esc(p) + '</button>';
+      }).join('');
+      h += '<div class="wz-grid2">' +
+        wfld('wz-fee', '参加費(円)', 'pub', winput('wz-fee', f.fee, 'number', '例: 1500')) +
+        '<div class="wf"><span class="wf-l">決済方法<em class="wz-pub nb">公開までに</em></span><div class="wz-pms">' + pmBtns + '</div></div>' +
+        '</div>';
+      if (f.paymentMethods.indexOf('PayPay') >= 0) {
+        h += wfld('wz-paypay', 'PayPayリンク', 'opt', winput('wz-paypay', f.paymentUrl_paypay, 'url', 'https://pay.paypay.ne.jp/…'), '保存するとPayPay決済管理にも登録されます。');
+      }
+      if (f.feeMode === 'per_session') h += '<p class="wf-hint">複製元は<span class="nb">セッション個別料金</span>です。その設定は引き継がれます(個別金額の変更は console から)。</p>';
+    }
+    h += '<h2 class="sec">同伴者とこども</h2>' +
+      '<div class="wf"><span class="wf-l">同伴者の受付</span>' +
+      '<button type="button" class="wz-chk' + (f.allowCompanions ? ' on' : '') + '" data-wztgl="allowCompanions" aria-pressed="' + !!f.allowCompanions + '"><span class="bx">' + (f.allowCompanions ? '✓' : '') + '</span>同伴者の申込を受け付ける</button>' +
+      (!f.allowCompanions && num(f.childFee) > 0 ? '<p class="wf-hint wz-warnline">子ども料金 ' + money(f.childFee) + '円 が設定されたままです ― こども連れを受けるならONにしてください。</p>' : '') +
+      '</div>';
+    if (f.allowCompanions) {
+      h += '<div class="wz-grid2">' +
+        wfld('wz-childfee', 'こども料金(円)', 'opt', winput('wz-childfee', f.childFee, 'number', '例: 500'), '年齢は申込時の生年月日からサーバーが判定します。') +
+        wfld('wz-childage', 'こどもの年齢上限(歳)', 'opt', winput('wz-childage', f.childAgeMax, 'number', '12')) +
+        wfld('wz-maxcomp', '同伴者の上限(名 / 0=無制限)', 'opt', winput('wz-maxcomp', f.maxCompanions, 'number')) +
+        '<div class="wf"><span class="wf-l">定員のカウント</span>' +
+        '<button type="button" class="wz-chk' + (f.companionCountsToCapacity ? ' on' : '') + '" data-wztgl="companionCountsToCapacity" aria-pressed="' + !!f.companionCountsToCapacity + '"><span class="bx">' + (f.companionCountsToCapacity ? '✓' : '') + '</span>同伴者も定員に数える</button></div>' +
+        '</div>';
+    }
+    h += '<h2 class="sec">定員</h2>' +
+      wfld('wz-cap', '定員(名 / 0=無制限)', 'pub', winput('wz-cap', f.capacity, 'number', '例: 30'), '満席判定と残り枠の表示に使われます。') +
+      '<h2 class="sec">写真と同意事項</h2>' +
+      '<p class="wz-note">写真の希望は<span class="nb">参加者が申込のとき3択</span>で選びます(みんなの思い出に / 公開はしないで / 撮影もNG)。イベント側の設定は不要で、選んだ内容は申込一覧と受付に表示されます。</p>' +
+      wfld('wz-policy', '申込時の同意事項(ポリシー)', 'pub',
+        '<textarea id="wz-policy" rows="4" placeholder="・写真撮影が行われ、SNS等で利用される可能性があります&#10;・キャンセルは開催3日前までにご連絡ください">' + esc(f.policy_ja) + '</textarea>',
+        '未設定だと参加者は申込できません。写真撮影・SNS掲載の可能性もここに明記します。');
+    return h + '</section>';
+  }
+  function wzConfirmRows() {
+    var f = wzEd.f;
+    var dated = wzDatedSessions();
+    var rows = [];
+    rows.push(['タイトル', esc(String(f.title || '').trim()) || '―']);
+    rows.push(['カテゴリ', esc(f.category || '') || '―']);
+    if (String(f.tags || '').trim()) rows.push(['区分', esc(f.tags)]);
+    rows.push(['説明', f.summary ? esc(String(f.summary).slice(0, 60)) + (String(f.summary).length > 60 ? '…' : '') : '―']);
+    rows.push(['写真', (f.heroImageUrl || f.posterUrl) ? 'あり' : 'なし']);
+    if (f.format === 'multi') {
+      rows.push(['開催形式', '複数日(全' + dated.length + '日)']);
+      rows.push(['日程', dated.length ? dated.map(function (s, i) {
+        var d = parseYmd(s.date);
+        return '<span class="nb">Day' + (i + 1) + ' ' + (d ? dateSlash(d) : '') + (s.startTime ? ' ' + esc(String(s.startTime).slice(0, 5)) : '') + '</span>';
+      }).join(' ・ ') : '日付未設定']);
+      rows.push(['会場', esc(f.venue || '') || (dated.some(function (s) { return s.venue; }) ? '各Dayの行のとおり' : '未定')]);
+    } else {
+      rows.push(['開催形式', '単日' + (f.online ? '(オンライン)' : '')]);
+      var d0 = parseYmd(f.date);
+      rows.push(['日程', d0 ? '<span class="nb">' + esc(dateJa(d0)) + '</span>' + (f.time ? ' <span class="nb">' + esc(String(f.time).slice(0, 5)) + (f.endTime ? '–' + esc(String(f.endTime).slice(0, 5)) : '') + '</span>' : '') : '未設定']);
+      rows.push(['会場', f.online ? ('オンライン' + (f.zoomURL ? '(Zoomリンクあり)' : '')) : ((esc(f.venue || '') || '未定') + (f.address ? ' <span class="nb">(' + esc(f.address) + ')</span>' : ''))]);
+    }
+    rows.push(['参加費', f.feeType === 'free' ? '無料' : (num(f.fee) > 0 ? '<span class="nb">' + money(f.fee) + '円</span> ・ 決済=' + esc(arr(f.paymentMethods).join('/')) : '未設定')]);
+    rows.push(['同伴・こども', f.allowCompanions
+      ? '受け付ける' + (num(f.childFee) > 0 ? ' ・ <span class="nb">こども' + money(f.childFee) + '円</span>(' + (num(f.childAgeMax) || 12) + '歳以下)' : '') +
+        (num(f.maxCompanions) > 0 ? ' ・ 上限' + num(f.maxCompanions) + '名' : '') + (f.companionCountsToCapacity ? '' : ' ・ 定員に数えない')
+      : '受け付けない']);
+    rows.push(['定員', num(f.capacity) > 0 ? num(f.capacity) + '名' : '無制限']);
+    rows.push(['写真の希望', '参加者が申込時に3択で選択(撮影NGはスタッフに共有されます)']);
+    rows.push(['同意事項', String(f.policy_ja || '').trim() ? '設定済み(' + String(f.policy_ja).trim().length + '文字)' : '未設定']);
+    rows.push(['公開予約', f.publishAt ? esc(String(f.publishAt).replace('T', ' ')) : 'なし(下のボタンで公開)']);
+    return rows;
+  }
+  function wzStep4Html() {
+    var f = wzEd.f;
+    var checks = wzChecks();
+    var warn;
+    if (checks.length) {
+      warn = '<div class="wz-warn"><b class="nb">公開前チェック ― あと' + checks.length + '件</b><ul>' + checks.map(function (c) {
+        return '<li>' + esc(c.t) + ' <button type="button" class="rowlink nb" data-wzstep="' + c.s + '">' + ['①基本', '②日程・会場', '③料金・受付'][c.s - 1] + 'で直す</button></li>';
+      }).join('') + '</ul><p>下書き保存はこのままできます。公開する前に直すのがおすすめです。</p></div>';
+    } else {
+      warn = '<p class="wz-ok">公開前チェックOK ― 参加者ページに必要な項目は揃っています。</p>';
+    }
+    var facts = '<h2 class="sec">この内容で保存します</h2><dl class="facts wz-facts">' + wzConfirmRows().map(function (r) {
+      return '<div class="f"><dt>' + r[0] + '</dt><dd>' + r[1] + '</dd></div>';
+    }).join('') + '</dl>';
+    var pub = '<h2 class="sec">公開のしかた</h2>' +
+      wfld('wz-pubat', '公開予約日時', 'opt', winput('wz-pubat', f.publishAt, 'datetime-local'), '「下書き」でも公開予約日時を過ぎると参加者サイトで自動公開されます。すぐ公開するなら下の「公開する」。');
+    var comms = '<h2 class="sec">配信の下書きも用意</h2>' +
+      '<p class="wz-note">保存と同時に、配信タイムラインへ<span class="nb">下書き</span>を作ります(まだ送信されません。予約はハブの配信タイムラインから)。</p>' +
+      '<div class="wz-comms">' +
+      '<button type="button" class="wz-chk' + (wzEd.commReminder ? ' on' : '') + '" data-wztgl="commReminder" aria-pressed="' + wzEd.commReminder + '"><span class="bx">' + (wzEd.commReminder ? '✓' : '') + '</span>前日リマインド<span class="sub nb">初日前日の20:00に送る想定の雛形</span></button>' +
+      '<button type="button" class="wz-chk' + (wzEd.commThanks ? ' on' : '') + '" data-wztgl="commThanks" aria-pressed="' + wzEd.commThanks + '"><span class="bx">' + (wzEd.commThanks ? '✓' : '') + '</span>お礼+アンケート<span class="sub nb">最終日翌日の18:00に送る想定の雛形</span></button>' +
+      '</div>';
+    var cta;
+    if (wzEd.confirm === 'final') {
+      cta = '<span class="xconfirm"><span>下書きとして保存します。参加者にはまだ公開されません。</span>' +
+        '<button type="button" class="yes nb" data-wzgo="final"' + (wzEd.busy ? ' disabled' : '') + '>' + (wzEd.busy ? '保存中…' : '保存する') + '</button>' +
+        '<button type="button" class="no" data-wzno="1">やめる</button></span>';
+    } else if (wzEd.confirm === 'publish') {
+      cta = '<span class="xconfirm"><span>公開すると参加者サイトに掲載され、申込の受付が始まります。</span>' +
+        '<button type="button" class="yes nb" data-wzgo="publish"' + (wzEd.busy ? ' disabled' : '') + '>' + (wzEd.busy ? '公開中…' : '公開する') + '</button>' +
+        '<button type="button" class="no" data-wzno="1">やめる</button></span>';
+    } else {
+      cta = '<button type="button" class="btn sub nb" data-wzfinal="1"' + (wzEd.busy ? ' disabled' : '') + '>下書きとして保存</button>' +
+        '<button type="button" class="btn nb" data-wzpub="1"' + (wzEd.busy ? ' disabled' : '') + '>公開する</button>';
+    }
+    return '<section class="wz-step" aria-label="公開と確認">' + wzErrline(4) + warn + facts + pub + comms +
+      '<div class="wz-cta">' + cta + '</div></section>';
+  }
+  function wzFootHtml() {
+    if (wzEd.step === 4) return ''; // ④のCTAはステップ内(保存/公開)
+    var mid;
+    if (wzEd.confirm === 'create') {
+      mid = '<span class="xconfirm"><span>「' + esc(String(wzEd.f.title || '').trim()) + '」を下書きとして作成します(一覧に載ります・参加者には非公開)。</span>' +
+        '<button type="button" class="yes nb" data-wzgo="create"' + (wzEd.busy ? ' disabled' : '') + '>' + (wzEd.busy ? '作成中…' : '作成する') + '</button>' +
+        '<button type="button" class="no" data-wzno="1">やめる</button></span>';
+    } else {
+      mid = '<button type="button" class="rowlink nb" data-wzdraft="1"' + (wzEd.busy ? ' disabled' : '') + '>' + (wzEd.busy ? '保存中…' : (wzEd.draftId ? '下書きを上書き保存' : 'ここまでを下書き保存')) + '</button>';
+    }
+    return '<div class="wz-foot">' +
+      '<button type="button" class="rowbtn nb" data-wzprev="1"' + (wzEd.step === 1 ? ' disabled' : '') + '>← 前へ</button>' +
+      '<span class="spacer"></span>' + mid +
+      '<button type="button" class="btn nb" data-wznext="1">次へ ― ' + WZ_STEPS[wzEd.step] + '</button>' +
+      '</div>';
+  }
+  function renderWizard(r) {
+    document.body.classList.remove('has-tabbtn');
+    var head = mastheadHtml(editChrome());
+    var back = '<a class="back" href="#/"><span class="mi">arrow_back</span>イベント一覧へ</a>';
+    if (!DEMO && M.me && M.me.rank < 2) {
+      root.innerHTML = head + back + '<div class="pagehead"><h1>新しいイベント</h1></div>' +
+        (rankUnknown_() ? '<p class="stub-line">権限を確認しています…</p>' : '<p class="stub-line">イベントの作成にはアシスタントマネージャー以上の権限が必要です。</p>') +
+        colophonHtml('新しいイベント');
+      return;
+    }
+    if (!wzEd.inited || wzEd.done || wzEd.from !== String(r.from || '')) wizInit(r.from || '');
+    if (DEMO) seedDemoWiz(); else loadWizExtras();
+    var sub = wzEd.draftId
+      ? '下書き ' + wzEd.draftId + ' として保存済み' + (wzEd.savedAt ? '(' + wzEd.savedAt + ')' : '')
+      : (wzEd.fromTitle ? '「' + wzEd.fromTitle + '」から複製' : '4段階で作成 ・ 途中でも下書き保存できます');
+    var stepHtml = wzEd.step === 1 ? wzStep1Html() : wzEd.step === 2 ? wzStep2Html() : wzEd.step === 3 ? wzStep3Html() : wzStep4Html();
+    root.innerHTML = head + back +
+      '<div class="pagehead"><h1>新しいイベント</h1><span class="count">' + esc(sub) + '</span></div>' +
+      wzStepsHtml() +
+      '<div class="wz">' + stepHtml + '</div>' +
+      wzFootHtml() +
+      ((wzEd.err && !wzEd.errStep) ? '<p class="edit-err">' + esc(wzEd.err) + '</p>' : '') +
+      (wzEd.notice ? '<p class="opnote" role="status">' + esc(wzEd.notice) +
+        (wzEd.doneId ? ' <a class="rowlink nb" href="#/ev/' + encodeURIComponent(wzEd.doneId) + '">イベントを開く</a>' : '') + '</p>' : '') +
+      colophonHtml('新しいイベント');
+    bindWizard();
+  }
+  function bindWizard() {
+    function on(sel, fn) {
+      Array.prototype.forEach.call(root.querySelectorAll(sel), function (b) {
+        b.addEventListener('click', function () { fn(b); });
+      });
+    }
+    function jump(step) { wzEd.step = Math.max(1, Math.min(4, step)); wzEd.confirm = ''; wzEd.err = ''; wzEd.errStep = 0; render(); }
+    on('[data-wzstep]', function (b) { if (wzEd.busy) return; wzKeep(); jump(num(b.getAttribute('data-wzstep'))); });
+    on('[data-wznext]', function () { if (wzEd.busy) return; wzKeep(); jump(wzEd.step + 1); });
+    on('[data-wzprev]', function () { if (wzEd.busy) return; wzKeep(); jump(wzEd.step - 1); });
+    on('[data-wzfmt]', function (b) { if (wzEd.busy) return; wzKeep(); wzEd.f.format = b.getAttribute('data-wzfmt') === 'multi' ? 'multi' : 'single'; render(); });
+    on('[data-wzfee]', function (b) { if (wzEd.busy) return; wzKeep(); wzEd.f.feeType = b.getAttribute('data-wzfee'); render(); });
+    on('[data-wzpm]', function (b) {
+      if (wzEd.busy) return;
+      wzKeep();
+      var p = b.getAttribute('data-wzpm');
+      var l = wzEd.f.paymentMethods;
+      if (l.indexOf(p) >= 0) { if (l.length > 1) wzEd.f.paymentMethods = l.filter(function (x) { return x !== p; }); } // 最後の1つは外せない(consoleと同じ)
+      else wzEd.f.paymentMethods = l.concat([p]);
+      render();
+    });
+    on('[data-wztgl]', function (b) {
+      if (wzEd.busy) return;
+      wzKeep();
+      var k = b.getAttribute('data-wztgl');
+      if (k === 'commReminder' || k === 'commThanks') { wzEd[k] = !wzEd[k]; render(); return; }
+      var f = wzEd.f;
+      f[k] = !f[k];
+      if (k === 'online') { // consoleと同じ: ON=会場が空なら「オンライン」/ OFF=「オンライン」なら空へ
+        if (f.online && !f.venue) f.venue = 'オンライン';
+        if (!f.online && f.venue === 'オンライン') f.venue = '';
+      }
+      render();
+    });
+    on('[data-wzdup]', function () {
+      if (wzEd.busy) return;
+      wzKeep();
+      if (!wzEd.dupSel) { wzEd.err = '複製元のイベントを選んでください。'; wzEd.errStep = 1; render(); return; }
+      var src = wzFindSource(wzEd.dupSel);
+      if (!src) { wzEd.err = '複製元が見つかりません。'; wzEd.errStep = 1; render(); return; }
+      wzApplySource(src);
+      wzEd.err = ''; wzEd.errStep = 0;
+      wzEd.notice = '「' + evTitle(src) + '」の内容を流し込みました。日付は②、公開のしかたは④で確かめてください。';
+      render();
+    });
+    on('[data-wzsadd]', function () { if (wzEd.busy) return; wzKeep(); wzEd.sessTouched = true; wzEd.sessions.push(wzNewRow()); render(); });
+    on('[data-wzsdel]', function (b) {
+      if (wzEd.busy) return;
+      wzKeep();
+      var k = num(b.getAttribute('data-wzsdel'));
+      wzEd.sessTouched = true;
+      wzEd.sessions = wzEd.sessions.filter(function (s) {
+        if (s._k === k) { if (s.id && String(s.id).indexOf('ES-') === 0) wzEd.delSess.push(s.id); return false; }
+        return true;
+      });
+      render();
+    });
+    on('[data-wzvuse]', function () {
+      if (wzEd.busy) return;
+      wzKeep();
+      var v = null;
+      arr(VN.venues).forEach(function (x) { if (x && String(x.id) === String(wzEd.vlibSel)) v = x; });
+      if (!v) { wzEd.err = '会場ライブラリから会場を選んでください。'; wzEd.errStep = 2; render(); return; }
+      wzEd.f.venue = v.name || '';
+      wzEd.f.address = v.address || '';
+      wzEd.err = ''; wzEd.errStep = 0;
+      wzEd.notice = '会場「' + (v.name || '') + '」の名前と住所を入れました。';
+      render();
+    });
+    on('[data-wzvsave]', function () { if (wzEd.busy) return; wzKeep(); wzEd.confirm = 'venue'; wzEd.err = ''; wzEd.errStep = 0; wzEd.notice = ''; render(); });
+    on('[data-wzdraft]', function () {
+      if (wzEd.busy) return;
+      wzKeep();
+      if (wzEd.draftId) { wzSave('mid'); return; } // 自分の下書きへの上書きは確認なし(作成の初回のみ確認)
+      var bad = wzValidate('mid');
+      if (bad) { wzEd.err = bad.m; wzEd.errStep = bad.s; wzEd.step = bad.s; render(); return; }
+      wzEd.confirm = 'create'; wzEd.err = ''; wzEd.errStep = 0; wzEd.notice = '';
+      render();
+    });
+    on('[data-wzfinal]', function () {
+      if (wzEd.busy) return;
+      wzKeep();
+      var bad = wzValidate('final');
+      if (bad) { wzEd.err = bad.m; wzEd.errStep = bad.s; wzEd.step = bad.s; render(); return; }
+      wzEd.confirm = 'final'; wzEd.err = ''; wzEd.errStep = 0; wzEd.notice = '';
+      render();
+    });
+    on('[data-wzpub]', function () {
+      if (wzEd.busy) return;
+      wzKeep();
+      var bad = wzValidate('publish');
+      if (bad) { wzEd.err = bad.m; wzEd.errStep = bad.s; wzEd.step = bad.s; render(); return; }
+      wzEd.confirm = 'publish'; wzEd.err = ''; wzEd.errStep = 0; wzEd.notice = '';
+      render();
+    });
+    on('[data-wzno]', function () { if (wzEd.busy) return; wzKeep(); wzEd.confirm = ''; render(); });
+    on('[data-wzgo]', function (b) {
+      var kind = b.getAttribute('data-wzgo');
+      if (kind === 'venue') { wzVenueSave(); return; }
+      wzSave(kind === 'create' ? 'mid' : kind);
+    });
+  }
+  /* ---- デモ(ウィザード): 複製元・部署・会場ライブラリ ---- */
+  function demoWizEvents() {
+    return [
+      Object.assign({}, DEMO_CAMP_EV, { category: 'IFT' }),
+      Object.assign({}, DEMO_PIC_EV, {
+        category: 'community',
+        heroImageUrl: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=1100&q=80',
+        summary: '公園に食べものを持ち寄って、ことばの壁なしで昼をすごす会。はじめての方も、そのまま来れば大丈夫。',
+        paymentMethods: 'PayPay,現金',
+        policy_ja: '・写真撮影が行われ、SNS等で利用される可能性があります\n・キャンセルは開催3日前までにご連絡ください',
+      }),
+    ];
+  }
+  function seedDemoWiz() {
+    if (VN.venues === null) {
+      VN.venues = [
+        { id: 'VN1', name: '代々木公園', address: '東京都渋谷区代々木神園町2-1', rainPlan: '原宿門インフォメーション前に変更 ― 10:00に判断し一斉連絡', active: true },
+        { id: 'VN2', name: '河口湖 青少年交流の家', address: '山梨県南都留郡富士河口湖町大石2585', rainPlan: '屋内プログラムに切替(体育館)', active: true },
+      ];
+    }
+  }
+
+  /* ============================================================================
      状態: 読込中 / エラー / ログイン / 見つからない
      ============================================================================ */
   function renderLoading() {
@@ -5612,6 +6528,7 @@ window.AdminAPI = (function () {
       head: demoHead(),
       tabs: { base: '#/ev/' + DEMO_ID, active: active || 'hub', unpaid: 4 },
       reception: './checkin.html' + QS + '#/ev/' + DEMO_ID,
+      dupHref: '#/new?from=' + DEMO_ID, // 複製(副操作)→ウィザードへ
       nums: demoNums(), numsNote: null,
       facts: [
         { dt: '日時', ddHtml: '<b><span class="nb">9月1日(火)</span> <span class="nb">12:00–15:00</span></b><span class="note">受付開始 11:30 ・ 運営集合 <span class="nb">11:00 原宿門</span></span>' },
@@ -6278,6 +7195,12 @@ window.AdminAPI = (function () {
   }
   function route() {
     var h = location.hash || '#/';
+    var mN = /^#\/new(?:\?([^#]*))?/.exec(h);
+    if (mN) { // 作成ウィザード。#/new?from=<id> = 複製元を指定
+      var from = '';
+      if (mN[1]) { var mq = /(?:^|&)from=([^&]*)/.exec(mN[1]); if (mq) from = decodeURIComponent(mq[1]); }
+      return { view: 'new', from: from };
+    }
     var m = /^#\/ev\/([^\/]+)(?:\/([a-z]+))?/.exec(h);
     if (m) return { view: m[2] || 'hub', id: decodeURIComponent(m[1]) };
     return { view: 'list' };
@@ -6286,6 +7209,7 @@ window.AdminAPI = (function () {
     var r = route();
     if (DEMO) {
       if (r.view === 'list') { renderList(demoListModel()); return; }
+      if (r.view === 'new') { renderWizard(r); return; } // 作成ウィザード(書込はスタブ)
       resetRegsState(r.id);
       resetPrepState(r.id);
       if (r.id === DEMO_ID2) { renderDemoCamp(r); return; } // 複数日デモは実ビルダー経由
@@ -6304,6 +7228,7 @@ window.AdminAPI = (function () {
     }
     if (M.events === null) { renderLoading(); return; }
     if (r.view === 'list') { renderList(buildListModel(M)); return; }
+    if (r.view === 'new') { renderWizard(r); return; } // 作成ウィザード(実書込)
     var ev = findEvent(r.id);
     if (!ev) {
       if (!loadedOnce) { renderLoading(); return; } // 深いリンク直開き: 実データ到着待ち
@@ -6359,7 +7284,7 @@ window.AdminAPI = (function () {
        超軽量 getDataGen(認証済み応答にuserが同梱される)で役職を解決して再描画する。 */
     if (API.hasSession() && !(window.currentUser && window.currentUser.member)) {
       API.fetchData('getDataGen', {}).then(function () {
-        if (window.currentUser && window.currentUser.member) { M.me = meModel(); try { render(); } catch (e) {} }
+        if (window.currentUser && window.currentUser.member) { M.me = meModel(); try { wzKeep(); } catch (e) {} try { render(); } catch (e) {} }
       }, function () {});
     }
     var cached = cacheLoad();
