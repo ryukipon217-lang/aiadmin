@@ -6,7 +6,7 @@
 <meta name="robots" content="noindex">
 <title>connec+a 運営ポータル</title>
 <meta name="description" content="connec+a 運営ポータル — 今日の紙面">
-<script>window.__ADMIN2_BUILD='20260902042348';</script>
+<script>window.__ADMIN2_BUILD='20260902061413';</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://script.google.com" crossorigin>
@@ -478,8 +478,9 @@ window.AdminAPI = (function () {
   var API = window.AdminAPI;
   var root = document.getElementById('app');
   var DEMO = /[?&]demo=1/.test(location.search);
-  // イベント面アプリへの結線(デモは ?demo=1 を引き継ぐ)。他の面は未実装なので # のまま。
+  // イベント面/組織面アプリへの結線(デモは ?demo=1 を引き継ぐ)。他の面は未実装なので # のまま。
   var EV_APP = './event.html' + (DEMO ? '?demo=1' : '');
+  var ORG_APP = './org.html' + (DEMO ? '?demo=1' : '');
   function evHubHref(id) { return EV_APP + '#/ev/' + encodeURIComponent(id); }
 
   /* ---------- 小道具 ---------- */
@@ -541,7 +542,7 @@ window.AdminAPI = (function () {
         (o.mePhoto ? '<img src="' + esc(o.mePhoto) + '" alt="">' : '') + '</div>';
     }
     right += '</div>';
-    var tabs = '<a href="#" aria-current="page">一面</a><a href="' + EV_APP + '#/">イベント</a><a href="#">発信</a><a href="#">組織</a>';
+    var tabs = '<a href="#" aria-current="page">一面</a><a href="' + EV_APP + '#/">イベント</a><a href="#">発信</a><a href="' + ORG_APP + '#/">組織</a>';
     if (o.showHq) tabs += '<a href="#">統括</a>';
     var nav = '';
     if (o.nav !== false) {
@@ -781,7 +782,7 @@ window.AdminAPI = (function () {
       index: [
         { cls: 'today', name: 'イベント面', href: evHubHref('EV-PIC'), headHtml: '<b>国際交流ピクニック、開場まで<span class="nb">あと3時間</span>。</b>未決済4名は<span class="nb">受付で案内</span>。', subHtml: '<img src="https://i.pravatar.cc/48?img=12" alt="">ケンタさんが最終準備中' },
         { cls: 'comms', name: '発信面', headHtml: '<span class="warn-t">問い合わせ2件が<span class="nb">返信待ち(英語)</span>。</span><span class="nb">ニュース下書き</span>が1本<span class="nb">レビュー待ち</span>。', subHtml: '<img src="https://i.pravatar.cc/48?img=44" alt="">ユイさんが執筆中' },
-        { cls: 'org', name: '組織面', headHtml: '今夜20:00 広報定例。前回の議事録は部署ハブに。', subHtml: '出席予定 6名' },
+        { cls: 'org', name: '組織面', href: ORG_APP + '#/', headHtml: '今夜20:00 広報定例。前回の議事録は部署ハブに。', subHtml: '出席予定 6名' },
         { cls: 'hq', name: '統括面', small: 'マネ以上', headHtml: '<span class="warn-t">アイシャさんの入会申請が<span class="nb">承認待ち</span>。</span>ほかの承認はありません。', subHtml: '<img src="https://i.pravatar.cc/48?img=68" alt="">昨日18:47 申請' },
         { cls: 'analytics', name: '分析面', small: 'マネ以上', headHtml: '今月の申込は<span class="nb">先月比<b> +18%</b></span>。<span class="nb">土曜開催</span>が伸びています。', subHtml: '9月1日 7:00 集計' },
       ],
@@ -1003,16 +1004,16 @@ window.AdminAPI = (function () {
       if (!nextMtg || md < cur) nextMtg = m;
     });
     if (d.meetingsPending) {
-      index.push({ cls: 'org', name: '組織面', headHtml: '読み込み中…', subHtml: '' });
+      index.push({ cls: 'org', name: '組織面', href: ORG_APP + '#/', headHtml: '読み込み中…', subHtml: '' });
     } else if (nextMtg) {
       var mdd = parseYmd(nextMtg.meetingDate || nextMtg.meeting_date);
       index.push({
-        cls: 'org', name: '組織面',
+        cls: 'org', name: '組織面', href: ORG_APP + '#/',
         headHtml: '次回の会議は<span class="nb">' + esc(mdd ? dateJaShort(mdd) : '') + '</span> <b>' + esc(nextMtg.meetingName || nextMtg.meeting_name || '会議') + '</b>。',
         subHtml: esc(nextMtg.dept || ''),
       });
     } else {
-      index.push({ cls: 'org', name: '組織面', headHtml: '予定されている会議はありません。議事録・部署ハブはこちら。', subHtml: '' });
+      index.push({ cls: 'org', name: '組織面', href: ORG_APP + '#/', headHtml: '予定されている会議はありません。議事録・部署ハブはこちら。', subHtml: '' });
     }
     // 統括面(マネ以上)
     if (rank >= 3) {
