@@ -6,7 +6,7 @@
 <meta name="robots" content="noindex">
 <title>イベント — connec+a 運営ポータル</title>
 <meta name="description" content="connec+a 運営ポータル — イベント面">
-<script>window.__ADMIN2_BUILD='20260902001553';</script>
+<script>window.__ADMIN2_BUILD='20260902020142';</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://script.google.com" crossorigin>
@@ -686,6 +686,175 @@ table.regs{width:100%;border-collapse:collapse;min-width:680px;font-size:13.5px}
   .brief .b-foot .ops a{margin-left:0;margin-right:14px}
   .ged .mem select{max-width:120px}
 }
+/* ============ 当日タブ(#/ev/<id>/day)。正典=event-day.html(現場前提=文字1段大きめ) ============ */
+.titleblock.dayblock{padding-bottom:14px;border-bottom:1px solid var(--rule)}
+.nowline{margin-left:auto;padding-bottom:4px;text-align:right}
+.nowline .clock{font-family:var(--serif);font-size:24px;font-weight:600;font-variant-numeric:tabular-nums;line-height:1.3}
+.nowline .who{font-size:12.5px;color:var(--ink4)}
+.checkin{display:flex;align-items:flex-end;gap:28px;flex-wrap:wrap;margin:18px 0 10px}
+.checkin .big{font-family:var(--serif);font-weight:600;font-size:76px;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:.01em}
+.checkin .big small{font-size:26px;color:var(--ink4);font-weight:400;margin-left:4px}
+.checkin .cap{font-size:13px;letter-spacing:.14em;color:var(--ink4)}
+.checkin .pct{font-family:var(--serif);font-size:30px;color:var(--deep);font-weight:600;padding-bottom:8px}
+.checkin .modes{margin-left:auto;padding-bottom:10px}
+.pbar{height:15px;border-radius:999px;background:rgba(110,134,224,.16);overflow:hidden;border:1px solid rgba(255,255,255,.7)}
+.pbar i{display:block;height:100%;background:linear-gradient(90deg, var(--accent), var(--deep));border-radius:999px}
+.pcap{display:flex;justify-content:space-between;gap:12px;font-size:13px;color:var(--ink4);margin:7px 0 14px}
+.pcap b{color:var(--ink2)}
+.pcap .un{color:var(--warn);font-weight:700}
+/* 未決済の回収キュー(主要操作) */
+.queue-note{font-size:13.5px;color:var(--ink3);margin-bottom:4px}
+.dq{display:flex;align-items:center;gap:14px;padding:14px 2px;border-bottom:1px dashed var(--line)}
+.dq:last-of-type{border-bottom:0}
+.dq img{width:48px;height:48px;border-radius:50%;object-fit:cover;flex:none;border:2.5px solid #fff;box-shadow:0 8px 20px -8px rgba(34,49,74,.3)}
+.dq .nm{font-weight:700;font-size:16px}
+.dq .st{display:block;font-size:12.5px;color:var(--ink4)}
+.dq .st b{color:var(--ok);font-weight:700}
+.dq .st .away{color:var(--ink5)}
+.dq .amt{margin-left:auto;font-family:var(--serif);font-size:19px;font-weight:600;font-variant-numeric:tabular-nums;flex:none}
+.dq .btn{font-size:14px;min-height:48px;flex:none}
+.dq .hold{flex:none;font-size:13px;color:var(--ink5);min-height:48px;display:inline-flex;align-items:center;white-space:nowrap}
+.payq-confirm{display:inline-flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end;font-size:13px;color:var(--ink2)}
+.payq-confirm select{font:inherit;font-size:13px;min-height:44px;border:1.5px solid var(--line);border-radius:6px;background:rgba(255,255,255,.8);padding:6px 10px;color:var(--ink)}
+/* いまの受付(ライブフィード。実データではチェックイン時刻が無いためデモのみ) */
+.feed{list-style:none;margin-top:6px;border-left:2px solid var(--line)}
+.feed li{display:flex;align-items:center;gap:12px;padding:10px 2px 10px 18px;font-size:15px;position:relative}
+.feed li::before{content:'';position:absolute;left:-5px;width:8px;height:8px;border-radius:50%;background:var(--ok)}
+.feed li.note::before{background:var(--amber)}
+.feed .tm{font-family:var(--serif);font-variant-numeric:tabular-nums;color:var(--ink3);flex:none;width:52px;font-size:14px}
+.feed img{width:36px;height:36px;border-radius:50%;object-fit:cover;flex:none}
+.feed b{font-weight:700}
+.feed .sub{color:var(--ink4);font-size:13px}
+.feed-src{font-size:12.5px;color:var(--ink5);margin-top:6px}
+/* 右列: 班の集合状況 */
+.dg{display:grid;grid-template-columns:64px 1fr auto;gap:10px;align-items:center;padding:8px 0;border-bottom:1px dashed var(--line);font-size:14px}
+.dg:last-of-type{border-bottom:0}
+.dg .gn{font-weight:700}
+.dg .gl{font-size:12px;color:var(--ink5);overflow:hidden;text-overflow:ellipsis}
+.dg .cnt{font-family:var(--serif);font-size:16px;font-variant-numeric:tabular-nums}
+.dg .full{color:var(--ok);font-weight:700;font-size:12.5px}
+.dg .part{color:var(--ink4);font-size:12.5px}
+.gsum{font-size:12.5px;color:var(--ink4);margin-top:8px}
+/* 当日一斉連絡 */
+.bcast .btn.sub{width:100%;justify-content:flex-start;font-size:14px;min-height:48px;margin-bottom:8px}
+.bcast textarea{width:100%;min-height:74px;border:1.5px solid var(--line);border-radius:6px;background:rgba(255,255,255,.72);
+  font:inherit;font-size:14px;padding:10px 12px;color:var(--ink);resize:vertical;margin-top:4px}
+.bcast textarea::placeholder{color:var(--ink5)}
+.bcast .send{display:flex;align-items:center;gap:10px;margin-top:8px;flex-wrap:wrap}
+.bcast .send .btn,.bcast .send .btn.sub{width:auto;margin:0}
+.bcast .note{font-size:12px;color:var(--ink5);margin-top:8px}
+.bc-to{font-size:12.5px;color:var(--ink3);margin-bottom:6px}
+.bc-subj{font-weight:700;font-size:13.5px;margin-bottom:4px}
+.bc-body{font-size:13px;color:var(--ink2);line-height:1.8;border:1px dashed var(--line);border-radius:6px;padding:10px 12px;background:rgba(255,255,255,.5);margin-bottom:4px}
+/* 全画面モード(大画面投影) */
+.dayfull{position:fixed;inset:0;z-index:60;background:var(--paper);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:40px;
+  background-image:radial-gradient(ellipse 900px 520px at 88% -6%, rgba(110,134,224,.26), transparent 60%),radial-gradient(ellipse 700px 500px at -8% 30%, rgba(244,228,178,.75), transparent 60%)}
+.dayfull .df-close{position:absolute;top:22px;right:26px;border:0;background:rgba(255,255,255,.7);border-radius:50%;width:52px;height:52px;cursor:pointer;color:var(--ink3);font-size:22px;display:flex;align-items:center;justify-content:center}
+.dayfull .df-title{font-family:var(--serif);font-size:26px;font-weight:600;letter-spacing:.06em}
+.dayfull .df-cap{font-size:15px;letter-spacing:.3em;color:var(--ink4);margin-top:10px}
+.dayfull .df-big{font-family:var(--serif);font-weight:600;font-size:min(24vw,220px);line-height:1;font-variant-numeric:tabular-nums}
+.dayfull .df-big small{font-size:.24em;color:var(--ink4);font-weight:400;margin-left:8px}
+.dayfull .df-pct{font-family:var(--serif);font-size:44px;color:var(--deep);font-weight:600}
+.dayfull .df-bar{width:min(72vw,900px);height:20px;margin-top:8px}
+.dayfull .df-note{font-size:18px;color:var(--ink3);margin-top:8px}
+
+/* ============ 事後タブ(#/ev/<id>/after)。正典=event-after.html ============ */
+.secnote .st-res{color:var(--deep);font-weight:700}
+.photos{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:6px}
+.ph{position:relative;border-radius:6px;overflow:hidden;margin:0}
+.ph img{width:100%;height:128px;object-fit:cover;display:block;background:#e8ecf4}
+.ph .cvr{position:absolute;left:7px;top:7px;font-size:10.5px;font-weight:700;letter-spacing:.08em;color:#fff;background:var(--deep);border-radius:4px;padding:1px 8px;box-shadow:0 4px 10px -4px rgba(34,49,74,.5)}
+.ph-foot{display:flex;align-items:baseline;gap:14px;font-size:12.5px;color:var(--ink4);margin-top:8px;flex-wrap:wrap}
+.ph-foot b{color:var(--ink2)}
+.ph-days{margin-top:10px;border-top:1px solid var(--line)}
+.phd{display:grid;grid-template-columns:130px 70px 1fr;gap:12px;padding:8px 2px;border-bottom:1px dashed var(--line);font-size:13px;color:var(--ink3)}
+.phd .lbl{font-weight:700;color:var(--ink2)}
+/* 満足度(NPS) */
+.nps{display:grid;grid-template-columns:190px 1fr;gap:26px;align-items:start;margin-top:8px}
+.nps .big{font-family:var(--serif);font-variant-numeric:tabular-nums;line-height:1}
+.nps .big .lbl{font-size:12px;letter-spacing:.24em;color:var(--ink4);font-family:var(--sans)}
+.nps .big .num{font-size:64px;font-weight:600;display:block;margin:2px 0}
+.nps .big .resp{font-size:12px;color:var(--ink4);font-family:var(--sans);display:block;margin-top:4px}
+.dist{margin-top:4px;min-width:0}
+.dist .bar{display:flex;height:16px;border-radius:4px;overflow:hidden}
+.dist .bar i{display:block}
+.dist .bar .pr{background:var(--ok)}
+.dist .bar .ps{background:#b9c4d6}
+.dist .bar .dt{background:var(--warn)}
+.dist .lg{display:flex;gap:16px;font-size:12px;color:var(--ink4);margin-top:6px;flex-wrap:wrap}
+.dist .lg span::before{content:'';display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+.dist .lg .pr::before{background:var(--ok)}
+.dist .lg .ps::before{background:#b9c4d6}
+.dist .lg .dt::before{background:var(--warn)}
+.dist .note{font-size:12.5px;margin-top:8px}
+.quotes{margin-top:16px;border-top:1px dashed var(--line);padding-top:6px}
+.qt{display:grid;grid-template-columns:34px 1fr;gap:6px;padding:10px 0;border-bottom:1px dashed var(--line)}
+.qt:last-child{border-bottom:0}
+.qt .mark{font-family:var(--serif);font-size:30px;color:var(--accent);line-height:1.1}
+.qt p{font-family:var(--serif);font-size:15px;line-height:1.9}
+.qt .who{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink4);margin-top:3px;font-family:var(--sans)}
+.qt.improve .tag{display:inline-block;font-size:11px;font-weight:700;color:var(--amber);border:1.5px solid rgba(138,106,47,.4);border-radius:999px;padding:0 9px;margin-right:8px;font-family:var(--sans);vertical-align:2px}
+.q-ops{font-size:12.5px;color:var(--ink4);margin-top:10px}
+.tl-note{font-size:11.5px;color:var(--ink5);margin-top:6px}
+/* 事後タブの右欄(356px)ではタイムラインを折り返し可能に(正典 event-after の .tl と同じ扱い) */
+.side .tl li{flex-wrap:wrap;font-size:13px}
+.side .tl .when{width:auto;min-width:78px}
+.fixseal{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;letter-spacing:.06em;color:var(--ok);border:1.5px solid rgba(63,125,92,.4);border-radius:999px;padding:1px 10px;background:rgba(255,255,255,.6);margin-bottom:6px}
+@media(max-width:960px){
+  .photos{grid-template-columns:repeat(3,1fr)}
+  .nowline{margin-left:0;text-align:left}
+}
+@media(max-width:640px){
+  .checkin{gap:14px;margin-top:14px}
+  .checkin .big{font-size:58px}
+  .checkin .modes{margin-left:0;padding-bottom:0;width:100%}
+  .checkin .modes .btn{width:100%;justify-content:center}
+  .dq{flex-wrap:wrap}
+  .dq .amt{margin-left:auto}
+  .dq .btn,.dq .hold{margin-left:62px;flex:none}
+  .payq-confirm{margin-left:0;flex:1 1 100%;justify-content:flex-start}
+  .photos{grid-template-columns:repeat(2,1fr)}
+  .ph img{height:110px}
+  .nps{grid-template-columns:1fr;gap:14px}
+  .nps .big .num{font-size:52px;display:inline-block;margin-right:12px}
+  .phd{grid-template-columns:1fr;gap:2px}
+}
+
+/* ============ 配信タイムラインの編集(#/ev/<id>/comms) ============ */
+.cm-tpl{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:6px 0 14px}
+.cm-tplnote{font-size:12px;color:var(--ink5)}
+.cmed{border-radius:8px;padding:18px 18px 14px;margin-bottom:18px}
+.cmed label{display:block;font-size:12px;font-weight:700;letter-spacing:.06em;color:var(--ink4)}
+.cmed input,.cmed select,.cmed textarea{display:block;width:100%;font:inherit;font-size:14px;color:var(--ink);margin-top:3px;
+  border:1.5px solid var(--line);border-radius:6px;background:rgba(255,255,255,.75);padding:9px 12px;min-height:42px}
+.cmed textarea{resize:vertical;line-height:1.7}
+.cm-grid{display:grid;grid-template-columns:190px 230px 190px;gap:12px;margin-bottom:10px}
+.cm-l{margin-bottom:10px}
+.cm-note{font-size:12px;color:var(--ink5);margin:2px 0 8px}
+.cm-cta{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+/* 配信の一覧(罫線の表組・カードにしない) */
+.cml{border-top:1px solid var(--rule)}
+.cmr{display:grid;grid-template-columns:110px 1fr 150px auto;gap:14px;align-items:center;padding:12px 2px;border-bottom:1px dashed var(--line);font-size:13.5px}
+.cmr.off{opacity:.55}
+.cmr .when{font-family:var(--serif);font-variant-numeric:tabular-nums;color:var(--ink3);font-size:13px}
+.cmr .body{min-width:0}
+.cmr .body b{font-weight:700}
+.cmr .body .sub2{display:block;font-size:11.5px;color:var(--ink5)}
+.cmr .kindtag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.05em;color:var(--ink4);border:1.5px solid var(--line);border-radius:999px;padding:0 9px;margin-right:8px;vertical-align:1px;background:rgba(255,255,255,.55)}
+.cmr .st{font-size:12px;letter-spacing:.05em;color:var(--ink5)}
+.cmr .st.ok{color:var(--ok);font-weight:700}
+.cmr .st.next{color:var(--deep);font-weight:700}
+.cmr .ops{display:flex;align-items:center;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.cm-lock{font-size:12px;color:var(--ink5)}
+@media(max-width:640px){
+  .cm-grid{grid-template-columns:1fr}
+  .cmr{grid-template-columns:1fr auto;gap:4px 12px}
+  .cmr .when{grid-column:1;grid-row:1}
+  .cmr .st{grid-column:2;grid-row:1;justify-self:end}
+  .cmr .body{grid-column:1 / -1}
+  .cmr .ops{grid-column:1 / -1;justify-content:flex-start}
+}
+
 /* ブリーフの印刷(#/ev/<id>/brief で Cmd+P / 印刷ボタン) */
 @media print{
   body{background:#fff !important;background-image:none !important;padding:0}
@@ -722,6 +891,8 @@ window.AdminAPI = (function () {
     listNews: 1, listMinutesMeetings: 1, listMembers: 1,
     // read-api @listWaitlist 追加済み(2026-09-01): キャンセル待ちの読取
     listWaitlist: 1,
+    // read-api 対応済み(2026-09-02 B3): 配信タイムラインの読取
+    listEventComms: 1,
     // イベント単体の申込読取(バックエンド実装中の新action。無ければ本体→呼び出し側でlistRegistrationsへフォールバック)
     listEventRegistrations: 1,
   };
@@ -1342,6 +1513,20 @@ window.AdminAPI = (function () {
   /* ============================================================================
      ハブ共通ヘッダ(見出しブロック+タブ+数字バンド)
      ============================================================================ */
+  function tabbarHtml(tabs, reception) {
+    var base = tabs.base;
+    function tab(id, label, extra) {
+      var href = id === 'hub' ? base : base + '/' + id;
+      return '<a href="' + href + '"' + (tabs.active === id ? ' aria-current="page"' : '') + '>' + label + (extra || '') + '</a>';
+    }
+    return '<nav class="tabbar glass" aria-label="イベント内">' +
+      tab('hub', '概要') +
+      tab('regs', '申込・決済', tabs.unpaid > 0 ? '<span class="cnt">' + tabs.unpaid + '</span>' : '') +
+      tab('prep', '準備') + tab('day', '当日') + tab('after', '事後') +
+      '<span class="spacer"></span>' +
+      (reception ? '<a class="btn" href="#"><span class="mi">qr_code_scanner</span>受付を開く(iPad)</a>' : '') +
+      '</nav>';
+  }
   function hubHeadHtml(H, tabs, reception) {
     var h = '<a class="back" href="#/"><span class="mi">arrow_back</span>イベント一覧へ</a>';
     h += '<div class="titlegrid' + (H.photo ? '' : ' nophoto') + '"><div><div class="titleblock">' +
@@ -1355,18 +1540,7 @@ window.AdminAPI = (function () {
         (H.photo.cap ? '<figcaption class="cap">' + esc(H.photo.cap) + '</figcaption>' : '') + '</figure>';
     }
     h += '</div>';
-    var base = tabs.base;
-    function tab(id, label, extra) {
-      var href = id === 'hub' ? base : base + '/' + id;
-      return '<a href="' + href + '"' + (tabs.active === id ? ' aria-current="page"' : '') + '>' + label + (extra || '') + '</a>';
-    }
-    h += '<nav class="tabbar glass" aria-label="イベント内">' +
-      tab('hub', '概要') +
-      tab('regs', '申込・決済', tabs.unpaid > 0 ? '<span class="cnt">' + tabs.unpaid + '</span>' : '') +
-      tab('prep', '準備') + tab('day', '当日') + tab('after', '事後') +
-      '<span class="spacer"></span>' +
-      (reception ? '<a class="btn" href="#"><span class="mi">qr_code_scanner</span>受付を開く(iPad)</a>' : '') +
-      '</nav>';
+    h += tabbarHtml(tabs, reception);
     return h;
   }
   /* ---- Dayセグメント(複数日のみ)。選択は全タブ共有(メモリ)・イベントを跨いだらリセット ---- */
@@ -1459,13 +1633,21 @@ window.AdminAPI = (function () {
         '<div class="nm">' + esc(c.nm) + '</div><div class="nt">' + esc(c.nt || '') + '</div></div>';
     }).join('') + '</div>';
   }
-  function timelineHtml(tl, showAct) {
+  function tlItemsHtml(rows) {
+    return '<ul class="tl">' + rows.map(function (t) {
+      return '<li' + (t.cls ? ' class="' + esc(t.cls) + '"' : '') + '><span class="when">' + esc(t.when) + '</span>' +
+        '<span>' + t.bodyHtml + '</span><span class="st ' + esc(t.stCls) + '">' + esc(t.stLabel) + '</span></li>';
+    }).join('') + '</ul>';
+  }
+  // tl = 配列(デモ=正典モックの静的一覧) または {rows|lineHtml, editHref}(実結線=listEventComms)
+  function timelineHtml(tl, editHref) {
     if (!tl) return '';
-    return '<h2 class="sec">配信タイムライン' + (showAct ? '<a class="act" href="#">編集</a>' : '') + '</h2>' +
-      '<ul class="tl">' + tl.map(function (t) {
-        return '<li' + (t.cls ? ' class="' + esc(t.cls) + '"' : '') + '><span class="when">' + esc(t.when) + '</span>' +
-          '<span>' + t.bodyHtml + '</span><span class="st ' + esc(t.stCls) + '">' + esc(t.stLabel) + '</span></li>';
-      }).join('') + '</ul>';
+    if (Array.isArray(tl)) {
+      return '<h2 class="sec">配信タイムライン' + (editHref ? '<a class="act" href="' + esc(editHref) + '">編集</a>' : '') + '</h2>' + tlItemsHtml(tl);
+    }
+    var h = '<h2 class="sec">配信タイムライン' + (tl.editHref ? '<a class="act" href="' + esc(tl.editHref) + '">編集</a>' : '') + '</h2>';
+    if (tl.lineHtml != null) return h + '<div class="rail-line">' + tl.lineHtml + '</div>';
+    return h + tlItemsHtml(tl.rows);
   }
   function hubAsideHtml(A) {
     if (!A) return '';
@@ -1497,7 +1679,7 @@ window.AdminAPI = (function () {
       factsHtml(vm.facts, vm.demo) +
       trendHtml(vm.trend, regsHref) +
       crewRailHtml(vm.crew) +
-      timelineHtml(vm.timeline, vm.demo) +
+      timelineHtml(vm.timeline, vm.demo ? vm.tabs.base + '/comms' : '') +
       '</main>';
     root.innerHTML = mastheadHtml({ mePhoto: vm.mePhoto, showHq: vm.showHq }) +
       hubHeadHtml(vm.head, vm.tabs, vm.reception) +
@@ -1512,6 +1694,12 @@ window.AdminAPI = (function () {
       var x = EX[vm.evId];
       if (x) { x.fetched = false; x.staffErr = false; x.expErr = false; }
       loadExtras(vm.evId);
+    });
+    var cm = document.getElementById('ev-cm-retry');
+    if (cm) cm.addEventListener('click', function () {
+      var c = CM[vm.evId];
+      if (c) { c.fetched = false; c.err = false; }
+      loadComms(vm.evId);
     });
   }
 
@@ -1663,6 +1851,8 @@ window.AdminAPI = (function () {
   }
   function memberName(m) { return (m && (m.nickname || m.name || m['氏名'])) || ''; }
   function canStaff() { return DEMO || !!(M.me && M.me.rank >= 2); } // 読取/書込ともアシマネ+(デモは表示のみ)
+  /* 役職が「まだ判明していない」状態(軽量API応答にuser非同梱・getDataGen解決前)。ゲートの拒否文の代わりに確認中を出す */
+  function rankUnknown_() { return !DEMO && API.hasSession() && !(window.currentUser && window.currentUser.member) && !(M.me && M.me.rank); }
   function hubCrewModel(ev, base) {
     if (!canStaff()) return null;
     var x = EX[ev.id];
@@ -1726,6 +1916,46 @@ window.AdminAPI = (function () {
       note: note,
     };
   }
+  /* ---- 配信タイムライン(listEventComms=B3 実結線)。表示ラベルは日本語・状態は5値 ---- */
+  var CM_KIND_LABEL = { announce: '告知', reminder: '前日リマインド', unpaid: '未決済の案内', thanks: 'お礼', survey: 'アンケート依頼', photo_notice: '写真公開のお知らせ', custom: '一斉連絡' };
+  var CM_AUD_LABEL = { all: '申込者全員', unpaid: '未決済の方', attended: '参加した方', absent: '欠席の方' };
+  function cmStatusView(c) {
+    var st = String((c && c.status) || '');
+    if (st === 'sent') return { cls: 'sent', stCls: 'ok', stLabel: '送信済み' + (num(c.sentCount) > 0 ? ' ・ ' + num(c.sentCount) + '名' : '') };
+    if (st === 'sending') return { cls: 'next', stCls: 'next', stLabel: '送信中' };
+    if (st === 'cancelled') return { cls: '', stCls: 'plan', stLabel: '取消済み' };
+    if (st === 'scheduled') {
+      var t = new Date(String(c.sendAt || '')).getTime();
+      if (isFinite(t) && t - Date.now() < 24 * 3600 * 1000) return { cls: 'next', stCls: 'next', stLabel: 'まもなく送信' };
+      return { cls: '', stCls: 'plan', stLabel: '予定' };
+    }
+    return { cls: '', stCls: 'plan', stLabel: '下書き' };
+  }
+  function cmRowView(c) {
+    var sv = cmStatusView(c);
+    return {
+      cls: sv.cls,
+      when: c.sendAt ? dtLabel(c.sendAt) : '日時未定',
+      bodyHtml: '<b>' + esc(c.subject || CM_KIND_LABEL[c.kind] || c.kind || '配信') + '</b> ― <span class="nb">' + esc(CM_AUD_LABEL[c.audience] || c.audience || '') + '</span>',
+      stCls: sv.stCls, stLabel: sv.stLabel,
+    };
+  }
+  function commsOf(evId) { var c = CM[evId]; return c && Array.isArray(c.items) ? c.items : null; }
+  function hubTimelineModel(ev, base) {
+    if (!canStaff()) return null; // listEventComms もアシマネ+(BEゲートと同じ)
+    var c = CM[ev.id];
+    if (c && c.unsupported) return null; // BE未対応(unknown action)=機能なし → 非表示
+    var items = commsOf(ev.id);
+    if (items === null) return null; // 取得中はまだ出さない(揃い次第 再render)
+    var editHref = base + '/comms';
+    if (c && c.err && !items.length) {
+      return { editHref: editHref, lineHtml: '配信の予定を取得できませんでした。<button type="button" id="ev-cm-retry">再読み込み</button>' };
+    }
+    var live = items.filter(function (x) { return x && String(x.status) !== 'cancelled'; });
+    if (!live.length) return { editHref: editHref, lineHtml: '配信の予定はまだありません ― <a href="' + esc(editHref) + '">追加</a>' };
+    return { editHref: editHref, rows: live.map(cmRowView) };
+  }
+
   // イベント別の申込行(全件到着済みなら全件から・未着なら listEventRegistrations の先行分)
   function regsOf(ev) {
     if (S.regs) return arr(S.regs).filter(function (r) { return r && r.eventId === ev.id; });
@@ -1762,7 +1992,7 @@ window.AdminAPI = (function () {
       facts: hubFactsModel(ev),
       trend: hubTrendModel(ev, a, M),
       crew: hubCrewModel(ev, base),
-      timeline: null,  // 配信予約 未実装 → 非表示
+      timeline: hubTimelineModel(ev, base), // 配信タイムライン(B3 実結線)
       aside: ledger ? { ledger: ledger } : null, // きょうの流れ/準備チェックは未実装のまま
       agg: a,
     };
@@ -2375,17 +2605,1124 @@ window.AdminAPI = (function () {
   }
 
   /* ============================================================================
-     当日/事後(正直な準備中表示・1行・装飾なし)。準備は本実装済み(下の準備タブ節)。
+     配信タイムラインの編集(#/ev/<id>/comms) — B3実結線
+     一覧+新規/編集(kind/sendAt/audience/subject/body)。保存=saveEventComm(draft/scheduled)
+     取消=cancelEventComm(確認つき)。sending/sent は編集不可(表示のみ)。
+     提案下書き=「前日リマインド」「お礼+アンケート」ボタンでフォームに雛形を前埋め
+     (イベント日付から既定sendAtを計算・複数日=初日基準)。保存するまで書込は発生しない。
      ============================================================================ */
-  var STUB_LABEL = { day: '当日', after: '事後' };
-  function renderStub(vm, tabId) {
+  var cmEd = { evId: '', open: false, id: '', kind: 'custom', sendAt: '', audience: 'all', subject: '', body: '', busy: false, err: '', notice: '', confirm: false, rowConfirm: '', rowKind: '', rowBusy: false };
+  var cmPrefill = null; // 提案下書き/事後タブ導線が置く {kind,sendAt,audience,subject,body}
+  function resetCmState(evId) {
+    if (cmEd.evId !== String(evId)) {
+      cmEd = { evId: String(evId), open: false, id: '', kind: 'custom', sendAt: '', audience: 'all', subject: '', body: '', busy: false, err: '', notice: '', confirm: false, rowConfirm: '', rowKind: '', rowBusy: false };
+    }
+  }
+  function cmFmtLocal(d) { return ymd(d) + 'T' + pad2(d.getHours()) + ':' + pad2(d.getMinutes()); } // input[datetime-local]形式
+  /* ---- 提案下書きの雛形(イベントデータ差し込み・偽データなし=あるフィールドだけ) ---- */
+  function cmTemplate(ev, key) {
+    var t = evTitle(ev);
+    var d0 = parseYmd(evDate(ev));
+    var dE = parseYmd(evEndDate(ev)) || d0;
+    var tr = timeRange(ev);
+    if (key === 'reminder') { // 前日リマインド=初日の前日20:00(複数日=初日基準)
+      var bel = parseItems(ev.belongings);
+      return {
+        kind: 'reminder', audience: 'all',
+        sendAt: d0 ? cmFmtLocal(new Date(d0.getFullYear(), d0.getMonth(), d0.getDate() - 1, 20, 0)) : '',
+        subject: '【あす開催】' + t + ' のご案内',
+        body: 'あすの「' + t + '」のご案内です。\n\n' +
+          (d0 ? '日時: ' + dateJa(d0) + (tr ? ' ' + tr : '') + '\n' : '') +
+          (ev.venue ? '会場: ' + ev.venue + (ev.address ? '(' + ev.address + ')' : '') + '\n' : '') +
+          (bel.length ? '持ち物: ' + bel.slice(0, 4).join('・') + (bel.length > 4 ? ' ほか' : '') + '\n' : '') +
+          '\nお気をつけてお越しください。お会いできるのを楽しみにしています。',
+      };
+    }
+    if (key === 'thanks') { // お礼+アンケート=最終日の翌日18:00
+      return {
+        kind: 'thanks', audience: 'all',
+        sendAt: dE ? cmFmtLocal(new Date(dE.getFullYear(), dE.getMonth(), dE.getDate() + 1, 18, 0)) : '',
+        subject: '「' + t + '」ご参加ありがとうございました',
+        body: '「' + t + '」にご参加いただき、ありがとうございました。\n\n次回をもっと良くするために、1分ほどの満足度アンケートへのご協力をお願いします(アプリのお知らせから回答できます)。\n\nまたお会いできるのを楽しみにしています。',
+      };
+    }
+    // survey: 回答依頼リマインド(事後タブの導線)=あす10:00
+    return {
+      kind: 'survey', audience: 'all',
+      sendAt: cmFmtLocal(new Date(NOW.getFullYear(), NOW.getMonth(), NOW.getDate() + 1, 10, 0)),
+      subject: '【1分】' + t + ' のアンケートにご協力ください',
+      body: '先日の「' + t + '」はいかがでしたか。\n\nまだ回答されていない方は、1分ほどの満足度アンケートにご協力ください(アプリのお知らせから回答できます)。いただいた声は次回の改善にそのまま使います。',
+    };
+  }
+  function cmEdKeep() {
+    var g = function (id) { var n = document.getElementById(id); return n && n.value != null ? String(n.value) : null; };
+    var k = g('cm-kind'); if (k !== null) cmEd.kind = k;
+    var w = g('cm-when'); if (w !== null) cmEd.sendAt = w;
+    var a = g('cm-aud'); if (a !== null) cmEd.audience = a;
+    var s = g('cm-subj'); if (s !== null) cmEd.subject = s;
+    var b = g('cm-body'); if (b !== null) cmEd.body = b;
+  }
+  function cmOpenForm(ev, vals, id) {
+    cmEd.open = true;
+    cmEd.id = String(id || '');
+    cmEd.kind = String((vals && vals.kind) || 'custom');
+    cmEd.sendAt = String((vals && vals.sendAt) || '');
+    cmEd.audience = String((vals && vals.audience) || 'all');
+    cmEd.subject = String((vals && vals.subject) || '');
+    cmEd.body = String((vals && vals.body) || '');
+    cmEd.err = ''; cmEd.notice = ''; cmEd.confirm = false; cmEd.rowConfirm = '';
+    render();
+  }
+  function cmLocalOfIso(s) { // 保存済みISO → datetime-local(編集フォーム前埋め)
+    if (!s) return '';
+    var d = new Date(s);
+    if (isNaN(d.getTime())) return String(s).slice(0, 16);
+    return cmFmtLocal(d);
+  }
+  function cmFormHtml(P) {
+    var st = cmEd;
+    var kindOpts = Object.keys(CM_KIND_LABEL).map(function (k) {
+      return '<option value="' + k + '"' + (st.kind === k ? ' selected' : '') + '>' + esc(CM_KIND_LABEL[k]) + '</option>';
+    }).join('');
+    var audOpts = Object.keys(CM_AUD_LABEL).map(function (k) {
+      return '<option value="' + k + '"' + (st.audience === k ? ' selected' : '') + '>' + esc(CM_AUD_LABEL[k]) + '</option>';
+    }).join('');
+    var cta;
+    if (st.confirm) {
+      cta = '<span class="xconfirm"><span class="nb">' + esc(dtLabel(st.sendAt) || st.sendAt) + 'に</span><span class="nb">「' + esc(CM_AUD_LABEL[st.audience] || st.audience) + '」へ送る予約をします。</span>' +
+        '<button type="button" class="yes nb" data-cmsvyes="1"' + (st.busy ? ' disabled' : '') + '>' + (st.busy ? '保存中…' : '予約する') + '</button>' +
+        '<button type="button" class="no" data-cmsvno="1">やめる</button></span>';
+    } else {
+      cta = '<button type="button" class="btn sub nb" data-cmsavedraft="1"' + (st.busy ? ' disabled' : '') + '>' + (st.busy ? '保存中…' : '下書き保存') + '</button>' +
+        '<button type="button" class="btn nb" data-cmsavesched="1"' + (st.busy ? ' disabled' : '') + '>予約して保存</button>' +
+        '<button type="button" class="rowlink" data-cmclose="1">閉じる</button>';
+    }
+    return '<div class="cmed glass" id="cm-form">' +
+      '<div class="cm-grid">' +
+      '<label>種類<select id="cm-kind" aria-label="配信の種類">' + kindOpts + '</select></label>' +
+      '<label>送信日時<input id="cm-when" type="datetime-local" value="' + esc(st.sendAt) + '" aria-label="送信日時"></label>' +
+      '<label>宛先<select id="cm-aud" aria-label="宛先">' + audOpts + '</select></label>' +
+      '</div>' +
+      '<label class="cm-l">件名<input id="cm-subj" value="' + esc(st.subject) + '" placeholder="例: 【あす開催】' + esc(evTitle(P.ev)) + ' のご案内" aria-label="件名"></label>' +
+      '<label class="cm-l">本文<textarea id="cm-body" rows="7" aria-label="本文" placeholder="メール本文">' + esc(st.body) + '</textarea></label>' +
+      '<p class="cm-note">宛先の人数は<span class="nb">送信のとき</span>に最新の申込から確定します。テスターとメール未登録の方は自動で除かれます。</p>' +
+      (st.err ? '<p class="edit-err">' + esc(st.err) + '</p>' : '') +
+      '<div class="cm-cta">' + cta + '</div>' +
+      '</div>';
+  }
+  function cmListRowsHtml(P) {
+    var items = P.items;
+    if (items === null) return '<div class="tbl-empty">読み込み中…</div>';
+    if (!items.length) {
+      return '<div class="tbl-empty">配信の予定はまだありません。上の「前日リマインド」「お礼+アンケート」から下書きを作るか、「新しい配信」で自由に書けます。</div>';
+    }
+    var st = cmEd;
+    var h = '<div class="cml">';
+    items.forEach(function (c) {
+      var s = String(c.status || 'draft');
+      var sv = cmStatusView(c);
+      var ops = '';
+      if (st.rowConfirm === c.id) {
+        var q = st.rowKind === 'cancel'
+          ? 'この配信を取り消しますか?'
+          : '<span class="nb">' + esc(dtLabel(c.sendAt) || '日時未定') + 'に送る</span>予約をしますか?';
+        ops = '<span class="xconfirm"><span>' + q + '</span>' +
+          '<button type="button" class="yes nb" data-cmyes="' + esc(c.id) + '"' + (st.rowBusy ? ' disabled' : '') + '>' + (st.rowBusy ? '送信中…' : (st.rowKind === 'cancel' ? '取り消す' : '予約する')) + '</button>' +
+          '<button type="button" class="no" data-cmno="1"' + (st.rowBusy ? ' disabled' : '') + '>やめる</button></span>';
+      } else if (s === 'draft') {
+        ops = '<button type="button" class="rowbtn nb" data-cmedit="' + esc(c.id) + '">編集</button>' +
+          '<button type="button" class="rowbtn nb" data-cmsched="' + esc(c.id) + '">予約する</button>' +
+          '<button type="button" class="rowlink nb" data-cmcancel="' + esc(c.id) + '">取消</button>';
+      } else if (s === 'scheduled') {
+        ops = '<button type="button" class="rowbtn nb" data-cmedit="' + esc(c.id) + '">編集</button>' +
+          '<button type="button" class="rowlink nb" data-cmcancel="' + esc(c.id) + '">取消</button>';
+      } else if (s === 'cancelled') {
+        ops = '<button type="button" class="rowlink nb" data-cmrestore="' + esc(c.id) + '">下書きに戻す</button>';
+      } else if (s === 'sent') {
+        ops = '<span class="cm-lock nb">' + esc(dtLabel(c.sentAt) || '') + ' 送信</span>';
+      } else { // sending
+        ops = '<span class="cm-lock nb">送信処理中</span>';
+      }
+      h += '<div class="cmr' + (s === 'cancelled' ? ' off' : '') + '">' +
+        '<span class="when nb">' + esc(c.sendAt ? dtLabel(c.sendAt) : '日時未定') + '</span>' +
+        '<span class="body"><span class="kindtag nb">' + esc(CM_KIND_LABEL[c.kind] || c.kind || '') + '</span><b>' + esc(c.subject || '(件名なし)') + '</b>' +
+        '<span class="sub2">宛先: ' + esc(CM_AUD_LABEL[c.audience] || c.audience || '') + '</span></span>' +
+        '<span class="st ' + esc(sv.stCls) + ' nb">' + esc(sv.stLabel) + '</span>' +
+        '<span class="ops">' + ops + '</span>' +
+        '</div>';
+    });
+    h += '</div>';
+    return h;
+  }
+  function renderComms(ev) {
+    document.body.classList.remove('has-tabbtn');
+    var base = '#/ev/' + encodeURIComponent(ev.id);
+    var head = mastheadHtml(editChrome());
+    if (!DEMO && M.me && M.me.rank < 2) {
+      root.innerHTML = head + editHeadHtml(ev, '配信タイムライン', esc(evTitle(ev)), base) +
+        (rankUnknown_() ? '<p class="stub-line">権限を確認しています…</p>' : '<p class="stub-line">配信の閲覧・予約にはアシスタントマネージャー以上の権限が必要です。</p>') + colophonHtml(esc(evTitle(ev)));
+      return;
+    }
+    resetCmState(ev.id);
+    if (cmPrefill) { // 提案下書き/事後タブからの導線: フォームを雛形で開く(保存するまで書込なし)
+      var pf = cmPrefill;
+      cmPrefill = null;
+      cmOpenForm(ev, pf, '');
+      return;
+    }
+    var items = commsOf(ev.id);
+    var st = cmEd;
+    root.innerHTML = head +
+      editHeadHtml(ev, '配信タイムライン', esc(evTitle(ev)), base) +
+      '<p class="edit-note"><span class="nb">予約した配信</span>は指定日時にメールで送られます(1時間ごとの送信便)。<span class="nb">下書き</span>のままでは送られません。送信済みの配信は編集できません。</p>' +
+      '<div class="cm-tpl">' +
+      '<button type="button" class="btn sub nb" data-cmtpl="reminder"><span class="mi">add</span>前日リマインド</button>' +
+      '<button type="button" class="btn sub nb" data-cmtpl="thanks"><span class="mi">add</span>お礼+アンケート</button>' +
+      '<button type="button" class="rowbtn nb" data-cmnew="1">新しい配信</button>' +
+      '<span class="cm-tplnote">ボタンで下書きの雛形ができます(日時はイベントの日付から計算)。</span>' +
+      '</div>' +
+      (st.open ? cmFormHtml({ ev: ev }) : '') +
+      '<div id="cm-list">' + cmListRowsHtml({ items: items }) + '</div>' +
+      (st.notice ? '<p class="opnote" role="status">' + esc(st.notice) + '</p>' : '') +
+      (!st.open && st.err ? '<p class="edit-err">' + esc(st.err) + '</p>' : '') +
+      colophonHtml(esc(evTitle(ev)) + ' ・ 配信タイムライン');
+    bindComms(ev);
+  }
+  function cmFindItem(evId, id) {
+    var items = arr(commsOf(evId));
+    for (var i = 0; i < items.length; i++) if (items[i] && String(items[i].id) === String(id)) return items[i];
+    return null;
+  }
+  function cmSaveForm(ev, status) {
+    var st = cmEd;
+    if (st.busy) return;
+    cmEdKeep();
+    if (!st.subject.trim()) { st.err = '件名を入力してください。'; st.confirm = false; render(); return; }
+    if (!st.body.trim()) { st.err = '本文を入力してください。'; st.confirm = false; render(); return; }
+    if (status === 'scheduled' && !st.sendAt) { st.err = '予約には送信日時が必要です。'; st.confirm = false; render(); return; }
+    if (DEMO) {
+      st.confirm = false;
+      st.err = '';
+      st.notice = 'デモ表示のため保存は行われません。実データでは' + (status === 'scheduled' ? '予約' : '下書き') + 'として保存されます。';
+      st.open = false;
+      render();
+      return;
+    }
+    st.busy = true; st.err = ''; st.notice = '';
+    render();
+    var payload = { eventId: ev.id, kind: st.kind, sendAt: st.sendAt || '', audience: st.audience, subject: st.subject.trim(), body: st.body, status: status };
+    if (st.id) payload.id = st.id;
+    API.postData('saveEventComm', payload).then(function () {
+      return cmRefetch(ev.id);
+    }).then(function () {
+      cmEd = { evId: String(ev.id), open: false, id: '', kind: 'custom', sendAt: '', audience: 'all', subject: '', body: '', busy: false, err: '', notice: (status === 'scheduled' ? '予約しました。指定日時に送信されます。' : '下書きを保存しました。'), confirm: false, rowConfirm: '', rowKind: '', rowBusy: false };
+      render();
+    }).catch(function (e) {
+      st.busy = false; st.confirm = false;
+      if (e && e._auth) return;
+      st.err = ((e && e.message) || '保存に失敗しました。') + ' 入力した内容は消えていません。もう一度お試しください。';
+      render();
+    });
+  }
+  function cmRowExec(ev) {
+    var st = cmEd;
+    if (st.rowBusy) return;
+    var id = st.rowConfirm;
+    var item = cmFindItem(ev.id, id);
+    if (!item) { st.rowConfirm = ''; render(); return; }
+    if (DEMO) {
+      st.rowConfirm = '';
+      st.notice = 'デモ表示のため' + (st.rowKind === 'cancel' ? '取消' : '予約') + 'は行われません。';
+      render();
+      return;
+    }
+    st.rowBusy = true; st.err = ''; st.notice = '';
+    render();
+    var p = (st.rowKind === 'cancel')
+      ? API.postData('cancelEventComm', { id: id })
+      : API.postData('saveEventComm', { id: id, eventId: ev.id, kind: item.kind, sendAt: item.sendAt || '', audience: item.audience, subject: item.subject, body: item.body, status: 'scheduled' });
+    p.then(function () {
+      return cmRefetch(ev.id);
+    }).then(function () {
+      st.rowBusy = false; st.rowConfirm = '';
+      st.notice = (st.rowKind === 'cancel') ? '取り消しました。' : '予約しました。指定日時に送信されます。';
+      st.rowKind = '';
+      render();
+    }).catch(function (e) {
+      st.rowBusy = false; st.rowConfirm = ''; st.rowKind = '';
+      if (e && e._auth) return;
+      st.err = ((e && e.message) || '操作に失敗しました。') + ' 変更は行われていません。';
+      render();
+    });
+  }
+  function bindComms(ev) {
+    var st = cmEd;
+    Array.prototype.forEach.call(root.querySelectorAll('[data-cmtpl]'), function (b) {
+      b.addEventListener('click', function () { if (!st.busy) cmOpenForm(ev, cmTemplate(ev, b.getAttribute('data-cmtpl')), ''); });
+    });
+    Array.prototype.forEach.call(root.querySelectorAll('[data-cmnew]'), function (b) {
+      b.addEventListener('click', function () { if (!st.busy) cmOpenForm(ev, null, ''); });
+    });
+    Array.prototype.forEach.call(root.querySelectorAll('[data-cmedit]'), function (b) {
+      b.addEventListener('click', function () {
+        if (st.busy) return;
+        var item = cmFindItem(ev.id, b.getAttribute('data-cmedit'));
+        if (!item) return;
+        cmOpenForm(ev, { kind: item.kind, sendAt: cmLocalOfIso(item.sendAt), audience: item.audience, subject: item.subject, body: item.body }, item.id);
+      });
+    });
+    Array.prototype.forEach.call(root.querySelectorAll('[data-cmsched]'), function (b) {
+      b.addEventListener('click', function () {
+        if (st.rowBusy) return;
+        var item = cmFindItem(ev.id, b.getAttribute('data-cmsched'));
+        if (item && !item.sendAt) { st.err = '予約には送信日時が必要です。「編集」で日時を入れてください。'; st.notice = ''; render(); return; }
+        cmEdKeep();
+        st.rowConfirm = b.getAttribute('data-cmsched'); st.rowKind = 'sched'; st.err = ''; st.notice = '';
+        render();
+      });
+    });
+    Array.prototype.forEach.call(root.querySelectorAll('[data-cmcancel]'), function (b) {
+      b.addEventListener('click', function () {
+        if (st.rowBusy) return;
+        cmEdKeep();
+        st.rowConfirm = b.getAttribute('data-cmcancel'); st.rowKind = 'cancel'; st.err = ''; st.notice = '';
+        render();
+      });
+    });
+    Array.prototype.forEach.call(root.querySelectorAll('[data-cmno]'), function (b) {
+      b.addEventListener('click', function () { if (!st.rowBusy) { st.rowConfirm = ''; st.rowKind = ''; render(); } });
+    });
+    Array.prototype.forEach.call(root.querySelectorAll('[data-cmyes]'), function (b) {
+      b.addEventListener('click', function () { cmRowExec(ev); });
+    });
+    Array.prototype.forEach.call(root.querySelectorAll('[data-cmrestore]'), function (b) {
+      b.addEventListener('click', function () {
+        if (st.rowBusy) return;
+        var item = cmFindItem(ev.id, b.getAttribute('data-cmrestore'));
+        if (!item) return;
+        if (DEMO) { st.notice = 'デモ表示のため変更は行われません。'; render(); return; }
+        st.rowBusy = true; st.err = ''; st.notice = '';
+        render();
+        API.postData('saveEventComm', { id: item.id, eventId: ev.id, kind: item.kind, sendAt: item.sendAt || '', audience: item.audience, subject: item.subject, body: item.body, status: 'draft' }).then(function () {
+          return cmRefetch(ev.id);
+        }).then(function () {
+          st.rowBusy = false;
+          st.notice = '下書きに戻しました。';
+          render();
+        }).catch(function (e) {
+          st.rowBusy = false;
+          if (e && e._auth) return;
+          st.err = ((e && e.message) || '操作に失敗しました。') + ' 変更は行われていません。';
+          render();
+        });
+      });
+    });
+    Array.prototype.forEach.call(root.querySelectorAll('[data-cmsavedraft]'), function (b) {
+      b.addEventListener('click', function () { cmSaveForm(ev, 'draft'); });
+    });
+    Array.prototype.forEach.call(root.querySelectorAll('[data-cmsavesched]'), function (b) {
+      b.addEventListener('click', function () {
+        if (st.busy) return;
+        cmEdKeep();
+        if (!st.sendAt) { st.err = '予約には送信日時が必要です。'; render(); return; }
+        st.confirm = true; st.err = '';
+        render();
+      });
+    });
+    Array.prototype.forEach.call(root.querySelectorAll('[data-cmsvno]'), function (b) {
+      b.addEventListener('click', function () { if (!st.busy) { cmEdKeep(); st.confirm = false; render(); } });
+    });
+    Array.prototype.forEach.call(root.querySelectorAll('[data-cmsvyes]'), function (b) {
+      b.addEventListener('click', function () { cmSaveForm(ev, 'scheduled'); });
+    });
+    Array.prototype.forEach.call(root.querySelectorAll('[data-cmclose]'), function (b) {
+      b.addEventListener('click', function () {
+        if (st.busy) return;
+        st.open = false; st.err = ''; st.confirm = false;
+        render();
+      });
+    });
+  }
+
+  /* ============================================================================
+     当日タブ(#/ev/<id>/day) — 正典: event-day.html
+     主役=チェックイン進捗(大数字+バー・Dayセグメント連動)。
+     左=未決済の回収キュー: 会場に来ている(チェックイン済/保留)人だけ「その場で決済を確定」
+       =admin.confirmPayment {regId,paymentMethod}(consoleの受付と同じアクション。
+        BE前提条件=対象の課金行自身が チェックイン保留/チェックイン済 のときだけ成功する)。
+       金銭=楽観反映禁止: サーバ確定→申込データをforce再読取→描画。未到着は案内文のみ。
+     右=班の集合状況(event_groups×来場)+当日一斉連絡(定型2+自由文→確認→
+       saveEventComm(kind:custom, draft)→sendEventCommNow。送信結果=実数を表示)。
+     受付済みの「推移」はチェックイン時刻がBEに無いため実データでは出さない(デモのみ)。
+     ============================================================================ */
+  var dayUi = { evId: '', confirmId: '', busy: false, notice: '', err: '', full: false, autoDone: false };
+  var bcSt = { evId: '', text: '', subject: '', confirm: false, busy: false, notice: '', err: '' };
+  function resetDayState(evId) {
+    if (dayUi.evId !== String(evId)) {
+      dayUi = { evId: String(evId), confirmId: '', busy: false, notice: '', err: '', full: false, autoDone: false };
+      bcSt = { evId: String(evId), text: '', subject: '', confirm: false, busy: false, notice: '', err: '' };
+    }
+  }
+  // 決済フラグはconsoleの受付と同じ判定(決済済み列)。状態文字列の「チェックイン」に引きずられない
+  function paidFlag(r) { return r.paid === true || r.paid === 'TRUE'; }
+  function rowAtVenue(r) { return /チェックイン/.test(regStatus(r)); } // 済+保留=来場している
+  /* ---- 未決済の回収キュー(申込単位。課金行=決済確定の対象) ---- */
+  function buildDayQueue(ev, regs, sel) {
+    if (regs === null) return null;
+    var mine = arr(regs).filter(function (r) { return r && !r.isTest && r.eventId === ev.id && regActive(r); });
+    var apps = {};
+    var order = [];
+    mine.forEach(function (r) {
+      var k = appKeyOf(r);
+      if (!apps[k]) { apps[k] = []; order.push(k); }
+      apps[k].push(r);
+    });
+    var lmap = dayLabelMap(ev);
+    var rows = [];
+    var totalAmt = 0;
+    order.forEach(function (k) {
+      var g = apps[k];
+      if (sel && !g.some(function (r) { return String(r.sessionId || '') === String(sel); })) return; // Dayセグメント絞り
+      var unpaidRows = g.filter(function (r) { return num(r.amount) > 0 && !paidFlag(r); });
+      if (!unpaidRows.length) return;
+      var moneyRow = unpaidRows[0];
+      var amt = 0;
+      unpaidRows.forEach(function (r) { amt += num(r.amount); });
+      totalAmt += amt;
+      var atVenue = g.some(rowAtVenue);
+      var lm = lmap[String(moneyRow.sessionId || '')];
+      var notes = [];
+      if (moneyRow.note) notes.push(String(moneyRow.note).slice(0, 26));
+      if (num(moneyRow.companionsCount) > 0) notes.push('同伴' + num(moneyRow.companionsCount) + '名');
+      if (evIsMulti(ev) && lm) notes.push('参加費は' + lm.label + 'の行');
+      rows.push({
+        id: String(moneyRow.id || ''),
+        name: moneyRow.userName || '(名前未登録)',
+        amt: amt,
+        atVenue: atVenue,
+        confirmable: rowAtVenue(moneyRow), // BE前提: 課金行自身が保留/済のときだけ確定できる
+        note: notes.join(' ・ '),
+      });
+    });
+    rows.sort(function (a, b) { return (b.confirmable ? 2 : b.atVenue ? 1 : 0) - (a.confirmable ? 2 : a.atVenue ? 1 : 0); });
+    return { rows: rows, totalAmt: totalAmt };
+  }
+  /* ---- 班の集合状況(event_groups × 来場)。sel指定時=そのDayの班+来場行だけ ---- */
+  function buildDayGroups(ev, regs, sel) {
+    var groups = groupsOf(ev.id);
+    if (groups === null || regs === null) return null;
+    var list = arr(groups);
+    var note = '';
+    if (evIsMulti(ev) && sel) {
+      var own = list.filter(function (g) { return String((g && g.sessionId) || '') === String(sel); });
+      if (own.length) list = own;
+      else {
+        list = list.filter(function (g) { return !(g && g.sessionId); });
+        if (list.length) note = 'このDay専用の班分けはありません ― 全日共通を表示中。';
+      }
+    }
+    if (!list.length) return { rows: [], note: '' };
+    var checked = {};
+    arr(regs).forEach(function (r) {
+      if (!r || r.isTest || r.eventId !== ev.id || !regActive(r) || !rowAtVenue(r)) return;
+      if (sel && String(r.sessionId || '') !== String(sel)) return;
+      var uid = String(r.userId || '').trim();
+      if (uid) checked[uid] = 1;
+    });
+    var inGroup = {};
+    var rows = list.map(function (g) {
+      var ids = arr(g.participantIds).map(function (x) { return String(x).trim(); });
+      ids.forEach(function (id) { inGroup[id] = 1; });
+      var x = ids.filter(function (id) { return checked[id]; }).length;
+      return { name: String(g.name || ''), note: String(g.note || ''), x: x, y: ids.length, full: ids.length > 0 && x >= ids.length };
+    });
+    var loose = 0;
+    Object.keys(checked).forEach(function (id) { if (!inGroup[id]) loose++; });
+    var gsum = loose > 0
+      ? '来場した方のうち<span class="nb">' + loose + '名は班に入っていません</span>(準備タブの班分けで確認できます)。'
+      : '来場した方はみな、いずれかの班に入っています。';
+    return { rows: rows, note: note, gsumHtml: gsum };
+  }
+  /* ---- 金銭のforce再読取(偽完了禁止): サーバ確定後に申込データを取り直してから描画 ---- */
+  function dayRegsForceFull() {
+    return API.fetchData('listRegistrations', {}).then(function (rows) {
+      S.regs = arr(rows);
+      M.regsOk = true;
+      M.aggs = buildAggs(S.regs, M.partsOk ? S.parts : null);
+      cacheSave();
+    });
+  }
+  function dayRegsForce(ev) {
+    if (erUnsupported) return dayRegsForceFull();
+    return API.fetchData('listEventRegistrations', { eventId: ev.id }).then(function (d) {
+      var rows = arr(d && d.rows ? d.rows : d);
+      var er = ER[ev.id] || (ER[ev.id] = { rows: null, err: false, fetched: true, loading: false });
+      er.rows = rows; er.err = false; er.fetched = true;
+      if (S.regs) { // 全件が正のときは該当イベント行を差し替えて集計も作り直す
+        S.regs = arr(S.regs).filter(function (r) { return !(r && r.eventId === ev.id); }).concat(rows);
+        M.aggs = buildAggs(S.regs, M.partsOk ? S.parts : null);
+      }
+      cacheSave();
+    }, function (e) {
+      if (/unknown action|invalid action|not supported|未対応|不明なアクション/i.test(String((e && e.message) || ''))) erUnsupported = true;
+      return dayRegsForceFull();
+    });
+  }
+  function dayConfirmPay(ev, rid) {
+    if (dayUi.busy) return;
+    if (DEMO) {
+      dayUi.confirmId = '';
+      dayUi.notice = 'デモ表示のため決済の記録は行われません。実データではこの場で決済済み+入場確定になります。';
+      render();
+      return;
+    }
+    var mEl = document.getElementById('payq-method');
+    var method = (mEl && mEl.value) ? String(mEl.value) : '当日確認';
+    dayUi.busy = true; dayUi.err = ''; dayUi.notice = '';
+    render();
+    API.postData('admin.confirmPayment', { regId: rid, paymentMethod: method }).then(function () {
+      // 決済はサーバで確定済み。表示は実データの取り直しで反映する(楽観反映しない)
+      return dayRegsForce(ev).then(function () { return true; }, function () { return false; });
+    }).then(function (reOk) {
+      dayUi.busy = false; dayUi.confirmId = '';
+      dayUi.notice = reOk
+        ? '決済を確認し、入場を確定しました(' + method + ')。'
+        : '決済は記録されました。表示の更新に失敗したため、再読み込みしてください。';
+      render();
+    }).catch(function (e) {
+      dayUi.busy = false; dayUi.confirmId = '';
+      if (e && e._auth) return;
+      dayUi.err = ((e && e.message) || '決済の確認に失敗しました。') + ' 記録は変わっていません。もう一度お試しください。';
+      render();
+    });
+  }
+  /* ---- 当日一斉連絡(定型2+自由文)。送信=下書き作成→sendEventCommNow(結果は実数で表示) ---- */
+  function bcTemplate(ev, key) {
+    var t = evTitle(ev);
+    if (key === 'rain') {
+      var rp = rainPlanOf(ev);
+      return {
+        subject: '【重要】' + t + ' ― 雨天による変更のお知らせ',
+        text: '本日の「' + t + '」は、天候のため次のとおり変更します。\n\n変更後: ' + (rp || '(場所・時間をここに)') + '\n\nご不明な点は受付でお声がけください。',
+      };
+    }
+    return {
+      subject: '【お知らせ】' + t + ' ― 開始時間の変更',
+      text: '本日の「' + t + '」は、開始が(　)分ほど遅れる見込みです。\n会場の受付は開いていますので、そのままお越しください。',
+    };
+  }
+  function bcKeep() {
+    var n = document.getElementById('bc-text');
+    if (n && n.value != null) bcSt.text = String(n.value);
+  }
+  function bcSend(ev) {
+    var st = bcSt;
+    if (st.busy) return;
+    if (DEMO) {
+      st.confirm = false;
+      st.notice = 'デモ表示のため送信は行われません。実データでは申込者へメールが送られます。';
+      render();
+      return;
+    }
+    st.busy = true; st.err = ''; st.notice = '';
+    render();
+    API.postData('saveEventComm', { eventId: ev.id, kind: 'custom', sendAt: '', audience: 'all', subject: st.subject, body: st.text, status: 'draft' }).then(function (res) {
+      var id = res && res.id;
+      if (!id) throw new Error('下書きの作成結果が不正です。');
+      return API.postData('sendEventCommNow', { id: id }).then(null, function () {
+        var er = new Error('下書きは作成しましたが送信できませんでした。配信タイムラインの下書きから、もう一度お試しください。');
+        er._draftOnly = true;
+        throw er;
+      });
+    }).then(function (r) {
+      r = r || {};
+      st.busy = false; st.confirm = false; st.text = ''; st.subject = '';
+      var parts = ['送信しました ― ' + num(r.sent) + '名に送信'];
+      if (num(r.failed) > 0) parts.push(num(r.failed) + '件は送信できませんでした(メール未登録など)');
+      if (r.done === false) parts.push('宛先が多いため残りは1時間ごとの送信便で順次送られます');
+      st.notice = parts.join('。') + '。';
+      var c = CM[ev.id];
+      if (c) c.fetched = false;
+      return cmRefetch(ev.id).then(function () { render(); }, function () { render(); });
+    }).catch(function (e) {
+      st.busy = false;
+      if (e && e._auth) return;
+      st.confirm = false;
+      st.err = (e && e.message) || '送信に失敗しました。';
+      if (e && e._draftOnly) {
+        var c2 = CM[ev.id];
+        if (c2) c2.fetched = false;
+        cmRefetch(ev.id).then(function () { render(); }, function () { render(); });
+        return;
+      }
+      render();
+    });
+  }
+  /* ---- 当日タブ: モデル ---- */
+  function buildDayModel(M, ev, regsOverride) {
+    resetDayState(ev.id);
+    if (evIsMulti(ev) && !dayUi.autoDone) { // 初回だけ、きょうのDayを既定選択(選び直しはそのまま尊重)
+      var td0 = todayDayOf(ev);
+      if (td0 && daySel(ev) === '') dayState.sel = String(evSess(ev)[td0.n - 1].id);
+      dayUi.autoDone = true;
+    }
+    var vm = buildHubModel(M, ev, 'day');
+    vm.ev = ev;
+    var sel = evIsMulti(ev) ? daySel(ev) : '';
+    var regs = regsOverride === undefined ? regsOf(ev) : regsOverride;
+    var a = vm.agg;
+    var prog = null;
+    if (a) {
+      var da = sel ? ((a.dayAggs && a.dayAggs[sel]) || { applied: 0, paid: 0, unpaid: 0, checked: 0 }) : a;
+      var applied = num(da.applied);
+      var checked = num(da.checked);
+      prog = {
+        checked: checked, applied: applied,
+        pct: applied > 0 ? Math.round(checked / applied * 100) : 0,
+        remain: Math.max(0, applied - checked),
+        unpaid: num(da.unpaid),
+      };
+    }
+    // 受付担当(event_staff role=受付。Day選択時はそのDay+全日共通)
+    var whoLine = '';
+    var staff = canStaff() ? staffOf(ev.id) : null;
+    if (staff && arr(staff).length) {
+      var mm = memberMap();
+      var names = [];
+      arr(staff).forEach(function (e) {
+        if (!/受付/.test(String((e && e.role) || ''))) return;
+        var sid = String((e && e.sessionId) || '');
+        if (sel && sid && sid !== sel) return;
+        var id = String((e && e.memberId) || '').trim();
+        if (!id) return;
+        var m = mm[id];
+        var nm = (m && memberName(m)) || String(e.memberName || '') || id;
+        if (names.indexOf(nm) < 0) names.push(nm);
+      });
+      if (names.length) whoLine = '受付 ' + esc(names.slice(0, 3).join('・'));
+    }
+    var nowD = new Date();
+    vm.day = {
+      canOps: canStaff(),
+      clock: nowD.getHours() + ':' + pad2(nowD.getMinutes()),
+      whoLine: whoLine,
+      prog: prog,
+      progErr: (!a && M.regsOk === false),
+      queue: canStaff() ? buildDayQueue(ev, regs, sel) : null,
+      groups: canStaff() ? buildDayGroups(ev, regs, sel) : null,
+      bcCount: a ? a.applied : 0, // 宛先(audience=all)はイベント全体の申込ユニーク(BEの解決と同じ粒度)
+      full: dayUi.full,
+      feedHtml: '', // チェックイン時刻はBEに無い=受付の推移は実データでは出さない(デモのみ)
+      timeHtml: timeRange(ev) ? '<span class="nb">' + esc(timeRange(ev)) + '</span>' : '',
+    };
+    return vm;
+  }
+  /* ---- 当日タブ: 描画 ---- */
+  function dayHeadHtml(vm) {
+    var H = vm.head;
+    return '<a class="back" href="#/"><span class="mi">arrow_back</span>イベント一覧へ</a>' +
+      '<div class="titleblock dayblock">' +
+      '<div><div class="kicker">' + H.kicker + '</div><h1>' + esc(H.title) + '</h1></div>' +
+      (H.metaHtml ? '<div class="meta">' + H.metaHtml + '</div>' : '') +
+      '<div class="nowline"><div class="clock nb">いま ' + esc(vm.day.clock) + '</div>' +
+      (vm.day.whoLine ? '<div class="who nb">' + vm.day.whoLine + '</div>' : '') + '</div>' +
+      '</div>' +
+      tabbarHtml(vm.tabs, vm.reception);
+  }
+  function dayProgressHtml(vm) {
+    var D = vm.day;
+    if (!D.prog) {
+      if (D.progErr) return '<div class="numband-note" style="margin-top:14px">受付状況を取得できませんでした。<button type="button" id="ev-retry">再読み込み</button></div>';
+      return '<div class="state-line" style="padding-bottom:10px">受付状況を読み込み中…</div>';
+    }
+    var P = D.prog;
+    var right = P.remain > 0
+      ? '残り' + P.remain + '名' + (P.unpaid > 0 ? ' ― うち<span class="un nb">未決済' + P.unpaid + '名</span>' : '')
+      : (P.applied > 0 ? '全員の受付が完了しました' : 'まだ申込がありません');
+    return '<section aria-label="チェックイン進捗">' +
+      '<div class="checkin">' +
+      '<div><div class="cap">受付済み</div><div class="big">' + P.checked + '<small class="nb">/' + P.applied + '名</small></div></div>' +
+      '<div class="pct nb">' + P.pct + '%</div>' +
+      '<div class="modes"><button type="button" class="btn sub nb" id="day-full"><span class="mi">present_to_all</span>全画面モード(大画面投影)</button></div>' +
+      '</div>' +
+      '<div class="pbar" role="img" aria-label="受付済み' + P.checked + '名 全' + P.applied + '名中 ' + P.pct + 'パーセント"><i style="width:' + P.pct + '%"></i></div>' +
+      '<div class="pcap"><span>' + (D.timeHtml ? '開催 ' + D.timeHtml : '') + '</span><span class="nb">' + right + '</span></div>' +
+      '</section>';
+  }
+  function dayQueueHtml(vm) {
+    var Q = vm.day.queue;
+    var h = '<h2 class="sec">未決済の回収' + (Q && Q.rows && Q.rows.length ? ' ― ' + Q.rows.length + '名' : '') +
+      '<a class="act" href="' + esc(vm.tabs.base) + '/regs">申込・決済タブへ</a></h2>';
+    if (Q === null) return h + '<div class="tbl-empty">読み込み中…</div>';
+    if (!Q.rows.length) return h + '<div class="tbl-empty">未決済の申込はありません。参加費はそろっています。</div>';
+    var here = Q.rows.filter(function (r) { return r.confirmable; }).length;
+    var away = Q.rows.length - here;
+    var noteBits = [];
+    if (here > 0) noteBits.push('受付済みの<span class="nb">' + here + '名</span>はその場で確定できます');
+    if (away > 0) noteBits.push('未到着の方は受付のときに案内が出ます');
+    h += '<p class="queue-note">' + noteBits.join('。') + '。</p>';
+    h += '<div>' + Q.rows.map(function (r) {
+      var st = r.atVenue
+        ? '<b>受付済み</b>' + (r.note ? ' ― ' + esc(r.note) : '')
+        : '<span class="away">未到着</span>' + (r.note ? ' ― ' + esc(r.note) : '');
+      if (r.stHtml) st = r.stHtml; // デモ(正典の文言をそのまま)
+      var op;
+      if (dayUi.confirmId === r.id) {
+        op = '<span class="payq-confirm"><span class="nb">' + esc(r.name) + 'さんの<b>' + money(r.amt) + '円</b></span>' +
+          '<select id="payq-method" aria-label="受け取った決済方法"><option value="現金">現金</option><option value="PayPay">PayPay</option><option value="クレジット">クレジット</option><option value="当日確認">その他</option></select>' +
+          '<button type="button" class="btn nb" data-payqyes="' + esc(r.id) + '"' + (dayUi.busy ? ' disabled' : '') + '>' + (dayUi.busy ? '確定中…' : '受け取って確定') + '</button>' +
+          '<button type="button" class="rowlink" data-payqno="1"' + (dayUi.busy ? ' disabled' : '') + '>やめる</button></span>';
+      } else if (r.confirmable) {
+        op = '<button type="button" class="btn nb" data-payq="' + esc(r.id) + '">その場で決済を確定</button>';
+      } else if (r.atVenue) {
+        op = '<span class="hold nb">決済の記録は console から</span>'; // 課金行が別Day=このアクションでは確定できない
+      } else {
+        op = '<span class="hold nb">受付時に案内が出ます</span>';
+      }
+      return '<div class="dq">' + (r.img ? '<img src="' + esc(r.img) + '" alt="">' : '') +
+        '<div><span class="nm nb">' + esc(r.name) + '</span><span class="st">' + st + '</span></div>' +
+        '<span class="amt nb">' + money(r.amt) + '円</span>' + op + '</div>';
+    }).join('') + '</div>';
+    h += '<p class="moneynote">確定の前に、金額と受け取った決済方法の確認が入ります。' +
+      (Q.rows.length > 0 ? '全員分がそろうと<span class="nb">+' + money(Q.totalAmt) + '円</span>です。' : '') + '</p>';
+    if (dayUi.err) h += '<p class="edit-err">' + esc(dayUi.err) + '</p>';
+    if (dayUi.notice) h += '<p class="opnote" role="status">' + esc(dayUi.notice) + '</p>';
+    return h;
+  }
+  function dayGroupsHtml(vm) {
+    var G = vm.day.groups;
+    var h = '<div class="grp"><h2>班の集合状況<a class="act" href="' + esc(vm.tabs.base) + '/prep">班分けは準備タブ</a></h2>';
+    if (G === null) h += '<div class="side-empty">読み込み中…</div>';
+    else if (!G.rows.length) h += '<div class="side-empty">班分けはまだありません。準備タブの「班を編集」から作成できます。</div>';
+    else {
+      if (G.note) h += '<p class="gsum" style="margin:2px 0 4px">' + esc(G.note) + '</p>';
+      h += G.rows.map(function (g) {
+        return '<div class="dg"><span class="gn nb">' + esc(g.name) + '</span><span class="gl nb">' + esc(g.note || '') + '</span>' +
+          '<span><span class="cnt nb">' + g.x + '/' + g.y + '</span> ' +
+          (g.full ? '<span class="full nb">そろいました</span>' : '<span class="part nb">あと' + (g.y - g.x) + '名</span>') + '</span></div>';
+      }).join('');
+      if (G.gsumHtml) h += '<p class="gsum">' + G.gsumHtml + '</p>';
+    }
+    h += '</div>';
+    return h;
+  }
+  function dayBcastHtml(vm) {
+    var st = bcSt;
+    var h = '<div class="grp bcast" style="margin-bottom:4px"><h2>当日一斉連絡</h2>';
+    if (st.confirm) {
+      h += '<div class="bc-confirm">' +
+        '<p class="bc-to"><span class="nb">宛先: 申込' + vm.day.bcCount + '名</span>(テスター・メール未登録は自動で除外)</p>' +
+        '<p class="bc-subj nb">' + esc(st.subject) + '</p>' +
+        '<p class="bc-body">' + esc(st.text).replace(/\n/g, '<br>') + '</p>' +
+        '<div class="send">' +
+        '<button type="button" class="btn nb" data-bcgo="1"' + (st.busy ? ' disabled' : '') + '>' + (st.busy ? '送信中…' : 'この内容で送信する') + '</button>' +
+        '<button type="button" class="btn sub nb" data-bcback="1"' + (st.busy ? ' disabled' : '') + '>書き直す</button>' +
+        '</div>' +
+        '<p class="note">メールで届きます。送信後の取り消しはできません。</p></div>';
+    } else {
+      h += '<button type="button" class="btn sub" data-bctpl="rain"><span class="nb">雨天時の場所変更を送る</span></button>' +
+        '<button type="button" class="btn sub" data-bctpl="delay"><span class="nb">開始時間の遅れを送る</span></button>' +
+        '<label for="bc-text" style="font-size:12.5px;color:var(--ink4);display:block;margin-top:10px">自由文で送る</label>' +
+        '<textarea id="bc-text" placeholder="例: 記念写真は14:40からです。中央の木の下にお集まりください。">' + esc(st.text) + '</textarea>' +
+        '<div class="send">' +
+        '<button type="button" class="btn sub nb" data-bcconfirm="1">確認して送信</button>' +
+        '<span style="font-size:12px;color:var(--ink5)" class="nb">宛先: 申込' + vm.day.bcCount + '名</span>' +
+        '</div>' +
+        '<p class="note">送信の前に宛先と本文の確認画面が入ります。届くのはメールです。</p>';
+    }
+    if (st.err) h += '<p class="edit-err">' + esc(st.err) + '</p>';
+    if (st.notice) h += '<p class="opnote" role="status">' + esc(st.notice) + '</p>';
+    h += '</div>';
+    return h;
+  }
+  function dayFullHtml(vm) {
+    var P = vm.day.prog;
+    if (!P) return '';
+    return '<div class="dayfull" role="dialog" aria-label="受付状況(全画面)">' +
+      '<button type="button" class="df-close" data-dayfullclose="1" aria-label="全画面をやめる"><span class="mi">close</span></button>' +
+      '<div class="df-title nb">' + esc(vm.head.title) + '</div>' +
+      '<div class="df-cap">受付済み</div>' +
+      '<div class="df-big">' + P.checked + '<small class="nb">/' + P.applied + '名</small></div>' +
+      '<div class="df-pct nb">' + P.pct + '%</div>' +
+      '<div class="pbar df-bar"><i style="width:' + P.pct + '%"></i></div>' +
+      '<div class="df-note nb">' + (P.remain > 0 ? '残り' + P.remain + '名' : '全員の受付が完了しました') + '</div>' +
+      '</div>';
+  }
+  function renderDay(vm) {
     document.body.classList.toggle('has-tabbtn', !!vm.reception);
-    root.innerHTML = mastheadHtml({ mePhoto: vm.mePhoto, showHq: vm.showHq }) +
+    var D = vm.day;
+    var h = mastheadHtml({ mePhoto: vm.mePhoto, showHq: vm.showHq }) +
+      dayHeadHtml(vm) +
+      (vm.dayseg || '') +
+      dayProgressHtml(vm);
+    if (D.canOps) {
+      h += '<div class="cols">' +
+        '<main>' + dayQueueHtml(vm) + (D.feedHtml || '') + '</main>' +
+        '<aside class="side glass">' + dayGroupsHtml(vm) + dayBcastHtml(vm) + '</aside>' +
+        '</div>';
+    } else {
+      h += (rankUnknown_() ? '<p class="stub-line">権限を確認しています…</p>' : '<p class="stub-line">未決済の回収・班の集合状況・一斉連絡の操作には、アシスタントマネージャー以上の権限が必要です。</p>');
+    }
+    h += colophonHtml(esc(vm.head.title) + ' ・ 当日');
+    if (D.full) h += dayFullHtml(vm);
+    root.innerHTML = h;
+    bindRetry();
+    if (vm.dayseg) bindDaySeg({ id: vm.evId });
+    bindDay(vm);
+  }
+  function bindDay(vm) {
+    var ev = vm.ev || findEvent(vm.evId) || { id: vm.evId, title: vm.head.title };
+    var fb = document.getElementById('day-full');
+    if (fb) fb.addEventListener('click', function () { dayUi.full = true; render(); });
+    Array.prototype.forEach.call(root.querySelectorAll('[data-dayfullclose]'), function (b) {
+      b.addEventListener('click', function () { dayUi.full = false; render(); });
+    });
+    Array.prototype.forEach.call(root.querySelectorAll('[data-payq]'), function (b) {
+      b.addEventListener('click', function () {
+        if (dayUi.busy) return;
+        dayUi.confirmId = b.getAttribute('data-payq');
+        dayUi.err = ''; dayUi.notice = '';
+        render();
+      });
+    });
+    Array.prototype.forEach.call(root.querySelectorAll('[data-payqno]'), function (b) {
+      b.addEventListener('click', function () { if (!dayUi.busy) { dayUi.confirmId = ''; render(); } });
+    });
+    Array.prototype.forEach.call(root.querySelectorAll('[data-payqyes]'), function (b) {
+      b.addEventListener('click', function () { dayConfirmPay(ev, b.getAttribute('data-payqyes')); });
+    });
+    Array.prototype.forEach.call(root.querySelectorAll('[data-bctpl]'), function (b) {
+      b.addEventListener('click', function () {
+        if (bcSt.busy) return;
+        var t = bcTemplate(ev, b.getAttribute('data-bctpl'));
+        bcSt.text = t.text; bcSt.subject = t.subject;
+        bcSt.err = ''; bcSt.notice = '';
+        render();
+      });
+    });
+    Array.prototype.forEach.call(root.querySelectorAll('[data-bcconfirm]'), function (b) {
+      b.addEventListener('click', function () {
+        if (bcSt.busy) return;
+        bcKeep();
+        if (!bcSt.text.trim()) { bcSt.err = '本文を入力してください(定型ボタンからも作れます)。'; bcSt.notice = ''; render(); return; }
+        if (!bcSt.subject) bcSt.subject = '【' + evTitle(ev) + '】運営からのお知らせ';
+        bcSt.confirm = true; bcSt.err = ''; bcSt.notice = '';
+        render();
+      });
+    });
+    Array.prototype.forEach.call(root.querySelectorAll('[data-bcback]'), function (b) {
+      b.addEventListener('click', function () { if (!bcSt.busy) { bcSt.confirm = false; render(); } });
+    });
+    Array.prototype.forEach.call(root.querySelectorAll('[data-bcgo]'), function (b) {
+      b.addEventListener('click', function () { bcSend(ev); });
+    });
+  }
+
+  /* ============================================================================
+     事後タブ(#/ev/<id>/after) — 正典: event-after.html
+     記念写真=Events/EventSessions の memento系フィールドを読取(mementoPhotoUrl/
+       mementoPublishAt/mementoGallery)。アップロード・公開設定の編集は console の
+       事後画面へ誘導(スタンプ位置/非表示写真/ニュース連動まで含む editor は再実装しない)。
+     満足度=listSurveys+listSurveyResponses(NPS/分布/自由記述)。回答依頼リマインドは
+       comms(kind:survey) の下書き導線(配信タイムラインのフォームに雛形前埋め)。
+     収支=概要の「収支の見込み」を流用し、未決済0なら確定の一文。
+     公開・配信=commsの時系列に記念写真の公開予約も合流(表示のみ)。
+     ============================================================================ */
+  function galleryVisible(g) {
+    var out = [];
+    arr(g).forEach(function (x) {
+      if (typeof x === 'string') { if (x) out.push(x); }
+      else if (x && typeof x === 'object' && x.u && !x.h) out.push(String(x.u));
+    });
+    return out;
+  }
+  function galleryHiddenCount(g) {
+    var n = 0;
+    arr(g).forEach(function (x) { if (x && typeof x === 'object' && x.u && x.h) n++; });
+    return n;
+  }
+  function pubInfo(at) { // 公開日時 → {past, label:'9/6(日) 12:00'}
+    if (!at) return null;
+    var d = new Date(String(at).replace(' ', 'T'));
+    if (isNaN(d.getTime())) { d = parseYmd(String(at)); if (!d) return null; }
+    return { past: d.getTime() <= Date.now(), label: dateSlash(d) + '(' + WD[d.getDay()] + ') ' + d.getHours() + ':' + pad2(d.getMinutes()) };
+  }
+  function buildAfterPhotos(ev) {
+    var cover = String(ev.mementoPhotoUrl || '');
+    var vis = galleryVisible(ev.mementoGallery);
+    var hidden = galleryHiddenCount(ev.mementoGallery);
+    var total = (cover ? 1 : 0) + vis.length;
+    var days = null;
+    if (evIsMulti(ev)) {
+      var ss = fullSessions(ev);
+      if (ss !== null) {
+        var lmap = dayLabelMap(ev);
+        days = [];
+        arr(ss).forEach(function (s) {
+          if (!s) return;
+          var c2 = String(s.mementoPhotoUrl || '');
+          var v2 = galleryVisible(s.mementoGallery);
+          var lm = lmap[String(s.id)];
+          var cnt = (c2 ? 1 : 0) + v2.length;
+          total += cnt;
+          days.push({
+            label: lm ? lm.label + (lm.md ? ' ' + lm.md : '') : String(s.name || ''),
+            count: cnt, pub: pubInfo(s.mementoPublishAt),
+          });
+        });
+      }
+    }
+    return { cover: cover, vis: vis, hidden: hidden, total: total, pub: pubInfo(ev.mementoPublishAt), days: days, daysLoading: evIsMulti(ev) && days === null };
+  }
+  function buildAfterSat(ev, checkedApps) {
+    if (!canStaff()) return null;
+    var s = SV[ev.id];
+    if (!s || s.surveys === null) return null; // 読み込み中
+    if (s.err && !arr(s.surveys).length) return { err: true };
+    var surveys = arr(s.surveys);
+    if (!surveys.length) return { none: true };
+    var resps = arr(s.resps);
+    var npsV = resps.filter(function (r) { return r && r.nps !== null && r.nps !== undefined; });
+    var pro = npsV.filter(function (r) { return num(r.nps) >= 9; }).length;
+    var det = npsV.filter(function (r) { return num(r.nps) <= 6; }).length;
+    var pas = npsV.length - pro - det;
+    var csV = resps.filter(function (r) { return r && r.csat !== null && r.csat !== undefined; });
+    var quotes = resps.filter(function (r) { return r && String(r.free || '').trim(); })
+      .sort(function (a, b) { return String(b.answeredAt || '').localeCompare(String(a.answeredAt || '')); })
+      .slice(0, 3)
+      .map(function (r) { return { text: String(r.free).trim().slice(0, 140), who: '自由記述より' }; });
+    return {
+      respN: resps.length,
+      nps: npsV.length ? Math.round((pro - det) / npsV.length * 100) : null,
+      npsN: npsV.length, pro: pro, pas: pas, det: det,
+      csat: csV.length ? Math.round(csV.reduce(function (a2, r) { return a2 + num(r.csat); }, 0) / csV.length * 10) / 10 : null,
+      csatN: csV.length,
+      quotes: quotes,
+      rate: checkedApps > 0 ? Math.round(resps.length / checkedApps * 100) : null,
+    };
+  }
+  function photoPublishEntries(ev) { // 記念写真の公開予約を配信の時系列に合流(表示のみ)
+    var out = [];
+    function push(label, at) {
+      var p = pubInfo(at);
+      if (!p) return;
+      var t = new Date(String(at).replace(' ', 'T')).getTime();
+      out.push({
+        t: isNaN(t) ? 0 : t,
+        v: {
+          cls: p.past ? 'sent' : '',
+          when: p.label,
+          bodyHtml: '<b>' + esc(label) + '</b> ― <span class="nb">参加者ページ</span>',
+          stCls: p.past ? 'ok' : 'plan', stLabel: p.past ? '公開済み' : '公開予約',
+        },
+      });
+    }
+    push('記念写真を公開', ev.mementoPublishAt);
+    if (evIsMulti(ev)) {
+      var lmap = dayLabelMap(ev);
+      arr(fullSessions(ev)).forEach(function (s) {
+        if (!s) return;
+        var lm = lmap[String(s.id)];
+        push('記念写真を公開(' + (lm ? lm.label : String(s.name || '')) + ')', s.mementoPublishAt);
+      });
+    }
+    return out;
+  }
+  function buildAfterTimeline(ev, base) {
+    if (!canStaff()) return null;
+    var cm = CM[ev.id];
+    var unsupported = !!(cm && cm.unsupported);
+    var items = commsOf(ev.id);
+    if (items === null && !unsupported) return null;
+    var editHref = unsupported ? '' : base + '/comms'; // BE未対応なら編集導線も出さない
+    var rows = [];
+    if (!unsupported) {
+      arr(items).forEach(function (c) {
+        if (!c || String(c.status) === 'cancelled') return;
+        var t = c.sendAt ? new Date(String(c.sendAt).replace(' ', 'T')).getTime() : Infinity;
+        rows.push({ t: isNaN(t) ? Infinity : t, v: cmRowView(c) });
+      });
+    }
+    photoPublishEntries(ev).forEach(function (p) { rows.push(p); });
+    if (!rows.length) {
+      if (unsupported) return null; // 機能なし+写真予約もなし → セクションごと非表示
+      return { editHref: editHref, lineHtml: '配信の予定はまだありません ― <a href="' + esc(editHref) + '">追加</a>' };
+    }
+    rows.sort(function (a, b) { return (a.t || 0) - (b.t || 0); });
+    return { editHref: editHref, rows: rows.map(function (r) { return r.v; }) };
+  }
+  function buildAfterModel(M, ev) {
+    var vm = buildHubModel(M, ev, 'after');
+    vm.ev = ev;
+    var base = vm.tabs.base;
+    var a = vm.agg;
+    var checked = a ? a.checked : 0;
+    var photos = buildAfterPhotos(ev);
+    var sat = buildAfterSat(ev, checked);
+    var ledger = (vm.aside && vm.aside.ledger) || null;
+    var fixed = null;
+    if (ledger && a) {
+      fixed = a.unpaid === 0
+        ? { ok: true, html: '未決済はありません。この内容が最終の収支です。' }
+        : { ok: false, html: '未決済<span class="nb">' + a.unpaid + '名分</span>' + (a.unpaidAmt > 0 ? '(+' + money(a.unpaidAmt) + '円)' : '') + 'が未回収のままです ― <a href="' + esc(base) + '/day">当日タブの回収キューへ</a>。' };
+    }
+    vm.after = {
+      canOps: canStaff(),
+      photos: photos,
+      sat: sat,
+      ledger: ledger,
+      fixed: fixed,
+      timeline: buildAfterTimeline(ev, base),
+      surveyDraftable: !!(sat && !sat.none && !sat.err),
+    };
+    // 数字バンド=事後の現在地(実データで言える数字だけ・偽装禁止)
+    var nums = [];
+    if (a) nums.push({ v: String(checked), unit: '/ ' + a.applied + '名', labelHtml: '来場' });
+    if (photos) nums.push({ v: String(photos.total), unit: '枚', labelHtml: '<span class="nb">記念写真</span>' });
+    if (sat && !sat.none && !sat.err && sat !== null) {
+      if (sat.nps !== null) nums.push({ v: String(sat.nps), unit: '', labelHtml: '<span class="nb">満足度 NPS</span>' });
+      nums.push({ v: String(sat.respN), unit: checked > 0 ? '/ ' + checked + '名' : '件', labelHtml: '<span class="nb">アンケート回答</span>' });
+    }
+    var x = EX[ev.id];
+    if (canStaff() && a && x && Array.isArray(x.expenses)) {
+      var spend = 0;
+      arr(x.expenses).forEach(function (r) { spend += num(r && r.amount); });
+      var bal = a.revenue - spend;
+      nums.push({ v: (bal < 0 ? '−' : '+') + money(Math.abs(bal)), unit: '円', labelHtml: (fixed && fixed.ok) ? '<span class="nb">確定収支</span>' : '<span class="nb">収支の見込み</span>' });
+    }
+    vm.nums = nums.length ? nums : null;
+    vm.numsNote = nums.length ? null : (a ? null : (M.regsOk === false
+      ? '申込数を取得できませんでした。<button type="button" id="ev-retry">再読み込み</button>'
+      : '事後の状況を読み込み中…'));
+    return vm;
+  }
+  /* ---- 事後タブ: 描画 ---- */
+  function afterPhotosHtml(vm) {
+    var P = vm.after.photos;
+    var h = '<h2 class="sec">記念写真<a class="act" href="./console.html">consoleの事後画面へ</a></h2>';
+    var noteBits = [];
+    if (P.pub) {
+      noteBits.push(P.pub.past
+        ? '公開済み(<span class="nb">' + esc(P.pub.label) + '</span>) ― 参加者ページに表示されています。'
+        : '<span class="st-res">公開 <span class="nb">' + esc(P.pub.label) + '</span> 予約済み</span> ― 時刻になると参加者ページに表示されます。');
+    } else if (P.total > 0) {
+      noteBits.push('公開日時は未設定です。');
+    }
+    noteBits.push('写真の追加・公開予約の変更は<span class="nb">consoleの事後画面</span>から。');
+    h += '<p class="secnote">' + noteBits.join(' ') + '</p>';
+    if (P.total === 0) {
+      h += '<div class="tbl-empty">写真はまだ取り込まれていません。アップロードは console の事後(記念写真)画面からできます。</div>';
+    } else {
+      var cells = [];
+      if (P.cover) cells.push('<figure class="ph"><span class="cvr">カバー</span><img src="' + esc(P.cover) + '" alt="記念写真(カバー)"></figure>');
+      P.vis.slice(0, P.cover ? 7 : 8).forEach(function (u, i) {
+        cells.push('<figure class="ph"><img src="' + esc(u) + '" alt="記念写真 ' + (i + 2) + '枚目"></figure>');
+      });
+      h += '<div class="photos">' + cells.join('') + '</div>';
+      var foot = [];
+      var shown = Math.min(P.vis.length, P.cover ? 7 : 8) + (P.cover ? 1 : 0);
+      if (P.total > shown) foot.push('ほか<b>' + (P.total - shown) + '枚</b>はconsoleで確認できます');
+      if (P.hidden > 0) foot.push('非表示の写真が<span class="nb">' + P.hidden + '枚</span>あります(参加者には見えません)');
+      if (foot.length) h += '<p class="ph-foot">' + foot.join(' ・ ') + '</p>';
+    }
+    if (P.daysLoading) h += '<div class="tbl-empty">Day別の写真を読み込み中…</div>';
+    else if (P.days && P.days.length) {
+      h += '<div class="ph-days">' + P.days.map(function (d) {
+        var pubTxt = d.pub ? (d.pub.past ? '公開済み(' + d.pub.label + ')' : '公開 ' + d.pub.label + ' 予約') : '公開日時 未設定';
+        return '<div class="phd"><span class="lbl nb">' + esc(d.label) + '</span><span class="nb">' + d.count + '枚</span><span class="nb">' + esc(pubTxt) + '</span></div>';
+      }).join('') + '</div>';
+    }
+    return h;
+  }
+  function afterSatHtml(vm) {
+    var S0 = vm.after.sat;
+    if (!vm.after.canOps) return ''; // 回答の読取はアシマネ+(BEゲート)=セクションごと非表示
+    var h = '<h2 class="sec">満足度</h2>';
+    var ops = vm.after.surveyDraftable
+      ? '<p class="q-ops">回答をお願いするリマインドは配信タイムラインに載せられます ― <button type="button" class="rowlink nb" data-svdraft="1">回答依頼の下書きを作る</button></p>'
+      : '';
+    if (S0 === null) return h + '<div class="tbl-empty">読み込み中…</div>';
+    if (S0.err) return h + '<div class="tbl-empty">満足度データを取得できませんでした。再読み込みしてください。</div>';
+    if (S0.none) return h + '<div class="tbl-empty">このイベントのアンケートはまだ作成されていません。作成は console のアンケート画面からできます。</div>';
+    if (!S0.respN) return h + '<div class="tbl-empty">回答はまだありません。</div>' + ops;
+    var big;
+    if (S0.nps !== null) {
+      big = '<div class="big"><span class="lbl">NPS</span><span class="num">' + S0.nps + '</span>' +
+        '<span class="resp"><span class="nb">回答 ' + S0.respN + (vm.agg && vm.agg.checked > 0 ? ' / 来場' + vm.agg.checked + '名' : '件') + '</span>' +
+        (S0.rate !== null ? '(' + S0.rate + '%)' : '') + '</span></div>';
+    } else {
+      big = '<div class="big"><span class="lbl">満足度平均</span><span class="num">' + (S0.csat === null ? '—' : S0.csat) + '<small style="font-size:20px">/5</small></span>' +
+        '<span class="resp"><span class="nb">回答 ' + S0.respN + '件</span></span></div>';
+    }
+    var dist = '';
+    if (S0.npsN > 0) {
+      var w = function (n) { return Math.round(n / S0.npsN * 1000) / 10; };
+      dist = '<div class="bar" role="img" aria-label="すすめたい' + S0.pro + '名 どちらでもない' + S0.pas + '名 すすめない' + S0.det + '名">' +
+        '<i class="pr" style="width:' + w(S0.pro) + '%"></i><i class="ps" style="width:' + w(S0.pas) + '%"></i><i class="dt" style="width:' + w(S0.det) + '%"></i></div>' +
+        '<div class="lg"><span class="pr"><span class="nb">すすめたい ' + S0.pro + '名</span></span>' +
+        '<span class="ps"><span class="nb">どちらでもない ' + S0.pas + '名</span></span>' +
+        '<span class="dt"><span class="nb">すすめない ' + S0.det + '名</span></span></div>';
+      if (S0.csat !== null) dist += '<p class="note">満足度の平均は<b>' + S0.csat + '/5</b>(' + S0.csatN + '件)。</p>';
+    }
+    var quotes = '';
+    if (S0.quotes.length) {
+      quotes = '<div class="quotes">' + S0.quotes.map(function (q) {
+        return '<div class="qt' + (q.improve ? ' improve' : '') + '"><span class="mark">“</span><div><p>' +
+          (q.improve ? '<span class="tag">改善の声</span>' : '') + esc(q.text) + '</p>' +
+          '<span class="who">' + esc(q.who || '自由記述より') + '</span></div></div>';
+      }).join('') + '</div>';
+    }
+    return h + '<div class="nps">' + big + '<div class="dist">' + dist + quotes + '</div></div>' + ops;
+  }
+  function afterTimelineAsideHtml(vm) {
+    var T = vm.after.timeline;
+    var cm = CM[vm.evId];
+    if (T === null && cm && cm.unsupported) return ''; // BE未対応=セクションごと非表示
+    var h = '<div class="grp"><h2>公開・配信の予定' + (T && T.editHref ? '<a class="act" href="' + esc(T.editHref) + '">編集</a>' : '') + '</h2>';
+    if (T === null) h += '<div class="side-empty">読み込み中…</div>';
+    else if (T.lineHtml != null) h += '<div class="side-empty">' + T.lineHtml + '</div>';
+    else h += tlItemsHtml(T.rows) + '<p class="tl-note">記念写真の公開予約(console)も、この時系列に載ります。</p>';
+    h += '</div>';
+    return h;
+  }
+  function afterLedgerHtml(vm) {
+    var L = vm.after.ledger;
+    var fixed = vm.after.fixed;
+    var h = '<div class="grp" style="margin-bottom:4px"><h2>収支の確定' + (L && L.editHref ? '<a class="act" href="' + esc(L.editHref) + '">支出を記録</a>' : '') + '</h2>';
+    if (!L) return h + '<div class="side-empty">読み込み中…</div></div>';
+    if (fixed && fixed.ok) h += '<span class="fixseal"><span class="mi" style="font-size:14px">check_circle</span><span class="nb">参加費 回収済み</span></span>';
+    h += '<div class="ledger">' +
+      L.rows.map(function (r) { return '<div class="lr"><span>' + r[0] + '</span><span>' + esc(r[1]) + '</span></div>'; }).join('') +
+      '<div class="lr total' + (L.neg ? ' neg' : '') + '"><span>' + esc(fixed && fixed.ok ? '確定収支' : '見込み収支') + '</span><span>' + esc(L.total[1]) + '</span></div>' +
+      (fixed ? '<p class="note">' + fixed.html + '</p>' : (L.note ? '<p class="note">' + L.note + '</p>' : '')) +
+      '</div></div>';
+    return h;
+  }
+  function renderAfter(vm) {
+    document.body.classList.toggle('has-tabbtn', !!vm.reception);
+    var A = vm.after;
+    var h = mastheadHtml({ mePhoto: vm.mePhoto, showHq: vm.showHq }) +
       hubHeadHtml(vm.head, vm.tabs, vm.reception) +
       (vm.dayseg || '') +
-      '<p class="stub-line">「' + esc(STUB_LABEL[tabId]) + '」タブはまだ作られていません。当面は console から操作してください。</p>' +
-      colophonHtml(esc(vm.head.title));
+      numbandHtml(vm.nums, vm.numsNote);
+    var main = '<main>' + afterPhotosHtml(vm) + afterSatHtml(vm) + '</main>';
+    if (A.canOps) {
+      h += '<div class="cols">' + main +
+        '<aside class="side glass">' + afterTimelineAsideHtml(vm) + afterLedgerHtml(vm) + '</aside></div>';
+    } else {
+      h += '<div class="cols solo">' + main + '</div>';
+    }
+    h += colophonHtml(esc(vm.head.title) + ' ・ 事後');
+    root.innerHTML = h;
+    bindRetry();
     if (vm.dayseg) bindDaySeg({ id: vm.evId });
+    Array.prototype.forEach.call(root.querySelectorAll('[data-svdraft]'), function (b) {
+      b.addEventListener('click', function () {
+        cmPrefill = cmTemplate(vm.ev || findEvent(vm.evId) || { id: vm.evId, title: vm.head.title }, 'survey');
+        location.hash = vm.tabs.base + '/comms';
+        render();
+      });
+    });
   }
 
   /* ============================================================================
@@ -2454,7 +3791,7 @@ window.AdminAPI = (function () {
     var head = mastheadHtml(editChrome());
     if (!DEMO && M.me && M.me.rank < 2) {
       root.innerHTML = head + editHeadHtml(ev, 'この日の担当', '割当の編集', base) +
-        '<p class="stub-line">担当の割当の閲覧・編集にはアシスタントマネージャー以上の権限が必要です。</p>' + colophonHtml(esc(evTitle(ev)));
+        (rankUnknown_() ? '<p class="stub-line">権限を確認しています…</p>' : '<p class="stub-line">担当の割当の閲覧・編集にはアシスタントマネージャー以上の権限が必要です。</p>') + colophonHtml(esc(evTitle(ev)));
       return;
     }
     if (staffEd.evId !== String(ev.id) || !staffEd.inited) {
@@ -2587,7 +3924,7 @@ window.AdminAPI = (function () {
     var head = mastheadHtml(editChrome());
     if (!DEMO && M.me && M.me.rank < 2) {
       root.innerHTML = head + editHeadHtml(ev, '支出の記録', esc(evTitle(ev)), base) +
-        '<p class="stub-line">支出の閲覧・記録にはアシスタントマネージャー以上の権限が必要です。</p>' + colophonHtml(esc(evTitle(ev)));
+        (rankUnknown_() ? '<p class="stub-line">権限を確認しています…</p>' : '<p class="stub-line">支出の閲覧・記録にはアシスタントマネージャー以上の権限が必要です。</p>') + colophonHtml(esc(evTitle(ev)));
       return;
     }
     if (expEd.evId !== String(ev.id)) {
@@ -3396,8 +4733,7 @@ window.AdminAPI = (function () {
     var P = vm.prep;
     var main;
     if (!P.canEdit) {
-      var rankUnknown = API.hasSession() && !(window.currentUser && window.currentUser.member) && !(M.me && M.me.rank);
-      main = rankUnknown
+      main = rankUnknown_()
         ? '<p class="stub-line">権限を確認しています…</p>'
         : '<p class="stub-line">準備タブの閲覧・編集にはアシスタントマネージャー以上の権限が必要です。当面は console から操作してください。</p>';
       root.innerHTML = mastheadHtml({ mePhoto: vm.mePhoto, showHq: vm.showHq }) +
@@ -3460,7 +4796,7 @@ window.AdminAPI = (function () {
     var head = mastheadHtml(editChrome());
     if (!DEMO && M.me && M.me.rank < 2) {
       root.innerHTML = head + editHeadHtml(ev, '運営ブリーフ', esc(evTitle(ev)), base + '/prep') +
-        '<p class="stub-line">運営ブリーフの閲覧にはアシスタントマネージャー以上の権限が必要です。</p>' + colophonHtml(esc(evTitle(ev)));
+        (rankUnknown_() ? '<p class="stub-line">権限を確認しています…</p>' : '<p class="stub-line">運営ブリーフの閲覧にはアシスタントマネージャー以上の権限が必要です。</p>') + colophonHtml(esc(evTitle(ev)));
       return;
     }
     var staff = staffOf(ev.id);
@@ -3583,7 +4919,7 @@ window.AdminAPI = (function () {
     var head = mastheadHtml(editChrome());
     if (!DEMO && M.me && M.me.rank < 2) {
       root.innerHTML = head + editHeadHtml(ev, '持ち物の編集', esc(evTitle(ev)), base + '/prep') +
-        '<p class="stub-line">持ち物の編集にはアシスタントマネージャー以上の権限が必要です。</p>' + colophonHtml(esc(evTitle(ev)));
+        (rankUnknown_() ? '<p class="stub-line">権限を確認しています…</p>' : '<p class="stub-line">持ち物の編集にはアシスタントマネージャー以上の権限が必要です。</p>') + colophonHtml(esc(evTitle(ev)));
       return;
     }
     if (belEd.evId !== String(ev.id)) belEdInit(ev, evIsMulti(ev) ? '' : '');
@@ -3689,7 +5025,7 @@ window.AdminAPI = (function () {
     var head = mastheadHtml(editChrome());
     if (!DEMO && M.me && M.me.rank < 2) {
       root.innerHTML = head + editHeadHtml(ev, '班分けの編集', esc(evTitle(ev)), base + '/prep') +
-        '<p class="stub-line">班分けの閲覧・編集にはアシスタントマネージャー以上の権限が必要です。</p>' + colophonHtml(esc(evTitle(ev)));
+        (rankUnknown_() ? '<p class="stub-line">権限を確認しています…</p>' : '<p class="stub-line">班分けの閲覧・編集にはアシスタントマネージャー以上の権限が必要です。</p>') + colophonHtml(esc(evTitle(ev)));
       return;
     }
     var groups = groupsOf(ev.id);
@@ -4069,10 +5405,19 @@ window.AdminAPI = (function () {
     { id: 'PG2', eventId: DEMO_ID, sessionId: '', name: '2班', participantIds: ['PU3', 'PU5', 'PU6', 'PU8'], note: '' },
     { id: 'PG3', eventId: DEMO_ID, sessionId: '', name: '3班', participantIds: ['PU7', 'PU10', 'PU11', 'PU12'], note: '日かげのシート' },
   ];
+  // 配信タイムラインのデモ(正典 event-hub.html と同じ流れ: 告知→前日→未決済→お礼→写真)
+  var DEMO_PIC_COMMS = [
+    { id: 'CM1', eventId: DEMO_ID, kind: 'announce', sendAt: dIso(-7, '18:00'), audience: 'all', subject: '公開告知メール', body: '…', status: 'sent', sentAt: dIso(-7, '18:01'), sentCount: 214 },
+    { id: 'CM2', eventId: DEMO_ID, kind: 'reminder', sendAt: dIso(-1, '20:00'), audience: 'all', subject: '前日リマインド(持ち物・集合)', body: '…', status: 'sent', sentAt: dIso(-1, '20:01'), sentCount: 42 },
+    { id: 'CM3', eventId: DEMO_ID, kind: 'unpaid', sendAt: dIso(0, '10:00'), audience: 'unpaid', subject: '未決済の案内(当日決済の方法)', body: '…', status: 'scheduled', sentAt: '', sentCount: 0 },
+    { id: 'CM4', eventId: DEMO_ID, kind: 'thanks', sendAt: dIso(2, '18:00'), audience: 'all', subject: 'お礼+満足度アンケート', body: '…', status: 'scheduled', sentAt: '', sentCount: 0 },
+    { id: 'CM5', eventId: DEMO_ID, kind: 'photo_notice', sendAt: dIso(5, '12:00'), audience: 'all', subject: '記念写真の公開通知', body: '…', status: 'scheduled', sentAt: '', sentCount: 0 },
+  ];
   function seedDemoPic() {
     if (!EX[DEMO_ID]) EX[DEMO_ID] = { staff: DEMO_STAFF, expenses: DEMO_EXPENSES, staffErr: false, expErr: false, fetched: true, loading: false };
     if (!AC[DEMO_ID]) AC[DEMO_ID] = { acts: DEMO_PIC_ACTS, err: false, fetched: true, loading: false };
     if (!GR[DEMO_ID]) GR[DEMO_ID] = { groups: DEMO_PIC_GROUPS, err: false, fetched: true, loading: false };
+    if (!CM[DEMO_ID]) CM[DEMO_ID] = { items: DEMO_PIC_COMMS, err: false, fetched: true, loading: false };
     if (VN.venues === null) VN.venues = [{ id: 'VN1', name: '代々木公園', rainPlan: '原宿門インフォメーション前に変更 ― 10:00に判断し一斉連絡', active: true }];
   }
   var DEMO_EXPENSES = [
@@ -4131,6 +5476,12 @@ window.AdminAPI = (function () {
     { id: 'CX1', label: '宿泊費(前払い)', amount: 96000, note: '2泊×24名想定' },
     { id: 'CX2', label: '食材・飲み物', amount: 23000 },
   ];
+  // 合宿の配信(実ビルダー経由=hubTimelineModel/renderCommsの実コードパスを目視検証)
+  var DEMO_CAMP_COMMS = [
+    { id: 'CC1', eventId: DEMO_ID2, kind: 'reminder', sendAt: dIso(-2, '20:00'), audience: 'all', subject: '【あす開催】秋の国際交流合宿 のご案内', body: '集合は10:00 新宿西口バス乗り場です。', status: 'sent', sentAt: dIso(-2, '20:02'), sentCount: 4 },
+    { id: 'CC2', eventId: DEMO_ID2, kind: 'unpaid', sendAt: dIso(0, '09:00'), audience: 'unpaid', subject: '参加費のご案内(未決済の方へ)', body: '受付にてお支払いください。', status: 'scheduled', sentAt: '', sentCount: 0 },
+    { id: 'CC3', eventId: DEMO_ID2, kind: 'thanks', sendAt: dIso(2, '18:00'), audience: 'all', subject: '「秋の国際交流合宿」ありがとうございました', body: 'アンケートへのご協力をお願いします。', status: 'draft', sentAt: '', sentCount: 0 },
+  ];
   /* ---- 合宿デモの準備データ(実ビルダーを通す=複数日の実コードパスを目視検証) ---- */
   var DEMO_CAMP_ACTS = [
     { activityId: 'CA1', sessionId: 'CS1', startTime: '10:00', endTime: '10:30', title: '集合・受付', owner: 'ケンタ', place: '新宿西口バス乗り場' },
@@ -4146,7 +5497,7 @@ window.AdminAPI = (function () {
   ];
   var DEMO_CAMP_SESS_FULL = [
     { id: 'CS1', name: '1日目', date: dYmd(-1), belongings: '' },
-    { id: 'CS2', name: '2日目', date: dYmd(0), belongings: '水着\nタオル(温泉用)' },
+    { id: 'CS2', name: '2日目', date: dYmd(0), belongings: '水着\nタオル(温泉用)', mementoPhotoUrl: 'https://images.unsplash.com/photo-1506869640319-fe1a24fd76dc?w=520&q=80', mementoPublishAt: dYmd(3) + ' 12:00' },
     { id: 'CS3', name: '3日目', date: dYmd(1), belongings: '' },
   ];
   function seedDemoCampPrep() {
@@ -4154,6 +5505,19 @@ window.AdminAPI = (function () {
     if (!GR[DEMO_ID2]) GR[DEMO_ID2] = { groups: DEMO_CAMP_GROUPS, err: false, fetched: true, loading: false };
     if (!SF[DEMO_ID2]) SF[DEMO_ID2] = { sessions: DEMO_CAMP_SESS_FULL, err: false, fetched: true, loading: false };
     if (VN.venues === null) VN.venues = [{ id: 'VN2', name: '河口湖 青少年交流の家', rainPlan: '屋内プログラムに切替(体育館)', active: true }];
+  }
+  // 事後タブ(合宿)=実ビルダー経由の満足度(NPS 67・自由記述2件)
+  function seedDemoCampSat() {
+    if (SV[DEMO_ID2]) return;
+    SV[DEMO_ID2] = {
+      surveys: [{ id: 'SV1', eventId: DEMO_ID2, status: '公開中' }],
+      resps: [
+        { id: 'RS1', surveyId: 'SV1', userId: 'CU1', nps: 9, csat: 5, free: '夜の料理持ち寄りが最高でした。来年もぜひ。', answeredAt: dIso(1, '09:00') },
+        { id: 'RS2', surveyId: 'SV1', userId: 'CU3', nps: 7, csat: 4, free: '', answeredAt: dIso(1, '10:00') },
+        { id: 'RS3', surveyId: 'SV1', userId: 'CU4', nps: 10, csat: 5, free: '子ども連れでも安心して過ごせました。', answeredAt: dIso(1, '11:00') },
+      ],
+      err: false, fetched: true, loading: false,
+    };
   }
   function demoCampM() {
     return {
@@ -4165,10 +5529,12 @@ window.AdminAPI = (function () {
   }
   function renderDemoCamp(r) {
     if (!EX[DEMO_ID2]) EX[DEMO_ID2] = { staff: DEMO_CAMP_STAFF, expenses: DEMO_CAMP_EXPENSES, staffErr: false, expErr: false, fetched: true, loading: false };
+    if (!CM[DEMO_ID2]) CM[DEMO_ID2] = { items: DEMO_CAMP_COMMS, err: false, fetched: true, loading: false };
     var dm = demoCampM();
     var ev = dm.events[0];
     if (r.view === 'staff') { renderStaffEdit(ev, DEMO_CAMP_STAFF); return; }
     if (r.view === 'expenses') { renderExpEdit(ev, DEMO_CAMP_EXPENSES); return; }
+    if (r.view === 'comms') { renderComms(ev); return; }
     if (r.view === 'regs') { renderRegs(demoChrome(buildRegsModel(dm, ev, DEMO_CAMP_REGS))); return; }
     if (r.view === 'prep' || r.view === 'brief' || r.view === 'groups' || r.view === 'belongings') {
       seedDemoCampPrep(); // 準備は実ビルダー(buildPrepModel等)を通す=複数日の実コードパスを目視検証
@@ -4178,7 +5544,8 @@ window.AdminAPI = (function () {
       renderBelongingsEdit(ev);
       return;
     }
-    if (r.view === 'day' || r.view === 'after') { renderStub(demoChrome(buildHubModel(dm, ev, r.view)), r.view); return; }
+    if (r.view === 'day') { seedDemoCampPrep(); renderDay(demoChrome(buildDayModel(dm, ev, DEMO_CAMP_REGS))); return; }
+    if (r.view === 'after') { seedDemoCampSat(); seedDemoCampPrep(); renderAfter(demoChrome(buildAfterModel(dm, ev))); return; }
     renderHub(demoChrome(buildHubModel(dm, ev, 'hub')));
   }
   function demoListModel() {
@@ -4453,6 +5820,123 @@ window.AdminAPI = (function () {
     return vm;
   }
 
+  /* ---- 当日タブのデモ(ピクニック): 正典 event-day.html と同じ紙面 ---- */
+  function demoDayFeedHtml() {
+    function li(cls, tm, img, html) {
+      return '<li' + (cls ? ' class="' + cls + '"' : '') + '><span class="tm">' + tm + '</span><img src="https://i.pravatar.cc/72?img=' + img + '" alt=""><span>' + html + '</span></li>';
+    }
+    return '<h2 class="sec">いまの受付</h2><ul class="feed">' +
+      li('', '12:41', 5, '<b>サラさん</b>(初参加)を受付 ― <span class="sub nb">子ども1名同伴</span>') +
+      li('', '12:38', 25, '<b>ミゲルさん</b>を受付 ― <span class="sub nb">未決済のため回収へ</span>') +
+      li('', '12:36', 15, '<b>ハルトさん</b>(常連)を受付') +
+      li('', '12:31', 36, '<b>ファティマさん</b>を受付') +
+      li('note', '12:24', 51, '<b>トムさん</b>を受付 ― <span class="sub"><span class="nb">QRが読めず</span><span class="nb">名前検索で</span></span>') +
+      li('', '12:22', 57, '<b>ソフィアさん</b>を受付') +
+      '</ul><p class="feed-src">受付(iPad)の記録がそのまま流れます ・ ここまで34名</p>';
+  }
+  function demoDayModel() {
+    resetDayState(DEMO_ID);
+    var vm = demoHubModel('day');
+    vm.head.kicker = 'きょう開催 ― 進行中';
+    vm.head.standfirst = '';
+    vm.head.metaHtml = '<span class="nb">12:00–15:00</span> ・ 代々木公園 中央広場';
+    vm.facts = null; vm.trend = null; vm.crew = null; vm.timeline = null; vm.aside = null;
+    vm.ev = DEMO_PIC_EV;
+    vm.day = {
+      canOps: true,
+      clock: '12:47',
+      whoLine: '受付 みずき(前半) → 13:30からケンタ',
+      prog: { checked: 34, applied: 42, pct: 81, remain: 8, unpaid: 4 },
+      queue: {
+        totalAmt: 6500,
+        rows: [
+          { id: 'R3', name: 'ミゲル', amt: 1500, atVenue: true, confirmable: true, img: 'https://i.pravatar.cc/96?img=25', stHtml: '<b>12:38 受付済み</b> ― 現金の予定と連絡あり' },
+          { id: 'R6', name: 'トム', amt: 1500, atVenue: true, confirmable: true, img: 'https://i.pravatar.cc/96?img=51', stHtml: '<b>12:24 受付済み</b> ― 初参加・決済方法は未確認' },
+          { id: 'R5', name: 'リン・チェン', amt: 2000, atVenue: false, confirmable: false, img: 'https://i.pravatar.cc/96?img=44', stHtml: '<span class="away">未到着</span> ― <span class="nb">子ども1名</span>同伴で2,000円' },
+          { id: 'R8', name: 'ダニエル', amt: 1500, atVenue: false, confirmable: false, img: 'https://i.pravatar.cc/96?img=20', stHtml: '<span class="away">未到着</span> ― きのう23時の申込・連絡なし' },
+        ],
+      },
+      groups: {
+        note: '',
+        gsumHtml: '受付34名は全員どこかの班に入っています。<span class="nb">13:30のグループ交流</span>までに残り8名。',
+        rows: [
+          { name: '1班', note: '班長 ユイ', x: 6, y: 6, full: true },
+          { name: '2班', note: '班長 ケンタ', x: 4, y: 6, full: false },
+          { name: '3班', note: '班長 リナ', x: 5, y: 6, full: false },
+          { name: '4班', note: '子ども連れ', x: 3, y: 5, full: false },
+          { name: '5班', note: '班長 アイシャ', x: 6, y: 6, full: true },
+          { name: '6班', note: '班長 みずき', x: 4, y: 6, full: false },
+          { name: '7班', note: '班長 ハルト', x: 6, y: 7, full: false },
+        ],
+      },
+      bcCount: 42,
+      full: dayUi.full,
+      feedHtml: demoDayFeedHtml(),
+      timeHtml: '<span class="nb">12:00–15:00</span>',
+    };
+    return vm;
+  }
+
+  /* ---- 事後タブのデモ(ピクニック): 正典 event-after.html と同じ紙面 ---- */
+  function demoAfterModel() {
+    var vm = demoHubModel('after');
+    vm.head.kicker = 'きのう開催';
+    vm.head.metaHtml = '<span class="nb">9月1日(火) 12:00–15:00</span> ・ 代々木公園 ・ <span class="nb">来場41名</span>';
+    vm.head.stateCls = 'done';
+    vm.head.stateLabel = '開催終了';
+    vm.head.standfirst = '41名が来場、初参加の14名は全員参加でした。きょうは<span class="nb">写真の選定</span>と<span class="nb">お礼メール</span>の準備を ― 公開はすべて<span class="nb">予約済み</span>です。';
+    vm.head.photo = { src: 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=760&q=80', cap: 'きのうの1枚(リナさん撮影)' };
+    vm.facts = null; vm.trend = null; vm.crew = null; vm.timeline = null; vm.aside = null;
+    vm.ev = DEMO_PIC_EV;
+    vm.agg = { checked: 41, applied: 42, unpaid: 0 };
+    vm.nums = [
+      { v: '41', unit: '/ 42名', labelHtml: '来場' },
+      { v: '32', unit: '枚', labelHtml: '<span class="nb">写真 取り込み済み</span>' },
+      { v: '64', unit: '', labelHtml: '<span class="nb">満足度 NPS</span>' },
+      { v: '28', unit: '/ 42名', labelHtml: '<span class="nb">アンケート回答</span>' },
+      { v: '+43,200', unit: '円', labelHtml: '<span class="nb">確定収支</span>' },
+    ];
+    vm.numsNote = null;
+    var us = ['1529156069898-49953e39b3ac', '1506869640319-fe1a24fd76dc', '1528605248644-14dd04022da1', '1506781961370-37a89d6b3095', '1511795409834-ef04bbd61622', '1476234251651-f353703a034d', '1517486808906-6ca8b3f04846'];
+    vm.after = {
+      canOps: true,
+      photos: {
+        cover: 'https://images.unsplash.com/photo-' + us[0] + '?w=520&q=80',
+        vis: us.slice(1).map(function (x) { return 'https://images.unsplash.com/photo-' + x + '?w=520&q=80'; }),
+        hidden: 2, total: 32,
+        pub: { past: false, label: '9/6(日) 12:00' },
+        days: null, daysLoading: false,
+      },
+      sat: {
+        respN: 28, nps: 64, npsN: 28, pro: 20, pas: 6, det: 2, csat: 4.6, csatN: 28, rate: 68,
+        quotes: [
+          { text: 'はじめてでも班のみなさんが話しかけてくれて、あっという間の3時間でした。次も来たいです。', who: '初参加 ・ サラさん(5班)' },
+          { text: '子ども連れでも班のシートが日かげで助かりました。名札があるので名前をすぐ覚えられます。', who: 'リピーター ・ メイさん(3班)' },
+          { text: '受付の列が12時すぎに少し長くなっていました。開始直後の体制を厚くしてもいいかも。', who: 'リピーター ・ ハルトさん(1班)', improve: true },
+        ],
+      },
+      ledger: {
+        editHref: '#/ev/' + DEMO_ID + '/expenses',
+        rows: [['参加費(大人41名)', '61,500円'], ['参加費(子ども3名)', '1,500円'], ['支出(材料・備品 5件)', '−19,800円']],
+        total: ['確定収支', '+43,200円'],
+        neg: false,
+      },
+      fixed: { ok: true, html: '未決済だった4名は、3名が受付で決済・1名は欠席(請求なし)。' },
+      timeline: {
+        editHref: '#/ev/' + DEMO_ID + '/comms',
+        rows: [
+          { cls: 'sent', when: '9/1 15:10', bodyHtml: '<b>解散のお知らせ</b> ― <span class="nb">41名</span>', stCls: 'ok', stLabel: '送信済み' },
+          { cls: 'next', when: '9/3 18:00', bodyHtml: '<b>お礼メール</b> ― <span class="nb">申込者全員</span>', stCls: 'next', stLabel: 'あす送信' },
+          { cls: '', when: '9/4 10:00', bodyHtml: '<b>アンケート リマインド</b> ― <span class="nb">未回答の方</span>', stCls: 'plan', stLabel: '予定' },
+          { cls: '', when: '9/6 12:00', bodyHtml: '<b>記念写真を公開</b> ― <span class="nb">参加者ページ</span>', stCls: 'plan', stLabel: '公開予約' },
+          { cls: '', when: '9/6 12:00', bodyHtml: '<b>公開の通知</b> ― <span class="nb">申込者全員</span>', stCls: 'plan', stLabel: '連動' },
+        ],
+      },
+      surveyDraftable: true,
+    };
+    return vm;
+  }
+
   /* ============================================================================
      永続キャッシュ(SWR)。listRegistrations 由来の個人名は保存しない:
      保存対象=イベント行(ホワイトリスト)+イベント別集計(件数・日次カウント)+自分の情報。
@@ -4461,7 +5945,8 @@ window.AdminAPI = (function () {
   var CACHE_TTL = 24 * 60 * 60 * 1000;
   var EV_KEEP = ['id', 'title', 'date', 'time', 'endTime', 'endDate', 'venue', 'address', 'capacity', 'status', 'category',
     'fee', 'feeType', 'childFee', 'allowCompanions', 'paymentMethod', 'paymentMethods', 'summary', 'heroImageUrl', 'posterUrl',
-    'format', 'sessions', 'publishAt', 'regOpenDate', 'regCloseDate', 'mementoPhotoUrl', 'belongings'];
+    'format', 'sessions', 'publishAt', 'regOpenDate', 'regCloseDate', 'mementoPhotoUrl', 'mementoPublishAt', 'belongings'];
+  // mementoGallery は永続キャッシュに入れない(枚数が多いとlocalStorageを圧迫。fresh listEventsで数秒後に揃う=SWR)
   // 担当/支出/メンバー名簿もホワイトリスト保存(スタッフ=console同等のPII方針。参加者PIIは引き続き保存しない)
   var STAFF_KEEP = ['id', 'sessionId', 'memberId', 'role', 'slot', 'note', 'ackAt'];
   var EXP_KEEP = ['id', 'label', 'amount', 'note', 'createdAt'];
@@ -4526,6 +6011,8 @@ window.AdminAPI = (function () {
   var GR = {}; // eventId -> { groups, err, fetched, loading }(班分け=event_groups: listEventGroups)
   var SF = {}; // eventId -> { sessions, err, fetched, loading }(EventSessions全量=Day別持ち物: listEventSessions)
   var VN = { venues: null, err: false, fetched: false, loading: false }; // 会場ライブラリ(ブリーフの雨天時)
+  var CM = {}; // eventId -> { items, err, fetched, loading }(配信タイムライン=event_comms: listEventComms)
+  var SV = {}; // eventId -> { surveys, resps, err, fetched, loading }(満足度=listSurveys+listSurveyResponses。PII=メモリのみ)
   var erUnsupported = false; // バックエンド未実装(unknown action)を検知したらセッション中は再試行しない
   var loadedOnce = false, loading = false, unauthShown = false;
   var membersLoading = null;
@@ -4622,6 +6109,115 @@ window.AdminAPI = (function () {
     });
   }
 
+  // 配信タイムラインの遅延読取(ハブ/当日/事後/編集ビューを開いたイベントだけ・アシマネ+)
+  function loadComms(evId) {
+    if (DEMO) return;
+    if (!M.me || M.me.rank < 2) return; // アシマネ未満はfetchしない(セクションごと非表示)
+    var c = CM[evId] || (CM[evId] = { items: null, err: false, unsupported: false, fetched: false, loading: false });
+    if (c.loading || c.fetched) return;
+    c.loading = true;
+    API.fetchData('listEventComms', { eventId: evId }).then(
+      function (d) { c.items = unwrapList(d, 'items'); c.err = false; c.unsupported = false; },
+      function (e) {
+        // BE未対応(unknown action)は「エラー」ではなく機能なし=セクションごと非表示(偽装・空騒ぎ禁止)
+        if (/unknown action|invalid action|not supported|未対応|不明なアクション/i.test(String((e && e.message) || ''))) c.unsupported = true;
+        c.err = true;
+        if (c.items === null) c.items = [];
+      }
+    ).then(function () {
+      c.loading = false;
+      c.fetched = true;
+      if (unauthShown) return;
+      var r = route();
+      if (String(r.id) !== String(evId)) return;
+      if (r.view === 'hub' || r.view === 'day' || r.view === 'after' || r.view === 'comms') render();
+    });
+  }
+  // 書込成功後の再取得(失敗しても書込は成功済み=次回表示で再取得)
+  function cmRefetch(evId) {
+    var c = CM[evId] || (CM[evId] = { items: null, err: false, fetched: false, loading: false });
+    return API.fetchData('listEventComms', { eventId: evId }).then(
+      function (d) { c.items = unwrapList(d, 'items'); c.err = false; },
+      function () { c.fetched = false; }
+    ).then(function () { if (Array.isArray(c.items)) c.fetched = true; });
+  }
+
+  // 満足度の遅延読取(事後タブ・アシマネ+)。listSurveys(全件→イベントで絞る)+回答は該当サーベイぶん並行取得
+  function loadSurveys(evId) {
+    if (DEMO) return;
+    if (!M.me || M.me.rank < 2) return; // listSurveyResponses はアシマネ+(BEゲート)
+    var s = SV[evId] || (SV[evId] = { surveys: null, resps: null, err: false, fetched: false, loading: false });
+    if (s.loading || s.fetched) return;
+    s.loading = true;
+    API.fetchData('listSurveys', {}).then(function (all) {
+      var mine = arr(all).filter(function (x) { return x && x.eventId === evId; });
+      s.surveys = mine;
+      return Promise.all(mine.map(function (x) {
+        return API.fetchData('listSurveyResponses', { surveyId: x.id }).then(function (d) { return arr(d); }, function () { return []; });
+      })).then(function (arrs) {
+        var flat = [];
+        arrs.forEach(function (a) { a.forEach(function (r) { if (r && !r.isTest) flat.push(r); }); });
+        s.resps = flat;
+        s.err = false;
+      });
+    }, function () {
+      s.err = true;
+      if (s.surveys === null) { s.surveys = []; s.resps = []; }
+    }).then(function () {
+      s.loading = false;
+      s.fetched = true;
+      if (unauthShown) return;
+      var r = route();
+      if (String(r.id) === String(evId) && r.view === 'after') render();
+    });
+  }
+
+  // 当日タブの遅延読取: 班分け(集合状況)+会場ライブラリ(雨天テンプレのrainPlan)。GR/VNはloadPrepと共有
+  function loadGroups(evId) {
+    if (DEMO) return;
+    if (!M.me || M.me.rank < 2) return;
+    var jobs = [];
+    var gr = GR[evId] || (GR[evId] = { groups: null, err: false, fetched: false, loading: false });
+    if (!gr.loading && !gr.fetched) {
+      gr.loading = true;
+      jobs.push(API.fetchData('listEventGroups', { eventId: evId }).then(
+        function (d) { gr.groups = unwrapList(d, 'groups'); gr.err = false; },
+        function () { gr.err = true; if (gr.groups === null) gr.groups = []; }
+      ).then(function () { gr.loading = false; gr.fetched = true; }));
+    }
+    if (!VN.loading && !VN.fetched) {
+      VN.loading = true;
+      jobs.push(API.fetchData('listVenues', {}).then(
+        function (d) { VN.venues = arr(d); VN.err = false; },
+        function () { VN.err = true; if (VN.venues === null) VN.venues = []; }
+      ).then(function () { VN.loading = false; VN.fetched = true; }));
+    }
+    if (!jobs.length) return;
+    Promise.all(jobs).then(function () {
+      if (unauthShown) return;
+      var r = route();
+      if (String(r.id) === String(evId) && r.view === 'day') render();
+    });
+  }
+  // EventSessions全量だけの遅延読取(事後タブ=Day別の記念写真。loadPrepとSF共有)
+  function loadSessionsFull(evId) {
+    if (DEMO) return;
+    if (!M.me || M.me.rank < 2) return;
+    var sf = SF[evId] || (SF[evId] = { sessions: null, err: false, fetched: false, loading: false });
+    if (sf.loading || sf.fetched) return;
+    sf.loading = true;
+    API.fetchData('listEventSessions', { eventId: evId }).then(
+      function (d) { sf.sessions = arr(d); sf.err = false; },
+      function () { sf.err = true; if (sf.sessions === null) sf.sessions = []; }
+    ).then(function () {
+      sf.loading = false;
+      sf.fetched = true;
+      if (unauthShown) return;
+      var r = route();
+      if (String(r.id) === String(evId) && r.view === 'after') render();
+    });
+  }
+
   /* 準備タブの遅延読取(アシマネ+のみ・メモリのみ):
      進行表=listActivities / 班分け=listEventGroups / EventSessions全量(Day別持ち物) / 会場ライブラリ。
      編集ビューは入力中の再描画を避ける(未初期化のときだけ差し替え)。 */
@@ -4696,11 +6292,13 @@ window.AdminAPI = (function () {
       if (r.view === 'regs') { renderRegs(demoRegsModel()); return; }
       if (r.view === 'staff') { renderStaffEdit({ id: DEMO_ID, title: '国際交流ピクニック' }, DEMO_STAFF); return; }
       if (r.view === 'expenses') { renderExpEdit({ id: DEMO_ID, title: '国際交流ピクニック' }, DEMO_EXPENSES); return; }
+      if (r.view === 'comms') { seedDemoPic(); renderComms(DEMO_PIC_EV); return; }
       if (r.view === 'prep') { seedDemoPic(); renderPrep(demoPrepModel()); return; }
       if (r.view === 'brief') { seedDemoPic(); renderBrief(DEMO_PIC_EV); return; }
       if (r.view === 'groups') { seedDemoPic(); renderGroupsEdit(DEMO_PIC_EV); return; }
       if (r.view === 'belongings') { seedDemoPic(); renderBelongingsEdit(DEMO_PIC_EV); return; }
-      if (r.view === 'day' || r.view === 'after') { renderStub(demoHubModel(r.view), r.view); return; }
+      if (r.view === 'day') { seedDemoPic(); renderDay(demoDayModel()); return; }
+      if (r.view === 'after') { seedDemoPic(); renderAfter(demoAfterModel()); return; }
       renderHub(demoHubModel('hub'));
       return;
     }
@@ -4714,10 +6312,14 @@ window.AdminAPI = (function () {
     }
     resetRegsState(r.id);
     resetPrepState(r.id);
-    if (r.view === 'hub' || r.view === 'staff' || r.view === 'expenses' || r.view === 'prep' || r.view === 'brief') loadExtras(ev.id); // 担当/支出の遅延読取
+    if (r.view === 'hub' || r.view === 'staff' || r.view === 'expenses' || r.view === 'prep' || r.view === 'brief' || r.view === 'day' || r.view === 'after') loadExtras(ev.id); // 担当/支出の遅延読取
     if (r.view === 'hub' || r.view === 'regs') loadWaitlist(ev.id); // キャンセル待ち(数字バンド+一覧)
-    if (r.view === 'hub' || r.view === 'regs' || r.view === 'prep' || r.view === 'groups') loadEventRegs(ev.id); // 全件未着ならイベント単体で先行読取
+    if (r.view === 'hub' || r.view === 'regs' || r.view === 'prep' || r.view === 'groups' || r.view === 'day' || r.view === 'after') loadEventRegs(ev.id); // 全件未着ならイベント単体で先行読取
     if (r.view === 'prep' || r.view === 'brief' || r.view === 'groups' || r.view === 'belongings') loadPrep(ev.id); // 進行表/班分け/Day持ち物/会場
+    if (r.view === 'hub' || r.view === 'day' || r.view === 'after' || r.view === 'comms') loadComms(ev.id); // 配信タイムライン
+    if (r.view === 'day') loadGroups(ev.id); // 班の集合状況
+    if (r.view === 'after') { loadSurveys(ev.id); if (evIsMulti(ev)) loadSessionsFull(ev.id); } // 満足度+Day別写真
+    if (r.view === 'comms') { renderComms(ev); return; }
     if (r.view === 'regs') { renderRegs(buildRegsModel(M, ev, regsOf(ev))); return; }
     if (r.view === 'staff') {
       var xs = EX[ev.id];
@@ -4733,7 +6335,8 @@ window.AdminAPI = (function () {
     if (r.view === 'brief') { renderBrief(ev); return; }
     if (r.view === 'groups') { renderGroupsEdit(ev); return; }
     if (r.view === 'belongings') { renderBelongingsEdit(ev); return; }
-    if (r.view === 'day' || r.view === 'after') { renderStub(buildHubModel(M, ev, r.view), r.view); return; }
+    if (r.view === 'day') { renderDay(buildDayModel(M, ev)); return; }
+    if (r.view === 'after') { renderAfter(buildAfterModel(M, ev)); return; }
     renderHub(buildHubModel(M, ev, 'hub'));
   }
 
@@ -4751,9 +6354,9 @@ window.AdminAPI = (function () {
     if (loading) return;
     loading = true;
     unauthShown = false;
-    /* (hotfix 2026-09-02) 読取が軽量API(user同梱なし)に寄ったため、直接event.htmlを開くと役職不明のまま
-       準備タブ等のアシマネ+ゲートが誤発動していた(代表でも拒否)。セッションがあり役職未判明なら
-       本体GASの超軽量 getDataGen(認証済み応答にuserが同梱される)で役職を解決し再描画する。 */
+    /* 読取の多くは軽量API(応答にuser非同梱)のため、直接アクセスだと役職不明のままアシマネ+ゲートが
+       誤発動する(2026-09-02実障害: 代表でも準備タブ拒否)。セッションがあり役職未判明なら、本体GASの
+       超軽量 getDataGen(認証済み応答にuserが同梱される)で役職を解決して再描画する。 */
     if (API.hasSession() && !(window.currentUser && window.currentUser.member)) {
       API.fetchData('getDataGen', {}).then(function () {
         if (window.currentUser && window.currentUser.member) { M.me = meModel(); try { render(); } catch (e) {} }
