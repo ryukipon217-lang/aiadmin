@@ -6,7 +6,7 @@
 <meta name="robots" content="noindex">
 <title>イベント — connec+a 運営ポータル</title>
 <meta name="description" content="connec+a 運営ポータル — イベント面">
-<script>window.__ADMIN2_BUILD='20260902020142';</script>
+<script>window.__ADMIN2_BUILD='20260902031853';</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://script.google.com" crossorigin>
@@ -1524,7 +1524,7 @@ window.AdminAPI = (function () {
       tab('regs', '申込・決済', tabs.unpaid > 0 ? '<span class="cnt">' + tabs.unpaid + '</span>' : '') +
       tab('prep', '準備') + tab('day', '当日') + tab('after', '事後') +
       '<span class="spacer"></span>' +
-      (reception ? '<a class="btn" href="#"><span class="mi">qr_code_scanner</span>受付を開く(iPad)</a>' : '') +
+      (reception ? '<a class="btn" href="' + esc(reception === true ? '#' : reception) + '"><span class="mi">qr_code_scanner</span>受付を開く(iPad)</a>' : '') +
       '</nav>';
   }
   function hubHeadHtml(H, tabs, reception) {
@@ -1984,7 +1984,8 @@ window.AdminAPI = (function () {
       mePhoto: M.me && M.me.photo, showHq: (M.me && M.me.rank >= 3),
       head: hubHeadModel(ev, active),
       tabs: { base: base, active: active, unpaid: a ? a.unpaid : 0 },
-      reception: false, // 受付アプリは本再設計ではまだ未接続(デモのみ)。当面の受付は console から。
+      // 当日受付アプリ(build/checkin.html)へ。書込はアシマネ+のため、それ未満には出さない(当日タブの操作と同じゲート)。
+      reception: canStaff() ? './checkin.html' + QS + '#/ev/' + encodeURIComponent(ev.id) : false,
       nums: nums,
       numsNote: a ? null : (M.regsOk === false
         ? '申込数を取得できませんでした。<button type="button" id="ev-retry">再読み込み</button>'
@@ -5611,7 +5612,7 @@ window.AdminAPI = (function () {
     var vm = demoChrome({
       head: demoHead(),
       tabs: { base: '#/ev/' + DEMO_ID, active: active || 'hub', unpaid: 4 },
-      reception: true,
+      reception: './checkin.html' + QS + '#/ev/' + DEMO_ID,
       nums: demoNums(), numsNote: null,
       facts: [
         { dt: '日時', ddHtml: '<b><span class="nb">9月1日(火)</span> <span class="nb">12:00–15:00</span></b><span class="note">受付開始 11:30 ・ 運営集合 <span class="nb">11:00 原宿門</span></span>' },
