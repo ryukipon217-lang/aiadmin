@@ -6,7 +6,7 @@
 <meta name="robots" content="noindex">
 <title>当日受付 — connec+a 運営ポータル</title>
 <meta name="description" content="connec+a 運営ポータル — 当日受付(iPad・カメラ全画面)">
-<script>window.__ADMIN2_BUILD='20260902042348';</script>
+<script>window.__ADMIN2_BUILD='20260902053325';</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://script.google.com" crossorigin>
@@ -64,6 +64,8 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2.5px solid var
 /* ============================================================================
    当日受付(iPad・カメラ全画面) — 正典: redesign/portal-proto/event-checkin.html
    構図は代表指示で確定: カメラ全画面・終了/別日トーストは上・状況バーは最下部。
+   全状態=同じ舞台(紺のカメラ地+薄いガイド四隅+下部バー)の上で演出し、
+   下部シート(.dock)の中身だけが入れ替わる。白カードを画面中央に浮かべない。
    このアプリは独立ファイル(タブバーなし)。sharedの紙面背景は使わず暗地に上書きする。
    ============================================================================ */
 html,body{height:100%}
@@ -71,6 +73,7 @@ body{background:#151d30;color:var(--ink);font-size:16px;line-height:1.7;overflow
   background-image:none}
 #app.wrap{max-width:none;padding:0;height:100%}
 a:focus-visible,button:focus-visible{outline:2.5px solid #fff;outline-offset:2px;border-radius:4px}
+.dock a:focus-visible,.dock button:focus-visible,.dock input:focus-visible{outline-color:var(--deep)}
 .svgi{display:inline-block;vertical-align:-3px;flex:none}
 
 /* ===== 全画面ステージ(カメラ) ===== */
@@ -89,6 +92,11 @@ a:focus-visible,button:focus-visible{outline:2.5px solid #fff;outline-offset:2px
     linear-gradient(180deg, rgba(9,14,26,.62), rgba(9,14,26,.18) 18%, transparent 30%),
     linear-gradient(0deg, rgba(9,14,26,.66), rgba(9,14,26,.2) 20%, transparent 34%),
     radial-gradient(ellipse 130% 96% at 50% 44%, transparent 56%, rgba(9,14,26,.42) 100%)}
+/* 舞台上部の小さなワードマーク(スキャン前の全状態に共通) */
+.brand{position:absolute;left:0;right:0;top:36px;z-index:4;text-align:center;pointer-events:none;
+  font-family:var(--latin);font-size:30px;font-weight:500;letter-spacing:.02em;color:rgba(255,255,255,.94);
+  text-shadow:0 1px 16px rgba(9,14,26,.6)}
+.brand b{color:#a7b7f2;font-weight:500}
 /* 中央の読み取りガイド(枠外をそっと沈め、視線を読取域へ) */
 .guidebox{position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);width:min(56vw,460px);aspect-ratio:1;border:0;background:none;padding:0}
 .guidebox::before{content:'';position:absolute;inset:0;border-radius:16px;pointer-events:none;
@@ -101,6 +109,10 @@ a:focus-visible,button:focus-visible{outline:2.5px solid #fff;outline-offset:2px
 .guidebox .corner.tr{top:-2px;right:-2px;border-left:0;border-bottom:0;border-radius:0 14px 0 0}
 .guidebox .corner.bl{bottom:-2px;left:-2px;border-right:0;border-top:0;border-radius:0 0 0 14px}
 .guidebox .corner.br{bottom:-2px;right:-2px;border-left:0;border-top:0;border-radius:0 0 14px 0}
+/* スキャン前/カメラ不可: ガイドは薄く静かに置く(舞台は同じまま・偽の走査線は出さない) */
+.guidebox.idle{opacity:.36}
+.guidebox.idle::before{box-shadow:none}
+.guidebox.idle .dash{border-color:rgba(255,255,255,.3);box-shadow:none}
 /* 走査線: ゆっくり往復する細い光(動きは控えめ・reduced-motionでは共通ルールで停止) */
 .scanline{position:absolute;left:7%;right:7%;top:12%;height:2px;border-radius:2px;pointer-events:none;
   background:linear-gradient(90deg, transparent, rgba(154,173,238,.9), transparent);
@@ -122,6 +134,14 @@ a:focus-visible,button:focus-visible{outline:2.5px solid #fff;outline-offset:2px
 .camdot.warn{background:#f0c987;box-shadow:0 0 9px rgba(240,201,135,.85)}
 .camdot.info{background:#93a7ec;box-shadow:0 0 9px rgba(147,167,236,.85)}
 @keyframes ck-pulse{0%,100%{opacity:.45}50%{opacity:1}}
+/* カメラ不可のときの正直な導線(状態ピル+名前で探すを縦に・重なり無し) */
+.camwrap{position:absolute;left:50%;top:63.5%;transform:translateX(-50%);z-index:4;width:min(88%,560px);
+  display:flex;flex-direction:column;align-items:center;gap:16px}
+.camwrap .camstate{position:static;left:auto;top:auto;transform:none;max-width:100%}
+.findcta{display:inline-flex;align-items:center;gap:10px;
+  min-height:60px;padding:0 28px;font-size:17px;font-weight:700;letter-spacing:.04em;color:var(--deep);
+  background:#fff;border:0;border-radius:12px;box-shadow:0 16px 38px -16px rgba(6,10,20,.85);cursor:pointer}
+.findcta:hover{background:#f0f3fb}
 
 /* ===== 決済係(2台で分担・受信側)。カメラなしの決済カウンター ===== */
 .desk{position:absolute;left:0;right:0;top:44%;transform:translateY(-50%);margin:0 auto;width:min(92%,720px);text-align:center;color:#fff}
@@ -163,14 +183,6 @@ a:focus-visible,button:focus-visible{outline:2.5px solid #fff;outline-offset:2px
   background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.24);cursor:pointer;white-space:nowrap}
 .heldrail button b{color:#ffd9a8;font-weight:700;margin-left:7px;font-size:12px}
 .heldrail button:hover{background:rgba(255,255,255,.16)}
-/* 役割ボタン(2台で分担)・開始画面の副導線 */
-.rolerows{display:flex;flex-direction:column;gap:8px;margin-top:16px}
-.rolerows button{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;min-height:64px;width:100%;
-  padding:12px 16px;border-radius:10px;cursor:pointer;border:1.5px solid var(--line);background:rgba(255,255,255,.7)}
-.rolerows button .rn{font-size:15.5px;font-weight:700;color:var(--ink2)}
-.rolerows button .rd{font-size:12.5px;color:var(--ink4);line-height:1.7}
-.rolerows button[aria-pressed="true"]{border-color:var(--deep);background:#fff;box-shadow:0 8px 20px -10px rgba(79,99,196,.5)}
-.pane .devnote{font-size:12px;color:var(--ink5);margin-top:12px}
 
 /* 左上: 終了(副操作・控えめ) */
 .quit{position:absolute;top:16px;left:16px;z-index:6;display:inline-flex;align-items:center;gap:7px;min-height:44px;padding:8px 15px;
@@ -265,34 +277,79 @@ a:focus-visible,button:focus-visible{outline:2.5px solid #fff;outline-offset:2px
 .findbtn small{font-size:11.5px;font-weight:400;color:var(--ink4)}
 @media(max-width:900px){.findbtn small{display:none}}
 
-/* ===== 開始前/日程選択/検索などの全画面パネル(暗地の上の紙面) ===== */
-.pane{position:absolute;inset:0;z-index:8;display:flex;align-items:center;justify-content:center;padding:24px;
-  background:rgba(16,23,38,.55);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
-.pane .card{width:min(92%,560px);border-radius:14px;padding:28px 30px 24px;
-  background:linear-gradient(168deg, rgba(253,252,248,.97), rgba(253,252,248,.9));
-  box-shadow:0 24px 60px -24px rgba(10,16,30,.7)}
-.pane .kicker{font-size:11.5px;letter-spacing:.22em;color:var(--deep);font-weight:700;margin-bottom:6px}
-.pane h2{font-family:var(--serif);font-size:24px;font-weight:600;line-height:1.5;letter-spacing:.04em}
-.pane .sub{font-size:13.5px;color:var(--ink4);margin-top:6px}
-.pane .warnline{font-size:13px;color:var(--warn);font-weight:700;margin-top:10px}
-.pane .okline{font-size:13px;color:var(--ok);font-weight:700;margin-top:10px}
-.pane .cta{display:flex;flex-direction:column;gap:10px;margin-top:18px}
-.pane .cta .btn{justify-content:center;font-size:16px;min-height:54px}
-.pane .cta .rowlink{background:none;border:0;color:var(--ink4);font-size:13px;text-decoration:underline;cursor:pointer;padding:6px}
-/* 日程(Day)選択 */
-.dayrows{display:flex;flex-direction:column;gap:8px;margin-top:16px}
-.dayrows button{display:flex;align-items:center;gap:12px;text-align:left;min-height:56px;padding:10px 16px;border-radius:10px;cursor:pointer;
-  border:1.5px solid var(--line);background:rgba(255,255,255,.7);font-size:15px;color:var(--ink2)}
+/* ============================================================================
+   全状態共通の下部シート(.dock) — 舞台は変えず、この中身だけが入れ替わる。
+   ログイン/イベント選択/開始/日程/役割/検索/権限/エラーはすべてここに載る。
+   スキャン結果シート(.sheet)と同じ下辺(112px)に揃え、同じ紙質・同じ言葉で。
+   ============================================================================ */
+.dockwrap{position:absolute;inset:0;z-index:8;pointer-events:none}
+.dockwrap.veil{pointer-events:auto;background:linear-gradient(180deg, rgba(9,14,26,.08), rgba(9,14,26,.46) 78%)}
+.dock{position:absolute;left:50%;transform:translateX(-50%);bottom:112px;width:min(92%,640px);pointer-events:auto;
+  border-radius:18px;padding:26px 30px 24px;max-height:calc(100% - 190px);overflow:auto;-webkit-overflow-scrolling:touch;
+  background:linear-gradient(168deg, rgba(253,252,248,.96), rgba(253,252,248,.88));
+  -webkit-backdrop-filter:blur(18px) saturate(1.25);backdrop-filter:blur(18px) saturate(1.25);
+  border:1px solid rgba(255,255,255,.85);
+  box-shadow:0 34px 80px -30px rgba(6,10,20,.9), 0 10px 28px -18px rgba(6,10,20,.55), inset 0 1px 0 rgba(255,255,255,.95);
+  animation:ck-rise .38s cubic-bezier(.22,.68,.32,1)}
+.dock.find{animation:none} /* 文字入力ごとの再描画で揺れない */
+@keyframes ck-rise{from{opacity:0;transform:translate(-50%,18px)}to{opacity:1;transform:translate(-50%,0)}}
+.dock .kick{font-size:11px;letter-spacing:.3em;color:var(--deep);font-weight:700}
+.dock h2{font-family:var(--serif);font-size:26px;font-weight:600;line-height:1.45;letter-spacing:.05em;color:var(--ink);margin-top:7px;
+  overflow:hidden;text-overflow:ellipsis}
+.dock .sub{font-size:13.5px;color:var(--ink4);margin-top:7px;line-height:1.85}
+.dock .subhead{font-size:11px;letter-spacing:.18em;color:var(--ink4);font-weight:700;margin-top:16px}
+.dock .evmeta{font-size:14px;color:var(--ink3);margin-top:7px}
+.dock .warnline{font-size:13px;color:var(--warn);font-weight:700;margin-top:10px}
+.dock .err{font-size:13px;color:var(--warn);font-weight:700;margin-top:10px}
+/* 進捗(x/y+細いバー) */
+.progress{display:flex;align-items:center;gap:12px;margin-top:14px}
+.progress .num{font-family:var(--serif);font-size:30px;font-weight:600;font-variant-numeric:tabular-nums;line-height:1.1;color:var(--ink)}
+.progress .num small{font-size:16px;color:var(--ink4);font-weight:400}
+.progress .plbl{font-size:12px;letter-spacing:.08em;color:var(--ink4)}
+.progress .plbl b{color:var(--amber);font-weight:700}
+.progress .pbar{flex:1;height:4px;border-radius:99px;background:rgba(34,49,74,.14);overflow:hidden}
+.progress .pbar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg, var(--accent), var(--deep))}
+/* 主要操作(64px)と副導線 */
+.dock .go{display:flex;align-items:center;justify-content:center;width:100%;min-height:64px;margin-top:18px;border:0;border-radius:12px;
+  background:var(--deep);color:#fff;font-family:var(--sans);font-size:19px;font-weight:700;letter-spacing:.1em;cursor:pointer;
+  box-shadow:0 18px 42px -16px rgba(79,99,196,.8);transition:background .15s}
+.dock .go:hover{background:#43549f}
+.dock .go[disabled]{opacity:.55;cursor:default;box-shadow:none}
+.dock .ctanote{font-size:12px;color:var(--ink5);margin-top:9px;text-align:center}
+.dock .cta{display:flex;flex-direction:column;gap:6px;margin-top:12px;align-items:center}
+.dock .cta .go{margin-top:6px}
+.dock .rowlink{background:none;border:0;color:var(--ink4);font-size:13px;text-decoration:underline;cursor:pointer;padding:8px;min-height:44px}
+.dock .devnote{font-size:11.5px;color:var(--ink5);margin-top:12px;line-height:1.8}
+/* 受付のかたち(正典の下部バーと同じ部品を紙面色で) */
+.modect{margin-top:16px}
+.modect .cap{font-size:11px;letter-spacing:.2em;color:var(--ink4);font-weight:700}
+.modeseg.paper{display:flex;width:100%;margin-top:7px;background:rgba(34,49,74,.06);border:1px solid var(--line)}
+.modeseg.paper button{flex:1;min-height:54px;font-size:14.5px;color:var(--ink3)}
+.modeseg.paper button[aria-pressed="true"]{background:#fff;color:var(--deep);font-weight:700;box-shadow:0 8px 18px -10px rgba(34,49,74,.4)}
+.modect .exp{font-size:12px;color:var(--ink5);margin-top:7px}
+/* 日程(Day)/イベントの選択行 */
+.dayrows{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+.dayrows button{display:flex;align-items:center;gap:12px;text-align:left;min-height:60px;padding:10px 16px;border-radius:11px;cursor:pointer;
+  border:1.5px solid var(--line);background:rgba(255,255,255,.74);font-size:15px;color:var(--ink2)}
 .dayrows button .dn{font-family:var(--serif);font-weight:700;font-size:16.5px;flex:none}
-.dayrows button .dd{color:var(--ink4);font-size:13px}
+.dayrows button .dd{color:var(--ink4);font-size:13px;overflow:hidden;text-overflow:ellipsis}
 .dayrows button .today{margin-left:auto;flex:none;font-size:11.5px;font-weight:700;color:#fff;background:var(--deep);border-radius:6px;padding:2px 9px}
 .dayrows button[aria-pressed="true"]{border-color:var(--deep);box-shadow:0 8px 20px -10px rgba(79,99,196,.5);background:#fff}
+/* 役割ボタン(2台で分担) */
+.rolerows{display:flex;flex-direction:column;gap:10px;margin-top:16px}
+.rolerows button{display:flex;align-items:center;gap:14px;text-align:left;min-height:76px;width:100%;
+  padding:14px 16px;border-radius:12px;cursor:pointer;border:1.5px solid var(--line);background:rgba(255,255,255,.74)}
+.rolerows .ric{flex:none;width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;
+  color:var(--deep);background:rgba(110,134,224,.12);border:1px solid rgba(110,134,224,.3)}
+.rolerows .rtx{display:flex;flex-direction:column;gap:2px;min-width:0}
+.rolerows button .rn{font-size:15.5px;font-weight:700;color:var(--ink2)}
+.rolerows button .rd{font-size:12.5px;color:var(--ink4);line-height:1.7}
+.rolerows button[aria-pressed="true"]{border-color:var(--deep);background:#fff;box-shadow:0 10px 24px -12px rgba(79,99,196,.55)}
+.rolerows button[aria-pressed="true"] .ric{background:var(--deep);color:#fff;border-color:var(--deep)}
 /* 名前で探す */
-.findwrap{width:min(94%,640px);max-height:86%;display:flex;flex-direction:column}
-.findwrap .card{width:100%;display:flex;flex-direction:column;min-height:0}
-.findwrap input{width:100%;min-height:52px;margin-top:14px;padding:10px 15px;border:1.5px solid var(--line);border-radius:10px;
+.dock input[type="search"]{width:100%;min-height:52px;margin-top:14px;padding:10px 15px;border:1.5px solid var(--line);border-radius:10px;
   font-family:var(--sans);font-size:17px;color:var(--ink);background:#fff}
-.findlist{margin-top:12px;overflow:auto;min-height:0;max-height:46vh;border-top:1px solid var(--line)}
+.findlist{margin-top:12px;overflow:auto;min-height:0;max-height:min(38vh,380px);border-top:1px solid var(--line)}
 .findlist button{display:flex;width:100%;align-items:center;gap:12px;text-align:left;padding:12px 6px;border:0;border-bottom:1px solid var(--line);
   background:none;cursor:pointer;font-size:15.5px;color:var(--ink2)}
 .findlist button:hover{background:rgba(110,134,224,.07)}
@@ -301,19 +358,22 @@ a:focus-visible,button:focus-visible{outline:2.5px solid #fff;outline-offset:2px
 .findlist .fst.done{color:#fff;background:var(--ok)}
 .findlist .fst.held{color:#fff;background:var(--warn)}
 .findempty{padding:16px 4px;font-size:13.5px;color:var(--ink4)}
-/* ログイン(コンパクト) */
-.pane label{display:block;font-size:13px;color:var(--ink3);font-weight:700;margin-top:12px}
-.pane label input{display:block;width:100%;min-height:48px;margin-top:5px;padding:9px 13px;border:1.5px solid var(--line);border-radius:9px;
+/* ログイン(下部シート内のフォーム) */
+.dock label{display:block;font-size:13px;color:var(--ink3);font-weight:700;margin-top:13px}
+.dock label input{display:block;width:100%;min-height:52px;margin-top:6px;padding:10px 14px;border:1.5px solid var(--line);border-radius:10px;
   font-family:var(--sans);font-size:16px;color:var(--ink);background:#fff;font-weight:400}
-.pane .err{font-size:13px;color:var(--warn);font-weight:700;margin-top:10px}
+.dock label .hint{display:block;font-size:11.5px;color:var(--ink5);font-weight:400;margin-top:4px;line-height:1.7}
 
 /* ===== スマホ緊急代用(390) ===== */
 @media(max-width:640px){
+  .brand{top:20px;font-size:24px}
   .callout{top:11%}
   .callout h1{font-size:22px}
   .callout p{font-size:13px}
   .guidebox{width:62vw;top:36%}
   .camstate{top:56%}
+  .camwrap{top:56%;gap:12px}
+  .findcta{min-height:54px;font-size:15px;padding:0 22px}
   .quit{top:12px;left:12px;min-height:40px;padding:6px 11px;font-size:12.5px}
   .topbtns{top:12px;right:12px}
   .toast{top:60px;left:12px;right:12px;transform:none;font-size:12.5px;padding:8px 13px;flex-wrap:wrap;row-gap:2px}
@@ -343,7 +403,58 @@ a:focus-visible,button:focus-visible{outline:2.5px solid #fff;outline-offset:2px
   .desk .bigamt{font-size:52px}
   .desk .methods{width:100%}
   .heldrail{bottom:118px}
+  .dock{bottom:126px;width:calc(100% - 20px);padding:20px 18px 18px;border-radius:16px;max-height:calc(100% - 170px)}
+  .dock h2{font-size:21px}
+  .dock .go{min-height:60px;font-size:17px}
+  .progress .num{font-size:25px}
+  .dayrows button{min-height:54px;padding:9px 13px}
+  .rolerows button{min-height:66px;padding:12px 13px;gap:11px}
+  .rolerows .ric{width:40px;height:40px}
+  .modeseg.paper button{min-height:50px;font-size:13.5px}
+  .findlist{max-height:30vh}
 }
+
+/* ============================================================================
+   虹彩(iris)アップグレード+かぶり根絶(2026-09-02 代表指示)
+   - 呼びかけ文とガイド枠の重なり: 絶対%配置を廃し、#ck-callout をフロー縦積みに
+     (横持ち/低背でも構造的に重ならない。ガイドはvhでも縮む)
+   - 上質感: 参加者アプリの虹彩(--mg-iris)を移植。ガイド四隅=虹彩ストローク・
+     カメラ地に微オーロラ・確定ボタン光沢・バー/シート上端に1px虹彩ライン
+   ============================================================================ */
+.stage{--iris:conic-gradient(from 220deg, #7d90e8, #8fc6ea, #a9e3cf, #f0d9a6, #ecc3d8, #b3a6ef, #7d90e8)}
+#ck-callout{position:absolute;left:0;right:0;top:0;bottom:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:flex-start;padding-top:86px;pointer-events:none}
+#ck-callout .callout{position:static;top:auto;padding:0 24px}
+#ck-callout .guidebox{position:relative;left:auto;top:auto;transform:none;pointer-events:auto;
+  width:min(56vw,460px,46vh);margin-top:clamp(16px,4.5vh,46px)}
+/* ガイド枠=虹彩リング(mask-composite方式・確実に描ける)+内側は既存の点線 */
+.guidebox .corner{display:none}
+.guidebox::after{content:'';position:absolute;inset:-3px;border-radius:19px;padding:3.5px;
+  background:var(--iris);filter:saturate(1.25) drop-shadow(0 0 10px rgba(140,164,240,.45));
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  mask-composite:exclude;animation:ckIris 18s linear infinite;pointer-events:none}
+.guidebox.idle::after{opacity:.55;filter:saturate(1.1)}
+@keyframes ckIris{to{filter:saturate(1.25) drop-shadow(0 0 10px rgba(140,164,240,.45)) hue-rotate(360deg)}}
+#ck-callout .camstate,#ck-callout .camwrap{position:static;left:auto;top:auto;transform:none;margin-top:16px;pointer-events:auto}
+/* 呼びかけの虹彩ティック(小さな署名・文字は白のまま) */
+.callout h1::before{content:'';display:block;width:30px;height:3px;border-radius:2px;margin:0 auto 12px;
+  background:var(--iris);filter:saturate(1.15)}
+/* カメラ地の微オーロラ(8%・ゆっくり漂う。映像が来たら video の下に沈む) */
+.feed{overflow:hidden}
+.feed::before{content:'';position:absolute;inset:-24%;background:var(--iris);opacity:.09;
+  filter:blur(80px) saturate(1.3);animation:ckAurora 30s ease-in-out infinite alternate;pointer-events:none}
+@keyframes ckAurora{from{transform:rotate(0deg) scale(1)}to{transform:rotate(16deg) scale(1.14)}}
+/* 下部バー・シートの上端に1pxの虹彩ライン */
+.statusbar::before{content:'';position:absolute;left:0;right:0;top:0;height:1px;opacity:.75;
+  background:linear-gradient(90deg,rgba(125,144,232,0),#8fc6ea 22%,#f0d9a6 50%,#ecc3d8 78%,rgba(125,144,232,0))}
+.sheet::before{content:'';position:absolute;left:14px;right:14px;top:0;height:2px;border-radius:2px;opacity:.85;
+  background:linear-gradient(90deg,rgba(125,144,232,0),#8fc6ea 20%,#a9e3cf 40%,#f0d9a6 60%,#ecc3d8 80%,rgba(125,144,232,0))}
+/* 確定ボタンの光沢(角度グラデ+押下で沈む) */
+.confirm{background:linear-gradient(135deg,#5b73da,#4f63c4 52%,#5e70cf);
+  box-shadow:0 14px 32px -12px rgba(79,99,196,.7), inset 0 1px 0 rgba(255,255,255,.28)}
+.confirm:hover{background:linear-gradient(135deg,#5069d5,#43549f 52%,#5265c4)}
+.confirm:active{transform:translateY(1px)}
 
 </style>
 </head>
@@ -550,6 +661,9 @@ window.AdminAPI = (function () {
 /* ============================================================================
    当日受付アプリ — vanilla JS(独立ファイル・タブバーなし)
    見た目の正典: redesign/portal-proto/event-checkin.html(カメラ全画面・状況バー下部)
+   全状態の原則(代表指示): ログイン/イベント・日程選択/開始/役割/検索/権限/エラーも
+   すべて同じ舞台(紺のカメラ地+薄ガイド+下部バー)の上で、下部シート(.dock)の
+   中身だけを入れ替えて演出する。白カードを中央に浮かべる状態は作らない。
    挙動の正典: console.html PageReception(+PageQR) — 挙動保存が決定事項:
    - QR=素のRegID("R-00001")。/R-?\d+/ → /U-?\d+/ を寛容に抽出(console recParseScan)。
    - 照合は端末内(申込を先読み listEventRegistrations{eventId}→無ければ listRegistrations)。
@@ -666,10 +780,12 @@ window.AdminAPI = (function () {
     try { if (NAV && NAV.vibrate) NAV.vibrate(kind === 'err' ? [18, 40, 18] : 10); } catch (e) {}
   }
 
-  /* ---------- 状態 ---------- */
-  var S = { ev: null, regs: null, parts: null, me: null, err: '', loading: false };
+  /* ---------- 状態 ----------
+     見た目の原則(代表指示): すべての状態を同じ舞台(紺のカメラ地+薄いガイド+下部バー)で演出し、
+     下部シート(.dock)の中身だけを入れ替える。白カードを中央に浮かべる状態は1つも作らない。 */
+  var S = { ev: null, regs: null, parts: null, me: null, err: '', loading: false, pick: null };
   var UI = {
-    phase: 'boot',      // boot | login | perm | notfound | ready(start前) | scan(受付中)
+    phase: 'boot',      // boot | login | pick(イベント選択) | perm | notfound | ready(start前) | scan(受付中)
     camErr: '',
     mode: 'solo',       // solo=この端末で確定 / duo=2台で分担
     duoRole: 'push',    // duoの役割: push=読み取り(送信のみ) / recv=決済係(受信+この画面で確定)
@@ -1131,7 +1247,7 @@ window.AdminAPI = (function () {
   function startCam(face) {
     if (!hasCam()) {
       UI.camErr = (typeof window !== 'undefined' && window.isSecureContext === false)
-        ? 'カメラを使用できません(httpsでのアクセスが必要です)。「名前で探す」で受付できます。'
+        ? 'httpsでのアクセスが必要なため、カメラを使用できません。「名前で探す」で受付できます。'
         : 'この端末ではカメラを使用できません。「名前で探す」で受付できます。';
       UI.phase = 'scan';
       paintAll();
@@ -1177,9 +1293,9 @@ window.AdminAPI = (function () {
     }, function (e) {
       var nm = (e && e.name) || '';
       UI.camErr =
-        nm === 'NotAllowedError' || nm === 'SecurityError' ? 'カメラを使用できません(許可されませんでした)。ブラウザ/OSの設定で許可するか、「名前で探す」で受付できます。' :
-        nm === 'NotFoundError' || nm === 'OverconstrainedError' || nm === 'DevicesNotFoundError' ? 'カメラを使用できません(利用可能なカメラが見つかりません)。「名前で探す」で受付できます。' :
-        nm === 'NotReadableError' ? 'カメラが他のアプリで使用中の可能性があります。他アプリを閉じてもう一度お試しください。' :
+        nm === 'NotAllowedError' || nm === 'SecurityError' ? 'カメラの使用が許可されませんでした ― ブラウザ/OSの設定で許可すると再開できます。それまでは「名前で探す」で受付できます。' :
+        nm === 'NotFoundError' || nm === 'OverconstrainedError' || nm === 'DevicesNotFoundError' ? '利用できるカメラが見つかりません。「名前で探す」で受付できます。' :
+        nm === 'NotReadableError' ? 'カメラが他のアプリで使用中の可能性があります。他アプリを閉じてもう一度お試しください。「名前で探す」でも受付できます。' :
         'カメラを使用できません(' + (nm || '不明') + ')。「名前で探す」で受付できます。';
       UI.phase = 'scan'; // 暗地のまま受付は続けられる(名前検索)
       paintAll();
@@ -1256,16 +1372,15 @@ window.AdminAPI = (function () {
     root.innerHTML =
       '<div class="stage">' +
       '<div class="feed" id="ck-feed"><video id="ck-video" playsinline muted></video></div>' +
+      '<div id="ck-brand"></div>' +
       '<div id="ck-callout"></div>' +
-      '<button type="button" class="quit" id="ck-quit"><svg class="svgi" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg><span class="nb">受付を終了</span></button>' +
+      '<div id="ck-quit-z"></div>' +
       '<div class="topbtns" id="ck-top"></div>' +
       '<div id="ck-toast"></div>' +
       '<div id="ck-sheet"></div>' +
       '<div id="ck-bar"></div>' +
       '<div id="ck-pane"></div>' +
       '</div>';
-    var q = document.getElementById('ck-quit');
-    if (q) q.addEventListener('click', quit);
     paintAll();
   }
   function quit() {
@@ -1273,14 +1388,50 @@ window.AdminAPI = (function () {
     stopRecv();
     location.href = './event.html' + QS + '#/ev/' + encodeURIComponent((S.ev && S.ev.id) || route().id || '') + '/day';
   }
-  function paintAll() { paintCallout(); paintTop(); paintToast(); paintSheet(); paintBar(); paintPane(); }
+  function paintAll() { paintBrand(); paintQuit(); paintCallout(); paintTop(); paintToast(); paintSheet(); paintBar(); paintPane(); }
 
+  /* 舞台上部の小さなワードマーク(スキャン前の全状態)。スキャン中は呼びかけに譲る */
+  function paintBrand() {
+    var el = document.getElementById('ck-brand');
+    if (!el) return;
+    el.innerHTML = UI.phase === 'scan' ? '' : '<div class="brand" aria-hidden="true">connec<b>+</b>a</div>';
+  }
+  /* 左上の終了は文脈があるときだけ(ログイン前などに崩れた枠を残さない) */
+  function paintQuit() {
+    var el = document.getElementById('ck-quit-z');
+    if (!el) return;
+    var bare = UI.phase === 'login' || UI.phase === 'boot' || UI.phase === 'pick';
+    el.innerHTML = bare ? '' :
+      '<button type="button" class="quit" id="ck-quit"><svg class="svgi" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg><span class="nb">受付を終了</span></button>';
+    var q = document.getElementById('ck-quit');
+    if (q) q.addEventListener('click', quit);
+  }
+
+  function idleGuideHtml() {
+    return '<div class="guidebox idle" aria-hidden="true"><span class="dash"></span>' +
+      '<span class="corner tl"></span><span class="corner tr"></span><span class="corner bl"></span><span class="corner br"></span></div>';
+  }
   function paintCallout() {
     var el = document.getElementById('ck-callout');
     if (!el) return;
-    if (UI.phase !== 'scan') { el.innerHTML = ''; return; }
+    // スキャン前の全状態も同じ舞台: ガイドは薄く静かに置いておく
+    if (UI.phase !== 'scan') { el.innerHTML = idleGuideHtml(); return; }
     if (recvActive()) { el.innerHTML = deskHtml(); bindDesk(); mirrorFeed(); return; }
     var push = UI.mode === 'duo' && UI.duoRole === 'push';
+    if (UI.camErr) {
+      // 正直な舞台: カメラが使えない=名前で探す受付になる(偽の走査線は出さない)
+      el.innerHTML = '<div class="callout">' +
+        '<h1><span class="nb">カメラを使えないため</span><span class="nb">名前で探す受付になります</span></h1>' +
+        '<p class="nb">' + (push ? '読み取り専用 ― 確定は決済係の端末で行われます' : '下の「名前で探す」から申込者を選んで受付できます') + '</p></div>' +
+        idleGuideHtml() +
+        '<div class="camwrap"><div class="camstate wide"><span class="camdot warn"></span>' + esc(UI.camErr) + '</div>' +
+        '<button type="button" class="findcta" id="ck-findcta">' +
+        '<svg class="svgi" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg><span class="nb">名前で探す</span></button></div>';
+      mirrorFeed();
+      var fc = document.getElementById('ck-findcta');
+      if (fc) fc.addEventListener('click', function () { UI.findOpen = true; paintPane(); });
+      return;
+    }
     var h = '<div class="callout">' +
       '<h1><span class="nb">参加者のQRを</span><span class="nb">かざしてください</span></h1>' +
       '<p class="nb">' + (push ? '読み取り専用 ― 確定は決済係の端末で行われます' : '読み取りは自動です ― ボタンを押す必要はありません') + '</p></div>';
@@ -1291,12 +1442,11 @@ window.AdminAPI = (function () {
     } else {
       h += '<div class="guidebox" aria-hidden="true">' + guideInner + '</div>';
     }
-    // 状態ピル: ドットの色で一目(緑=カメラ動作中/琥珀=カメラ不可/藍=デモ)
-    var dot = DEMO ? 'info' : UI.camErr ? 'warn' : '';
+    // 状態ピル: ドットの色で一目(緑=カメラ動作中/藍=デモ)
+    var dot = DEMO ? 'info' : '';
     var msg = DEMO ? 'デモ ― 枠をタップするとスキャンを再現します'
-      : UI.camErr ? esc(UI.camErr)
       : (push ? 'カメラ動作中(内向き) ・ 端末名 ' + esc(device) : 'カメラ動作中 ― 自動で読み取ります');
-    h += '<div class="camstate' + (UI.camErr ? ' wide' : ' nb') + '"><span class="camdot ' + dot + '"></span>' + msg + '</div>';
+    h += '<div class="camstate nb"><span class="camdot ' + dot + '"></span>' + msg + '</div>';
     el.innerHTML = h;
     mirrorFeed();
     var db = document.getElementById('ck-demo-scan');
@@ -1506,7 +1656,8 @@ window.AdminAPI = (function () {
   function paintBar() {
     var el = document.getElementById('ck-bar');
     if (!el) return;
-    if (!S.ev || UI.phase === 'login' || UI.phase === 'boot') { el.innerHTML = ''; return; }
+    if (!S.ev || UI.phase === 'login' || UI.phase === 'boot' || UI.phase === 'pick') { el.innerHTML = ''; return; }
+    var live = UI.phase === 'scan';
     var t = tallyNow();
     var dayLine = '';
     if (isMulti()) {
@@ -1514,7 +1665,7 @@ window.AdminAPI = (function () {
       var d = s && parseYmd(s.date);
       dayLine = (s ? '<span class="nb">Day' + dayNoOf(s.id) + ' ' + (d ? esc(dateSlash(d)) + '(' + WD[d.getDay()] + ')' : '') +
         (timeRange(s) ? ' ' + esc(timeRange(s)) : '') + '</span>' : '<span class="nb">日程未選択</span>') +
-        ' <button type="button" id="ck-daychg" class="nb">日程を変更</button>';
+        (live ? ' <button type="button" id="ck-daychg" class="nb">日程を変更</button>' : '');
     } else {
       var d0 = parseYmd(String(S.ev.date || '').slice(0, 10));
       dayLine = '<span class="nb">' + (d0 ? esc(dateJa(d0)) : '') + (timeRange(S.ev) ? ' ' + esc(timeRange(S.ev)) : '') + '</span>';
@@ -1528,12 +1679,13 @@ window.AdminAPI = (function () {
       (meName ? '<div class="crew">' + (S.me.photo ? '<img src="' + esc(S.me.photo) + '" alt="">' : '') +
         '<div><div class="nm nb">' + esc(meName) + '</div><div class="rl nb">担当(自分)</div></div></div>' : '') +
       '<span class="sp"></span>' +
-      '<div class="modeseg" role="group" aria-label="受付のかたち">' +
-      '<button type="button" data-mode="solo" aria-pressed="' + (UI.mode === 'solo') + '"><span class="nb">この端末で確定</span></button>' +
-      '<button type="button" data-mode="duo" aria-pressed="' + (UI.mode === 'duo') + '"><span class="nb">2台で分担</span></button></div>' +
-      '<button type="button" class="findbtn" id="ck-find">' +
-      '<svg class="svgi" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg>' +
-      '<span class="nb">名前で探す</span><small class="nb">QRが出せない方</small></button>' +
+      // 受付のかたち/名前で探すは受付中だけ(開始前は下部シート側に同じ部品を出す)
+      (live ? '<div class="modeseg" role="group" aria-label="受付のかたち">' +
+        '<button type="button" data-mode="solo" aria-pressed="' + (UI.mode === 'solo') + '"><span class="nb">この端末で確定</span></button>' +
+        '<button type="button" data-mode="duo" aria-pressed="' + (UI.mode === 'duo') + '"><span class="nb">2台で分担</span></button></div>' +
+        '<button type="button" class="findbtn" id="ck-find">' +
+        '<svg class="svgi" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg>' +
+        '<span class="nb">名前で探す</span><small class="nb">QRが出せない方</small></button>' : '') +
       '</footer>';
     el.innerHTML = h;
     Array.prototype.forEach.call(root.querySelectorAll('[data-mode]'), function (b) {
@@ -1560,71 +1712,149 @@ window.AdminAPI = (function () {
     paintAll();
   }
   function setDuoRole(role) {
+    // 役割の確定=そのまま開始(開始前の役割選択シートからの直行もここに合流する)
     if (role !== 'push' && role !== 'recv') return;
     UI.roleOpen = false;
+    UI.dayOpen = false;
     UI.mode = 'duo';
     UI.duoRole = role;
     UI.sheet = null;
     if (role === 'recv') {
-      startRecv(); // カメラを止めて受信専用へ(決済カウンター)
-    } else {
-      stopRecv();
-      if (UI.phase === 'scan' && !DEMO && hasCam()) startCam('user'); // 読み取り側=内カメラ(console規約)
+      UI.phase = 'scan';
+      startRecv(); // カメラを止めて受信専用へ(決済カウンター・カメラ許可不要)
+      paintAll();
+      return;
     }
+    stopRecv();
+    if (DEMO) { UI.phase = 'scan'; paintAll(); return; } // デモはダミー地のまま
+    startCam('user'); // 読み取り側=内カメラ(console規約)。不可なら camErr+正直な案内で開始
     paintAll();
   }
 
-  /* ---- 全画面パネル(開始前/日程選択/名前検索/ログイン/権限/エラー) ---- */
+  /* ---- 下部シート(dock): 開始前/日程選択/名前検索/ログイン/権限/エラーの全状態 ----
+     舞台(カメラ地+薄ガイド+状況バー)はそのまま、この dock の中身だけを入れ替える。 */
+  function dockWrap(inner, opts) {
+    opts = opts || {};
+    return '<div class="dockwrap' + (opts.veil ? ' veil' : '') + '">' +
+      '<section class="dock' + (opts.cls ? ' ' + opts.cls : '') + '" aria-label="' + esc(opts.label || '当日受付') + '">' + inner + '</section></div>';
+  }
   function paintPane() {
     var el = document.getElementById('ck-pane');
     if (!el) return;
-    if (UI.phase === 'login') { el.innerHTML = loginHtml(); bindLogin(); return; }
+    var live = UI.phase === 'scan';
+    if (UI.phase === 'login') { el.innerHTML = dockWrap(loginHtml(), { label: 'ログイン' }); bindLogin(); return; }
     if (UI.phase === 'boot') {
-      el.innerHTML = '<div class="pane"><div class="card"><div class="kicker">当日受付</div><h2>読み込んでいます…</h2>' +
-        (S.err ? '<div class="err">' + esc(S.err) + '</div><div class="cta"><button type="button" class="btn" id="ck-retry">再読み込み</button></div>' : '') +
-        '</div></div>';
+      el.innerHTML = dockWrap('<div class="kick nb">当日受付</div><h2>読み込んでいます…</h2>' +
+        (S.err ? '<div class="err">' + esc(S.err) + '</div><div class="cta"><button type="button" class="go" id="ck-retry">再読み込み</button></div>' : ''),
+        { label: '読み込み中' });
       var rb = document.getElementById('ck-retry');
       if (rb) rb.addEventListener('click', function () { S.err = ''; paintPane(); loadReal(); });
       return;
     }
+    if (UI.phase === 'pick') { el.innerHTML = dockWrap(pickHtml(), { label: '受付するイベントを選ぶ' }); bindPick(); return; }
     if (UI.phase === 'perm') {
-      el.innerHTML = '<div class="pane"><div class="card"><div class="kicker">当日受付</div>' +
+      el.innerHTML = dockWrap('<div class="kick nb">当日受付</div>' +
         '<h2>権限が必要です</h2><p class="sub">受付(チェックイン・決済確認)には<span class="nb">アシスタントマネージャー以上</span>の権限が必要です。</p>' +
-        '<div class="cta"><button type="button" class="rowlink" id="ck-back2">イベント面へ戻る</button></div></div></div>';
+        '<div class="cta"><button type="button" class="rowlink" id="ck-back2">イベント面へ戻る</button></div>', { label: '権限が必要です' });
       var b2 = document.getElementById('ck-back2');
       if (b2) b2.addEventListener('click', quit);
       return;
     }
     if (UI.phase === 'notfound') {
-      el.innerHTML = '<div class="pane"><div class="card"><div class="kicker">当日受付</div>' +
+      el.innerHTML = dockWrap('<div class="kick nb">当日受付</div>' +
         '<h2>このイベントは見つかりませんでした</h2><p class="sub">URLが古いか、イベントが削除された可能性があります。</p>' +
-        '<div class="cta"><button type="button" class="rowlink" id="ck-back3">イベント面へ戻る</button></div></div></div>';
+        '<div class="cta"><button type="button" class="rowlink" id="ck-back3">イベント面へ戻る</button></div>', { label: 'イベントが見つかりません' });
       var b3 = document.getElementById('ck-back3');
       if (b3) b3.addEventListener('click', quit);
       return;
     }
-    if (UI.findOpen) { el.innerHTML = findHtml(); bindFind(); return; }
-    if (UI.roleOpen) { el.innerHTML = roleHtml(); bindRole(); return; }
-    if (UI.phase === 'ready' || UI.dayOpen) { el.innerHTML = startHtml(); bindStart(); return; }
+    if (UI.findOpen) { el.innerHTML = dockWrap(findHtml(), { label: '名前で探す', veil: live, cls: 'find' }); bindFind(); return; }
+    if (UI.roleOpen) { el.innerHTML = dockWrap(roleHtml(), { label: '役割の選択', veil: live }); bindRole(); return; }
+    if (UI.phase === 'ready' || UI.dayOpen) { el.innerHTML = dockWrap(startHtml(), { label: '受付の開始', veil: live }); bindStart(); return; }
     el.innerHTML = '';
   }
 
-  /* ---- 2台で分担: 役割選択(読み取り/決済係) ---- */
+  /* ---- 直リンクなしで開いたとき: きょうのイベントを選ぶ(1件なら自動で開始画面へ) ---- */
+  function evIsToday(e) {
+    if (!e) return false;
+    var ss = evSess(e);
+    if (ss.length) {
+      var hit = false;
+      ss.forEach(function (s) { if (String(s.date).slice(0, 10) === todayYmd) hit = true; });
+      return hit;
+    }
+    return String(e.date || '').slice(0, 10) === todayYmd;
+  }
+  function pickHtml() {
+    var list = arr(S.pick);
+    var todays = list.filter(evIsToday);
+    var future = list.filter(function (e) { return !evIsToday(e) && String(e.date || '').slice(0, 10) > todayYmd; })
+      .sort(function (a, b) { return String(a.date).localeCompare(String(b.date)); }).slice(0, 4);
+    var row = function (e, isToday) {
+      var d = parseYmd(String(e.date || '').slice(0, 10));
+      return '<button type="button" data-pick="' + esc(e.id) + '">' +
+        '<span class="dn nb">' + esc(e.title || e.name || e.id) + '</span>' +
+        '<span class="dd nb">' + (d ? esc(dateSlash(d)) + '(' + WD[d.getDay()] + ')' : '') + (timeRange(e) ? ' ' + esc(timeRange(e)) : '') + '</span>' +
+        (isToday ? '<span class="today nb">きょう</span>' : '') + '</button>';
+    };
+    var h = '<div class="kick nb">当日受付</div><h2>受付するイベントを選んでください</h2>';
+    if (todays.length) {
+      h += '<div class="dayrows">' + todays.map(function (e) { return row(e, true); }).join('') + '</div>';
+    } else {
+      h += '<p class="sub nb">きょう開催のイベントはありません。</p>';
+    }
+    if (future.length) {
+      h += '<div class="subhead nb">これからのイベント</div>' +
+        '<div class="dayrows">' + future.map(function (e) { return row(e, false); }).join('') + '</div>';
+    }
+    if (!todays.length && !future.length) h += '<p class="sub">イベント面の「受付を開く(iPad)」からも入れます。</p>';
+    return h;
+  }
+  function bindPick() {
+    Array.prototype.forEach.call(root.querySelectorAll('[data-pick]'), function (b) {
+      b.addEventListener('click', function () {
+        location.hash = '#/ev/' + encodeURIComponent(b.getAttribute('data-pick') || '');
+      });
+    });
+  }
+  function loadPicker() {
+    UI.phase = 'boot';
+    paintAll();
+    API.fetchData('listEvents', {}).then(function (events) {
+      var list = arr(events).filter(function (e) { return e && e.id && !/下書き/.test(String(e.status || '')); });
+      var todays = list.filter(evIsToday);
+      if (todays.length === 1) { location.hash = '#/ev/' + encodeURIComponent(todays[0].id); return; } // 1件なら自動選択で開始画面へ
+      S.pick = list;
+      UI.phase = 'pick';
+      paintAll();
+    }, function (e) {
+      if (e && e._auth) return;
+      S.err = (e && e.message) || '通信に失敗しました。';
+      UI.phase = 'boot';
+      paintAll();
+    });
+  }
+
+  /* ---- 2台で分担: 役割選択(読み取り/決済係)。開始前も受付中も同じシート ---- */
   function roleHtml() {
-    return '<div class="pane"><div class="card"><div class="kicker">2台で分担</div>' +
+    var live = UI.phase === 'scan';
+    var icoCam = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 4h-5L7.5 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3.5z"/><circle cx="12" cy="13" r="3.5"/></svg>';
+    var icoPay = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="3"/><path d="M5.5 9.5h.01M18.5 14.5h.01"/></svg>';
+    return '<div class="kick nb">受付のかたち ― 2台で分担</div>' +
       '<h2>この端末の役割を選んでください</h2>' +
       '<p class="sub"><span class="nb">読み取りと確定を2台に分けると、</span><span class="nb">列が止まりません。</span></p>' +
       '<div class="rolerows">' +
       '<button type="button" data-role="push" aria-pressed="' + (UI.mode === 'duo' && UI.duoRole === 'push') + '">' +
+      '<span class="ric" aria-hidden="true">' + icoCam + '</span><span class="rtx">' +
       '<span class="rn nb">QRを読み取る(スキャン係)</span>' +
-      '<span class="rd"><span class="nb">画面を参加者に向けて、かざされたQRを読むだけ。</span><span class="nb">チェックインはしません(内カメラ)。</span></span></button>' +
+      '<span class="rd"><span class="nb">画面を参加者に向けて、かざされたQRを読むだけ。</span><span class="nb">チェックインはしません(内カメラ)。</span></span></span></button>' +
       '<button type="button" data-role="recv" aria-pressed="' + (UI.mode === 'duo' && UI.duoRole === 'recv') + '">' +
+      '<span class="ric" aria-hidden="true">' + icoPay + '</span><span class="rtx">' +
       '<span class="rn nb">受付・決済を確定する(決済係)</span>' +
-      '<span class="rd"><span class="nb">読み取りの到着を待ち、この画面でチェックイン。</span><span class="nb">未決済はその場で決済を確定できます(カメラなし)。</span></span></button>' +
+      '<span class="rd"><span class="nb">読み取りの到着を待ち、この画面でチェックイン。</span><span class="nb">未決済はその場で決済を確定できます(カメラなし)。</span></span></span></button>' +
       '</div>' +
       '<p class="devnote"><span class="nb">読み取り端末名: ' + esc(device) + '</span> <span class="nb">・ consoleの受付タブ(読み取る側/受信する側)とも相互につながります。</span></p>' +
-      '<div class="cta"><button type="button" class="rowlink" id="ck-rolecancel">やめる(いまのままにする)</button></div>' +
-      '</div></div>';
+      '<div class="cta"><button type="button" class="rowlink" id="ck-rolecancel">' + (live ? 'やめる(いまのままにする)' : 'もどる') + '</button></div>';
   }
   function bindRole() {
     Array.prototype.forEach.call(root.querySelectorAll('[data-role]'), function (b) {
@@ -1634,10 +1864,18 @@ window.AdminAPI = (function () {
     if (cb) cb.addEventListener('click', function () { UI.roleOpen = false; paintPane(); });
   }
 
+  function progressHtml(t) {
+    var pct = t.y > 0 ? Math.round(t.x / t.y * 100) : 0;
+    return '<div class="progress" aria-label="受付の進捗">' +
+      '<span class="num nb">' + t.x + '<small> / ' + t.y + '</small></span>' +
+      '<span class="plbl nb">受付済み' + (t.held > 0 ? ' ・ <b>保留' + t.held + '</b>' : '') + '</span>' +
+      '<span class="pbar" aria-hidden="true"><i style="width:' + pct + '%"></i></span></div>';
+  }
   function startHtml() {
     var multi = isMulti();
+    var live = UI.phase === 'scan';
     var rankKnown = DEMO || !!(S.me && S.me.rank);
-    var h = '<div class="pane"><div class="card"><div class="kicker">当日受付</div>' +
+    var h = '<div class="kick nb">当日受付</div>' +
       '<h2 class="nb">' + esc(S.ev.title || '') + '</h2>';
     if (multi) {
       h += '<p class="sub">受付する日程を選んでください。' + (todaySession() ? '<span class="nb">きょうのDayを既定にしています。</span>' : '<span class="nb">きょう開催のDayはありません。</span>') + '</p>';
@@ -1651,16 +1889,27 @@ window.AdminAPI = (function () {
       }).join('') + '</div>';
     } else {
       var d0 = parseYmd(String(S.ev.date || '').slice(0, 10));
-      h += '<p class="sub"><span class="nb">' + (d0 ? esc(dateJa(d0)) : '') + '</span>' + (timeRange(S.ev) ? ' <span class="nb">' + esc(timeRange(S.ev)) + '</span>' : '') + (S.ev.venue ? ' ・ ' + esc(S.ev.venue) : '') + '</p>';
+      h += '<p class="evmeta"><span class="nb">' + (d0 ? esc(dateJa(d0)) : '') + '</span>' + (timeRange(S.ev) ? ' <span class="nb">' + esc(timeRange(S.ev)) + '</span>' : '') + (S.ev.venue ? ' ・ <span class="nb">' + esc(S.ev.venue) + '</span>' : '') + '</p>';
     }
     if (S.regs === null) h += '<p class="sub nb">申込名簿を読み込んでいます…</p>';
+    else if (dayReady()) h += progressHtml(tallyNow());
     if (!rankKnown) h += '<p class="warnline nb">権限を確認しています…</p>';
-    h += '<div class="cta">' +
-      '<button type="button" class="btn" id="ck-start"' + ((multi && !UI.sel) || !rankKnown ? ' disabled' : '') + '><span class="nb">' +
-      (UI.phase === 'scan' ? 'この日程に切り替える' : '受付をはじめる(カメラを起動)') + '</span></button>' +
-      (UI.phase === 'scan' ? '<button type="button" class="rowlink" id="ck-daycancel">やめる(いまの日程のまま)</button>'
-        : '<button type="button" class="rowlink" id="ck-startrecv"' + ((multi && !UI.sel) || !rankKnown ? ' disabled' : '') + '><span class="nb">決済係としてはじめる(2台で分担・カメラなし)</span></button>') +
-      '</div></div></div>';
+    h += '<button type="button" class="go" id="ck-start"' + ((multi && !UI.sel) || !rankKnown ? ' disabled' : '') + '><span class="nb">' +
+      (live ? 'この日程に切り替える' : '受付をはじめる') + '</span></button>';
+    if (live) {
+      h += '<div class="cta"><button type="button" class="rowlink" id="ck-daycancel">やめる(いまの日程のまま)</button></div>';
+    } else {
+      h += '<p class="ctanote nb">' + (DEMO ? 'デモ ― カメラは起動せず、枠のタップでスキャンを再現できます'
+        : UI.mode === 'duo' ? '2台で分担 ― はじめる前に役割を選びます'
+        : hasCam() ? 'カメラが起動し、QRを自動で読み取ります'
+        : 'カメラを使えないため、名前で探す受付になります') + '</p>';
+      // 受付のかたち(正典の下部バーと同じ部品)。2台で分担は役割の説明つきで選ぶ
+      h += '<div class="modect"><div class="cap nb">受付のかたち</div>' +
+        '<div class="modeseg paper" role="group" aria-label="受付のかたち">' +
+        '<button type="button" data-startmode="solo" aria-pressed="' + (UI.mode === 'solo') + '"><span class="nb">この端末で確定</span></button>' +
+        '<button type="button" data-startmode="duo" aria-pressed="' + (UI.mode === 'duo') + '"><span class="nb">2台で分担</span></button></div>' +
+        '<p class="exp nb">' + (UI.mode === 'duo' ? 'スキャン係と決済係の2台に分かれて受け付けます' : '読み取りから決済の確認まで、この1台で受け付けます') + '</p></div>';
+    }
     return h;
   }
   function bindStart() {
@@ -1681,14 +1930,14 @@ window.AdminAPI = (function () {
       startCam(faceForMode());
       paintPane();
     });
-    // 決済係専用の端末(カメラ許可も不要)として直接はじめる
-    var rb = document.getElementById('ck-startrecv');
-    if (rb) rb.addEventListener('click', function () {
-      if (isMulti() && !UI.sel) return;
-      UI.dayOpen = false;
-      UI.sheet = null;
-      UI.phase = 'scan';
-      setDuoRole('recv');
+    // 受付のかたち: この端末で確定(既定) / 2台で分担=役割の説明シートへ
+    Array.prototype.forEach.call(root.querySelectorAll('[data-startmode]'), function (b) {
+      b.addEventListener('click', function () {
+        var m = b.getAttribute('data-startmode');
+        if (m === 'duo') { UI.roleOpen = true; paintPane(); return; }
+        if (UI.mode !== 'solo') { UI.mode = 'solo'; stopRecv(); }
+        paintPane();
+      });
     });
     var cb = document.getElementById('ck-daycancel');
     if (cb) cb.addEventListener('click', function () { UI.dayOpen = false; paintPane(); });
@@ -1705,7 +1954,7 @@ window.AdminAPI = (function () {
         if (hay.indexOf(ql) >= 0) rows.push(r);
       });
     }
-    var h = '<div class="pane"><div class="findwrap"><div class="card"><div class="kicker">名前で探す</div>' +
+    var h = '<div class="kick nb">名前で探す</div>' +
       '<h2>QRが出せない方の受付</h2>' +
       '<input id="ck-findq" type="search" placeholder="名前・メール・R-番号" value="' + esc(q) + '" autocomplete="off">' +
       '<div class="findlist">';
@@ -1719,8 +1968,7 @@ window.AdminAPI = (function () {
           '<span class="fst ' + st[0] + ' nb">' + st[1] + '</span></button>';
       }).join('');
     }
-    h += '</div><div class="cta"><button type="button" class="rowlink" id="ck-findclose">閉じる(カメラに戻る)</button></div>' +
-      '</div></div></div>';
+    h += '</div><div class="cta"><button type="button" class="rowlink" id="ck-findclose">閉じる(カメラに戻る)</button></div>';
     return h;
   }
   function bindFind() {
@@ -1744,25 +1992,29 @@ window.AdminAPI = (function () {
     if (inp && inp.focus) { try { var v = inp.value; inp.focus(); inp.setSelectionRange && inp.setSelectionRange(v.length, v.length); } catch (e) {} }
   }
 
-  /* ---- ログイン(event/30-app.js renderLogin のコンパクト版・同じAPI規約) ---- */
+  /* ---- ログイン(event/30-app.js renderLogin と同じ文言規約・同じAPI規約) ---- */
   function loginHtml() {
     var st = UI;
     var f;
     if (st.loginMode === 'setpw') {
-      f = '<label>新しいパスワード<input type="password" id="ck-npw" autocomplete="new-password"></label>' +
+      f = '<label>新しいパスワード<input type="password" id="ck-npw" autocomplete="new-password">' +
+        '<span class="hint nb">10文字以上で設定してください</span></label>' +
         '<label>パスワード(確認)<input type="password" id="ck-npw2" autocomplete="new-password"></label>';
     } else {
-      f = '<label>メンバーコード または メール<input id="ck-lid" autocomplete="username" placeholder="CN0001 / you@example.com"></label>' +
-        '<label>パスワード<input type="password" id="ck-lpw" autocomplete="current-password"></label>';
+      f = '<label>メンバーコード または メール<input id="ck-lid" value="' + esc(st.loginId || '') + '" autocomplete="username" placeholder="CN0001 / you@example.com"></label>' +
+        '<label>パスワード<input type="password" id="ck-lpw" autocomplete="current-password">' +
+        '<span class="hint"><span class="nb">初回(未設定)の場合は</span><span class="nb">空のままログインしてください</span></span></label>';
     }
-    return '<div class="pane"><div class="card"><div class="kicker">運営メンバー専用</div>' +
-      '<h2>' + (st.loginMode === 'setpw' ? 'パスワードの設定' : '当日受付へログイン') + '</h2>' +
-      '<p class="sub">console と同じ<span class="nb">メンバーコード(またはメール)</span>と<span class="nb">パスワードで入れます</span>。</p>' +
+    return '<div class="kick nb">運営メンバー専用</div>' +
+      '<h2>' + (st.loginMode === 'setpw' ? 'パスワードの設定' : '当日受付') + '</h2>' +
+      '<p class="sub">' + (st.loginMode === 'setpw'
+        ? '初回ログインです。ご自身のパスワードを設定してください。'
+        : 'console と同じ<span class="nb">メンバーコード(またはメール)</span>と<span class="nb">パスワードで入れます</span>。') + '</p>' +
       '<form id="ck-lform">' + f +
       (st.loginErr ? '<div class="err">' + esc(st.loginErr) + '</div>' : '') +
-      '<div class="cta"><button class="btn" id="ck-lgo" type="submit"><span class="nb">' +
-      (st.loginBusy ? '認証中…' : (st.loginMode === 'setpw' ? '設定してログイン' : 'ログイン')) + '</span></button></div>' +
-      '</form></div></div>';
+      '<div class="cta"><button class="go" id="ck-lgo" type="submit"><span class="nb">' +
+      (st.loginBusy ? (st.loginMode === 'setpw' ? '設定中…' : '認証中…') : (st.loginMode === 'setpw' ? '設定してログイン' : 'ログイン')) + '</span></button></div>' +
+      '</form>';
   }
   function bindLogin() {
     var form = document.getElementById('ck-lform');
@@ -1841,7 +2093,7 @@ window.AdminAPI = (function () {
     if (S.loading) return;
     S.loading = true;
     var evId = route().id;
-    if (!evId) { S.loading = false; UI.phase = 'notfound'; paintAll(); return; }
+    if (!evId) { S.loading = false; loadPicker(); return; } // 直リンクなし → きょうのイベントを選ぶ(1件なら自動)
     // 軽量読取はuser非同梱=役職不明のままだと権限ゲートが判定できない → getDataGen で解決(event/30-app.js と同じ)
     if (API.hasSession() && !(window.currentUser && window.currentUser.member)) {
       API.fetchData('getDataGen', {}).then(function () {
@@ -2043,6 +2295,7 @@ window.AdminAPI = (function () {
   };
   window.__ckSetToday = function (y) { recomputeToday(String(y)); };
   window.__ckStart = function () { UI.phase = 'scan'; UI.dayOpen = false; paintAll(); };
+  window.__ckCamErr = function (msg) { UI.camErr = String(msg == null ? '' : msg); paintAll(); }; // 見た目検証(カメラ拒否の舞台)専用
   window.__ckRole = function (role) { UI.phase = 'scan'; UI.dayOpen = false; setDuoRole(role); };
   window.__ckLive = function (code) { if (DEMO) demoServer('qrPushScan', null, { code: String(code || ''), eventId: S.ev ? S.ev.id : '', device: 'scanner-demo' }); };
 
@@ -2067,7 +2320,7 @@ window.AdminAPI = (function () {
     // イベントを跨いだら受付状態をリセット(consoleはイベント切替で cursor/chimed/pushed 等をリセット)
     stopCam();
     stopRecv();
-    S.ev = null; S.regs = null;
+    S.ev = null; S.regs = null; S.pick = null;
     localChecked = {}; chimed = {}; payMark = {}; pushed = {};
     recvCursor = 0; recvSeen = {}; recvCount = 0;
     UI.sel = ''; UI.selBy = 'auto'; UI.sheet = null; UI.count = 0; UI.dayOpen = false; UI.findOpen = false;
