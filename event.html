@@ -2076,9 +2076,8 @@ window.AdminAPI = (function () {
         '<td class="st ' + stCls + '">' + esc(r.stLabel) + (r.how ? '<span class="how">' + r.how + '</span>' : '') + '</td>' +
         '<td class="amt">' + (r.amt || '―') + '</td>' +
         '<td class="' + (r.comp ? 'comp' : 'none') + '">' + (r.comp ? '<span class="nb">' + esc(r.comp) + '</span>' : '―') + '</td>' +
-        '<td>' + (r.canMark
-          ? '<button type="button" class="rowbtn nb" data-mark="' + esc(r.id) + '">決済済みにする</button>'
-          : '<button type="button" class="rowlink" data-sel="' + esc(r.id) + '">' + (sel ? '詳細を閉じる' : '詳細') + '</button>') + '</td></tr>';
+        '<td>' + (r.canMark ? '<button type="button" class="rowbtn nb" data-mark="' + esc(r.id) + '">決済済みにする</button> ' : '') +
+          '<button type="button" class="rowlink" data-sel="' + esc(r.id) + '">' + (sel ? '詳細を閉じる' : '詳細') + '</button></td></tr>';
       if (st.mode === 'group') {
         arr(r.children).forEach(function (c) {
           h += '<tr class="child' + (sel ? ' sel' : '') + '"><td class="cname"><span class="nb">' + esc(c.label) + '</span></td><td></td>' +
