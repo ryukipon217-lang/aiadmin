@@ -1138,9 +1138,11 @@ function renderDetail(appId,d){
           try{RC.stream.getTracks().forEach(function(t){t.stop()})}catch(e){}
           try{if(RC.lock)RC.lock.release()}catch(e){}
           clearInterval(RC.timer);
-          if(!RC.chunks.length){rcShow('rc_idle');rcErr(new Error('録音データが空でした。もう一度お試しください'));return}
+          if(!RC.chunks.length){rcShow('rc_idle');rcErr(new Error('録音データが空でした。もう一度お試しください（マイクの許可・入力をご確認ください）'));return}
           var type=(RC.mr.mimeType||mt||'audio/webm').split(';')[0];
-          rcSetBlob(new Blob(RC.chunks,{type:type}),'代表面談録音.'+(type.indexOf('mp4')>=0?'m4a':'webm'));
+          var _b=new Blob(RC.chunks,{type:type});
+          if(_b.size<1024){rcShow('rc_idle');rcErr(new Error('録音がほぼ空でした（'+Math.round(_b.size/1024)+'KB）。音声が記録されていない可能性があります。もう一度録音するか、録音ファイルのアップロードをお試しください'));return}
+          rcSetBlob(_b,'代表面談録音.'+(type.indexOf('mp4')>=0?'m4a':'webm'));
         };
         RC.mr.onerror=function(){rcErr(new Error('録音エンジンがエラーを報告しました'))};
         RC.mr.start(1000);   // timeslice必須(バックグラウンド化での0バイト録音防止)
@@ -1150,7 +1152,7 @@ function renderDetail(appId,d){
         RC.timer=setInterval(function(){var s=Math.floor((Date.now()-RC.t0)/1000);var n=el('rc_time');if(n)n.textContent=Math.floor(s/60)+':'+('0'+s%60).slice(-2)},500);
       }catch(ex){rcErr(new Error('マイクを開始できませんでした: '+String(ex&&ex.message||ex)))}
     });
-    el('rc_stop').addEventListener('click',function(){try{if(RC.mr&&RC.mr.state!=='inactive')RC.mr.stop()}catch(e){}});
+    el('rc_stop').addEventListener('click',function(){try{if(RC.mr&&RC.mr.state!=='inactive'){try{RC.mr.requestData()}catch(e){}RC.mr.stop()}}catch(e){}});   // requestDataで最終バッファをフラッシュしてからstop(取りこぼし防止)
     el('rc_file').addEventListener('change',function(){
       rcClearErr();
       var f=this.files&&this.files[0];
@@ -1160,6 +1162,7 @@ function renderDetail(appId,d){
     el('rc_redo').addEventListener('click',function(){RC.blob=null;rcShow('rc_idle');rcSt('')});
     el('rc_up').addEventListener('click',async function(){
       if(!RC.blob){rcErr(new Error('録音またはファイルがありません'));return}
+      if(RC.blob.size<1024){rcErr(new Error('録音が空です（'+Math.round(RC.blob.size/1024)+'KB）。音声が記録されていません。録音し直すか、録音ファイルをアップロードしてください'));return}   // 空の無音アップロードを防止
       rcClearErr();
       var btn=this;busy(btn,'アップロード中…');
       try{
