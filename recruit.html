@@ -113,6 +113,7 @@ h1.pg{font-family:var(--serif);font-weight:600;font-size:clamp(24px,4vw,32px);li
 .btn.danger{background:#fff;color:var(--bad);border:1px solid #e6c3c3}
 .btn.danger:hover{background:var(--bad-bg)}
 .btn.sm{padding:7px 16px;font-size:12px}
+a.btn,a.btn:hover{text-decoration:none}   /* リンクをボタンとして使う箇所(議事録・録音)の下線を消す */
 .btnrow{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:8px}
 
 .err{display:none;border:1px solid #e6c3c3;background:var(--bad-bgd,#fdf5f5);color:#8a2f2f;border-radius:10px;padding:11px 14px;font-size:12.5px;margin:12px 0;line-height:1.7}
@@ -183,6 +184,16 @@ h1.pg{font-family:var(--serif);font-weight:600;font-size:clamp(24px,4vw,32px);li
 @media(prefers-reduced-motion:reduce){.rec-dot{animation:none}}
 .rec-time{font-family:var(--latin);font-weight:500;font-size:22px;letter-spacing:.06em;vertical-align:middle}
 .rec-sub{font-family:var(--serif);font-weight:600;font-size:15px;letter-spacing:.08em;margin:0 0 10px}
+/* ===== 議事録 ===== */
+.mrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 4px;border-bottom:1px solid var(--soft)}
+.mrow:last-child{border-bottom:none}
+.mrow .nm{font-weight:700;font-size:14px;min-width:8em}
+.mrow .mt{font-size:12px;color:var(--ink2);flex:1;min-width:8em}
+.mrow .act{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.mblk{padding:4px 0 14px;border-bottom:1px solid var(--soft)}
+.mblk:last-of-type{border-bottom:none}
+.mtx{font-size:12.5px;white-space:pre-line;line-height:1.9;color:var(--ink);background:var(--soft);border-radius:10px;padding:12px 15px;margin:10px 4px 0}
+@media(max-width:760px){.mrow .act{margin-left:0;width:100%;justify-content:flex-start}}
 /* ===== 兼任部署チップ ===== */
 .selchips{display:flex;flex-wrap:wrap;gap:8px;margin:2px 0 4px}
 .selchips .sc{border:1px solid var(--line);background:#fff;border-radius:999px;padding:5px 14px;font-size:12px;font-weight:700;color:var(--ink2);cursor:pointer;transition:all .15s;font-family:inherit}
@@ -233,6 +244,7 @@ h1.pg{font-family:var(--serif);font-weight:600;font-size:clamp(24px,4vw,32px);li
       <a href="#home" data-r="home">ダッシュボード</a>
       <a href="#flow" data-r="flow">選考の流れ</a>
       <a href="#list" data-r="list">候補者</a>
+      <a href="#minutes" data-r="minutes">議事録</a>
       <a href="#issue" data-r="issue">エントリーなし採用</a>
       <a href="#mail" data-r="mail">メール・設定</a>
     </nav>
@@ -253,6 +265,8 @@ var _liteFails=0;
 var SKEY='recruitSession-v2';
 var S=null; try{S=JSON.parse(localStorage.getItem(SKEY)||'null')}catch(e){}
 var CACHE={bundle:null,bundleAt:0,templates:null};
+var MCACHE={items:null,at:0};   // (議事録) 一覧のキャッシュ
+var MPOLL={t:0,n:0};            // (議事録) 生成待ちの自動再確認タイマー
 
 function el(id){return document.getElementById(id)}
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
@@ -310,7 +324,7 @@ async function apiPost(action,payload){
   if(!j.ok)throw new Error(j.error||'処理に失敗しました');
   return j.data;
 }
-function logout(){S=null;localStorage.removeItem(SKEY);try{localStorage.removeItem(BKEY);localStorage.removeItem(DKEY);localStorage.removeItem(DETKEY)}catch(e){}DCACHE={};CACHE={bundle:null,bundleAt:0,templates:null};location.hash='#login';route()}
+function logout(){S=null;localStorage.removeItem(SKEY);try{localStorage.removeItem(BKEY);localStorage.removeItem(DKEY);localStorage.removeItem(DETKEY)}catch(e){}DCACHE={};CACHE={bundle:null,bundleAt:0,templates:null};MCACHE={items:null,at:0};try{clearTimeout(MPOLL.t)}catch(e){}MPOLL={t:0,n:0};location.hash='#login';route()}
 
 /* 体感ゼロ化: 直近スナップショットで即描画→裏で最新を取得して差し替える (keep-previous) */
 var BKEY='recruitBundle-v1',DKEY='recruitDepts-v1';
@@ -406,6 +420,7 @@ function stateChips(a){
   }
   if((a.source||'')==='direct_entry')out.push('<span class="chip dir">エントリーなし採用</span>');
   else if((a.source||'')==='direct_entry_noiv')out.push('<span class="chip dir">面談なし採用</span>');
+  else if((a.source||'')==='direct_entry_rec')out.push('<span class="chip dir">録音から始める採用</span>');
   return out.join('');
 }
 function needsDeptWarning(a){
@@ -417,6 +432,7 @@ var NAV=0;   // 画面遷移の世代。非同期読み込み完了時に世代�
 function route(){
   NAV++;
   try{var _fp=el('freshpill');if(_fp)_fp.remove()}catch(e){}   // 詳細の更新ピルは画面遷移で破棄
+  try{clearTimeout(MPOLL.t);MPOLL.n=0}catch(e){}   // 議事録の生成待ち再確認は画面遷移で打ち切る
   // 画面遷移時に進行中の録音を停止(マイク残留防止)
   try{if(window.__rec){var _r=window.__rec;window.__rec=null;if(_r.mr&&_r.mr.state!=='inactive')_r.mr.stop();if(_r.stream)_r.stream.getTracks().forEach(function(t){t.stop()});clearInterval(_r.timer)}}catch(e){}
   var h=(location.hash||'#home').replace(/^#/,'');
@@ -429,6 +445,7 @@ function route(){
   if(m==='login')vLogin();
   else if(m==='flow')vFlow();
   else if(m==='list')vList();
+  else if(m==='minutes')vMinutes();
   else if(m==='issue')vIssue();
   else if(m==='mail')vMail();
   else if(m==='detail')vDetail(q.get('id')||'');
@@ -586,7 +603,7 @@ function renderFlow(b){
         '<div class="fs-note">'+esc(st.note)+'</div>'+
         (cols[i].length?cols[i].map(function(a){
           return '<div class="fs-card" onclick="location.hash=\'#detail?id='+esc(a.id)+'\'"><div class="n">'+esc(a.name||'（無名）')+'</div>'+
-            '<div class="m">'+esc(a.candidateCode||a.id)+(a.source==='direct_entry'?' · エントリーなし':(a.source==='direct_entry_noiv'?' · 面談なし':''))+' '+actorChip(a)+'</div></div>';
+            '<div class="m">'+esc(a.candidateCode||a.id)+(a.source==='direct_entry'?' · エントリーなし':(a.source==='direct_entry_noiv'?' · 面談なし':(a.source==='direct_entry_rec'?' · 録音から':'')))+' '+actorChip(a)+'</div></div>';
         }).join(''):'<div class="fs-empty">—</div>')+
       '</div>';
     }).join('')+'</div>'+
@@ -632,6 +649,195 @@ function renderList(b){
   document.querySelectorAll('.fpill').forEach(function(bt){bt.addEventListener('click',function(){LIST_FILTER.ph=this.dataset.ph;document.querySelectorAll('.fpill').forEach(function(x){x.classList.toggle('on',x.dataset.ph===LIST_FILTER.ph)});render()})});
   el('lq').addEventListener('input',function(){LIST_FILTER.q=this.value.trim();render()});
   render();
+}
+
+/* ============ 議事録 ============ */
+/* 面談の録音は Drive へ上げたあと、文字起こし→議事録生成が MinutesApp 側で非同期に進む。
+   ここでは面談記録(InterviewRecords)を軸に、その進み具合と生成済みドキュメントを見せる。 */
+
+/* 録音を Drive へ直PUT → 議事録パイプラインへ登録。面談実施待ちの投稿(advance:true = 合否判断へ進める)と
+   面談後の追加投稿(advance:false = 選考状態は動かさない)で共通。onStatus は進捗表示のコールバック。 */
+async function uploadInterviewRecording(blob,filename,opts){
+  opts=opts||{};
+  var onStatus=opts.onStatus||function(){};
+  onStatus('アップロード先を準備しています…');
+  var sess=await apiPost('createMinutesUploadSession',{filename:filename||'recording.webm',mimeType:blob.type||'application/octet-stream',sizeBytes:blob.size,origin:location.origin});
+  if(!sess||sess.ok===false||!sess.uploadUrl)throw new Error((sess&&sess.error)||'アップロードURLを取得できません');
+  var fileId=await new Promise(function(resolve,reject){
+    var xhr=new XMLHttpRequest();
+    xhr.open('PUT',sess.uploadUrl,true);
+    xhr.setRequestHeader('Content-Type',blob.type||'application/octet-stream');
+    if(xhr.upload)xhr.upload.onprogress=function(e){if(e.lengthComputable)onStatus('アップロード中… '+Math.round(e.loaded/e.total*100)+'%')};
+    xhr.onload=function(){try{var j=JSON.parse(xhr.responseText);resolve(j.id||j.fileId)}catch(e){reject(new Error('Drive応答の解析に失敗しました'))}};
+    xhr.onerror=function(){reject(new Error('アップロードに失敗しました。通信環境をご確認ください'))};
+    xhr.send(blob);
+  });
+  if(!fileId)throw new Error('DriveのファイルIDを取得できませんでした');
+  onStatus('面談記録を登録しています…');
+  var r=await apiPost('recruitFinalizeInterviewUpload',{appId:opts.appId,stage:opts.stage||'primary',fileId:fileId,advance:opts.advance!==false});
+  if(r&&r.ok===false)throw new Error(r.error||'登録に失敗しました');
+  return r;
+}
+
+/* 生成の進み具合を1つのラベルに畳む。台帳と照合できて初めて「議事録あり」になる。 */
+function minState(it){
+  if(it.docUrl)return{k:'done',t:'議事録あり',c:'g'};
+  var st=String(it.intakeStatus||'');
+  if(it.hasRecording){
+    if(st==='error'||st==='failed')return{k:'error',t:'生成失敗',c:'r'};
+    if(st==='cancelled')return{k:'cancelled',t:'取り消し済み',c:''};
+    if(st==='processed')return{k:'linking',t:'生成済み・反映待ち',c:'y'};
+    return{k:'pending',t:'生成中',c:'y'};
+  }
+  if(it.transcript)return{k:'memo',t:'メモのみ',c:''};
+  return{k:'none',t:'記録なし',c:''};
+}
+function minStateNote(st,it){
+  if(st.k==='pending')return '録音は投稿済みです。文字起こしと議事録の生成には数分〜十数分かかります。生成が終わるとこの画面に議事録のリンクが表示されます。';
+  if(st.k==='linking')return '議事録は生成済みですが、まだ台帳に反映されていません。数分後にもう一度ご確認ください。';
+  if(st.k==='error')return '議事録の生成に失敗しました'+(it.intakeNote?'（'+it.intakeNote+'）':'')+'。録音し直して再投稿してください。';
+  if(st.k==='cancelled')return 'この録音は取り消されています。';
+  if(st.k==='memo')return '録音はありません。面談メモが記録として保存されています。';
+  return '';
+}
+function minLinks(it,sm){
+  var c=sm?' sm':'';
+  var h='';
+  if(it.docUrl)h+='<a class="btn'+c+'" href="'+esc(it.docUrl)+'" target="_blank" rel="noopener">議事録を開く</a>';
+  if(it.recordingUrl)h+='<a class="btn ghost'+c+'" href="'+esc(it.recordingUrl)+'" target="_blank" rel="noopener">録音を聞く</a>';
+  return h;
+}
+
+/* --- 一覧(タブ) --- */
+var MIN_FILTER={st:'',q:''};
+async function vMinutes(){
+  var nav=NAV;
+  if(MCACHE.items)renderMinutes(MCACHE.items);else spin();
+  try{
+    var d=await apiGet('listRecruitMinutes',{});
+    if(nav!==NAV)return;
+    MCACHE.items=(d&&d.items)||[];MCACHE.at=Date.now();
+    renderMinutes(MCACHE.items);
+  }catch(e){if(nav===NAV&&!MCACHE.items)errView(e,'vMinutes()')}
+}
+function renderMinutes(items){
+  function row(it){
+    var st=minState(it);
+    return '<div class="mrow">'+
+      '<a class="nm" href="#detail?id='+encodeURIComponent(it.appId)+'" style="color:inherit;text-decoration:none">'+esc(it.candidateName||'（無名）')+'</a>'+
+      '<span class="chip b">'+esc(it.stageLabel)+'</span>'+
+      '<span class="chip '+st.c+'">'+esc(st.t)+'</span>'+
+      '<span class="mt">'+esc(it.meetingDate||fmtD(it.createdAt)||'')+(it.attendees?' · '+esc(it.attendees):'')+'</span>'+
+      '<span class="act">'+minLinks(it,true)+'</span></div>';
+  }
+  function render(){
+    var f=items.filter(function(it){
+      if(MIN_FILTER.st&&minState(it).k!==MIN_FILTER.st)return false;
+      if(MIN_FILTER.q){
+        var q=MIN_FILTER.q.toLowerCase();
+        if(String(it.candidateName||'').toLowerCase().indexOf(q)<0
+          &&String(it.candidateCode||'').toLowerCase().indexOf(q)<0
+          &&String(it.meetingName||'').toLowerCase().indexOf(q)<0)return false;
+      }
+      return true;
+    });
+    el('minbody').innerHTML=f.length?f.map(row).join(''):'<div class="empty">該当する面談記録がありません。</div>';
+    el('mincnt').textContent=f.length+'件';
+  }
+  var pills=[['','すべて'],['done','議事録あり'],['pending','生成中'],['error','生成失敗'],['memo','メモのみ']];
+  shell('<p class="eyebrow">Minutes</p><h1 class="pg">面談の議事録</h1>'+
+    '<p class="pg-lede">面談の録音を投稿すると、文字起こしと議事録が自動で生成されます。生成には数分〜十数分かかります。'+
+    '<button class="btn ghost sm" style="margin-left:14px" onclick="MCACHE.items=null;vMinutes()">最新に更新</button></p>'+
+    '<div class="filters">'+pills.map(function(p){
+      return '<button class="fpill'+(MIN_FILTER.st===p[0]?' on':'')+'" data-st="'+esc(p[0])+'">'+esc(p[1])+'</button>';
+    }).join('')+
+    '<span class="search"><input type="text" id="mq" placeholder="候補者名・会議名で検索" value="'+esc(MIN_FILTER.q)+'"></span></div>'+
+    '<h2 class="sect-h">面談記録<span class="cnt" id="mincnt"></span></h2><div class="sect-rule"></div>'+
+    '<div class="card" id="minbody"></div>');
+  render();
+  document.querySelectorAll('.fpill').forEach(function(b){
+    b.addEventListener('click',function(){
+      MIN_FILTER.st=b.dataset.st;
+      document.querySelectorAll('.fpill').forEach(function(x){x.classList.toggle('on',x===b)});
+      render();
+    });
+  });
+  var q=el('mq');
+  if(q)q.addEventListener('input',function(){MIN_FILTER.q=this.value.trim();render()});
+}
+
+/* --- 候補者詳細のカード --- */
+/* 詳細本体とは別に取得する。生成は非同期に進むので、このカードだけを更新できるようにしておく。 */
+function detailMinutesHtml(items){
+  var h='';
+  if(!items.length){
+    h='<div class="empty">この候補者の面談記録はまだありません。面談の録音を投稿すると、文字起こしと議事録が自動で生成されます。</div>';
+  }else{
+    h=items.map(function(it){
+      var st=minState(it),note=minStateNote(st,it),links=minLinks(it,true);
+      return '<div class="mblk">'+
+        '<div class="mrow" style="border-bottom:none">'+
+          '<span class="chip b">'+esc(it.stageLabel)+'</span>'+
+          '<span class="chip '+st.c+'">'+esc(st.t)+'</span>'+
+          '<span class="mt">'+esc(it.meetingDate||fmtD(it.createdAt)||'')+(it.generatedBy?' · 記録者: '+esc(it.generatedBy):'')+'</span>'+
+          (links?'<span class="act">'+links+'</span>':'')+
+        '</div>'+
+        (it.attendees?'<p class="note" style="padding:0 4px">出席: '+esc(it.attendees)+'</p>':'')+
+        (note?'<p class="note" style="padding:2px 4px 0">'+esc(note)+'</p>':'')+
+        (it.transcript?'<div class="mtx">'+esc(it.transcript)+'</div>':'')+
+      '</div>';
+    }).join('');
+  }
+  return h+'<div class="btnrow" style="margin-top:14px">'+
+    '<button class="btn ghost sm" id="mu_reload">最新に更新</button>'+
+    '<label class="btn ghost sm" style="cursor:pointer">録音を追加で投稿<input type="file" id="mu_file" accept="audio/*,video/*" style="display:none"></label>'+
+    '</div>'+
+    '<p class="note" id="mu_status" style="margin-top:8px"></p><div class="err" id="mu_err"></div>'+
+    '<p class="note" style="margin-top:6px">追加投稿は選考の状態を進めません（面談後に録音を足したいとき用です）。</p>';
+}
+async function loadDetailMinutes(appId,stage,silent){
+  var nav=NAV;
+  if(!el('minbox'))return;
+  var d;
+  try{d=await apiGet('listRecruitMinutes',{appId:appId})}
+  catch(e){
+    if(nav!==NAV)return;
+    var be=el('minbox');
+    if(be&&!silent)be.innerHTML='<div class="empty">議事録の読み込みに失敗しました（'+esc(String(e&&e.message||e))+'）<br><button class="btn ghost sm" style="margin-top:10px" onclick="loadDetailMinutes(\''+esc(appId)+'\',\''+esc(stage)+'\')">再読み込み</button></div>';
+    return;
+  }
+  if(nav!==NAV)return;
+  var box=el('minbox');if(!box)return;
+  if(_userBusy()&&silent)return;   // 入力・録音中は差し替えない
+  var items=(d&&d.items)||[];
+  box.innerHTML=detailMinutesHtml(items);
+  bindDetailMinutes(appId,stage);
+  // 生成待ちがあれば控えめに自動再確認する(画面を離れたら router 側で打ち切られる)
+  var waiting=items.some(function(it){var k=minState(it).k;return k==='pending'||k==='linking'});
+  if(waiting&&(MPOLL.n||0)<10){
+    var nav2=NAV;MPOLL.n=(MPOLL.n||0)+1;
+    clearTimeout(MPOLL.t);
+    MPOLL.t=setTimeout(function(){if(nav2===NAV)loadDetailMinutes(appId,stage,true)},60000);
+  }else if(!waiting){MPOLL.n=0}
+}
+function bindDetailMinutes(appId,stage){
+  var st=el('mu_status'),er=el('mu_err');
+  function sst(m){if(st)st.textContent=m||''}
+  function serr(ex){if(!er)return alert(String(ex&&ex.message||ex));er.textContent=String(ex&&ex.message||ex);er.classList.add('on')}
+  if(el('mu_reload'))el('mu_reload').addEventListener('click',function(){
+    this.disabled=true;MPOLL.n=0;MCACHE.items=null;loadDetailMinutes(appId,stage);
+  });
+  if(el('mu_file'))el('mu_file').addEventListener('change',async function(){
+    var f=this.files&&this.files[0];this.value='';
+    if(er){er.textContent='';er.classList.remove('on')}
+    if(!f)return;
+    if(f.size<1024){serr(new Error('録音ファイルが空です（音声が記録されていません）。録音し直してください'));return}
+    try{
+      await uploadInterviewRecording(f.slice(0,f.size,f.type),f.name,{appId:appId,stage:stage,advance:false,onStatus:sst});
+      sst('');toast('録音を追加しました。議事録は自動で生成されます');
+      MPOLL.n=0;MCACHE.items=null;loadDetailMinutes(appId,stage);
+    }catch(ex){sst('');serr(ex)}
+  });
 }
 
 /* ============ detail ============ */
@@ -680,7 +886,8 @@ function renderDetail(appId,d){
   var A=d.application||{},app=A.application||{},reg=A.registrationForm,gc=A.guardian,hist=A.statusHistory||[],msgs=A.messages||[];
   var depts=d.departments||[],interviewers=d.interviewers||[];
   var phase=app.currentPhase||'',task=app.currentTask||'',rs=app.resultStatus||'active';
-  var isDirect=String(app.source||'').indexOf('direct_entry')===0;   // direct_entry(面談あり)/direct_entry_noiv(面談なし)
+  var isDirect=String(app.source||'').indexOf('direct_entry')===0;   // direct_entry(面談あり)/direct_entry_noiv(面談なし)/direct_entry_rec(録音から)
+  var isRec=String(app.source||'')==='direct_entry_rec';   // (録音から始める採用)
   var deptMapId={};depts.forEach(function(x){deptMapId[x.id]=x.name});
   var finalDept=app.final_department_id?(deptMapId[app.final_department_id]||app.final_department_id):'';
 
@@ -743,6 +950,25 @@ function renderDetail(appId,d){
         '<div class="err" id="fd_err"></div><div class="btnrow">'+
         '<button class="btn" id="fd_accept">採用する</button><button class="btn danger" id="fd_rej">不採用にする</button></div>'+
         '<p class="note" style="margin-top:10px">採用すると内定通知が自動送信され、以降（意思確認→追加情報→未成年は保護者同意→登録）は自動で進みます。不採用の場合は不採用連絡が自動送信されます。</p></div>';
+    }else if(phase==='採用後'&&task==='録音待ち'){
+      act='<div class="banner ok"><b>面談は実施済みです（録音から始める採用）。</b><br>面談の録音を投稿すると、文字起こし・議事録を残したうえで、自動で本人へ登録案内が届きます（以降は面談なし採用と同じ動線で登録まで自動）。録音を残さない場合は、下の「録音せずに登録リンクを送る」からでも進められます。</div>'+
+        '<div class="card">'+
+        '<p class="rec-sub">録音から議事録をつくる</p>'+
+        '<div id="rc_idle"><div class="btnrow">'+
+          '<button class="btn" id="rc_start"><span style="color:#ff8a80">●</span> 録音を開始</button>'+
+          '<label class="btn ghost" style="cursor:pointer">録音ファイルを選ぶ<input type="file" id="rc_file" accept="audio/*,video/*" style="display:none"></label>'+
+        '</div><p class="note" style="margin-top:10px">その場で録音するか、録音済みファイルをアップロードします。投稿すると自動で本人へ登録案内が届きます。</p></div>'+
+        '<div id="rc_live" style="display:none"><span class="rec-dot"></span><span class="rec-time" id="rc_time">0:00</span>'+
+          '<div class="btnrow" style="margin-top:12px"><button class="btn danger" id="rc_stop">録音を停止する</button></div>'+
+          '<p class="note" style="margin-top:8px">録音中は画面を閉じないでください。</p></div>'+
+        '<div id="rc_done" style="display:none"><audio controls id="rc_audio" style="width:100%;margin:4px 0 12px"></audio>'+
+          '<div class="btnrow"><button class="btn" id="rc_up">アップロードして登録案内を送る</button><button class="btn ghost" id="rc_redo">選び直す・録り直す</button></div></div>'+
+        '<p class="note" id="rc_status" style="margin-top:10px"></p><div class="err" id="rc_err"></div>'+
+        '</div>'+
+        '<div class="card"><p class="rec-sub">録音を残さない場合</p>'+
+        '<p class="note" style="margin-bottom:10px">録音を投稿せずに、そのまま本人へ登録案内（面談なし採用と同じ）を送ります。録音は登録後でも「面談記録」から追加できます。</p>'+
+        '<div class="btnrow"><button class="btn ghost" id="rec_send">録音せずに登録リンクを送る</button></div>'+
+        '<div class="err" id="rec_send_err"></div></div>';
     }else if(phase==='応募'&&isDirect){
       act='<div class="banner ok"><b>ご本人の基本情報入力待ちです（エントリーなし採用）。</b><br>入力が完了すると面談の日程調整へ進みます（本人には入力後、面談予約カレンダーが案内されます）。リンクの有効期限は発行から72時間です。</div>'+
         '<div class="card"><div class="btnrow">'+
@@ -750,8 +976,8 @@ function renderDetail(appId,d){
         '<button class="btn ghost" id="de_remail">新しいリンクをメールで再送</button>'+
         '</div><div class="linkbox" id="de_box" style="display:none"><input readonly id="de_url"><button class="btn sm ghost" onclick="__copy(el(\'de_url\').value)">コピー</button></div>'+
         '<div class="err" id="de_err"></div></div>';
-    }else if(phase==='採用後'&&task==='入力待ち'&&app.source==='direct_entry_noiv'){
-      act='<div class="banner ok"><b>ご本人の入力待ちです（面談なし採用）。</b><br>入力が完了すると自動で登録まで進みます。リンクの有効期限は発行から72時間です。</div>'+
+    }else if(phase==='採用後'&&task==='入力待ち'&&(app.source==='direct_entry_noiv'||app.source==='direct_entry_rec')){
+      act='<div class="banner ok"><b>ご本人の入力待ちです（'+(isRec?'録音から始める採用':'面談なし採用')+'）。</b><br>入力が完了すると自動で登録まで進みます。リンクの有効期限は発行から72時間です。</div>'+
         '<div class="card"><div class="btnrow">'+
         '<button class="btn ghost" id="de_reissue">新しいリンクを発行してコピー</button>'+
         '<button class="btn ghost" id="de_remail">新しいリンクをメールで再送</button>'+
@@ -765,6 +991,18 @@ function renderDetail(appId,d){
   }else if(rs==='registered'){
     act='<div class="banner ok"><b>構成員登録が完了しています。</b>会員: '+esc(app.member_id||'')+' · '+esc(app.registrationStatus||'')+'</div>';
   }
+  /* (エントリーなし採用) 面談日程の確定・録音を待たず、直接 採用/不採用 を判断できる導線（対面で会った方向け） */
+  if(app.source==='direct_entry'&&rs==='active'&&(phase==='応募'||phase==='一次選考')){
+    act+='<div class="card" style="margin-top:14px"><p class="rec-sub">この候補者を直接 採用/不採用 にする</p>'+
+      '<p class="note" style="margin:2px 0 12px">面談日程の確定や録音を待たずに、いまここで採否を確定できます。採用すると内定通知が自動送信され登録手続きへ、不採用にすると不採用連絡が自動送信されます。</p>'+
+      '<div class="grid2">'+
+      '<div class="fld"><label>所属部署（採用時 必須）</label><select id="dd_dept">'+opts(depts,(A.desiredDepartmentNames&&A.desiredDepartmentNames[0]&&A.desiredDepartmentNames[0].id)||app.final_department_id||'')+'</select></div>'+
+      '<div class="fld"><label>初期役職</label><select id="dd_role"><option>メンバー</option><option>アシマネ</option></select></div>'+
+      '</div>'+
+      '<div class="fld"><label>兼任部署<span class="opt">任意・複数選択可</span></label>'+deptChipsHtml('dd_subs',depts)+'</div>'+
+      '<div class="err" id="dd_err"></div>'+
+      '<div class="btnrow"><button class="btn" id="dd_accept">採用する</button><button class="btn danger" id="dd_rej">不採用にする</button></div></div>';
+  }
 
   /* --- プロフィール --- */
   function kv(label,val){return val?'<dt>'+esc(label)+'</dt><dd>'+esc(val)+'</dd>':''}
@@ -777,7 +1015,7 @@ function renderDetail(appId,d){
     kv('初期役職',app.initial_role)+
     kv('志望動機',app.desired_department_reason)+
     kv('事前質問・メモ',app.pre_interview_questions)+
-    kv('紹介者',app.referrer_name)+kv('応募経路',app.source==='direct_entry_noiv'?'面談なし採用（リンク発行）':(isDirect?'エントリーなし採用（リンク発行）':(app.source||'')))+
+    kv('紹介者',app.referrer_name)+kv('応募経路',app.source==='direct_entry_noiv'?'面談なし採用（リンク発行）':(app.source==='direct_entry_rec'?'録音から始める採用（面談実施済み）':(isDirect?'エントリーなし採用（リンク発行）':(app.source||''))))+
     kv('応募日',fmtD(app.created_at))+kv('会員ID',app.member_id)+
     '</dl>';
   var regH='';
@@ -808,12 +1046,20 @@ function renderDetail(appId,d){
       }).join('')+'</div>';
     }
   }
+  /* 面談の議事録。面談が始まっている候補者にだけ出す(応募直後には無関係なため) */
+  var minStage=(phase==='二次選考')?'secondary':'primary';
+  var showMin=(phase==='一次選考'||phase==='二次選考'||rs!=='active'||!!app.primaryInterviewAt||isRec);
+  var minH=showMin
+    ? '<h2 class="sect-h">面談の議事録</h2><div class="sect-rule"></div><div class="card" id="minbox"><div class="empty">読み込んでいます…</div></div>'
+    : '';
+
   shell(
     '<p class="eyebrow"><a href="#list" style="color:inherit;text-decoration:none">← 候補者一覧</a></p>'+
     '<div class="dhead"><h1>'+esc(app.name||'（無名）')+'</h1><span class="code">'+esc(app.candidate_code||app.id||'')+'</span></div>'+
     '<div class="chips">'+stateChips({currentPhase:phase,currentTask:task,nextActor:app.nextActor,resultStatus:rs,source:app.source})+'</div>'+
     stepper+
     act+
+    minH+
     '<div class="two"><div>'+
       '<h2 class="sect-h">プロフィール</h2><div class="sect-rule"></div><div class="card">'+prof+'</div>'+regH+
       '<h2 class="sect-h">メール</h2><div class="sect-rule"></div><div class="card">'+
@@ -839,7 +1085,8 @@ function renderDetail(appId,d){
   function reload(){CACHE.bundleAt=0;dropDetail(appId);vDetail(appId)}   // 操作後は必ず最新を取り直す(古いキャッシュの瞬間表示を防ぐ)
   function showErr(id,ex){var e=el(id);if(!e)return alert(String(ex&&ex.message||ex));e.textContent=String(ex&&ex.message||ex);e.classList.add('on')}
 
-  bindChips('ap_subs');bindChips('fd_subs');
+  bindChips('ap_subs');bindChips('fd_subs');bindChips('dd_subs');
+  if(el('minbox'))loadDetailMinutes(appId,minStage);
   if(el('ap_go'))el('ap_go').addEventListener('click',async function(){
     var deptId=el('ap_dept').value,role=el('ap_role').value,subs=chipVals('ap_subs',deptId);
     if(!deptId){showErr('ap_err',new Error('所属部署を選択してください'));return}
@@ -861,7 +1108,7 @@ function renderDetail(appId,d){
     busy(this);
     try{var r=await apiPost('adminConfirmPrimaryInterview',{appId:appId,datetime:dt.replace('T',' '),interviewer:who,url:el('iv_url').value.trim()});
       if(r&&r.ok===false)throw new Error(r.error||'確定に失敗しました');
-      toast('一次面談を確定し、案内を送信しました');reload();
+      toast('代表面談を確定し、案内を送信しました');reload();
     }catch(ex){unbusy(this);showErr('iv_err',ex)}
   });
   /* 面談録音: その場録音(timeslice=1秒で取りこぼし防止) or ファイル → Drive直PUT(resumable) → 議事録パイプライン登録 */
@@ -919,23 +1166,9 @@ function renderDetail(appId,d){
         // メモ/チェックが入力されていれば面談記録として先に保存 (録音と併存)
         var _hasNote=(el('mm_memo')&&el('mm_memo').value.trim())||CHECK_ITEMS.some(function(_,i){var c=el('ck_'+i);return c&&c.checked});
         if(_hasNote)await saveInterviewNote();
-        rcSt('アップロード先を準備しています…');
-        var sess=await apiPost('createMinutesUploadSession',{filename:RC.name||'recording.webm',mimeType:RC.blob.type||'application/octet-stream',sizeBytes:RC.blob.size,origin:location.origin});
-        if(!sess||sess.ok===false||!sess.uploadUrl)throw new Error((sess&&sess.error)||'アップロードURLを取得できません');
-        var fileId=await new Promise(function(resolve,reject){
-          var xhr=new XMLHttpRequest();
-          xhr.open('PUT',sess.uploadUrl,true);
-          xhr.setRequestHeader('Content-Type',RC.blob.type||'application/octet-stream');
-          if(xhr.upload)xhr.upload.onprogress=function(e){if(e.lengthComputable)rcSt('アップロード中… '+Math.round(e.loaded/e.total*100)+'%')};
-          xhr.onload=function(){try{var j=JSON.parse(xhr.responseText);resolve(j.id||j.fileId)}catch(e){reject(new Error('Drive応答の解析に失敗しました'))}};
-          xhr.onerror=function(){reject(new Error('アップロードに失敗しました。通信環境をご確認ください'))};
-          xhr.send(RC.blob);
-        });
-        if(!fileId)throw new Error('DriveのファイルIDを取得できませんでした');
-        rcSt('面談記録を登録しています…');
-        var r=await apiPost('recruitFinalizeInterviewUpload',{appId:appId,stage:'primary',fileId:fileId});
-        if(r&&r.ok===false)throw new Error(r.error||'登録に失敗しました');
+        await uploadInterviewRecording(RC.blob,RC.name||'代表面談録音.webm',{appId:appId,stage:'primary',advance:true,onStatus:rcSt});
         toast('録音を登録しました。文字起こしと議事録は自動で進みます');
+        MCACHE.items=null;
         reload();
       }catch(ex){unbusy(btn);rcSt('');rcErr(ex)}
     });
@@ -962,6 +1195,7 @@ function renderDetail(appId,d){
       var ser=await saveInterviewNote();
       var r=await apiPost('adminGenerateMinutes',{appId:appId,stage:'primary',transcript:ser});
       if(r&&r.ok===false)throw new Error(r.error||'更新に失敗しました');
+      MCACHE.items=null;
       toast('合否判断へ進めました');reload();
     }catch(ex){unbusy(this);showErr('mm_err',ex)}
   });
@@ -975,6 +1209,16 @@ function renderDetail(appId,d){
     var rejDecision=(phase==='一次選考')?'reject_primary':'reject_final';
     busy(this);try{var r=await apiPost('adminRecruitDecision',{appId:appId,decision:rejDecision});if(r&&r.ok===false)throw new Error(r.error);toast('不採用にしました');reload()}catch(ex){unbusy(this);showErr('fd_err',ex)}
   });
+  /* (エントリーなし採用) 直接 採用/不採用 */
+  if(el('dd_accept'))el('dd_accept').addEventListener('click',async function(){
+    var deptId=el('dd_dept').value;if(!deptId){showErr('dd_err',new Error('採用には所属部署の選択が必要です'));return}
+    if(!confirm('この候補者を採用します。内定通知が自動送信され、以降は登録手続きへ自動で進みます。よろしいですか？'))return;
+    busy(this);try{var r=await apiPost('recruitDirectDecision',{appId:appId,decision:'accept',finalDeptId:deptId,initialRole:el('dd_role').value,subDeptIds:chipVals('dd_subs',deptId)});if(r&&r.ok===false)throw new Error(r.error);toast('採用にしました');reload()}catch(ex){unbusy(this);showErr('dd_err',ex)}
+  });
+  if(el('dd_rej'))el('dd_rej').addEventListener('click',async function(){
+    if(!confirm('この候補者を不採用にします。不採用連絡が自動送信されます。よろしいですか？'))return;
+    busy(this);try{var r=await apiPost('recruitDirectDecision',{appId:appId,decision:'reject'});if(r&&r.ok===false)throw new Error(r.error);toast('不採用にしました');reload()}catch(ex){unbusy(this);showErr('dd_err',ex)}
+  });
   async function reissue(sendMail,btn){
     busy(btn);
     try{var r=await apiPost('recruitIssueDirectEntry',{appId:appId,sendMail:sendMail});
@@ -987,6 +1231,17 @@ function renderDetail(appId,d){
   }
   if(el('de_reissue'))el('de_reissue').addEventListener('click',function(){reissue(false,this)});
   if(el('de_remail'))el('de_remail').addEventListener('click',function(){reissue(true,this)});
+
+  /* (録音から始める採用) 録音を残さず、そのまま本人へ登録案内を送って面談なし採用と同じ動線へ */
+  if(el('rec_send'))el('rec_send').addEventListener('click',async function(){
+    if(!confirm('録音を投稿せずに、本人へ登録案内メールを送ります。よろしいですか？'))return;
+    busy(this,'送信しています…');
+    try{var r=await apiPost('recruitStartRecordedEntry',{appId:appId});
+      if(r&&r.ok===false)throw new Error(r.error||'送信に失敗しました');
+      toast(r.mailSent?'登録案内を送信しました':'状態を進めました（メール送信は行われませんでした）');
+      MCACHE.items=null;reload();
+    }catch(ex){unbusy(this);showErr('rec_send_err',ex)}
+  });
 
   if(el('del_go'))el('del_go').addEventListener('click',async function(){
     if(!confirm('「'+(app.name||appId)+'」を完全に削除します。面談記録・メール履歴など関連データもすべて消え、復元できません。よろしいですか？'))return;
@@ -1068,6 +1323,7 @@ function renderIssue(depts,b){
       '<div class="fld"><label>フロー</label><select id="ie_flow">'+
         '<option value="interview">面談あり（標準）— 基本情報入力 → 代表面談 → 合否</option>'+
         '<option value="no_interview">面談なし — 入力完了で登録まで自動（採用確定済みの方）</option>'+
+        '<option value="recorded">録音から始める採用 — 面談実施済み・録音を残して登録へ</option>'+
       '</select></div>'+
       '<div class="fld"><label>氏名（必須）</label><input type="text" id="ie_name" placeholder="山田 太郎"></div>'+
       '<div class="fld"><label>メールアドレス<span class="opt">自動送信する場合は必須</span></label><input type="email" id="ie_mail" placeholder="taro@gmail.com"></div>'+
@@ -1087,17 +1343,25 @@ function renderIssue(depts,b){
   bindChips('ie_subs');
   el('ie_go').addEventListener('click',async function(){
     var e=el('ie_err');e.classList.remove('on');
-    var name=el('ie_name').value.trim(),mail=el('ie_mail').value.trim(),send=el('ie_send').checked;
+    var name=el('ie_name').value.trim(),mail=el('ie_mail').value.trim(),send=el('ie_send').checked,flow=el('ie_flow').value;
     if(!name){e.textContent='氏名を入力してください';e.classList.add('on');return}
+    if(flow==='recorded'&&!mail){e.textContent='録音から始める採用では、登録案内の送信先メールアドレスが必要です';e.classList.add('on');return}
     if(send&&!mail){e.textContent='メールを自動送信する場合は、メールアドレスを入力してください';e.classList.add('on');return}
     var btn=this;btn.disabled=true;btn.textContent='発行しています…';
     try{
-      var r=await apiPost('recruitIssueDirectEntry',{name:name,email:mail,deptId:el('ie_dept').value,role:el('ie_role').value,subDeptIds:chipVals('ie_subs',el('ie_dept').value),sendMail:send,flow:el('ie_flow').value});
+      var r=await apiPost('recruitIssueDirectEntry',{name:name,email:mail,deptId:el('ie_dept').value,role:el('ie_role').value,subDeptIds:chipVals('ie_subs',el('ie_dept').value),sendMail:send,flow:flow});
       if(r&&r.ok===false)throw new Error(r.error||'発行に失敗しました');
       el('ie_done').style.display='';el('ie_url').value=r.url||'';
       var expTxt=r.expiresAt?fmtDt(r.expiresAt):'';
+      if(flow==='recorded'){
+        // 録音から始める採用: 作成時は案内を送らない。詳細画面で録音投稿 or 登録リンク送信を促す。
+        el('ie_msg').innerHTML='<b>作成しました（'+esc(r.candidateCode||r.appId)+'）。</b><br>候補者一覧からこの方の詳細を開き、<b>録音を投稿</b>するか<b>「録音せずに登録リンクを送る」</b>を押すと、ご本人に登録案内が届きます（以降は面談なし採用と同じ動線で自動登録まで進みます）。';
+        var lb=el('ie_url')&&el('ie_url').closest('.linkbox'); if(lb)lb.style.display='none';
+      }else{
       el('ie_msg').innerHTML='<b>リンクを発行しました（'+esc(r.candidateCode||r.appId)+'）。</b> 有効期限: '+esc(expTxt)+'（72時間）'+
         (send?(r.mailSent?'<br>案内メールを自動送信しました。':'<br>メール送信は行われませんでした'+(r.mailReason?'（'+esc(r.mailReason)+'）':'')+'。リンクをコピーして直接お送りください。'):'<br>リンクをコピーしてご本人にお送りください。');
+      var lb2=el('ie_url')&&el('ie_url').closest('.linkbox'); if(lb2)lb2.style.display='';
+      }
       CACHE.bundleAt=0;
       loadBundle(true).then(function(nb){var box=el('ie_directs');if(box)box.outerHTML=directsHtml(nb)}).catch(function(){});
       btn.disabled=false;btn.textContent='リンクを発行する';
