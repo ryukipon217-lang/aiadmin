@@ -942,7 +942,23 @@ window.GAS=(function(){var URL='https://script.google.com/macros/s/AKfycbxLs1eXm
   // (PII 2026-09-02) listParticipants は read-api 経路から除外 — read-api 側に _applyParticipantPiiPolicy_
   //   (サーバ側マスク)が無いため、console はマスクの効く本体経路で読む(速度<秘匿)。
   //   ※これはFE側の緩和のみ。read-api の /exec 直叩き露出はサーバ側の case 削除+再デプロイが恒久対処。
-  var READ_API_ACTIONS={listEvents:1,listRegistrations:1,listTodos:1};
+  /* (edge拡大 2026-09-07) 「6秒画面」(イベント詳細/スケジュール/ダッシュボード)の読取をWorker経由に拡大。
+     Workerが read-api対応分は軽量GASへ・それ以外は本体GASへ振り分けつつエッジキャッシュ(_gen世代キー+SWR)。
+     除外(直行のまま): listParticipants/getSettings(PII・機密)・getRegistration/qrLivePoll/recLockPing(決済/ライブ系=鮮度が命)。 */
+  var READ_API_ACTIONS={
+    listEvents:1,listRegistrations:1,listTodos:1,getDataGen:1,
+    listNews:1,listMinutesMeetings:1,listMembers:1,listDeptGoals:1,listDeptGroups:1,listVenues:1,listOnboarding:1,
+    listEventStaffAssignments:1,listEventGroups:1,listEventExpenses:1,listWaitlist:1,listEventComms:1,listEventRegistrations:1,
+    listEventSessions:1,getEvent:1,loadEventDetail:1,listActivities:1,
+    getMembersBundle:1,listDepartments:1,listScopedDepartments:1,listMinutesDepartments:1,
+    getSchedule:1,getMyAvailability:1,
+    getTaskInitialData:1,getPersonalTaskList:1,getOverdueTaskList:1,getReviewWaitingTasks:1,getCurrentUserTaskContext:1,getHubDepartments:1,
+    listKnowledge:1,getKnowledgeBootstrap:1,listKudos:1,listApplications:1,
+    listChannels:1,listSurveys:1,listSurveyResponses:1,getSurveyQuestions:1,listNotifications:1,
+    getOrg:1,listMyOneOnOnes:1,listOneOnOnes:1,listDeptOneOnOnes:1,listOpenOneOnOneSlots:1,
+    listMemberRoles:1,listAds:1,listMembershipChangeRequests:1,listMemberHistories:1,
+    getMemberDetail:1,getMemberActivityStatus:1,getEventSatisfactionStats:1,getDepartmentWorkload:1,
+    listWeeklyEvalSparkForMembers:1,listHREvalTargets:1,listFollowUpAlerts:1};
   function mid(){try{return localStorage.getItem('connecta.memberId')||'';}catch(e){return'';}}function tok(){try{return localStorage.getItem('connecta.token')||'';}catch(e){return'';}}
   function setSession(id,t){try{if(id)localStorage.setItem('connecta.memberId',id);if(t)localStorage.setItem('connecta.token',t);}catch(e){}}function clearSession(){try{localStorage.removeItem('connecta.memberId');localStorage.removeItem('connecta.token');localStorage.removeItem('gas_cache_v1');}catch(e){}}
   function authFail(j){var e=(j&&j.error&&(j.error.message||j.error))||'';if(/FORBIDDEN|権限がありません|required /i.test(String(e)))return false;return j&&(j.unauthorized===true||(!j.ok&&/AUTH_REQUIRED|認証が必要|認証が切れ|再ログイン|未ログイン|セッション|ログインが必要|unauthorized|expired/i.test(String(e))));}
@@ -984,7 +1000,7 @@ window.GAS=(function(){var URL='https://script.google.com/macros/s/AKfycbxLs1eXm
     'getPersonalTaskList','getOverdueTaskList','getReviewWaitingTasks','getHubDepartments',
     'listNews','listMembers','listApplications','listMinutesDepartments','getMembersBundle','getSettings',
     'listDepartments','listScopedDepartments','listChannels','listSurveys','listNotifications','getOrg','listMyOneOnOnes','listMemberRoles','listAds'];
-  var __genTimer=null,__lastGen=null,__warming=false;
+  var __genTimer=null,__lastGen=null,__warming=false,__genFast=false,__genLast=0;   // __genFast=世代確認がエッジ(D1)提供のときだけ15s周期(GAS税ゼロなので高頻度化できる)
   function warmAll(){if(__warming||!mid()||!tok())return;try{if((window.__uiBusy||0)>0||(window.__mutating||0)>0)return;}catch(_g){}__warming=true;   /* 編集/申込(Modal/Drawer)を開いている間は裏読みしない=入力導線に読込を挟まない(genSyncと同ガード) */
     // (並列先読み) 同時6本で温める→多数でも十数秒で完了。エントリは 'action' か {a:action,p:params}(引数付き先読み用)。各readは失敗しても他に影響しない。
     var queue=WARM_ACTIONS.slice(),active=0,CONC=6;
@@ -1014,7 +1030,9 @@ window.GAS=(function(){var URL='https://script.google.com/macros/s/AKfycbxLs1eXm
       // (2026-08 恒久1分同期) 仮反映=楽観的即時 / 実データ=裏取得 / 本反映=この1分周期でnotify確定。
       //   タブ非表示・編集画面/申込画面(Modal/Drawer)を開いている・書込中 は本反映しない=作業を邪魔しない。
       try{if(document.hidden||(window.__uiBusy>0)||(window.__mutating>0))return;}catch(_g){}
+      if(Date.now()-__genLast<(__genFast?13500:57000))return;__genLast=Date.now();   // エッジ提供時のみ15s周期・それ以外は従来60s(GASを高頻度で叩かない)
       rawFetch('getDataGen',{}).then(function(d){
+        __genFast=!!(d&&d.edge);
         var g=d&&d.gen;if(g==null)return;
         if(__lastGen===null){__lastGen=g;return;}
         if(g===__lastGen){var now=Date.now();for(var k in __cache){if(__cache[k])__cache[k].ts=now;}return;}   // 変更なし → 全延命(再取得ゼロ=無駄打ちなし)
@@ -1027,17 +1045,22 @@ window.GAS=(function(){var URL='https://script.google.com/macros/s/AKfycbxLs1eXm
         setTimeout(warmAll,1500);                                                                               // 次に開く画面も温め直し=遷移時も即・鮮度
       },function(){});
     }
-    try{window.__resync=function(){try{genSync();}catch(_e){}};}catch(_e){}   // 編集/申込を閉じた直後などに次周期を待たず即時同期
-    __genTimer=setInterval(genSync,60000);
+    try{window.__resync=function(){try{__genLast=0;genSync();}catch(_e){}};}catch(_e){}   // 編集/申込を閉じた直後などに次周期を待たず即時同期(レートゲートも解除)
+    __genTimer=setInterval(genSync,15000);   // 実行間隔はgenSync内のレートゲートが制御(エッジ15s/従来60s)
     try{document.addEventListener('visibilitychange',function(){if(!document.hidden&&window.__resync)setTimeout(window.__resync,120);});}catch(_v){}}   // タブに戻った時も本反映を最新化
   try{startBgSync();}catch(e){}
   function peek(a,p){var h=__cache[ckey(a,p)];return h?h.data:undefined;}
   var __liteFails=0,__liteOff=false;
+  /* (edge整合) __writeSeq=保存成功ごとに世代キーを強制回転(自分の書込後にエッジの旧値を掴まない)。
+     __bustUntil=D1ミラー系(listEvents/listTodos/listNews=同期が最大60s遅れる)だけ保存後90秒は本体直行。
+     getDataGenは常にWorker経由(D1の世代=スナップショットと同時に進む=常に自己整合)。 */
+  var __writeSeq=0,__bustUntil=0;
+  var EDGE_D1_ACTIONS={listEvents:1,listTodos:1,listNews:1};
   async function rawFetch(a,p,timeoutMs){
-    // (高速化) 対象readは軽量API優先(silent=認証不一致でもログアウトさせず本体へ委譲)。2回連続で不調なら以後は本体直行=無駄な往復(タックス)を打ち切る。
-    if(READ_API_URL&&!__liteOff&&READ_API_ACTIONS[a]){
-      /* _gen=データ世代をキャッシュキーに混入(エッジ側はparams文字列ごとキー化)→ 書込で世代が進むと即キー切替=保存直後に古いエッジ応答を掴まない */
-      try{ var _d=await _rawFetchAt(READ_API_URL,a,Object.assign({},p,{_gen:__lastGen}),Math.min(timeoutMs||12000,5000),true); __liteFails=0; return _d; }
+    // (高速化) 対象readはWorkerエッジ優先(silent=認証不一致でもログアウトさせず本体へ委譲)。2回連続で不調なら以後は本体直行=無駄な往復(タックス)を打ち切る。
+    if(READ_API_URL&&!__liteOff&&READ_API_ACTIONS[a]&&!(EDGE_D1_ACTIONS[a]&&Date.now()<__bustUntil)){
+      /* _gen=データ世代+書込回数をキャッシュキーに混入(エッジ側はparams文字列ごとキー化)→ 世代が進む/自分が保存すると即キー切替=古いエッジ応答を掴まない */
+      try{ var _d=await _rawFetchAt(READ_API_URL,a,Object.assign({},p,{_gen:(__lastGen==null?'':String(__lastGen))+':'+__writeSeq}),(timeoutMs||12000),true); __liteFails=0; return _d; }
       catch(e){ if(++__liteFails>=2&&!__liteOff){__liteOff=true;try{console.warn('[lite] 軽量API不調→本体GASに切替(5分後に自動復帰)');}catch(_){}
         setTimeout(function(){__liteOff=false;__liteFails=0;},300000); } }   // GAS混雑スパイクは数分で収まるため、恒久OFFにせず再挑戦する
     }
@@ -1062,6 +1085,7 @@ window.GAS=(function(){var URL='https://script.google.com/macros/s/AKfycbxLs1eXm
     // force は __inflight に相乗りしない(書込前に発行済みの裏読み応答=古値を掴む競合窓を避け、必ず新規リクエスト)
     var data=await (force?rawFetch(a,p,opts&&opts.timeout):sharedFetch(a,p,opts&&opts.timeout));__cache[ck]={data:data,ts:Date.now()};notify(ck);persist();return data;}
   async function postData(a,p){p=p||{};try{window.__mutating=(window.__mutating||0)+1;}catch(_mu){}var r;try{r=await fetch(URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:a,payload:p,memberId:mid(),token:tok()})});}catch(e){try{window.__mutating=Math.max(0,(window.__mutating||1)-1);}catch(_mu){}var _pm=String((e&&e.message)||'');throw new Error(/Load failed|Failed to fetch|NetworkError|network/i.test(_pm)||_pm===''?'通信が一時的に不安定です。もう一度お試しください（二重送信を避けるため自動での再試行はしていません）。':(_pm||'通信エラー'));}try{window.__mutating=Math.max(0,(window.__mutating||1)-1);}catch(_mu){}if(!r.ok)throw new Error('HTTP '+r.status);var t=await r.text();var j;try{j=JSON.parse(t);}catch(e){if(typeof window.__onGoogleAuth__==='function')window.__onGoogleAuth__();throw new Error('GASからの応答を解析できません。Googleの再ログイン、またはGASの公開設定を確認してください。');}var data=handleResp(j);
+    __writeSeq++;__bustUntil=Date.now()+90000;   // (edge整合) 保存成功→キー回転+D1系90秒直行=自分の変更を必ず即読める
     // (読み込み中を減らす) 保存後にキャッシュを丸ごと破棄すると全ページが再取得=Loading多発。
     //   → 破棄せず全エントリを stale 化。peek は即データを返す(Loadingなし)、次アクセスで裏再取得し subscribe で更新。
     if(data&&data.ok===false)return data; // (ERR-05) 内包ソフト失敗(data.ok===false)は書込未確定 → 全キャッシュstale化(下)をスキップし無駄な全再取得を避ける。戻り値は不変。
