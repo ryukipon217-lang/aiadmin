@@ -935,7 +935,10 @@ window.GAS=(function(){var URL='https://script.google.com/macros/s/AKfycbxLs1eXm
   //   デプロイ後にこの空文字を新URLへ差し替えるだけ(read-api.gs のヘッダ参照)。
   /* (2026-08-12 再建) 軽量読取API=新アカウントの別プロジェクト(scriptId 1wIRMvjwQ61V4SRUW8mLRqG8k9MQ9m50mmzZ0Ml7abNI6ZjMBGunF0jQ1)。
      移行後は本体と同一URLを指していて実質無効だった。UI発行のWebアプリURL(API経由デプロイは/exec入口が紐付かない罠あり)。認証不一致時は本体へ自動フォールバック。 */
-  var READ_API_URL='https://script.google.com/macros/s/AKfycbxm-_IBapGbmilVQSzPhsLhL6cMwm8_bIwxyq8Wh8j3IxXjGjBz234EwEohFe18EAY/exec';
+  /* (2026-09-06 エッジ化) Cloudflare Workers(edge-api/)を read-api の前段に挿入。フレッシュ60s即返し+SWR10分。
+     不調時は従来どおり2連続失敗で本体GASへ自動フォールバック(=壊れない)。
+     ロールバック=旧GAS直URLへ戻すだけ: https://script.google.com/macros/s/AKfycbxm-_IBapGbmilVQSzPhsLhL6cMwm8_bIwxyq8Wh8j3IxXjGjBz234EwEohFe18EAY/exec */
+  var READ_API_URL='https://connecta-edge-read.solitary-cloud-f083.workers.dev/';
   // (PII 2026-09-02) listParticipants は read-api 経路から除外 — read-api 側に _applyParticipantPiiPolicy_
   //   (サーバ側マスク)が無いため、console はマスクの効く本体経路で読む(速度<秘匿)。
   //   ※これはFE側の緩和のみ。read-api の /exec 直叩き露出はサーバ側の case 削除+再デプロイが恒久対処。
@@ -1033,7 +1036,8 @@ window.GAS=(function(){var URL='https://script.google.com/macros/s/AKfycbxLs1eXm
   async function rawFetch(a,p,timeoutMs){
     // (高速化) 対象readは軽量API優先(silent=認証不一致でもログアウトさせず本体へ委譲)。2回連続で不調なら以後は本体直行=無駄な往復(タックス)を打ち切る。
     if(READ_API_URL&&!__liteOff&&READ_API_ACTIONS[a]){
-      try{ var _d=await _rawFetchAt(READ_API_URL,a,p,Math.min(timeoutMs||12000,5000),true); __liteFails=0; return _d; }
+      /* _gen=データ世代をキャッシュキーに混入(エッジ側はparams文字列ごとキー化)→ 書込で世代が進むと即キー切替=保存直後に古いエッジ応答を掴まない */
+      try{ var _d=await _rawFetchAt(READ_API_URL,a,Object.assign({},p,{_gen:__lastGen}),Math.min(timeoutMs||12000,5000),true); __liteFails=0; return _d; }
       catch(e){ if(++__liteFails>=2&&!__liteOff){__liteOff=true;try{console.warn('[lite] 軽量API不調→本体GASに切替(5分後に自動復帰)');}catch(_){}
         setTimeout(function(){__liteOff=false;__liteFails=0;},300000); } }   // GAS混雑スパイクは数分で収まるため、恒久OFFにせず再挑戦する
     }
