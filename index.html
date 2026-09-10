@@ -1702,6 +1702,22 @@ html[data-theme="night"] .cx select option,
 html[data-theme="night"] .cxm select option,
 html[data-theme="night"] .fld select option,
 html[data-theme="night"] .cx .fselect option{background:#161d40;color:#eef0ff}
+
+/* ── 17) モバイル下部ナビ(MobileBottomNav .mbnav.mb2 = .cx外描画・全hex直書き族) ──
+   ライト定義は cx-mobile 内(.mb-pill 白ピル/.mb-i.on ペリ×インディゴ/.mb-add FAB/
+   .mb-sd スピードダイヤル)。.cx スコープ外のため夜トークンが届かず、ナイトで
+   下部メニューバーだけ白く残っていた。色・影のみ夜へ(寸法/blur/挙動は継承)。 */
+html[data-theme="night"] .mb-pill{background:rgba(22,29,64,.86);box-shadow:0 22px 48px -16px rgba(0,0,0,.66),0 3px 10px -4px rgba(0,0,0,.42),inset 0 1px 0 rgba(255,255,255,.09)}
+html[data-theme="night"] .mb-ic i{color:#9aa0cc}
+html[data-theme="night"] .mb-i.on{background:linear-gradient(135deg,#8ca0ea,#4a5bb0);box-shadow:0 2px 0 #313a6e,0 9px 20px -7px rgba(0,0,0,.55)}
+html[data-theme="night"] .mb-i.on .mb-ic i{color:#fff}
+html[data-theme="night"] .mb-add{background:linear-gradient(135deg,#8ca0ea,#4a5bb0);box-shadow:0 3px 0 #313a6e,0 13px 26px -8px rgba(0,0,0,.62)}
+html[data-theme="night"] .mb-add:active{box-shadow:0 1px 0 #313a6e,0 6px 14px -6px rgba(0,0,0,.5)}
+html[data-theme="night"] .mb-sd-ic{background:rgba(30,37,76,.94);box-shadow:0 12px 26px -8px rgba(0,0,0,.66),inset 0 0 0 1px rgba(255,255,255,.15)}
+html[data-theme="night"] .mb-sd-ic i{color:#c4caee}
+html[data-theme="night"] .mb-sd-i.hot .mb-sd-ic{background:linear-gradient(135deg,#8ca0ea,#4a5bb0)}
+html[data-theme="night"] .mb-sd-i.hot .mb-sd-ic i{color:#fff}
+html[data-theme="night"] .mb-sd-lb{background:#1c2450;color:#dfe4fb;box-shadow:0 8px 20px -8px rgba(0,0,0,.6)}
 </style>
 
 </head>
