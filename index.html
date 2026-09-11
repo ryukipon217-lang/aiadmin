@@ -1765,6 +1765,22 @@ window.GAS=(function(){var URL='https://script.google.com/macros/s/AKfycbxLs1eXm
     listMemberRoles:1,listAds:1,listMembershipChangeRequests:1,listMemberHistories:1,
     getMemberDetail:1,getMemberActivityStatus:1,getEventSatisfactionStats:1,getDepartmentWorkload:1,
     listWeeklyEvalSparkForMembers:1,listHREvalTargets:1,listFollowUpAlerts:1};
+  /* (D1衛星 2026-09-11) メール/inbox系を衛星GAS mail-api(226KB=本体の1/10・起動税~1.5-2s)へ。
+     設計書=_spec/reports/_gas-monolith-diet-plan.md / 手順書=_mail-satellite-cutover.md。
+     読取=試行→失敗で本体へ(liteと同型・2連続失敗で5分間直行)。
+     書込=衛星応答が「未実行を証明できる失敗」(unauthorized/mail-api未対応)のときだけ本体へ1回委譲。
+     ネットワーク断では自動再送しない(二重送信防止=既存postDataと同じ哲学)。
+     ロールバック=MAIL_API_URLを空文字にするだけ(全アクションが本体直行に戻る)。 */
+  var MAIL_API_URL='https://script.google.com/macros/s/AKfycbwGo2JOJtCxsclqHFfmfiAvGvCPA4MCsHG0UO39AFY2ROjxfAOhfxgrm4-ffZNuRe4G0w/exec';
+  var MAIL_API_READS={'admin.listMailDispatch':1,'admin.listMailAccounts':1,'admin.mailAiContext':1,
+    'admin.mailContactsStatus':1,'admin.searchRecipients':1,'admin.recipientDirectory':1,
+    'admin.listMailSuppressions':1,'admin.listMailSegments':1,'admin.listMailScheduled':1,
+    'admin.getInboxSetupStatus':1};
+  var MAIL_API_WRITES={'admin.inboxSyncNow':1,'admin.sendBulkMail':1,'logMailDispatch':1,
+    'admin.mailSuppress':1,'admin.mailUnsuppress':1,'admin.saveMailSegment':1,'admin.deleteMailSegment':1,
+    'admin.cancelMailScheduled':1,'admin.setMailAccounts':1,'admin.gmailExtractRecipients':1,
+    'admin.setupInboxSyncTrigger':1,'admin.removeInboxSyncTrigger':1};
+  var __mailFails=0,__mailOff=false;
   function mid(){try{return localStorage.getItem('connecta.memberId')||'';}catch(e){return'';}}function tok(){try{return localStorage.getItem('connecta.token')||'';}catch(e){return'';}}
   function setSession(id,t){try{if(id)localStorage.setItem('connecta.memberId',id);if(t)localStorage.setItem('connecta.token',t);}catch(e){}}function clearSession(){try{localStorage.removeItem('connecta.memberId');localStorage.removeItem('connecta.token');localStorage.removeItem('gas_cache_v1');}catch(e){}}
   function authFail(j){var e=(j&&j.error&&(j.error.message||j.error))||'';if(/FORBIDDEN|権限がありません|required /i.test(String(e)))return false;return j&&(j.unauthorized===true||(!j.ok&&/AUTH_REQUIRED|認証が必要|認証が切れ|再ログイン|未ログイン|セッション|ログインが必要|unauthorized|expired/i.test(String(e))));}
@@ -1865,6 +1881,12 @@ window.GAS=(function(){var URL='https://script.google.com/macros/s/AKfycbxLs1eXm
   var __writeSeq=0,__bustUntil=0;
   var EDGE_D1_ACTIONS={listEvents:1,listTodos:1,listNews:1};
   async function rawFetch(a,p,timeoutMs){
+    // (D1衛星) メール系読取は衛星優先(silent=認証不一致でもログアウトさせず本体へ委譲)。liteと同じ2連続失敗→5分直行。
+    if(MAIL_API_URL&&!__mailOff&&MAIL_API_READS[a]){
+      try{ var _dm=await _rawFetchAt(MAIL_API_URL,a,p,(timeoutMs||12000),true); __mailFails=0; return _dm; }
+      catch(eM){ if(++__mailFails>=2&&!__mailOff){__mailOff=true;try{console.warn('[mail-api] 衛星不調→本体GASに切替(5分後に自動復帰)');}catch(_){}
+        setTimeout(function(){__mailOff=false;__mailFails=0;},300000); } }
+    }
     // (高速化) 対象readはWorkerエッジ優先(silent=認証不一致でもログアウトさせず本体へ委譲)。2回連続で不調なら以後は本体直行=無駄な往復(タックス)を打ち切る。
     if(READ_API_URL&&!__liteOff&&READ_API_ACTIONS[a]&&!(EDGE_D1_ACTIONS[a]&&Date.now()<__bustUntil)){
       /* _gen=データ世代+書込回数をキャッシュキーに混入(エッジ側はparams文字列ごとキー化)→ 世代が進む/自分が保存すると即キー切替=古いエッジ応答を掴まない */
@@ -1892,7 +1914,23 @@ window.GAS=(function(){var URL='https://script.google.com/macros/s/AKfycbxLs1eXm
     }
     // force は __inflight に相乗りしない(書込前に発行済みの裏読み応答=古値を掴む競合窓を避け、必ず新規リクエスト)
     var data=await (force?rawFetch(a,p,opts&&opts.timeout):sharedFetch(a,p,opts&&opts.timeout));__cache[ck]={data:data,ts:Date.now()};notify(ck);persist();return data;}
-  async function postData(a,p){p=p||{};try{window.__mutating=(window.__mutating||0)+1;}catch(_mu){}var r;try{r=await fetch(URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:a,payload:p,memberId:mid(),token:tok()})});}catch(e){try{window.__mutating=Math.max(0,(window.__mutating||1)-1);}catch(_mu){}var _pm=String((e&&e.message)||'');throw new Error(/Load failed|Failed to fetch|NetworkError|network/i.test(_pm)||_pm===''?'通信が一時的に不安定です。もう一度お試しください（二重送信を避けるため自動での再試行はしていません）。':(_pm||'通信エラー'));}try{window.__mutating=Math.max(0,(window.__mutating||1)-1);}catch(_mu){}if(!r.ok)throw new Error('HTTP '+r.status);var t=await r.text();var j;try{j=JSON.parse(t);}catch(e){if(typeof window.__onGoogleAuth__==='function')window.__onGoogleAuth__();throw new Error('GASからの応答を解析できません。Googleの再ログイン、またはGASの公開設定を確認してください。');}var data=handleResp(j);
+  async function postData(a,p){p=p||{};try{window.__mutating=(window.__mutating||0)+1;}catch(_mu){}
+    /* (D1衛星 2026-09-11) メール系書込は衛星優先。フォールバックは「未実行を証明できる応答」
+       (unauthorized=認証層で弾かれた / mail-api未対応=dispatch前)のみ=本体へ1回だけ委譲。
+       ネットワーク断・タイムアウトではどの宛先でも自動再送しない(二重送信防止=従来と同じ)。 */
+    var _targets=(MAIL_API_URL&&MAIL_API_WRITES[a])?[MAIL_API_URL,URL]:[URL];
+    var r,t,j;
+    try{
+      for(var _ti=0;_ti<_targets.length;_ti++){
+        try{r=await fetch(_targets[_ti],{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:a,payload:p,memberId:mid(),token:tok()})});}catch(e){var _pm=String((e&&e.message)||'');throw new Error(/Load failed|Failed to fetch|NetworkError|network/i.test(_pm)||_pm===''?'通信が一時的に不安定です。もう一度お試しください（二重送信を避けるため自動での再試行はしていません）。':(_pm||'通信エラー'));}
+        if(!r.ok)throw new Error('HTTP '+r.status);
+        t=await r.text();
+        try{j=JSON.parse(t);}catch(e){if(typeof window.__onGoogleAuth__==='function')window.__onGoogleAuth__();throw new Error('GASからの応答を解析できません。Googleの再ログイン、またはGASの公開設定を確認してください。');}
+        if(_ti<_targets.length-1&&j&&j.ok===false&&(j.unauthorized===true||/mail-api未対応/.test(String((j.error&&(j.error.message||j.error))||'')))){continue;}
+        break;
+      }
+    }finally{try{window.__mutating=Math.max(0,(window.__mutating||1)-1);}catch(_mu){}}
+    var data=handleResp(j);
     __writeSeq++;__bustUntil=Date.now()+90000;   // (edge整合) 保存成功→キー回転+D1系90秒直行=自分の変更を必ず即読める
     // (読み込み中を減らす) 保存後にキャッシュを丸ごと破棄すると全ページが再取得=Loading多発。
     //   → 破棄せず全エントリを stale 化。peek は即データを返す(Loadingなし)、次アクセスで裏再取得し subscribe で更新。
