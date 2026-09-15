@@ -1865,7 +1865,7 @@ window.GAS=(function(){var URL='https://script.google.com/macros/s/AKfycbxLs1eXm
         for(var k2 in __cache){if(__cache[k2]){__cache[k2].ts=0;__cache[k2].rv=false;}}                        // 変更あり → stale化
         for(var sk in __subs){if(!__subs[sk]||!__subs[sk].length)continue;                                      // 表示中キーの実データを取得→この周期で本反映(notify)
           (function(kk){var pp=kk.indexOf('|');var a2=kk.slice(0,pp);var pr={};try{pr=JSON.parse(kk.slice(pp+1)||'{}');}catch(e){}
-            rawFetch(a2,pr).then(function(d2){__cache[kk]={data:d2,ts:Date.now()};notify(kk);persist();},function(){});})(sk);
+            rawFetch(a2,pr,null,true).then(function(d2){__cache[kk]={data:d2,ts:Date.now()};notify(kk);persist();},function(){});})(sk);
         }
         setTimeout(warmAll,1500);                                                                               // 次に開く画面も温め直し=遷移時も即・鮮度
       },function(){});
@@ -1890,7 +1890,7 @@ window.GAS=(function(){var URL='https://script.google.com/macros/s/AKfycbxLs1eXm
   function _gateAcquire(){return new Promise(function(res){if(_gateCur<_GATE_MAX){_gateCur++;res();}else{_gateQ.push(res);}});}
   function _gateRelease(){if(_gateQ.length){var n=_gateQ.shift();n();}else{_gateCur=Math.max(0,_gateCur-1);}}
   async function _gated(fn){await _gateAcquire();try{return await fn();}finally{_gateRelease();}}
-  async function rawFetch(a,p,timeoutMs){
+  async function rawFetch(a,p,timeoutMs,wantFresh){
     // (D1衛星) メール系読取は衛星優先(silent=認証不一致でもログアウトさせず本体へ委譲)。liteと同じ2連続失敗→5分直行。
     if(MAIL_API_URL&&!__mailOff&&MAIL_API_READS[a]){
       try{ var _dm=await _rawFetchAt(MAIL_API_URL,a,p,(timeoutMs||12000),true); __mailFails=0; return _dm; }
@@ -1899,8 +1899,13 @@ window.GAS=(function(){var URL='https://script.google.com/macros/s/AKfycbxLs1eXm
     }
     // (高速化) 対象readはWorkerエッジ優先(silent=認証不一致でもログアウトさせず本体へ委譲)。2回連続で不調なら以後は本体直行=無駄な往復(タックス)を打ち切る。
     if(READ_API_URL&&!__liteOff&&READ_API_ACTIONS[a]&&!(EDGE_D1_ACTIONS[a]&&Date.now()<__bustUntil)){
-      /* _gen=データ世代+書込回数をキャッシュキーに混入(エッジ側はparams文字列ごとキー化)→ 世代が進む/自分が保存すると即キー切替=古いエッジ応答を掴まない */
-      try{ var _d=await _rawFetchAt(READ_API_URL,a,Object.assign({},p,{_gen:(__lastGen==null?'':String(__lastGen))+':'+__writeSeq}),(timeoutMs||12000),true); __liteFails=0; return _d; }
+      /* (2026-09-16 輻輳根治) _gen はキャッシュ「キー」ではなく世代の申告に降格(エッジ側で除外)。
+         旧: params文字列ごとキー化=誰か1人の書込で全員・全actionのキーが回転→全部MISS→本体GAS(5〜15s)へ雪崩→実行枠飽和→echo失効404。
+         新: エッジは安定キーで保持し、世代が進んだら「即stale返却+裏で1本だけ再取得」。
+         鮮度が要る読取(force / 世代変化に伴う本反映)だけ _fresh:1 を立てて実データを取りに行く。 */
+      var _ep=Object.assign({},p,{_gen:(__lastGen==null?'':String(__lastGen))+':'+__writeSeq});
+      if(wantFresh)_ep._fresh=1;
+      try{ var _d=await _rawFetchAt(READ_API_URL,a,_ep,(timeoutMs||12000),true); __liteFails=0; return _d; }
       catch(e){ if(++__liteFails>=2&&!__liteOff){__liteOff=true;try{console.warn('[lite] 軽量API不調→本体GASに切替(5分後に自動復帰)');}catch(_){}
         setTimeout(function(){__liteOff=false;__liteFails=0;},300000); } }   // GAS混雑スパイクは数分で収まるため、恒久OFFにせず再挑戦する
     }
@@ -1923,7 +1928,7 @@ window.GAS=(function(){var URL='https://script.google.com/macros/s/AKfycbxLs1eXm
       return hit.data;
     }
     // force は __inflight に相乗りしない(書込前に発行済みの裏読み応答=古値を掴む競合窓を避け、必ず新規リクエスト)
-    var data=await (force?rawFetch(a,p,opts&&opts.timeout):sharedFetch(a,p,opts&&opts.timeout));__cache[ck]={data:data,ts:Date.now()};notify(ck);persist();return data;}
+    var data=await (force?rawFetch(a,p,opts&&opts.timeout,true):sharedFetch(a,p,opts&&opts.timeout));__cache[ck]={data:data,ts:Date.now()};notify(ck);persist();return data;}
   async function postData(a,p){p=p||{};try{window.__mutating=(window.__mutating||0)+1;}catch(_mu){}
     /* (D1衛星 2026-09-11) メール系書込は衛星優先。フォールバックは「未実行を証明できる応答」
        (unauthorized=認証層で弾かれた / mail-api未対応=dispatch前)のみ=本体へ1回だけ委譲。
