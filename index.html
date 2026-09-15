@@ -1776,11 +1776,11 @@ window.GAS=(function(){var URL='https://script.google.com/macros/s/AKfycbxLs1eXm
   var MAIL_API_READS={'admin.listMailDispatch':1,'admin.listMailAccounts':1,'admin.mailAiContext':1,
     'admin.mailContactsStatus':1,'admin.searchRecipients':1,'admin.recipientDirectory':1,
     'admin.listMailSuppressions':1,'admin.listMailSegments':1,'admin.listMailScheduled':1,
-    'admin.getInboxSetupStatus':1};
+    'admin.getInboxSetupStatus':1,'admin.previewAudience':1};
   var MAIL_API_WRITES={'admin.inboxSyncNow':1,'admin.sendBulkMail':1,'logMailDispatch':1,
     'admin.mailSuppress':1,'admin.mailUnsuppress':1,'admin.saveMailSegment':1,'admin.deleteMailSegment':1,
     'admin.cancelMailScheduled':1,'admin.setMailAccounts':1,'admin.gmailExtractRecipients':1,
-    'admin.setupInboxSyncTrigger':1,'admin.removeInboxSyncTrigger':1};
+    'admin.setupInboxSyncTrigger':1,'admin.removeInboxSyncTrigger':1,'admin.harvestContacts':1};
   var __mailFails=0,__mailOff=false;
   function mid(){try{return localStorage.getItem('connecta.memberId')||'';}catch(e){return'';}}function tok(){try{return localStorage.getItem('connecta.token')||'';}catch(e){return'';}}
   function setSession(id,t){try{if(id)localStorage.setItem('connecta.memberId',id);if(t)localStorage.setItem('connecta.token',t);}catch(e){}}function clearSession(){try{localStorage.removeItem('connecta.memberId');localStorage.removeItem('connecta.token');localStorage.removeItem('gas_cache_v1');}catch(e){}}
