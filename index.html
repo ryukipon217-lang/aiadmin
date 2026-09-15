@@ -1881,6 +1881,15 @@ window.GAS=(function(){var URL='https://script.google.com/macros/s/AKfycbxLs1eXm
      getDataGenは常にWorker経由(D1の世代=スナップショットと同時に進む=常に自己整合)。 */
   var __writeSeq=0,__bustUntil=0;
   var EDGE_D1_ACTIONS={listEvents:1,listTodos:1,listNews:1};
+  /* (2026-09 輻輳/404自滅ループ対策) GASの同時実行はアカウント単位で上限(~30)。オーナー実行のため
+     全ユーザー+全トリガーがこの枠を共有する。画面が起動時に多数のGETを一斉発射すると枠を超過し、
+     応答リダイレクト(script.googleusercontent.com/macros/echo)が大量404になる自滅ループに陥る。
+     → クライアント側で本体GAS向けの同時実行を _GATE_MAX 本に絞り、超過分はキューで順次処理する。
+     エッジ(READ_API)/衛星への読取は別バックエンドなので絞らない(本体GAS宛だけゲート)。 */
+  var _GATE_MAX=5,_gateCur=0,_gateQ=[];
+  function _gateAcquire(){return new Promise(function(res){if(_gateCur<_GATE_MAX){_gateCur++;res();}else{_gateQ.push(res);}});}
+  function _gateRelease(){if(_gateQ.length){var n=_gateQ.shift();n();}else{_gateCur=Math.max(0,_gateCur-1);}}
+  async function _gated(fn){await _gateAcquire();try{return await fn();}finally{_gateRelease();}}
   async function rawFetch(a,p,timeoutMs){
     // (D1衛星) メール系読取は衛星優先(silent=認証不一致でもログアウトさせず本体へ委譲)。liteと同じ2連続失敗→5分直行。
     if(MAIL_API_URL&&!__mailOff&&MAIL_API_READS[a]){
@@ -1897,7 +1906,7 @@ window.GAS=(function(){var URL='https://script.google.com/macros/s/AKfycbxLs1eXm
     }
     // (2026-08 Load failed対策) 読取は冪等 → 一時的なネットワーク不調/5xx/404/タイムアウトは指数バックオフで自動リトライ(最大2回)。それでも駄目なら親切文言を投げる。
     //   404を含む理由: GASは並列GET時に応答リダイレクト先(script.googleusercontent.com/macros/echo)が一過性の404を返すことがある(再送で成功する)。
-    var _at=0;while(true){try{return await _rawFetchAt(URL,a,p,timeoutMs);}catch(_e){if(_e&&_e._net&&_at<2){_at++;await new Promise(function(_r){setTimeout(_r,400*_at);});continue;}throw _e;}}
+    var _at=0;while(true){try{return await _gated(function(){return _rawFetchAt(URL,a,p,timeoutMs);});}catch(_e){if(_e&&_e._net&&_at<2){_at++;await new Promise(function(_r){setTimeout(_r,400*_at);});continue;}throw _e;}}
   }
   /* (Perf 2026-07-21) in-flight共有: 同一キーの読取が同時に走ったら1本のGASリクエストに相乗りする。
      起動時は warmCritical / App初期effect / Dashboard が同じ listEvents・listTodos を同時要求して
@@ -1930,7 +1939,7 @@ window.GAS=(function(){var URL='https://script.google.com/macros/s/AKfycbxLs1eXm
       while(true){
        try{
         for(var _ti=0;_ti<_targets.length;_ti++){
-          try{r=await fetch(_targets[_ti],{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:a,payload:p,memberId:mid(),token:tok()})});}catch(e){var _pm=String((e&&e.message)||'');if(_safePost&&(/Load failed|Failed to fetch|NetworkError|network/i.test(_pm)||_pm==='')){var _te=new Error('net');_te._pt=true;throw _te;}throw new Error(/Load failed|Failed to fetch|NetworkError|network/i.test(_pm)||_pm===''?'通信が一時的に不安定です。もう一度お試しください（二重送信を避けるため自動での再試行はしていません）。':(_pm||'通信エラー'));}
+          try{r=await _gated(function(){return fetch(_targets[_ti],{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:a,payload:p,memberId:mid(),token:tok()})});});}catch(e){var _pm=String((e&&e.message)||'');if(_safePost&&(/Load failed|Failed to fetch|NetworkError|network/i.test(_pm)||_pm==='')){var _te=new Error('net');_te._pt=true;throw _te;}throw new Error(/Load failed|Failed to fetch|NetworkError|network/i.test(_pm)||_pm===''?'通信が一時的に不安定です。もう一度お試しください（二重送信を避けるため自動での再試行はしていません）。':(_pm||'通信エラー'));}
           if(!r.ok){if(_safePost&&(r.status===404||r.status===429||r.status>=500)){var _te2=new Error('HTTP '+r.status);_te2._pt=true;throw _te2;}throw new Error('HTTP '+r.status);}
           t=await r.text();
           try{j=JSON.parse(t);}catch(e){if(typeof window.__onGoogleAuth__==='function')window.__onGoogleAuth__();throw new Error('GASからの応答を解析できません。Googleの再ログイン、またはGASの公開設定を確認してください。');}
