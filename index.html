@@ -1865,7 +1865,11 @@ window.GAS=(function(){var URL='https://script.google.com/macros/s/AKfycbxLs1eXm
         for(var k2 in __cache){if(__cache[k2]){__cache[k2].ts=0;__cache[k2].rv=false;}}                        // 変更あり → stale化
         for(var sk in __subs){if(!__subs[sk]||!__subs[sk].length)continue;                                      // 表示中キーの実データを取得→この周期で本反映(notify)
           (function(kk){var pp=kk.indexOf('|');var a2=kk.slice(0,pp);var pr={};try{pr=JSON.parse(kk.slice(pp+1)||'{}');}catch(e){}
-            rawFetch(a2,pr,null,true).then(function(d2){__cache[kk]={data:d2,ts:Date.now()};notify(kk);persist();},function(){});})(sk);
+            /* (2026-09-16 修正) ここで常に _fresh を立てると、誰か1人の書込で世代が進むたびに
+               表示中の読取が全部 origin 直行(4.2s)になり、エッジ(0.7s)の効果が消える。
+               → 自分の書込直後(20秒)だけ実データ。他人の変更はキャッシュから即返し+裏で最新化し、
+               次の周期(15s)で反映する。自分の変更が見えない事故は起きない。 */
+            rawFetch(a2,pr,null,(Date.now()-__ownWriteAt)<20000).then(function(d2){__cache[kk]={data:d2,ts:Date.now()};notify(kk);persist();},function(){});})(sk);
         }
         setTimeout(warmAll,1500);                                                                               // 次に開く画面も温め直し=遷移時も即・鮮度
       },function(){});
@@ -1879,7 +1883,7 @@ window.GAS=(function(){var URL='https://script.google.com/macros/s/AKfycbxLs1eXm
   /* (edge整合) __writeSeq=保存成功ごとに世代キーを強制回転(自分の書込後にエッジの旧値を掴まない)。
      __bustUntil=D1ミラー系(listEvents/listTodos/listNews=同期が最大60s遅れる)だけ保存後90秒は本体直行。
      getDataGenは常にWorker経由(D1の世代=スナップショットと同時に進む=常に自己整合)。 */
-  var __writeSeq=0,__bustUntil=0;
+  var __writeSeq=0,__bustUntil=0;var __ownWriteAt=0;   // (2026-09-16) 自分が最後に書き込んだ時刻。直後だけ実データを取りに行く判断に使う
   var EDGE_D1_ACTIONS={listEvents:1,listTodos:1,listNews:1};
   /* (2026-09 輻輳/404自滅ループ対策) GASの同時実行はアカウント単位で上限(~30)。オーナー実行のため
      全ユーザー+全トリガーがこの枠を共有する。画面が起動時に多数のGETを一斉発射すると枠を超過し、
@@ -1956,7 +1960,7 @@ window.GAS=(function(){var URL='https://script.google.com/macros/s/AKfycbxLs1eXm
       }
     }finally{try{window.__mutating=Math.max(0,(window.__mutating||1)-1);}catch(_mu){}}
     var data=handleResp(j);
-    __writeSeq++;__bustUntil=Date.now()+90000;   // (edge整合) 保存成功→キー回転+D1系90秒直行=自分の変更を必ず即読める
+    __writeSeq++;__ownWriteAt=Date.now();__bustUntil=Date.now()+90000;   // (edge整合) 保存成功→キー回転+D1系90秒直行=自分の変更を必ず即読める
     // (読み込み中を減らす) 保存後にキャッシュを丸ごと破棄すると全ページが再取得=Loading多発。
     //   → 破棄せず全エントリを stale 化。peek は即データを返す(Loadingなし)、次アクセスで裏再取得し subscribe で更新。
     if(data&&data.ok===false)return data; // (ERR-05) 内包ソフト失敗(data.ok===false)は書込未確定 → 全キャッシュstale化(下)をスキップし無駄な全再取得を避ける。戻り値は不変。
