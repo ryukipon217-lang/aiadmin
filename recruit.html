@@ -976,8 +976,11 @@ function renderDetail(appId,d){
         '<button class="btn ghost" id="de_remail">新しいリンクをメールで再送</button>'+
         '</div><div class="linkbox" id="de_box" style="display:none"><input readonly id="de_url"><button class="btn sm ghost" onclick="__copy(el(\'de_url\').value)">コピー</button></div>'+
         '<div class="err" id="de_err"></div></div>';
-    }else if(phase==='採用後'&&task==='入力待ち'&&(app.source==='direct_entry_noiv'||app.source==='direct_entry_rec')){
-      act='<div class="banner ok"><b>ご本人の入力待ちです（'+(isRec?'録音から始める採用':'面談なし採用')+'）。</b><br>入力が完了すると自動で登録まで進みます。リンクの有効期限は発行から72時間です。</div>'+
+    }else if(phase==='採用後'&&task==='入力待ち'){
+      // (加入意思ステップ廃止 2026-09-17) source で絞ると代表面談ルートの採用者に再発行UIが出ず、
+      //   リンク切れ/メール不着のときに運営が手当てできなくなる。状態(採用後|入力待ち)だけで出す。
+      var _flowLbl=isRec?'録音から始める採用':(app.source==='direct_entry_noiv'?'面談なし採用':'代表面談を経た採用');
+      act='<div class="banner ok"><b>ご本人の登録情報の入力待ちです（'+_flowLbl+'）。</b><br>案内と追いかけの連絡は自動送信済みです。入力が完了すると自動で登録まで進みます。<br>この画面から発行するリンクの有効期限は72時間です。</div>'+
         '<div class="card"><div class="btnrow">'+
         '<button class="btn ghost" id="de_reissue">新しいリンクを発行してコピー</button>'+
         '<button class="btn ghost" id="de_remail">新しいリンクをメールで再送</button>'+
