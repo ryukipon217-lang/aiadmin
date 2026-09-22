@@ -147,6 +147,23 @@ a.btn,a.btn:hover{text-decoration:none}   /* リンクをボタンとして使�
 .msg:last-child{border-bottom:none}
 .msg .s{font-size:13px;font-weight:700}
 .msg .m{font-size:11px;color:var(--ink3);font-family:var(--latin)}
+/* (2026-09-22 メールの見える化) 自動/手動の区別・届いていない自動メール・候補者からの返信 */
+.msg.bad .s{color:#7a4a00}
+.mtag{display:inline-block;padding:1px 6px;border-radius:4px;background:var(--soft);color:var(--ink3);font-size:10px;font-weight:700;letter-spacing:.06em}
+.mtag.man{background:#eef3fb;color:var(--blue-deep)}
+.mbox{border-radius:10px;padding:12px 14px;margin:0 0 14px}
+.mbox.warn{background:#fdf3e2;border:1px solid #e3c489}
+.mbox.info{background:#eef3fb;border:1px solid #c9d6e8}
+.mbox-h{margin:0 0 8px;font-size:13px;font-weight:700;letter-spacing:.04em}
+.mbox.warn .mbox-h{color:#7a4a00}
+.mbox.info .mbox-h{color:var(--blue-deep)}
+.mrow2{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:8px 0;border-top:1px solid rgba(0,0,0,.06)}
+.mrow2:first-of-type{border-top:none}
+.mrow2>div{min-width:0}
+.mrow2 b{font-size:13px}
+.mrow2 .m{font-size:11px;color:var(--ink3);line-height:1.7;margin-top:2px}
+.mrow2 .ex{color:var(--ink3);font-size:11px}
+.mrow2 .btn{flex:0 0 auto}
 .linkbox{display:flex;gap:8px;align-items:center;border:1px solid var(--line);border-radius:10px;background:var(--soft);padding:9px 12px;margin:8px 0}
 .linkbox input{flex:1;border:none;background:transparent;font-family:var(--latin);font-size:11.5px;color:var(--ink2);outline:none}
 
@@ -184,6 +201,16 @@ a.btn,a.btn:hover{text-decoration:none}   /* リンクをボタンとして使�
 @media(prefers-reduced-motion:reduce){.rec-dot{animation:none}}
 .rec-time{font-family:var(--latin);font-weight:500;font-size:22px;letter-spacing:.06em;vertical-align:middle}
 .rec-sub{font-family:var(--serif);font-weight:600;font-size:15px;letter-spacing:.08em;margin:0 0 10px}
+/* (無音検知 2026-09-22) 入力レベルメーター — console.html の録音安全パックと同じ思想。
+   「録れているつもりで完全無音」を録音中に気づけるようにする(2026-09-08 IF Tokyo 30分無音の教訓)。 */
+.rec-meter{margin-top:12px;height:8px;border-radius:99px;background:#e7e9ef;overflow:hidden}
+.rec-meter>i{display:block;height:100%;width:0;border-radius:99px;background:#12356f;transition:width .12s linear}
+.rec-meter.silent>i{background:#c77700}
+.rec-mic{margin-top:8px;font-size:12px;color:var(--muted);word-break:break-all}
+.rec-warn{display:none;margin-top:10px;padding:10px 13px;border-radius:10px;font-size:13px;line-height:1.7;
+  background:#fdf3e2;border:1px solid #e3c489;color:#7a4a00}
+.rec-warn.on{display:block}
+@media(prefers-reduced-motion:reduce){.rec-meter>i{transition:none}}
 /* ===== 議事録 ===== */
 .mrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 4px;border-bottom:1px solid var(--soft)}
 .mrow:last-child{border-bottom:none}
@@ -267,6 +294,7 @@ var S=null; try{S=JSON.parse(localStorage.getItem(SKEY)||'null')}catch(e){}
 var CACHE={bundle:null,bundleAt:0,templates:null};
 var MCACHE={items:null,at:0};   // (議事録) 一覧のキャッシュ
 var MPOLL={t:0,n:0};            // (議事録) 生成待ちの自動再確認タイマー
+var MU_ST={};                   // (議事録) 追加投稿の送信状態(ファイル→DriveファイルID)。登録だけ失敗した時にバイトを送り直さないため
 
 function el(id){return document.getElementById(id)}
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
@@ -299,27 +327,85 @@ function chipVals(id,excl){var box=el(id);if(!box)return [];return [].map.call(b
 function copyText(v){try{navigator.clipboard.writeText(v).then(function(){toast('コピーしました')})}catch(e){var i=document.createElement('input');i.value=v;document.body.appendChild(i);i.select();document.execCommand('copy');i.remove();toast('コピーしました')}}
 window.__copy=copyText;
 
+/* (2026-09-22 実測に基づく堅牢化) console.html が2026-08に入れた作法をここへ揃える。
+   実測(9/22 17:23-17:45・24〜45本): 本体GASは平常3秒台だが数分おきに10〜45秒へ跳ね、404が17%。
+   軽量API(read-api)は平常1.5秒だが、詰まると50秒で応答しない窓が繰り返し来る。
+   ここには時間制限もリトライも無かったため、
+     ・軽量APIが詰まると画面がブラウザ既定のタイムアウトまで丸ごと待ってから本体へ落ちる(=遅い)
+     ・GASが並列GET時に返す一過性404がそのまま「HTTP 404」として画面に出る(=ところどころエラー)
+     ・軽量API側の認証不一致だけで即ログアウトする(=勝手にセッションが切れる)
+   の3つが採用管理にだけ起きていた。 */
+var T_LITE=6000, T_MAIN=30000, T_POST=180000;
+function _fetchT(url,opts,ms){
+  var ctrl=(typeof AbortController!=='undefined')?new AbortController():null;
+  var to=ctrl?setTimeout(function(){try{ctrl.abort()}catch(e){}},ms):null;
+  return fetch(url,Object.assign({},opts||{},ctrl?{signal:ctrl.signal}:{}))
+    .then(function(r){if(to)clearTimeout(to);return r},
+          function(e){if(to)clearTimeout(to);throw e});
+}
+function _isNetErr(e){
+  var m=String((e&&e.message)||'');
+  return (e&&e.name==='AbortError')||m===''||/Load failed|Failed to fetch|NetworkError|network|aborted/i.test(m);
+}
+/* 一過性として扱う応答。404を含めるのは、GASが並列GET時に応答リダイレクト先(macros/echo)で
+   一過性の404を返すことがあるため(再送で成功する)。console.html と同じ判断。 */
+function _isTransient(status){return status===404||status===429||status>=500}
 async function apiGet(action,params){
   var mkQ=function(base){return base+'?action='+encodeURIComponent(action)+'&params='+encodeURIComponent(JSON.stringify(params||{}))+'&memberId='+encodeURIComponent(S?S.memberId:'')+'&token='+encodeURIComponent(S?S.token:'')};
   if(LITE_ACTIONS[action]&&_liteFails<2){
     var j0=null;
-    try{var r0=await fetch(mkQ(LITE));if(r0.ok)j0=await r0.json()}catch(e){}
-    if(j0&&j0.unauthorized){logout();throw new Error('セッションの有効期限が切れました。もう一度ログインしてください')}
-    if(j0&&j0.ok)return j0.data;
+    /* ★時間制限つき。軽量APIは平常1.5秒なので6秒で見切って本体へ回す。
+       ここが無いと、詰まっている間は画面が数十秒〜数分そのまま待ってしまう。 */
+    try{var r0=await _fetchT(mkQ(LITE),null,T_LITE);if(r0.ok)j0=await r0.json()}catch(e){}
+    /* ★軽量API側の unauthorized ではログアウトしない。別スクリプト由来の認証不一致で
+       正常なセッションを切ってしまうため(console.html の silent と同じ扱い)。本体の判断に委ねる。 */
+    if(j0&&j0.ok&&!j0.unauthorized)return j0.data;
     _liteFails++;
+    if(_liteFails>=2)setTimeout(function(){_liteFails=0},300000);   // 混雑スパイクは数分で収まる。恒久OFFにはしない
   }
-  var q=mkQ(GAS);
-  var r=await fetch(q);
-  if(!r.ok)throw new Error('HTTP '+r.status);
-  var j=await r.json();
-  if(j&&j.unauthorized){logout();throw new Error('セッションの有効期限が切れました。もう一度ログインしてください')}
-  if(!j.ok)throw new Error(j.error||'読み込みに失敗しました');
-  return j.data;
+  /* 読取は冪等なので、一過性の404/429/5xx・時間切れ・通信断は指数バックオフで自動再試行(最大2回)。 */
+  var at=0;
+  while(true){
+    try{
+      var r=await _fetchT(mkQ(GAS),null,T_MAIN);
+      if(!r.ok){
+        if(_isTransient(r.status)&&at<2){at++;await new Promise(function(z){setTimeout(z,500*at)});continue}
+        throw new Error(_isTransient(r.status)?'サーバが混み合っています（HTTP '+r.status+'）。少し待ってから再読み込みしてください':'HTTP '+r.status);
+      }
+      var j=await r.json();
+      if(j&&j.unauthorized){logout();throw new Error('セッションの有効期限が切れました。もう一度ログインしてください')}
+      if(!j.ok)throw new Error(j.error||'読み込みに失敗しました');
+      return j.data;
+    }catch(e){
+      if(e&&e._final)throw e;
+      if(_isNetErr(e)&&at<2){at++;await new Promise(function(z){setTimeout(z,500*at)});continue}
+      if(_isNetErr(e)){var ne=new Error((e&&e.name==='AbortError')?'応答に時間がかかっています。少し待ってから再読み込みしてください':'通信が一時的に不安定です。少し待ってから再読み込みしてください');ne._final=1;throw ne}
+      throw e;
+    }
+  }
 }
 async function apiPost(action,payload){
-  var r=await fetch(GAS,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:action,payload:payload||{},memberId:S?S.memberId:'',token:S?S.token:''})});
-  if(!r.ok)throw new Error('HTTP '+r.status);
-  var j=await r.json();
+  /* ★書込は自動再送しない(二重送信・二重登録を避ける)。authenticate だけは認証確認のみで
+     サーバ状態を書かないので、一過性404を指数バックオフで最大3回まで吸収する。 */
+  var safe=(action==='authenticate');
+  var at=0,r,j;
+  while(true){
+    try{
+      r=await _fetchT(GAS,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},
+        body:JSON.stringify({action:action,payload:payload||{},memberId:S?S.memberId:'',token:S?S.token:''})},T_POST);
+    }catch(e){
+      if(safe&&_isNetErr(e)&&at<3){at++;await new Promise(function(z){setTimeout(z,500*at)});continue}
+      if(_isNetErr(e))throw new Error('通信が一時的に不安定です。二重送信を避けるため自動での再試行はしていません。一覧で反映を確かめてから、もう一度お試しください');
+      throw e;
+    }
+    if(!r.ok){
+      if(safe&&_isTransient(r.status)&&at<3){at++;await new Promise(function(z){setTimeout(z,500*at)});continue}
+      if(_isTransient(r.status))throw new Error('サーバが混み合っています（HTTP '+r.status+'）。処理が通っている場合があるので、一覧で反映を確かめてから、もう一度お試しください');
+      throw new Error('HTTP '+r.status);
+    }
+    break;
+  }
+  j=await r.json();
   if(j&&j.unauthorized){logout();throw new Error('セッションの有効期限が切れました。もう一度ログインしてください')}
   if(!j.ok)throw new Error(j.error||'処理に失敗しました');
   return j.data;
@@ -420,7 +506,7 @@ function stateChips(a){
   }
   if((a.source||'')==='direct_entry')out.push('<span class="chip dir">エントリーなし採用</span>');
   else if((a.source||'')==='direct_entry_noiv')out.push('<span class="chip dir">面談なし採用</span>');
-  else if((a.source||'')==='direct_entry_rec')out.push('<span class="chip dir">録音から始める採用</span>');
+  else if((a.source||'')==='direct_entry_rec')out.push('<span class="chip dir">先に面談</span>');
   return out.join('');
 }
 function needsDeptWarning(a){
@@ -534,6 +620,32 @@ function renderHome(b){
     var arr=bk[def[0]]||[];if(!arr.length)return;
     waiting+='<h2 class="sect-h">'+esc(def[1])+'<span class="cnt">'+arr.length+'件</span></h2><div class="sect-rule"></div><div class="card">'+arr.map(function(s){return rowHtml(s)}).join('')+'</div>';
   });
+  /* (2026-09-22) 自動メールが届いていない候補者。★登録完了した人も含めて横断で拾う。
+     歓迎連絡が落ちるのは登録完了した人で、その人たちは「進行中」から外れるため、
+     進行中だけを見ている画面では永久に気づけなかった(実際に5名分を1か月見逃した)。 */
+  var miArr=bk.mailIssues||[],mih='';
+  if(miArr.length){
+    mih='<h2 class="sect-h">メールが届いていない候補者<span class="cnt">'+miArr.length+'名</span></h2><div class="sect-rule"></div>'+
+      '<p class="note" style="margin:-4px 0 10px">自動で送られるはずのメールが送られていません。候補者を開いて「いま送る」から送信できます。</p><div class="card">'+
+      miArr.map(function(x){
+        return '<div class="rowline" onclick="location.hash=\'#detail?id='+esc(x.id)+'\'">'+
+          '<span class="nm">'+esc(x.name||x.id)+'</span>'+
+          '<span class="chip r">'+esc(x.items.map(function(i){return i.messageType}).join('・'))+'</span>'+
+          '<span class="meta">'+esc(x.candidateCode||'')+'</span></div>';
+      }).join('')+'</div>';
+  }
+  /* (2026-09-22) 候補者からの返信。受信箱に一般の問い合わせと混ざって入るため埋もれやすい。 */
+  var crArr=bk.candidateReplies||[],crh='';
+  if(crArr.length){
+    crh='<h2 class="sect-h">候補者から返信が届いています<span class="cnt">'+crArr.length+'名</span></h2><div class="sect-rule"></div><div class="card">'+
+      crArr.map(function(x){
+        var latest=x.items[0]||{};
+        return '<div class="rowline" onclick="location.hash=\'#detail?id='+esc(x.id)+'\'">'+
+          '<span class="nm">'+esc(x.name||x.id)+'</span>'+
+          '<span class="chip">'+esc(latest.subject||'(件名なし)')+'</span>'+
+          '<span class="meta">'+esc(fmtDt(latest.receivedAt))+'</span></div>';
+      }).join('')+'</div>';
+  }
   var exh='';
   if(ex.length){
     exh='<h2 class="sect-h">例外・要確認<span class="cnt">'+ex.length+'件</span></h2><div class="sect-rule"></div><div class="card">'+
@@ -548,8 +660,10 @@ function renderHome(b){
       '<div class="stat"><div class="n">'+(c.waitingCandidate||0)+'</div><div class="l">ご本人待ち</div></div>'+
       '<div class="stat"><div class="n">'+(c.waitingGuardian||0)+'</div><div class="l">保護者待ち</div></div>'+
       '<div class="stat'+(c.stalled?' warn':'')+'"><div class="n">'+(c.stalled||0)+'</div><div class="l">停滞</div></div>'+
+      '<div class="stat'+(c.mailIssues?' warn':'')+'"><div class="n">'+(c.mailIssues||0)+'</div><div class="l">メール未達</div></div>'+
+      '<div class="stat'+(c.candidateReplies?' warn':'')+'"><div class="n">'+(c.candidateReplies||0)+'</div><div class="l">返信あり</div></div>'+
       '<div class="stat"><div class="n">'+(c.registered||0)+'</div><div class="l">登録完了</div></div>'+
-    '</div>'+need+waiting+exh);
+    '</div>'+mih+crh+need+waiting+exh);
 }
 
 /* ============ 選考の流れ ============ */
@@ -603,7 +717,7 @@ function renderFlow(b){
         '<div class="fs-note">'+esc(st.note)+'</div>'+
         (cols[i].length?cols[i].map(function(a){
           return '<div class="fs-card" onclick="location.hash=\'#detail?id='+esc(a.id)+'\'"><div class="n">'+esc(a.name||'（無名）')+'</div>'+
-            '<div class="m">'+esc(a.candidateCode||a.id)+(a.source==='direct_entry'?' · エントリーなし':(a.source==='direct_entry_noiv'?' · 面談なし':(a.source==='direct_entry_rec'?' · 録音から':'')))+' '+actorChip(a)+'</div></div>';
+            '<div class="m">'+esc(a.candidateCode||a.id)+(a.source==='direct_entry'?' · エントリーなし':(a.source==='direct_entry_noiv'?' · 面談なし':(a.source==='direct_entry_rec'?' · 先に面談':'')))+' '+actorChip(a)+'</div></div>';
         }).join(''):'<div class="fs-empty">—</div>')+
       '</div>';
     }).join('')+'</div>'+
@@ -657,25 +771,58 @@ function renderList(b){
 
 /* 録音を Drive へ直PUT → 議事録パイプラインへ登録。面談実施待ちの投稿(advance:true = 合否判断へ進める)と
    面談後の追加投稿(advance:false = 選考状態は動かさない)で共通。onStatus は進捗表示のコールバック。 */
+/* Driveのresumableアップロードセッションを1本発行する。バイトはここでは送らない(URLを貰うだけ)。
+   ★sizeBytes=0 でも発行できる(BE側は X-Upload-Content-Length を省くだけ)。
+     録音が終わる前=サイズ未確定のうちに先出しできるのはこのため。 */
+async function createRecordingUploadSession(filename,mimeType,sizeBytes){
+  var sess=await apiPost('createMinutesUploadSession',{filename:filename||'recording.webm',
+    mimeType:mimeType||'application/octet-stream',sizeBytes:Number(sizeBytes)||0,origin:location.origin});
+  if(!sess||sess.ok===false||!sess.uploadUrl)throw new Error((sess&&sess.error)||'アップロードURLを取得できません');
+  return sess;
+}
+/* バイト転送。宛先は googleapis.com のDrive直PUTで、本体GASは一切通らない(=速いのはここだけ)。 */
+function putRecordingBytes(uploadUrl,blob,onStatus){
+  return new Promise(function(resolve,reject){
+    var xhr=new XMLHttpRequest();
+    xhr.open('PUT',uploadUrl,true);
+    xhr.setRequestHeader('Content-Type',blob.type||'application/octet-stream');
+    if(xhr.upload)xhr.upload.onprogress=function(e){if(e.lengthComputable)onStatus('録音を送っています… '+Math.round(e.loaded/e.total*100)+'%')};
+    xhr.onload=function(){
+      var id='';try{var j=JSON.parse(xhr.responseText);id=j.id||j.fileId||''}catch(e){}
+      if(id)return resolve(id);
+      reject(new Error('Driveの応答を解析できませんでした（HTTP '+xhr.status+'）。もう一度お試しください'));
+    };
+    xhr.onerror=function(){reject(new Error('録音の送信に失敗しました。通信環境をご確認のうえ、もう一度お試しください'))};
+    xhr.send(blob);
+  });
+}
+
+/* 録音を Drive へ直PUT → 議事録パイプラインへ登録。面談実施待ちの投稿(advance:true = 合否判断へ進める)と
+   面談後の追加投稿(advance:false = 選考状態は動かさない)で共通。onStatus は進捗表示のコールバック。
+
+   (2026-09-22 体感速度) 工程は3つで、待ち時間の正体は①と③=本体GASの往復。混雑時は1本10〜45秒かかる。
+     ① アップロード先の発行  … opts.sessionP に先出し分を渡せば待ち時間から丸ごと消える
+     ② バイト転送(Drive直PUT) … GASを通らない。回線だけで決まる
+     ③ 面談記録として登録     … 候補者・部署・メンバー表の読込+議事録登録+状態遷移があり元々重い
+   ★③は冪等でない(面談記録の作成・状態遷移・メール送信を伴う)ので自動再送しない。失敗しても
+     opts.state.fileId に送信済みのDriveファイルが残るので、もう一度押せば③だけやり直せる。 */
 async function uploadInterviewRecording(blob,filename,opts){
   opts=opts||{};
   var onStatus=opts.onStatus||function(){};
-  onStatus('アップロード先を準備しています…');
-  var sess=await apiPost('createMinutesUploadSession',{filename:filename||'recording.webm',mimeType:blob.type||'application/octet-stream',sizeBytes:blob.size,origin:location.origin});
-  if(!sess||sess.ok===false||!sess.uploadUrl)throw new Error((sess&&sess.error)||'アップロードURLを取得できません');
-  var fileId=await new Promise(function(resolve,reject){
-    var xhr=new XMLHttpRequest();
-    xhr.open('PUT',sess.uploadUrl,true);
-    xhr.setRequestHeader('Content-Type',blob.type||'application/octet-stream');
-    if(xhr.upload)xhr.upload.onprogress=function(e){if(e.lengthComputable)onStatus('アップロード中… '+Math.round(e.loaded/e.total*100)+'%')};
-    xhr.onload=function(){try{var j=JSON.parse(xhr.responseText);resolve(j.id||j.fileId)}catch(e){reject(new Error('Drive応答の解析に失敗しました'))}};
-    xhr.onerror=function(){reject(new Error('アップロードに失敗しました。通信環境をご確認ください'))};
-    xhr.send(blob);
-  });
-  if(!fileId)throw new Error('DriveのファイルIDを取得できませんでした');
-  onStatus('面談記録を登録しています…');
-  var r=await apiPost('recruitFinalizeInterviewUpload',{appId:opts.appId,stage:opts.stage||'primary',fileId:fileId,advance:opts.advance!==false});
+  var st=opts.state||{};
+  if(!st.fileId){
+    var sess=null;
+    onStatus('アップロード先を準備しています…');
+    if(opts.sessionP){try{sess=await opts.sessionP}catch(e){sess=null}opts.sessionP=null}
+    if(!sess||!sess.uploadUrl)sess=await createRecordingUploadSession(filename,blob.type,blob.size);
+    st.fileId=await putRecordingBytes(sess.uploadUrl,blob,onStatus);
+  }
+  if(!st.fileId)throw new Error('DriveのファイルIDを取得できませんでした');
+  if(opts.beforeFinalize)await opts.beforeFinalize();
+  onStatus('面談記録として登録しています… サーバが混み合っていると1分ほどかかることがあります');
+  var r=await apiPost('recruitFinalizeInterviewUpload',{appId:opts.appId,stage:opts.stage||'primary',fileId:st.fileId,advance:opts.advance!==false});
   if(r&&r.ok===false)throw new Error(r.error||'登録に失敗しました');
+  st.done=true;
   return r;
 }
 
@@ -832,11 +979,17 @@ function bindDetailMinutes(appId,stage){
     if(er){er.textContent='';er.classList.remove('on')}
     if(!f)return;
     if(f.size<1024){serr(new Error('録音ファイルが空です（音声が記録されていません）。録音し直してください'));return}
+    /* (体感速度) ここも工程①③が本体GASの往復。経過秒を出さないと数十秒の沈黙が「固まった」に見える。
+       送信済みのDriveファイルIDは MU_ST に残すので、登録だけ失敗した時に再選択してもバイトは送り直さない。 */
+    var _t0=Date.now(),_msg='',_tick=setInterval(function(){sst(_msg+'（'+Math.floor((Date.now()-_t0)/1000)+'秒）')},500);
+    MU_ST[f.name+':'+f.size]=MU_ST[f.name+':'+f.size]||{};
     try{
-      await uploadInterviewRecording(f.slice(0,f.size,f.type),f.name,{appId:appId,stage:stage,advance:false,onStatus:sst});
+      await uploadInterviewRecording(f.slice(0,f.size,f.type),f.name,{appId:appId,stage:stage,advance:false,
+        onStatus:function(m){_msg=m||''},state:MU_ST[f.name+':'+f.size]});
+      clearInterval(_tick);delete MU_ST[f.name+':'+f.size];   // 成功したら破棄(同じファイルの再選択が二重登録にならないように)
       sst('');toast('録音を追加しました。議事録は自動で生成されます');
       MPOLL.n=0;MCACHE.items=null;loadDetailMinutes(appId,stage);
-    }catch(ex){sst('');serr(ex)}
+    }catch(ex){clearInterval(_tick);sst(MU_ST[f.name+':'+f.size].fileId?'録音の送信は完了しています。同じファイルをもう一度選ぶと、登録だけやり直します。':'');serr(ex)}
   });
 }
 
@@ -884,6 +1037,9 @@ async function vDetail(appId){
 }
 function renderDetail(appId,d){
   var A=d.application||{},app=A.application||{},reg=A.registrationForm,gc=A.guardian,hist=A.statusHistory||[],msgs=A.messages||[];
+  /* (2026-09-22) 自動メールの結果・届いていないもの・候補者からの返信。
+     旧実装は手動送信(messages)しか見ておらず、自動で送られなかったことが画面に出なかった。 */
+  var autoMsgs=A.autoMessages||[],mailIssues=A.mailIssues||[],replies=A.replies||[];
   var depts=d.departments||[],interviewers=d.interviewers||[];
   var phase=app.currentPhase||'',task=app.currentTask||'',rs=app.resultStatus||'active';
   var isDirect=String(app.source||'').indexOf('direct_entry')===0;   // direct_entry(面談あり)/direct_entry_noiv(面談なし)/direct_entry_rec(録音から)
@@ -920,10 +1076,16 @@ function renderDetail(appId,d){
           '<label class="btn ghost" style="cursor:pointer">録音ファイルを選ぶ<input type="file" id="rc_file" accept="audio/*,video/*" style="display:none"></label>'+
         '</div><p class="note" style="margin-top:10px">面談中にこの画面で録音するか、録音済みファイルをアップロードします。音声は自動で文字起こしされ、面談記録として保存されます。</p></div>'+
         '<div id="rc_live" style="display:none"><span class="rec-dot"></span><span class="rec-time" id="rc_time">0:00</span>'+
+          '<div class="rec-meter" id="rc_meter"><i></i></div>'+
+          '<p class="rec-mic" id="rc_mic"></p>'+
+          '<div class="rec-warn" id="rc_warn"></div>'+
           '<div class="btnrow" style="margin-top:12px"><button class="btn danger" id="rc_stop">録音を停止する</button></div>'+
-          '<p class="note" style="margin-top:8px">録音中は画面を閉じないでください。</p></div>'+
+          '<p class="note" style="margin-top:8px">録音中は画面を閉じないでください。バーが動いていれば音が入っています。</p></div>'+
         '<div id="rc_done" style="display:none"><audio controls id="rc_audio" style="width:100%;margin:4px 0 12px"></audio>'+
-          '<div class="btnrow"><button class="btn" id="rc_up">アップロードして合否判断へ進める</button><button class="btn ghost" id="rc_redo">選び直す・録り直す</button></div></div>'+
+          '<div class="rec-warn" id="rc_dwarn"></div>'+
+          '<div class="btnrow"><button class="btn" id="rc_up">アップロードして合否判断へ進める</button><button class="btn ghost" id="rc_redo">選び直す・録り直す</button>'+
+          /* (2026-09-22) 投稿が失敗しても録音を失わないための退避口。面談の録音は録り直しが効かない。 */
+          '<a class="btn ghost" id="rc_dl" download style="display:none;text-decoration:none">録音を端末に保存</a></div></div>'+
         '<p class="note" id="rc_status" style="margin-top:10px"></p><div class="err" id="rc_err"></div>'+
         '</div>'+
         (function(){
@@ -951,7 +1113,7 @@ function renderDetail(appId,d){
         '<button class="btn" id="fd_accept">採用する</button><button class="btn danger" id="fd_rej">不採用にする</button></div>'+
         '<p class="note" style="margin-top:10px">採用すると内定通知が自動送信され、以降（意思確認→追加情報→未成年は保護者同意→登録）は自動で進みます。不採用の場合は不採用連絡が自動送信されます。</p></div>';
     }else if(phase==='採用後'&&task==='録音待ち'){
-      act='<div class="banner ok"><b>面談は実施済みです（録音から始める採用）。</b><br>面談の録音を投稿すると、文字起こし・議事録を残したうえで、自動で本人へ登録案内が届きます（以降は面談なし採用と同じ動線で登録まで自動）。録音を残さない場合は、下の「録音せずに登録リンクを送る」からでも進められます。</div>'+
+      act='<div class="banner ok"><b>面談は実施済みです（先に面談 → あとで情報）。</b><br>ご本人へ登録案内を送ると、基本情報の入力から登録まで自動で進みます。面談の録音を投稿すれば、文字起こし・議事録を残したうえで同じ動線に入ります。<b>録音は任意です</b>。残さない場合は下の「録音せずに登録リンクを送る」から進められます。</div>'+
         '<div class="card">'+
         '<p class="rec-sub">録音から議事録をつくる</p>'+
         '<div id="rc_idle"><div class="btnrow">'+
@@ -959,10 +1121,16 @@ function renderDetail(appId,d){
           '<label class="btn ghost" style="cursor:pointer">録音ファイルを選ぶ<input type="file" id="rc_file" accept="audio/*,video/*" style="display:none"></label>'+
         '</div><p class="note" style="margin-top:10px">その場で録音するか、録音済みファイルをアップロードします。投稿すると自動で本人へ登録案内が届きます。</p></div>'+
         '<div id="rc_live" style="display:none"><span class="rec-dot"></span><span class="rec-time" id="rc_time">0:00</span>'+
+          '<div class="rec-meter" id="rc_meter"><i></i></div>'+
+          '<p class="rec-mic" id="rc_mic"></p>'+
+          '<div class="rec-warn" id="rc_warn"></div>'+
           '<div class="btnrow" style="margin-top:12px"><button class="btn danger" id="rc_stop">録音を停止する</button></div>'+
-          '<p class="note" style="margin-top:8px">録音中は画面を閉じないでください。</p></div>'+
+          '<p class="note" style="margin-top:8px">録音中は画面を閉じないでください。バーが動いていれば音が入っています。</p></div>'+
         '<div id="rc_done" style="display:none"><audio controls id="rc_audio" style="width:100%;margin:4px 0 12px"></audio>'+
-          '<div class="btnrow"><button class="btn" id="rc_up">アップロードして登録案内を送る</button><button class="btn ghost" id="rc_redo">選び直す・録り直す</button></div></div>'+
+          '<div class="rec-warn" id="rc_dwarn"></div>'+
+          '<div class="btnrow"><button class="btn" id="rc_up">アップロードして登録案内を送る</button><button class="btn ghost" id="rc_redo">選び直す・録り直す</button>'+
+          /* (2026-09-22) 投稿が失敗しても録音を失わないための退避口。面談の録音は録り直しが効かない。 */
+          '<a class="btn ghost" id="rc_dl" download style="display:none;text-decoration:none">録音を端末に保存</a></div></div>'+
         '<p class="note" id="rc_status" style="margin-top:10px"></p><div class="err" id="rc_err"></div>'+
         '</div>'+
         '<div class="card"><p class="rec-sub">録音を残さない場合</p>'+
@@ -979,7 +1147,7 @@ function renderDetail(appId,d){
     }else if(phase==='採用後'&&task==='入力待ち'){
       // (加入意思ステップ廃止 2026-09-17) source で絞ると代表面談ルートの採用者に再発行UIが出ず、
       //   リンク切れ/メール不着のときに運営が手当てできなくなる。状態(採用後|入力待ち)だけで出す。
-      var _flowLbl=isRec?'録音から始める採用':(app.source==='direct_entry_noiv'?'面談なし採用':'代表面談を経た採用');
+      var _flowLbl=isRec?'先に面談 → あとで情報':(app.source==='direct_entry_noiv'?'面談なし採用':'代表面談を経た採用');
       act='<div class="banner ok"><b>ご本人の登録情報の入力待ちです（'+_flowLbl+'）。</b><br>案内と追いかけの連絡は自動送信済みです。入力が完了すると自動で登録まで進みます。<br>この画面から発行するリンクの有効期限は72時間です。</div>'+
         '<div class="card"><div class="btnrow">'+
         '<button class="btn ghost" id="de_reissue">新しいリンクを発行してコピー</button>'+
@@ -1018,7 +1186,7 @@ function renderDetail(appId,d){
     kv('初期役職',app.initial_role)+
     kv('志望動機',app.desired_department_reason)+
     kv('事前質問・メモ',app.pre_interview_questions)+
-    kv('紹介者',app.referrer_name)+kv('応募経路',app.source==='direct_entry_noiv'?'面談なし採用（リンク発行）':(app.source==='direct_entry_rec'?'録音から始める採用（面談実施済み）':(isDirect?'エントリーなし採用（リンク発行）':(app.source||''))))+
+    kv('紹介者',app.referrer_name)+kv('応募経路',app.source==='direct_entry_noiv'?'面談なし採用（リンク発行）':(app.source==='direct_entry_rec'?'先に面談 → あとで情報（面談実施済み）':(isDirect?'エントリーなし採用（リンク発行）':(app.source||''))))+
     kv('応募日',fmtD(app.created_at))+kv('会員ID',app.member_id)+
     '</dl>';
   var regH='';
@@ -1032,8 +1200,41 @@ function renderDetail(appId,d){
   /* --- タイムライン + メール --- */
   var tlH=hist.length?'<ul class="tl">'+hist.map(function(h){
     return '<li><div class="t">'+esc(h.after_status||'')+'</div><div class="d">'+esc(fmtDt(h.created_at))+' · '+esc(h.changedByName||'')+'</div>'+(h.reason?'<div class="r">'+esc(h.reason)+'</div>':'')+'</li>'}).join('')+'</ul>':'<div class="empty">履歴はまだありません。</div>';
-  var msgH=msgs.length?msgs.slice(0,12).map(function(m){
-    return '<div class="msg"><div class="s">'+esc(m.subject||m.message_type||'')+'</div><div class="m">'+esc(m.to_email||'')+' · '+esc(fmtDt(m.sent_at||m.created_at))+'</div></div>'}).join(''):'<div class="empty">送信履歴はまだありません。</div>';
+  /* 送信の記録 = 自動送信(MessageHistories) + 手動送信(RecruitmentMessages) を1本の時系列に畳む。
+     これまで手動分しか出ておらず、自動で何が送られたのかを画面から確かめる手段が無かった。 */
+  var sendLog=autoMsgs.map(function(m){
+      return {auto:true,subject:m.subject||m.messageType||'',type:m.messageType||'',to:m.to||'',
+              at:m.sentAt||m.createdAt,status:m.status||'',error:m.error||''};
+    }).concat(msgs.map(function(m){
+      return {auto:false,subject:m.subject||m.message_type||'',type:m.message_type||'',to:m.to_email||'',
+              at:m.sent_at||m.created_at,status:'sent',error:''};
+    })).sort(function(a,b){return new Date(b.at||0)-new Date(a.at||0)});
+  var msgH=sendLog.length?sendLog.slice(0,14).map(function(m){
+    var bad=m.status&&m.status!=='sent';
+    return '<div class="msg'+(bad?' bad':'')+'"><div class="s">'+esc(m.subject)+'</div><div class="m">'+
+      '<span class="mtag'+(m.auto?'':' man')+'">'+(m.auto?'自動':'手動')+'</span> '+
+      esc(m.to)+' · '+esc(fmtDt(m.at))+(bad?' · <b>'+esc(m.status)+(m.error?'（'+esc(m.error)+'）':'')+'</b>':'')+
+      '</div></div>'}).join(''):'<div class="empty">送信の記録はまだありません。</div>';
+
+  /* ★届いていない自動メール。ここが空でないことが異常のサイン(歓迎連絡が1か月見逃された原因)。 */
+  var issueH=!mailIssues.length?'':'<div class="mbox warn"><p class="mbox-h">自動で送られるはずのメールが、届いていません（'+mailIssues.length+'件）</p>'+
+    mailIssues.map(function(x,i){
+      var canSend=!!x.tpl&&(x.recipientType==='candidate'||x.recipientType==='guardian');
+      return '<div class="mrow2"><div><b>'+esc(x.messageType)+'</b>'+
+        '<div class="m">'+esc(x.status==='skipped'?'送信を見送りました':'送信に失敗しました')+
+        (x.reason?'（'+esc(x.reason)+'）':'')+' · '+esc(fmtDt(x.scheduledAt))+'</div></div>'+
+        (canSend?'<button class="btn sm" data-tpl="'+esc(x.tpl)+'" data-mi="'+i+'">いま送る</button>':'')+'</div>';
+    }).join('')+'</div>';
+
+  /* ★この方からの返信。採用メールへの返信は受信箱に一般の問い合わせと混ざって入るため、
+     採用管理の画面からは「返信が来たこと」すら見えなかった。 */
+  var replyH=!replies.length?'':'<div class="mbox info"><p class="mbox-h">この方からの返信（'+replies.length+'件）</p>'+
+    replies.slice(0,6).map(function(r){
+      return '<div class="mrow2"><div><b>'+esc(r.subject||'(件名なし)')+'</b>'+
+        '<div class="m">'+esc(fmtDt(r.receivedAt))+' · '+esc(r.state||'未対応')+
+        (r.excerpt?'<br><span class="ex">'+esc(String(r.excerpt).slice(0,120))+'</span>':'')+'</div></div>'+
+        (r.gmailUrl?'<a class="btn sm ghost" href="'+esc(r.gmailUrl)+'" target="_blank" rel="noopener">Gmailで開く</a>':'')+'</div>';
+    }).join('')+'</div>';
 
   /* 進捗ステッパー(選考の流れの現在地)。終了(不採用/辞退)は非表示 */
   var stepper='';
@@ -1066,14 +1267,15 @@ function renderDetail(appId,d){
     '<div class="two"><div>'+
       '<h2 class="sect-h">プロフィール</h2><div class="sect-rule"></div><div class="card">'+prof+'</div>'+regH+
       '<h2 class="sect-h">メール</h2><div class="sect-rule"></div><div class="card">'+
-        '<div class="fld"><label>定型文から作成</label><select id="mc_tpl"><option value="">定型文を選択…</option></select></div>'+
+        issueH+replyH+
+        '<div class="fld"><label>定型文から作成<span class="opt">選考の段階に関わらず、どの文面でも送れます</span></label><select id="mc_tpl"><option value="">定型文を選択…</option></select></div>'+
         '<div id="mc_edit" style="display:none">'+
           '<div class="fld"><label>宛先</label><input type="email" id="mc_to" value="'+esc(app.email||'')+'"></div>'+
           '<div class="fld"><label>件名</label><input type="text" id="mc_sub"></div>'+
           '<div class="fld"><label>本文</label><textarea id="mc_body"></textarea></div>'+
           '<div class="btnrow"><button class="btn" id="mc_send">送信する</button></div>'+
         '</div><div class="err" id="mc_err"></div>'+
-        '<h2 class="sect-h" style="margin-top:20px">送信履歴</h2><div class="sect-rule"></div>'+msgH+
+        '<h2 class="sect-h" style="margin-top:20px">送信の記録</h2><div class="sect-rule"></div>'+msgH+
       '</div>'+
     '</div><div>'+
       '<h2 class="sect-h">経過</h2><div class="sect-rule"></div><div class="card">'+tlH+'</div>'+
@@ -1116,17 +1318,89 @@ function renderDetail(appId,d){
   });
   /* 面談録音: その場録音(timeslice=1秒で取りこぼし防止) or ファイル → Drive直PUT(resumable) → 議事録パイプライン登録 */
   if(el('rc_start')){
-    var RC={mr:null,stream:null,chunks:[],blob:null,name:'',timer:null,t0:0,lock:null};
+    var RC={mr:null,stream:null,chunks:[],blob:null,name:'',timer:null,t0:0,lock:null,
+            sessionP:null,up:null,stats:null};
     window.__rec=RC;
     var rcShow=function(m){['rc_idle','rc_live','rc_done'].forEach(function(x){var n=el(x);if(n)n.style.display=(x===m)?'':'none'})};
     var rcSt=function(m){var n=el('rc_status');if(n)n.textContent=m||''};
+    /* ===== 無音検知 (console.html の録音安全パックを移植 / 2026-09-22) =====
+       「デバイスは生きているが信号がゼロ」(別マイクを掴む・OS入力音量0・ミュート・遠すぎ)は
+       MediaRecorder のエラーにもサイズにも出ない。30分の完全無音でもOpusは数十KBになるので
+       既存の <1KB ガードを素通りする(2026-09-08 IF Tokyo 30分無音録音の教訓)。実信号のRMSで見る。
+       destination へは繋がない(再生・エコーなし)。閾値は window.__recSilence* で上書き可(検証用)。 */
+    var LV={ctx:null,an:null,buf:null,timer:null,level:0,silentSince:0,silentMs:0,sampleMs:0,lastWarn:0,heard:false,t0:0,device:''};
+    var lvThresh=function(){return Number(window.__recSilenceThresh)||0.0045};   // 静かな室内ノイズ未満
+    var lvGrace=function(){return Number(window.__recSilenceGrace)||30000};      // 継続無音の警告しきい(30秒)
+    var lvEarly=function(){return Number(window.__recSilenceEarly)||10000};      // 開始直後の早期警告(10秒)
+    var lvWarnShow=function(msg){
+      LV.lastWarn=Date.now();
+      var n=el('rc_warn');if(!n)return;
+      n.innerHTML='<b>マイクが音を拾っていません</b>（'+esc(msg)+'）<br>入力デバイス・音量・端末の位置をご確認ください。'
+        +(LV.device?'<br>使用マイク: '+esc(LV.device):'');
+      n.classList.add('on');
+    };
+    var lvPaint=function(){
+      var m=el('rc_meter');if(!m)return;
+      var bar=m.firstElementChild;if(bar)bar.style.width=Math.round(LV.level*100)+'%';
+      var q=!!LV.silentSince&&(Date.now()-LV.silentSince>3000);
+      m.classList[q?'add':'remove']('silent');
+    };
+    var lvStop=function(){
+      if(LV.timer){clearInterval(LV.timer);LV.timer=null}
+      try{if(LV.ctx)LV.ctx.close()}catch(e){}
+      LV.ctx=null;LV.an=null;LV.buf=null;LV.level=0;LV.silentSince=0;LV.lastWarn=0;LV.heard=false;
+    };
+    var lvStart=function(stream){
+      lvStop();LV.silentMs=0;LV.sampleMs=0;LV.t0=Date.now();
+      try{LV.device=String((stream.getAudioTracks()[0]||{}).label||'')}catch(e){LV.device=''}
+      var mic=el('rc_mic');if(mic)mic.textContent=LV.device?('使用マイク: '+LV.device):'使用マイク: （名称を取得できません）';
+      try{
+        var AC=window.AudioContext||window.webkitAudioContext;if(!AC||!stream)return;
+        LV.ctx=new AC();
+        var src=LV.ctx.createMediaStreamSource(stream);
+        LV.an=LV.ctx.createAnalyser();LV.an.fftSize=1024;src.connect(LV.an);
+        LV.buf=(typeof Float32Array!=='undefined')?new Float32Array(LV.an.fftSize):null;
+        if(LV.ctx.state==='suspended'){try{LV.ctx.resume()}catch(e){}}
+        LV.timer=setInterval(function(){try{
+          if(!LV.ctx||LV.ctx.state!=='running'){LV.silentSince=0;return}
+          var rms=0,i,s=0;
+          if(LV.buf&&LV.an.getFloatTimeDomainData){LV.an.getFloatTimeDomainData(LV.buf);for(i=0;i<LV.buf.length;i++)s+=LV.buf[i]*LV.buf[i];rms=Math.sqrt(s/LV.buf.length)}
+          else{var b=new Uint8Array(LV.an.fftSize);LV.an.getByteTimeDomainData(b);for(i=0;i<b.length;i++){var v=(b[i]-128)/128;s+=v*v}rms=Math.sqrt(s/b.length)}
+          LV.level=Math.min(1,rms*14);   // 表示用スケール(囁き〜通常会話で概ね0.1〜0.7)
+          LV.sampleMs+=250;
+          var now=Date.now();
+          if(rms<lvThresh()){
+            LV.silentMs+=250;
+            if(!LV.silentSince)LV.silentSince=now;
+            var dur=now-LV.silentSince;
+            if(!LV.heard&&now-LV.t0>=lvEarly()&&dur>=lvEarly()&&!LV.lastWarn)lvWarnShow('開始から音が入っていません');
+            else if(dur>=lvGrace()&&now-LV.lastWarn>60000)lvWarnShow('無音が'+Math.round(dur/1000)+'秒続いています');
+          }else{LV.silentSince=0;LV.heard=true;var w=el('rc_warn');if(w)w.classList.remove('on')}
+          lvPaint();
+        }catch(e){}},250);
+      }catch(e){}
+    };
     var rcErr=function(ex){var n=el('rc_err');if(n){n.textContent=String(ex&&ex.message||ex);n.classList.add('on')}};
     var rcClearErr=function(){var n=el('rc_err');if(n)n.classList.remove('on')};
     var rcMime=function(){var c=['audio/webm;codecs=opus','audio/webm','audio/mp4'];for(var i=0;i<c.length;i++){if(window.MediaRecorder&&MediaRecorder.isTypeSupported&&MediaRecorder.isTypeSupported(c[i]))return c[i]}return ''};
-    var rcSetBlob=function(blob,name){
-      RC.blob=blob;RC.name=name;
+    var rcSize=function(n){return n>1048576?(n/1048576).toFixed(1)+'MB':Math.round(n/1024)+'KB'};
+    var rcSetBlob=function(blob,name,stats){
+      RC.blob=blob;RC.name=name;RC.stats=stats||null;RC.up=null;   // 別の録音に差し替わったら送信状態は破棄
       var au=el('rc_audio');try{au.src=URL.createObjectURL(blob)}catch(e){}
-      rcShow('rc_done');rcSt('サイズ: '+(blob.size>1048576?(blob.size/1048576).toFixed(1)+'MB':Math.round(blob.size/1024)+'KB'));
+      /* 投稿が失敗しても面談の録音を失わないための退避口。録り直しが効かない素材なので常に出す。 */
+      var dl=el('rc_dl');
+      if(dl){try{dl.href=URL.createObjectURL(blob);dl.setAttribute('download',name||'面談録音.webm');dl.style.display=''}catch(e){}}
+      /* (無音検知) 1分以上録って9割超が無音ならマイク不良の可能性大。投稿ボタンを押す前に気づかせる。 */
+      var dw=el('rc_dwarn');
+      if(dw){
+        if(stats&&stats.sampleMs>60000&&stats.silentMs>=stats.sampleMs*0.9){
+          dw.innerHTML='<b>録音のほとんどが無音でした</b>（'+Math.round(stats.silentMs/stats.sampleMs*100)+'%）。マイクが音を拾えていなかった可能性があります。'
+            +(stats.device?'<br>使用マイク: '+esc(stats.device):'')
+            +'<br>このまま投稿しても議事録は作られない見込みです。再生して確認し、必要なら録り直してください。';
+          dw.classList.add('on');
+        }else dw.classList.remove('on');
+      }
+      rcShow('rc_done');rcSt('サイズ: '+rcSize(blob.size));
     };
     el('rc_start').addEventListener('click',async function(){
       rcClearErr();
@@ -1136,8 +1410,16 @@ function renderDetail(appId,d){
         var mt=rcMime();
         RC.mr=new MediaRecorder(RC.stream,mt?{mimeType:mt}:undefined);
         RC.chunks=[];
+        lvStart(RC.stream);   // (無音検知) 入力レベル監視を開始
+        /* (体感速度) アップロード先の発行を録音開始と同時に済ませておく。これは本体GASへの往復で
+           混雑時は10〜45秒かかる工程だが、面談中に裏で終わらせておけば投稿時の待ち時間から丸ごと消える。
+           バイトを送るまでDriveにファイルは作られないので、投稿しなかった場合も痕跡は残らない。 */
+        RC.sessionP=createRecordingUploadSession('代表面談録音.'+((mt||'').indexOf('mp4')>=0?'m4a':'webm'),(mt||'audio/webm').split(';')[0],0)
+          .catch(function(){return null});   // 失敗しても投稿時に作り直すだけ=ここでは握りつぶす
         RC.mr.ondataavailable=function(ev){if(ev.data&&ev.data.size)RC.chunks.push(ev.data)};
         RC.mr.onstop=function(){
+          var _stats={silentMs:LV.silentMs,sampleMs:LV.sampleMs,device:LV.device};   // lvStop前に統計を確保
+          lvStop();
           try{RC.stream.getTracks().forEach(function(t){t.stop()})}catch(e){}
           try{if(RC.lock)RC.lock.release()}catch(e){}
           clearInterval(RC.timer);
@@ -1145,7 +1427,7 @@ function renderDetail(appId,d){
           var type=(RC.mr.mimeType||mt||'audio/webm').split(';')[0];
           var _b=new Blob(RC.chunks,{type:type});
           if(_b.size<1024){rcShow('rc_idle');rcErr(new Error('録音がほぼ空でした（'+Math.round(_b.size/1024)+'KB）。音声が記録されていない可能性があります。もう一度録音するか、録音ファイルのアップロードをお試しください'));return}
-          rcSetBlob(_b,'代表面談録音.'+(type.indexOf('mp4')>=0?'m4a':'webm'));
+          rcSetBlob(_b,'代表面談録音.'+(type.indexOf('mp4')>=0?'m4a':'webm'),_stats);
         };
         RC.mr.onerror=function(){rcErr(new Error('録音エンジンがエラーを報告しました'))};
         RC.mr.start(1000);   // timeslice必須(バックグラウンド化での0バイト録音防止)
@@ -1153,30 +1435,63 @@ function renderDetail(appId,d){
         try{if(navigator.wakeLock)RC.lock=await navigator.wakeLock.request('screen')}catch(e){}
         rcShow('rc_live');rcSt('');
         RC.timer=setInterval(function(){var s=Math.floor((Date.now()-RC.t0)/1000);var n=el('rc_time');if(n)n.textContent=Math.floor(s/60)+':'+('0'+s%60).slice(-2)},500);
-      }catch(ex){rcErr(new Error('マイクを開始できませんでした: '+String(ex&&ex.message||ex)))}
+      }catch(ex){
+        lvStop();try{if(RC.stream)RC.stream.getTracks().forEach(function(t){t.stop()})}catch(e){}   // 途中で失敗してもマイクは必ず離す
+        rcErr(new Error('マイクを開始できませんでした: '+String(ex&&ex.message||ex)));
+      }
     });
     el('rc_stop').addEventListener('click',function(){try{if(RC.mr&&RC.mr.state!=='inactive'){try{RC.mr.requestData()}catch(e){}RC.mr.stop()}}catch(e){}});   // requestDataで最終バッファをフラッシュしてからstop(取りこぼし防止)
     el('rc_file').addEventListener('change',function(){
       rcClearErr();
       var f=this.files&&this.files[0];
-      if(f)rcSetBlob(f.slice(0,f.size,f.type),f.name);   // sliceでinputの寿命から切り離す(値クリア後の参照無効化防止)
+      if(f){
+        rcSetBlob(f.slice(0,f.size,f.type),f.name);   // sliceでinputの寿命から切り離す(値クリア後の参照無効化防止)
+        /* (体感速度) ファイル選択の時点でサイズも形式も確定している。投稿ボタンを押す前に
+           アップロード先を取りに行っておく(録音開始時の先出しと同じ狙い)。録音由来のセッションは
+           ファイル名も形式も違うので必ず捨てて作り直す。 */
+        RC.sessionP=createRecordingUploadSession(f.name,f.type,f.size).catch(function(){return null});
+      }
       this.value='';
     });
-    el('rc_redo').addEventListener('click',function(){RC.blob=null;rcShow('rc_idle');rcSt('')});
+    el('rc_redo').addEventListener('click',function(){RC.blob=null;RC.up=null;RC.sessionP=null;RC.stats=null;rcShow('rc_idle');rcSt('')});
     el('rc_up').addEventListener('click',async function(){
       if(!RC.blob){rcErr(new Error('録音またはファイルがありません'));return}
       if(RC.blob.size<1024){rcErr(new Error('録音が空です（'+Math.round(RC.blob.size/1024)+'KB）。音声が記録されていません。録音し直すか、録音ファイルをアップロードしてください'));return}   // 空の無音アップロードを防止
       rcClearErr();
-      var btn=this;busy(btn,'アップロード中…');
+      var btn=this;
+      RC.up=RC.up||{};   // 送信済みのDriveファイルIDを保持。③だけ失敗した時に②(バイト転送)をやり直さない。
+      busy(btn,RC.up.fileId?'登録し直しています…':'アップロード中…');
+      /* 経過秒を出す。本体GASの往復は混雑時に数十秒かかるので、無言だと固まったように見える。 */
+      var _t0=Date.now(),_msg='',_tick=setInterval(function(){
+        var n=el('rc_status');if(n)n.textContent=_msg+'（'+Math.floor((Date.now()-_t0)/1000)+'秒）';
+      },500);
+      var _st=function(m){_msg=m||''};
       try{
-        // メモ/チェックが入力されていれば面談記録として先に保存 (録音と併存)
+        /* メモ/チェックは録音のバイト転送と並行して保存する。直列に前置きすると本体GASの往復が
+           もう1本まるごと待ち時間に足される。登録(③)より前には必ず完了させるので、同じ面談記録への
+           書込が競合することはない。 */
         var _hasNote=(el('mm_memo')&&el('mm_memo').value.trim())||CHECK_ITEMS.some(function(_,i){var c=el('ck_'+i);return c&&c.checked});
-        if(_hasNote)await saveInterviewNote();
-        await uploadInterviewRecording(RC.blob,RC.name||'代表面談録音.webm',{appId:appId,stage:'primary',advance:true,onStatus:rcSt});
+        var _noteP=null;
+        if(_hasNote){_noteP=saveInterviewNote();_noteP.catch(function(){})}   // 先に握っておく(未処理rejection避け)。実際の判定は下で await する。
+        await uploadInterviewRecording(RC.blob,RC.name||'代表面談録音.webm',{
+          appId:appId,stage:'primary',advance:true,onStatus:_st,
+          sessionP:RC.sessionP,state:RC.up,
+          beforeFinalize:function(){
+            if(!_noteP)return;
+            return _noteP.catch(function(e){
+              throw new Error('面談メモの保存に失敗しました（録音はDriveへ送信済みです）。もう一度「アップロード」を押すと、メモの保存と登録だけやり直します: '+String(e&&e.message||e));
+            });
+          }});
+        clearInterval(_tick);RC.sessionP=null;
         toast('録音を登録しました。文字起こしと議事録は自動で進みます');
         MCACHE.items=null;
         reload();
-      }catch(ex){unbusy(btn);rcSt('');rcErr(ex)}
+      }catch(ex){
+        clearInterval(_tick);unbusy(btn);
+        RC.sessionP=null;   // 使い切った/失効した可能性がある。次回は作り直す。
+        rcSt(RC.up.fileId?'録音の送信は完了しています。「アップロード」をもう一度押すと、登録だけやり直します（録音は送り直しません）。':'録音は端末に残っています。「録音を端末に保存」で手元に控えたうえで、もう一度お試しください。');
+        rcErr(ex);
+      }
     });
   }
   /* 面談メモ+チェックリストの保存 (面談記録へ upsert。既存の他フィールドは温存) */
@@ -1277,6 +1592,18 @@ function renderDetail(appId,d){
           if(r.toEmail)el('mc_to').value=r.toEmail;
         }catch(ex){showErr('mc_err',ex)}
       });
+      /* (2026-09-22)「いま送る」= 届かなかった自動メールを、その定型文を差し込んだ状態で作成欄へ流す。
+         自動で送り直すのではなく、必ず代表が中身を見て送る形にする(誤送信を作らない)。 */
+      document.querySelectorAll('[data-mi]').forEach(function(b){
+        b.addEventListener('click',function(){
+          var k=this.dataset.tpl;if(!k)return;
+          var hit=false;
+          for(var i=0;i<sel.options.length;i++)if(sel.options[i].value===k){sel.selectedIndex=i;hit=true;break}
+          if(!hit){showErr('mc_err',new Error('この定型文（'+k+'）は一覧にありません。定型文の設定をご確認ください'));return}
+          sel.dispatchEvent(new Event('change'));
+          try{el('mc_edit').scrollIntoView({block:'center'})}catch(e){}
+        });
+      });
       el('mc_send').addEventListener('click',async function(){
         var e=el('mc_err');e.classList.remove('on');
         var to=el('mc_to').value.trim(),sub=el('mc_sub').value.trim(),body=el('mc_body').value;
@@ -1327,9 +1654,12 @@ function renderIssue(depts,b){
     '<h2 class="sect-h">リンクを発行する</h2><div class="sect-rule"></div>'+
     '<div class="card"><div class="grid2">'+
       '<div class="fld"><label>フロー</label><select id="ie_flow">'+
-        '<option value="interview">面談あり（標準）— 基本情報入力 → 代表面談 → 合否</option>'+
+        /* (2026-09-22) 「どの順番で進めるか」が選べることが分かる名前にする。
+           recorded は実体が「先に面談 → あとで基本情報」で、録音は任意(録音せずに進める導線が既にある)
+           のに、名前が録音前提だったため順序の選択肢として認識されていなかった。 */
+        '<option value="interview">先に情報 → 面談（標準）— 基本情報を入力してもらってから代表面談</option>'+
         '<option value="no_interview">面談なし — 入力完了で登録まで自動（採用確定済みの方）</option>'+
-        '<option value="recorded">録音から始める採用 — 面談実施済み・録音を残して登録へ</option>'+
+        '<option value="recorded">先に面談 → あとで情報 — もう会った方に、あとから登録案内を送る（録音は任意）</option>'+
       '</select></div>'+
       '<div class="fld"><label>氏名（必須）</label><input type="text" id="ie_name" placeholder="山田 太郎"></div>'+
       '<div class="fld"><label>メールアドレス<span class="opt">自動送信する場合は必須</span></label><input type="email" id="ie_mail" placeholder="taro@gmail.com"></div>'+
@@ -1351,7 +1681,7 @@ function renderIssue(depts,b){
     var e=el('ie_err');e.classList.remove('on');
     var name=el('ie_name').value.trim(),mail=el('ie_mail').value.trim(),send=el('ie_send').checked,flow=el('ie_flow').value;
     if(!name){e.textContent='氏名を入力してください';e.classList.add('on');return}
-    if(flow==='recorded'&&!mail){e.textContent='録音から始める採用では、登録案内の送信先メールアドレスが必要です';e.classList.add('on');return}
+    if(flow==='recorded'&&!mail){e.textContent='「先に面談 → あとで情報」では、登録案内の送信先メールアドレスが必要です';e.classList.add('on');return}
     if(send&&!mail){e.textContent='メールを自動送信する場合は、メールアドレスを入力してください';e.classList.add('on');return}
     var btn=this;btn.disabled=true;btn.textContent='発行しています…';
     try{
