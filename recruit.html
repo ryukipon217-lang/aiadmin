@@ -1383,6 +1383,7 @@ function renderDetail(appId,d){
         issueH+replyH+
         '<div class="fld"><label>定型文から作成<span class="opt">選考の段階に関わらず、どの文面でも送れます</span></label><select id="mc_tpl"><option value="">定型文を選択…</option></select></div>'+
         '<div id="mc_edit" style="display:none">'+
+          '<div id="mc_warn" role="alert" style="display:none;margin:0 0 12px;padding:10px 12px;border-radius:10px;background:#fff4e5;border:1px solid #f1c27d;color:#7a4300;font-size:12.5px;line-height:1.7"></div>'+
           '<div class="fld"><label>宛先</label><input type="email" id="mc_to" value="'+esc(app.email||'')+'"></div>'+
           '<div class="fld"><label>件名</label><input type="text" id="mc_sub"></div>'+
           '<div class="fld"><label>本文</label><textarea id="mc_body"></textarea></div>'+
@@ -1760,12 +1761,14 @@ function renderDetail(appId,d){
       });
       if(legacyGrp)sel.appendChild(legacyGrp);
       sel.addEventListener('change',async function(){
-        if(!this.value){el('mc_edit').style.display='none';return}
+        if(!this.value){el('mc_edit').style.display='none';var _w0=el('mc_warn');if(_w0)_w0.style.display='none';return}
         el('mc_edit').style.display='';el('mc_sub').value='読み込んでいます…';el('mc_body').value='';
         try{
           var r=await apiGet('getRecruitMessageDraft',{appId:appId,messageType:this.value});
           if(r&&r.ok===false)throw new Error(r.error);
           el('mc_sub').value=r.subject||'';el('mc_body').value=r.body||'';
+          // (2026-10-09) サーバの確認結果(今は開けないリンク・保護者宛ての宛先など)。送信時もサーバが同じ理由で止める
+          var _w=el('mc_warn');if(_w){_w.textContent=r.linkWarning?('⚠ '+r.linkWarning):'';_w.style.display=r.linkWarning?'':'none';}
           // (2026-10-06) サーバは宛先を to で返す。toEmail だけを見ていたため、保護者宛ての定型文でも宛先が本人のままだった。
           //   宛先が空(保護者メール未登録など)なら空のままにして、本人へ誤送信しない。
           el('mc_to').value=r.to||r.toEmail||'';
