@@ -533,7 +533,10 @@ function route(){
   try{if(window.__rec){var _r=window.__rec;window.__rec=null;if(_r.mr&&_r.mr.state!=='inactive')_r.mr.stop();if(_r.stream)_r.stream.getTracks().forEach(function(t){t.stop()});clearInterval(_r.timer)}}catch(e){}
   var h=(location.hash||'#home').replace(/^#/,'');
   var m=h.split('?')[0],q=new URLSearchParams(h.indexOf('?')>=0?h.slice(h.indexOf('?')+1):'');
-  if(!S&&m!=='login'){location.hash='#login';return}
+  if(!S&&m!=='login'){
+    // (2026-10-06) console や通知メールから開いた候補者(#detail?id=…)を、ログイン後に開き直せるよう控えておく
+    try{if(location.hash&&location.hash!=='#login')sessionStorage.setItem('recruitAfterLogin',location.hash)}catch(e){}
+    location.hash='#login';return}
   if(S&&m==='login'){location.hash='#home';return}
   el('chrome').style.display=S?'':'none';
   if(S){el('uname').textContent=(S.name||'')+(S.role?'（'+S.role+'）':'');
@@ -579,7 +582,8 @@ function vLogin(){
       S={memberId:(u.member&&u.member.id)||u.memberId||'',token:r.token,name:(u.member&&u.member.name)||'',role:u.highestRole||''};
       localStorage.setItem(SKEY,JSON.stringify(S));
       warmup();
-      location.hash='#home';route();
+      var back='';try{back=sessionStorage.getItem('recruitAfterLogin')||'';sessionStorage.removeItem('recruitAfterLogin')}catch(e2){}
+      location.hash=(/^#[a-z]/.test(back)&&back.indexOf('#login')!==0)?back:'#home';route();
     }).catch(function(ex){
       el('l_go').disabled=false;el('l_go').textContent='ログイン';
       e.textContent=String(ex&&ex.message||ex);e.classList.add('on');
@@ -624,6 +628,10 @@ function renderHome(b){
         return rowHtml(Object.assign({},s,{source:a.source,finalDepartmentId:a.finalDepartmentId}),warn);
       }).join('')+'</div>';
   });
+  /* (2026-10-06) 「録音待ち」(先に面談 → あとで情報) は運営の対応待ちなのに、サーバ集計のどの分類にも入らず
+     停滞(3日)になるまで出てこなかった。一覧データから拾って要対応に並べる。 */
+  var recWait=(b.applications||[]).filter(function(a){return a.currentPhase==='採用後'&&a.currentTask==='録音待ち'&&(a.resultStatus||'active')==='active'});
+  if(recWait.length)need+='<h2 class="sect-h">録音の投稿・登録案内の送信<span class="cnt">'+recWait.length+'件</span></h2><div class="sect-rule"></div><div class="card">'+recWait.map(function(a){return rowHtml(a)}).join('')+'</div>';
   if(!need)need='<h2 class="sect-h">対応が必要な候補者</h2><div class="sect-rule"></div><div class="card"><div class="empty">今、運営の対応が必要な候補者はいません。手続きは自動で進行しています。</div></div>';
   var waiting='';
   [['waitingCandidate','ご本人の入力待ち'],['waitingGuardian','保護者の同意待ち'],['stalled','停滞（追いかけ推奨）']].forEach(function(def){
@@ -1006,6 +1014,8 @@ function bindDetailMinutes(appId,stage){
 /* ============ detail ============ */
 function _userBusy(){
   if(window.__rec)return true;   // 録音中は絶対に画面を差し替えない
+  // (2026-10-06) プロフィール編集・日時変更の欄を開いている間も差し替えない(入力欄の外にいると未保存の入力が消えていた)
+  if(['pf_edit','rs_box'].some(function(id){var n=el(id);return !!n&&n.style.display===''}))return true;
   var ae=document.activeElement;
   return !!(ae&&/^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName)&&ae.closest('#app'));
 }
@@ -1056,6 +1066,16 @@ function renderDetail(appId,d){
   var isRec=String(app.source||'')==='direct_entry_rec';   // (録音から始める採用)
   var deptMapId={};depts.forEach(function(x){deptMapId[x.id]=x.name});
   var finalDept=app.final_department_id?(deptMapId[app.final_department_id]||app.final_department_id):'';
+  /* (2026-10-06) datetime-local / month の入力欄に入れる形へ整える(シートからは Date の ISO 文字列で来ることがある) */
+  function dtLocal(v){if(!v)return '';var s=String(v);if(/^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}$/.test(s))return s.replace(' ','T');var d=new Date(s);if(isNaN(d.getTime()))return '';var p=function(x){return ('0'+x).slice(-2)};return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+'T'+p(d.getHours())+':'+p(d.getMinutes())}
+  function monthVal(v){if(!v)return '';var s=String(v);if(/^\d{4}-\d{2}$/.test(s))return s;var d=new Date(s);if(isNaN(d.getTime()))return s;return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)}
+  /* 送信の記録(自動+手動)から、指定した種別のメールが最後に送られた日時を返す。バナーの「送信済み」を実データで出すため。 */
+  function lastSent(autoTypes,manualTpls){
+    var xs=autoMsgs.filter(function(m){return autoTypes[m.messageType]&&m.status==='sent'}).map(function(m){return m.sentAt||m.createdAt})
+      .concat(msgs.filter(function(m){return manualTpls[m.message_type]}).map(function(m){return m.sent_at||m.created_at}));
+    xs.sort(function(a,b){return new Date(b||0)-new Date(a||0)});return xs[0]||'';
+  }
+  function pendingOf(types){return (A.scheduledMessages||[]).filter(function(s){return types[s.messageType]&&s.status==='pending'})[0]||null}
 
   /* --- 次のアクション パネル --- */
   var act='';
@@ -1078,7 +1098,16 @@ function renderDetail(appId,d){
         '<div class="fld"><label>Zoom URL<span class="opt">空欄で既定</span></label><input type="url" id="iv_url" placeholder="既定のZoomを使用"></div>'+
         '</div><div class="err" id="iv_err"></div><div class="btnrow"><button class="btn" id="iv_go">日時を確定して案内を自動送信</button></div></div>';
     }else if(phase==='一次選考'&&task==='面談実施待ち'){
-      act='<div class="banner warn"><b>代表面談の実施待ちです。</b>'+(app.primaryInterviewAt?'<br>予定: '+esc(fmtDt(app.primaryInterviewAt))+(app.primaryInterviewer?' · 担当: '+esc(app.primaryInterviewer):''):'')+'</div>'+
+      var _ivWho=(interviewers.filter(function(x){return x.id===app.primaryInterviewer})[0]||{}).name||app.primaryInterviewer||'';
+      act='<div class="banner warn"><b>代表面談の実施待ちです。</b>'+(app.primaryInterviewAt?'<br>予定: '+esc(fmtDt(app.primaryInterviewAt))+(_ivWho?' · 担当: '+esc(_ivWho):''):'')+'</div>'+
+        /* (2026-10-06) 日時変更。確定後に日程がずれても直す手段が無く、旧日時の前日・当日確認がそのまま届いていた。 */
+        '<div class="card"><div class="btnrow" id="rs_openrow"><button class="btn ghost" id="rs_open">代表面談の日時を変更する</button></div>'+
+        '<div id="rs_box" style="display:none"><p class="rec-sub">代表面談の日時を変更する</p><div class="grid3">'+
+        '<div class="fld"><label>新しい日時</label><input type="datetime-local" id="rs_dt" value="'+esc(dtLocal(app.primaryInterviewAt))+'"></div>'+
+        '<div class="fld"><label>担当者</label><select id="rs_who">'+opts(interviewers,app.primaryInterviewer||'')+'</select></div>'+
+        '<div class="fld"><label>Zoom URL<span class="opt">空欄で既定</span></label><input type="url" id="rs_url" value="'+esc(app.primaryInterviewUrl||'')+'" placeholder="既定のZoomを使用"></div>'+
+        '</div><div class="err" id="rs_err"></div><div class="btnrow"><button class="btn" id="rs_go">日時を変更してご本人へ連絡する</button><button class="btn ghost" id="rs_cancel">やめる</button></div>'+
+        '<p class="note" style="margin-top:8px">旧日時の前日・当日のリマインドは取り消され、新しい日時で入れ直されます。ご本人には「日時変更のご連絡」が届きます。</p></div></div>'+
         '<div class="card">'+
         '<p class="rec-sub">録音から議事録をつくる</p>'+
         '<div id="rc_idle"><div class="btnrow">'+
@@ -1121,7 +1150,7 @@ function renderDetail(appId,d){
         '<div class="fld"><label>兼任部署<span class="opt">任意・複数選択可</span></label>'+deptChipsHtml('fd_subs',depts)+'<div class="hint">最初から兼任する場合は選択。登録時に副所属として自動作成されます。</div></div>'+
         '<div class="err" id="fd_err"></div><div class="btnrow">'+
         '<button class="btn" id="fd_accept">採用する</button><button class="btn danger" id="fd_rej">不採用にする</button></div>'+
-        '<p class="note" style="margin-top:10px">採用すると内定通知が自動送信され、以降（意思確認→追加情報→未成年は保護者同意→登録）は自動で進みます。不採用の場合は不採用連絡が自動送信されます。</p></div>';
+        '<p class="note" style="margin-top:10px">採用すると内定通知が自動送信され、以降（登録情報の入力→未成年は保護者同意→登録）は自動で進みます。不採用の場合は不採用連絡が自動送信されます。</p></div>';
     }else if(phase==='採用後'&&task==='録音待ち'){
       act='<div class="banner ok"><b>面談は実施済みです（先に面談 → あとで情報）。</b><br>ご本人へ登録案内を送ると、基本情報の入力から登録まで自動で進みます。面談の録音を投稿すれば、文字起こし・議事録を残したうえで同じ動線に入ります。<b>録音は任意です</b>。残さない場合は下の「録音せずに登録リンクを送る」から進められます。</div>'+
         '<div class="card">'+
@@ -1158,14 +1187,37 @@ function renderDetail(appId,d){
       // (加入意思ステップ廃止 2026-09-17) source で絞ると代表面談ルートの採用者に再発行UIが出ず、
       //   リンク切れ/メール不着のときに運営が手当てできなくなる。状態(採用後|入力待ち)だけで出す。
       var _flowLbl=isRec?'先に面談 → あとで情報':(app.source==='direct_entry_noiv'?'面談なし採用':'代表面談を経た採用');
-      act='<div class="banner ok"><b>ご本人の登録情報の入力待ちです（'+_flowLbl+'）。</b><br>案内と追いかけの連絡は自動送信済みです。入力が完了すると自動で登録まで進みます。<br>この画面から発行するリンクの有効期限は72時間です。</div>'+
+      /* (2026-10-06) 「案内と追いかけの連絡は自動送信済みです」は固定文言で、実際には一通も送られていない候補者
+         (リンクだけ発行した面談なし採用など)にも出ていた。送信の記録から実際の状況を出す。
+         面談なし採用・先に面談の経路には追いかけの自動連絡が無い(採用通知を経ないため)。 */
+      var _invAt=lastSent({'採用通知':1,'面談なし採用(登録のみ)のご案内':1,'面談なし採用のご案内':1,'追加情報入力依頼':1},{accept_notice:1,direct_entry_invite_noiv:1,direct_entry_invite:1,additional_info:1});
+      var _invPend=pendingOf({'採用通知':1,'面談なし採用(登録のみ)のご案内':1,'面談なし採用のご案内':1});
+      var _fu=pendingOf({'追加情報未入力追い連絡':1,'加入意思未回答追い連絡':1});
+      var _logOk=Array.isArray(A.autoMessages)&&Array.isArray(A.scheduledMessages);   // 送信記録を返さない古い応答では「未送信」と断定しない
+      var _noInv=_logOk&&!_invAt&&!_invPend;
+      act='<div class="banner '+(_noInv?'warn':'ok')+'"><b>'+(_noInv?'登録案内のメールがまだ送られていません（'+_flowLbl+'）。':'ご本人の登録情報の入力待ちです（'+_flowLbl+'）。')+'</b><br>'+
+        (!_logOk?'送信の記録を取得できませんでした（下の「送信の記録」をご確認ください）。'
+          :_noInv?'下の「新しいリンクをメールで再送」で案内を送るか、リンクをコピーしてご本人へ直接お送りください。'
+          :(_invAt?'登録案内は送信済みです（最終: '+esc(fmtDt(_invAt))+'）。':'登録案内は数分以内に自動で送信されます。')+(_fu?'追いかけの連絡は '+esc(fmtDt(_fu.scheduledAt))+' に自動送信の予定です。':'追いかけの連絡は自動では送られません。'))+
+        '<br>入力が完了すると自動で登録まで進みます。この画面から発行するリンクの有効期限は72時間です。</div>'+
         '<div class="card"><div class="btnrow">'+
         '<button class="btn ghost" id="de_reissue">新しいリンクを発行してコピー</button>'+
         '<button class="btn ghost" id="de_remail">新しいリンクをメールで再送</button>'+
         '</div><div class="linkbox" id="de_box" style="display:none"><input readonly id="de_url"><button class="btn sm ghost" onclick="__copy(el(\'de_url\').value)">コピー</button></div>'+
         '<div class="err" id="de_err"></div></div>';
     }else if(task==='同意待ち'){
-      act='<div class="banner ok"><b>保護者の同意待ちです。</b>同意のご案内は自動送信済みです。同意が確認されると自動で登録まで進みます。'+(gc?'<br>保護者: '+esc(gc.guardian_name||'')+'（'+esc(gc.guardian_email||'')+'）· 状態: '+esc(gc.consent_status||''):'')+'</div>';
+      /* (2026-10-06) 固定の「自動送信済みです」をやめ、送信の記録から出す。consent_status は依頼を送っても
+         「未送信」のまま変わらない列なので表示しない。自動の追い連絡は3日後の1回だけなので、再送の入口を置く。 */
+      var _gAt=lastSent({'保護者同意依頼':1,'保護者同意未完了追い連絡':1},{guardian_consent:1,guardian_consent_followup:1});
+      var _gPend=pendingOf({'保護者同意依頼':1});
+      var _gLogOk=Array.isArray(A.autoMessages)&&Array.isArray(A.scheduledMessages);
+      var _gNo=_gLogOk&&!_gAt&&!_gPend;
+      act='<div class="banner '+(_gNo?'warn':'ok')+'"><b>保護者の同意待ちです。</b>'+
+        (!_gLogOk?'同意のご案内の送信記録を取得できませんでした（下の「送信の記録」をご確認ください）。'
+          :_gAt?'同意のご案内は送信済みです（最終: '+esc(fmtDt(_gAt))+'）。':(_gPend?'同意のご案内は数分以内に自動で送信されます。':'<b>同意のご案内がまだ送られていません。</b>'))+
+        '同意が確認されると自動で登録まで進みます。'+(gc?'<br>保護者: '+esc(gc.guardian_name||'')+'（'+esc(gc.guardian_email||'')+'）':'')+'</div>'+
+        '<div class="card"><div class="btnrow"><button class="btn ghost" data-compose-tpl="guardian_consent">保護者へ同意のご案内を送る（メール作成欄へ）</button></div>'+
+        '<p class="note" style="margin-top:8px">保護者のメールアドレスが間違っている場合は、先に下の「プロフィール」の「編集する」から直してください。</p></div>';
     }else if(app.nextActor==='candidate'){
       act='<div class="banner ok"><b>ご本人の対応待ちです。</b>依頼と追いかけの連絡は自動で送信されます。</div>';
     }
@@ -1190,6 +1242,7 @@ function renderDetail(appId,d){
   var prof='<dl class="kv">'+
     kv('メール',app.email)+kv('フリガナ',app.name_kana)+kv('学年',app.grade)+kv('学校・所属',app.school_name||app.affiliation)+
     kv('在住',[app.residence_prefecture,(reg&&reg.residence_country)].filter(Boolean).join(' / '))+
+    kv('保護者',gc?[gc.guardian_name,gc.guardian_email?'（'+gc.guardian_email+'）':''].join(''):'')+
     kv('希望部署',(A.desiredDepartmentNames||[]).map(function(x){return x.name}).join('、'))+
     kv('確定部署',finalDept)+
     kv('兼任部署',String(app.sub_department_ids||'').split(',').filter(Boolean).map(function(id){return deptMapId[id]||id}).join('、'))+
@@ -1202,10 +1255,60 @@ function renderDetail(appId,d){
   var regH='';
   if(reg){
     regH='<h2 class="sect-h">本人入力（追加情報）</h2><div class="sect-rule"></div><div class="card"><dl class="kv">'+
-      kv('参加開始月',reg.join_date)+kv('緊急連絡先',reg.emergency_contact)+kv('フルリモート',reg.remote_available)+
+      kv('参加開始月',monthVal(reg.join_date))+kv('緊急連絡先',reg.emergency_contact)+kv('フルリモート',reg.remote_available)+
       kv('保護者同意',reg.guardian_required==='はい'?((gc&&gc.consent_status)||'必要'):'不要（成人）')+
       kv('入力日時',fmtDt(reg.submitted_at))+'</dl></div>';
   }
+  /* (2026-10-06) プロフィールの修正。候補者の入力ミス(メール・保護者メールの打ち間違い等)を運営が直せる手段が無く、
+     メールが届かないまま止まっていた。保存は recruitUpdateProfile(応募行・追加情報・保護者同意を同じ値にそろえる)。
+     構成員登録後は Members が正本なので、ここでは編集させない。 */
+  var canEditProf=!app.member_id&&rs!=='registered';
+  var GRADES=['中学1年','中学2年','中学3年','高校1年','高校2年','高校3年','高専','大学1年','大学2年','大学3年','大学4年','大学院','専門学校','社会人','その他'];   // entry.html と同じ
+  // 登録情報(ARF)がある項目はその値を初期値にする(登録に使われるのは ARF。旧経路の候補者は応募行と食い違うことがある)
+  function effv(raV,k){return (reg&&reg[k]!=null&&String(reg[k])!=='')?reg[k]:raV}
+  var PF=[   // [キー, 見出し, 入力の種類, 現在値, 必須]
+    ['name','氏名','text',effv(app.name,'name'),1],['name_kana','フリガナ','text',effv(app.name_kana,'name_kana')],['email','メール','email',effv(app.email,'email'),1],
+    ['grade','学年','grade',effv(app.grade,'grade')],['school_name','学校名','text',effv(app.school_name,'school_name')],['affiliation','所属・学年（自由記述）','text',app.affiliation],
+    ['residence_prefecture','都道府県','text',effv(app.residence_prefecture,'residence_prefecture')]
+  ];
+  if(reg)PF=PF.concat([['residence_country','在住国','text',reg.residence_country],['join_date','参加開始月','month',monthVal(reg.join_date)],
+    ['emergency_contact','緊急連絡先','text',reg.emergency_contact],['remote_available','フルリモート','yn',reg.remote_available]]);
+  if(gc)PF=PF.concat([['guardian_name','保護者氏名','text',gc.guardian_name],['guardian_email','保護者メール','email',gc.guardian_email]]);
+  PF=PF.concat([['referrer_name','紹介者','text',app.referrer_name],
+    ['desired_department_reason','志望動機','area',app.desired_department_reason],['pre_interview_questions','事前質問・メモ','area',app.pre_interview_questions]]);
+  /* (2026-10-06 提案8) 希望部署。HP 応募は部署「名」、リンク発行は部署 ID で入っている。部署一覧と名前で突き合わせて
+     ID のチップに直す。一覧に無い名称は注記に出し、チップに触れなければ元の値のまま残す(保存時は差分だけ送る)。 */
+  var desIds=[],desOther=[];
+  String(app.desired_department_ids||'').split(',').map(function(s){return s.trim()}).filter(Boolean).forEach(function(v){
+    var hit=depts.filter(function(d){return d.id===v||d.name===v})[0];
+    if(hit){if(desIds.indexOf(hit.id)<0)desIds.push(hit.id)}else desOther.push(v);
+  });
+  function pfInput(f){
+    var id='pf_'+f[0],v=f[3]==null?'':String(f[3]);
+    if(f[2]==='area')return '<textarea id="'+id+'">'+esc(v)+'</textarea>';
+    if(f[2]==='grade'){var gl=GRADES.slice();if(v&&gl.indexOf(v)<0)gl.unshift(v);return '<select id="'+id+'"><option value="">（未入力）</option>'+gl.map(function(g){return '<option'+(g===v?' selected':'')+'>'+esc(g)+'</option>'}).join('')+'</select>'}
+    if(f[2]==='yn')return '<select id="'+id+'"><option value="">（未入力）</option>'+['はい','いいえ'].map(function(o){return '<option'+(o===v?' selected':'')+'>'+o+'</option>'}).join('')+'</select>';
+    // 参加開始月が YYYY-MM でない既存値(「11月から」等)は type=month に入らず空になるため、文字入力で出す
+    var asMonth=f[2]==='month'&&(!v||/^\d{4}-\d{2}$/.test(v));
+    return '<input type="'+(f[2]==='email'?'email':(asMonth?'month':'text'))+'" id="'+id+'" value="'+esc(v)+'">';
+  }
+  var pfH=!canEditProf?(app.member_id?'<p class="note" style="margin-top:6px">構成員登録後の変更は、コンソールのメンバー管理で行ってください。</p>':'')
+    :'<div class="btnrow" id="pf_openrow" style="margin-top:6px"><button class="btn sm ghost" id="pf_open">プロフィールを編集する</button></div>'+
+     '<div id="pf_edit" style="display:none;margin-top:14px;padding-top:14px;border-top:1px solid var(--line)">'+
+     '<div class="grid2">'+PF.filter(function(f){return f[2]!=='area'}).map(function(f){return '<div class="fld"><label>'+esc(f[1])+(f[4]?'<span class="opt">必須</span>':'')+'</label>'+pfInput(f)+'</div>'}).join('')+'</div>'+
+     '<div class="fld"><label>希望部署<span class="opt">複数選択可</span></label>'+deptChipsHtml('pf_desired',depts,desIds)+
+       (desOther.length?'<div class="hint">応募時の希望（部署一覧にない名称）: '+esc(desOther.join('、'))+'。部署を選び直すと、選んだ部署に置き換わります。</div>':'')+'</div>'+
+     PF.filter(function(f){return f[2]==='area'}).map(function(f){return '<div class="fld"><label>'+esc(f[1])+'</label>'+pfInput(f)+'</div>'}).join('')+
+     '<p class="note">変えた項目だけを保存します。ご本人が入力済みの登録情報・保護者情報にも同じ値が反映されます。</p>'+
+     '<div class="err" id="pf_err"></div><div class="btnrow"><button class="btn" id="pf_save">保存する</button><button class="btn ghost" id="pf_cancel">やめる</button></div></div>';
+  /* (2026-10-06) 選考の終了。不採用にできるのは「判断待ち」だけで、日時選択待ち・入力待ち・保護者同意待ちで
+     止まった候補者(辞退・連絡がつかない・保護者の同意が得られない)を閉じる手段が完全削除しか無かった。 */
+  var closeH=(rs==='active'&&!app.member_id)?'<div class="card" style="margin-top:26px"><p class="rec-sub">選考を終了する</p>'+
+    '<p class="note" style="margin-bottom:10px">辞退の申し出があった・連絡がつかない・保護者の同意が得られない、などで手続きを止めるときに使います。未送信の自動メールや追いかけの連絡は止まり、記録は残ります（完全削除とは別です）。</p>'+
+    '<div class="grid2"><div class="fld"><label>区分</label><select id="cl_kind"><option value="withdrawn">辞退（ご本人の都合・連絡がつかない）</option><option value="rejected">見送り（不採用）</option></select></div>'+
+    '<div class="fld"><label>ご本人へのメール</label><select id="cl_mail"><option value="none">送らない</option><option value="withdrawal">辞退受付連絡を送る</option><option value="reject">不採用連絡を送る</option></select></div></div>'+
+    '<div class="fld"><label>理由・メモ<span class="opt">任意・経過に残ります</span></label><input type="text" id="cl_reason" placeholder="例: 3回連絡したが返信がない"></div>'+
+    '<div class="err" id="cl_err"></div><div class="btnrow"><button class="btn danger" id="cl_go">選考を終了する</button></div></div>':'';
 
   /* --- タイムライン + メール --- */
   var tlH=hist.length?'<ul class="tl">'+hist.map(function(h){
@@ -1275,7 +1378,7 @@ function renderDetail(appId,d){
     act+
     minH+
     '<div class="two"><div>'+
-      '<h2 class="sect-h">プロフィール</h2><div class="sect-rule"></div><div class="card">'+prof+'</div>'+regH+
+      '<h2 class="sect-h">プロフィール</h2><div class="sect-rule"></div><div class="card">'+prof+pfH+'</div>'+regH+
       '<h2 class="sect-h">メール</h2><div class="sect-rule"></div><div class="card">'+
         issueH+replyH+
         '<div class="fld"><label>定型文から作成<span class="opt">選考の段階に関わらず、どの文面でも送れます</span></label><select id="mc_tpl"><option value="">定型文を選択…</option></select></div>'+
@@ -1290,6 +1393,7 @@ function renderDetail(appId,d){
     '</div><div>'+
       '<h2 class="sect-h">経過</h2><div class="sect-rule"></div><div class="card">'+tlH+'</div>'+
     '</div></div>'+
+    closeH+
     '<div class="card" style="border-color:#e6c3c3;margin-top:26px"><p class="rec-sub" style="color:var(--bad)">データの削除</p>'+
     '<p class="note">デモ・テストの候補者を、応募・面談記録・メール履歴などの関連データごと完全に削除します（復元できません）。'+(app.member_id?'<br>※構成員登録済みのため、構成員データ（メンバー管理）は残ります。':'')+'</p>'+
     '<div class="btnrow"><button class="btn danger" id="del_go">この候補者を完全に削除する</button></div><div class="err" id="del_err"></div></div>');
@@ -1299,8 +1403,61 @@ function renderDetail(appId,d){
   function unbusy(btn){btn.disabled=false;btn.textContent=btn.dataset.t}
   function reload(){CACHE.bundleAt=0;dropDetail(appId);vDetail(appId)}   // 操作後は必ず最新を取り直す(古いキャッシュの瞬間表示を防ぐ)
   function showErr(id,ex){var e=el(id);if(!e)return alert(String(ex&&ex.message||ex));e.textContent=String(ex&&ex.message||ex);e.classList.add('on')}
+  /* 新しい操作(2026-10-06)を、本体GASの配信前に画面だけ先に開いたときの案内 */
+  function srvErr(ex){return /unknown mutation/i.test(String(ex&&ex.message||ex))?new Error('サーバ側（本体GAS）の更新がまだ配信されていないため、この操作はまだ使えません。'):ex}
 
-  bindChips('ap_subs');bindChips('fd_subs');bindChips('dd_subs');
+  /* --- プロフィールの修正 --- */
+  /* 差分は「編集欄を開いた時点の入力欄の値」と比べる。元データと比べると、ブラウザによる正規化
+     (month 欄に入らない値が空になる・select の不一致など)を「変更あり」とみなし、触っていない項目を空で上書きしてしまう。 */
+  var pfInit={};
+  if(el('pf_open'))el('pf_open').addEventListener('click',function(){
+    el('pf_edit').style.display='';el('pf_openrow').style.display='none';
+    pfInit={};PF.forEach(function(f){var e=el('pf_'+f[0]);if(e)pfInit[f[0]]=String(e.value||'').trim()});
+    pfInit.__desired=chipVals('pf_desired').join(',');   // 希望部署チップの開いた時点の選択
+    try{el('pf_name').focus()}catch(e){}
+  });
+  if(el('pf_cancel'))el('pf_cancel').addEventListener('click',function(){el('pf_edit').style.display='none';el('pf_openrow').style.display=''});
+  if(el('pf_save'))el('pf_save').addEventListener('click',async function(){
+    var fields={},n=0;
+    PF.forEach(function(f){var e=el('pf_'+f[0]);if(!e)return;var v=String(e.value||'').trim();var base=(f[0] in pfInit)?pfInit[f[0]]:String(f[3]==null?'':f[3]).trim();if(v!==base){fields[f[0]]=v;n++}});
+    var desNow=chipVals('pf_desired').join(',');
+    if(el('pf_desired')&&desNow!==pfInit.__desired){fields.desired_department_ids=desNow;n++}
+    if(!n){showErr('pf_err',new Error('変更された項目がありません'));return}
+    busy(this,'保存しています…');
+    try{var r=await apiPost('recruitUpdateProfile',{appId:appId,fields:fields});
+      if(r&&r.ok===false)throw new Error(r.error||'保存に失敗しました');
+      toast(r.changed&&r.changed.length?'保存しました（'+r.changed.join('・')+'）':'変更はありませんでした');
+      if(r.warnings&&r.warnings.length)setTimeout(function(){toast(r.warnings.join(' / '))},2700);
+      reload();
+    }catch(ex){unbusy(this);showErr('pf_err',srvErr(ex))}
+  });
+  /* --- 代表面談の日時変更 --- */
+  if(el('rs_open'))el('rs_open').addEventListener('click',function(){el('rs_box').style.display='';el('rs_openrow').style.display='none'});
+  if(el('rs_cancel'))el('rs_cancel').addEventListener('click',function(){el('rs_box').style.display='none';el('rs_openrow').style.display=''});
+  if(el('rs_go'))el('rs_go').addEventListener('click',async function(){
+    var dt=el('rs_dt').value;
+    if(!dt){showErr('rs_err',new Error('新しい日時を入力してください'));return}
+    var sameDt=dt===dtLocal(app.primaryInterviewAt);   // 日時が同じなら担当・URLの更新だけ(ご本人へは連絡しない)
+    if(!confirm(sameDt?'日時は変わっていません。担当・URLだけを更新します（ご本人への連絡は送りません）。よろしいですか？':'代表面談の日時を '+dt.replace('T',' ')+' に変更し、ご本人へ変更のご連絡を送ります。よろしいですか？'))return;
+    busy(this,'変更しています…');
+    try{var r=await apiPost('recruitRescheduleInterview',{appId:appId,datetime:dt.replace('T',' '),interviewer:el('rs_who').value,url:el('rs_url').value.trim()});
+      if(r&&r.ok===false)throw new Error(r.error||'変更に失敗しました');
+      toast(r.unchanged?(r.urlChanged?'担当・URLを更新しました。新しいURLは作成欄の「代表面談 案内」からご本人へ送ってください':'担当を更新しました（日時は同じため連絡は送っていません）')
+        :(r.mailSent?'日時を変更し、ご本人へ連絡しました':'日時を変更しました（連絡メールは送られませんでした'+(r.mailReason?'：'+r.mailReason:'')+'）'));reload();
+    }catch(ex){unbusy(this);showErr('rs_err',srvErr(ex))}
+  });
+  /* --- 選考の終了 --- */
+  if(el('cl_go'))el('cl_go').addEventListener('click',async function(){
+    var kind=el('cl_kind').value,mail=el('cl_mail').value;
+    if(!confirm('「'+(app.name||appId)+'」の選考を'+(kind==='withdrawn'?'辞退':'見送り')+'で終了します。'+(mail==='none'?'メールは送りません。':'選んだメールを送ります。')+'よろしいですか？'))return;
+    busy(this,'処理しています…');
+    try{var r=await apiPost('recruitCloseApplication',{appId:appId,kind:kind,mail:mail,reason:el('cl_reason').value.trim()});
+      if(r&&r.ok===false)throw new Error(r.error||'終了できませんでした');
+      toast('選考を終了しました'+(mail==='none'?'':(r.mailSent?'（メールを送信しました）':'（メールは送られませんでした'+(r.mailReason?'：'+r.mailReason:'')+'）')));reload();
+    }catch(ex){unbusy(this);showErr('cl_err',srvErr(ex))}
+  });
+
+  bindChips('ap_subs');bindChips('fd_subs');bindChips('dd_subs');bindChips('pf_desired');
   if(el('minbox'))loadDetailMinutes(appId,minStage);
   if(el('ap_go'))el('ap_go').addEventListener('click',async function(){
     var deptId=el('ap_dept').value,role=el('ap_role').value,subs=chipVals('ap_subs',deptId);
@@ -1314,7 +1471,8 @@ function renderDetail(appId,d){
         }else{unbusy(this);return}
       }
       if(r&&r.ok===false)throw new Error(r.error||'承認に失敗しました');
-      toast('構成員登録が完了しました（'+(r.memberCode||r.memberId||'')+'）');reload();
+      // (2026-10-06) 構成員作成済みで状態だけ残っていた行の補正。歓迎連絡は二重送信を避けて自動では送らない
+      toast(r&&r.recovered?'登録済みの構成員（'+(r.memberId||'')+'）として完了にしました。歓迎連絡は自動で送っていません（必要なら作成欄の「登録完了（歓迎）」から）':'構成員登録が完了しました（'+(r.memberCode||r.memberId||'')+'）');reload();
     }catch(ex){unbusy(this);showErr('ap_err',ex)}
   });
   if(el('iv_go'))el('iv_go').addEventListener('click',async function(){
@@ -1591,7 +1749,16 @@ function renderDetail(appId,d){
     try{
       if(!CACHE.templates)CACHE.templates=await apiGet('listRecruitMailTemplates',{});
       var sel=el('mc_tpl');if(!sel)return;
-      (CACHE.templates.templates||[]).forEach(function(t){var o=document.createElement('option');o.value=t.key;o.textContent=t.label;sel.appendChild(o)});
+      /* (2026-10-06) 現行(代表面談1回制)で使わない旧フローの定型文は末尾の別グループへ分ける。一次希望時間・二次系の
+         リンクは受け口が無く開けない。'accept' は「仮の文面」のまま。9/22 に「どの文面でも送れるように」と出した経緯があるため一覧には残す。 */
+      var LEGACY_TPL={primary_availability_request:1,primary_availability_followup:1,second_input_request:1,secondary_input_followup:1,second_schedule_notice:1,second_interview:1,secondary_interview_thanks:1,accept:1};
+      var legacyGrp=null;
+      (CACHE.templates.templates||[]).forEach(function(t){
+        var o=document.createElement('option');o.value=t.key;o.textContent=t.label;
+        if(LEGACY_TPL[t.key]){if(!legacyGrp){legacyGrp=document.createElement('optgroup');legacyGrp.label='旧フロー（現在の選考では使いません）'}legacyGrp.appendChild(o)}
+        else sel.appendChild(o);
+      });
+      if(legacyGrp)sel.appendChild(legacyGrp);
       sel.addEventListener('change',async function(){
         if(!this.value){el('mc_edit').style.display='none';return}
         el('mc_edit').style.display='';el('mc_sub').value='読み込んでいます…';el('mc_body').value='';
@@ -1599,14 +1766,16 @@ function renderDetail(appId,d){
           var r=await apiGet('getRecruitMessageDraft',{appId:appId,messageType:this.value});
           if(r&&r.ok===false)throw new Error(r.error);
           el('mc_sub').value=r.subject||'';el('mc_body').value=r.body||'';
-          if(r.toEmail)el('mc_to').value=r.toEmail;
+          // (2026-10-06) サーバは宛先を to で返す。toEmail だけを見ていたため、保護者宛ての定型文でも宛先が本人のままだった。
+          //   宛先が空(保護者メール未登録など)なら空のままにして、本人へ誤送信しない。
+          el('mc_to').value=r.to||r.toEmail||'';
         }catch(ex){showErr('mc_err',ex)}
       });
       /* (2026-09-22)「いま送る」= 届かなかった自動メールを、その定型文を差し込んだ状態で作成欄へ流す。
          自動で送り直すのではなく、必ず代表が中身を見て送る形にする(誤送信を作らない)。 */
-      document.querySelectorAll('[data-mi]').forEach(function(b){
+      document.querySelectorAll('[data-mi],[data-compose-tpl]').forEach(function(b){   // data-compose-tpl = 保護者同意待ちの「同意のご案内を送る」
         b.addEventListener('click',function(){
-          var k=this.dataset.tpl;if(!k)return;
+          var k=this.dataset.tpl||this.dataset.composeTpl;if(!k)return;
           var hit=false;
           for(var i=0;i<sel.options.length;i++)if(sel.options[i].value===k){sel.selectedIndex=i;hit=true;break}
           if(!hit){showErr('mc_err',new Error('この定型文（'+k+'）は一覧にありません。定型文の設定をご確認ください'));return}
@@ -1618,6 +1787,9 @@ function renderDetail(appId,d){
         var e=el('mc_err');e.classList.remove('on');
         var to=el('mc_to').value.trim(),sub=el('mc_sub').value.trim(),body=el('mc_body').value;
         if(!to||!sub){showErr('mc_err',new Error('宛先と件名を入力してください'));return}
+        // (2026-10-06) 開けない旧フローのリンクや「仮の文面」の注記が残ったまま候補者へ送らない
+        if(/admin\.connectahubapp\.com\/#recruit-/.test(body)){showErr('mc_err',new Error('本文に、現在は開けない旧フローのリンク（admin.connectahubapp.com/#recruit-…）が含まれています。リンクを削除するか、別の定型文をお使いください'));return}
+        if(/文面は仮/.test(body)){showErr('mc_err',new Error('本文に「仮の文面」の注記が残っています。内定のご連絡は「内定通知（登録情報の入力案内）」をお使いください'));return}
         if(!confirm(to+' 宛にメールを送信します。よろしいですか？'))return;
         busy(this);
         try{var r=await apiPost('sendRecruitMessage',{appId:appId,to:to,subject:sub,body:body,messageType:el('mc_tpl').value||'manual'});
