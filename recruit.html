@@ -1076,6 +1076,16 @@ function renderDetail(appId,d){
     xs.sort(function(a,b){return new Date(b||0)-new Date(a||0)});return xs[0]||'';
   }
   function pendingOf(types){return (A.scheduledMessages||[]).filter(function(s){return types[s.messageType]&&s.status==='pending'})[0]||null}
+  /* (2026-10-09) 本人入力欄の「保護者同意」。consent_status は依頼を送っても「未送信」のまま変わらない列なので、
+     同意済み以外は上部の案内と同じく送信の記録から出す(「未送信」と出て、送ったのに再送されるのを防ぐ)。 */
+  function guardianConsentLabel(){
+    if(gc&&String(gc.consent_status||'')==='同意済')return '同意済み'+(gc.consented_at?'（'+fmtDt(gc.consented_at)+'）':'');
+    var at=lastSent({'保護者同意依頼':1,'保護者同意未完了追い連絡':1},{guardian_consent:1,guardian_consent_followup:1});
+    if(at)return '同意待ち（依頼は送信済み・最終: '+fmtDt(at)+'）';
+    if(pendingOf({'保護者同意依頼':1}))return '同意待ち（依頼はまもなく自動送信）';
+    if(!(Array.isArray(A.autoMessages)&&Array.isArray(A.scheduledMessages)))return '同意待ち';
+    return gc?'同意待ち（依頼はまだ送られていません）':'必要';
+  }
 
   /* --- 次のアクション パネル --- */
   var act='';
@@ -1256,7 +1266,7 @@ function renderDetail(appId,d){
   if(reg){
     regH='<h2 class="sect-h">本人入力（追加情報）</h2><div class="sect-rule"></div><div class="card"><dl class="kv">'+
       kv('参加開始月',monthVal(reg.join_date))+kv('緊急連絡先',reg.emergency_contact)+kv('フルリモート',reg.remote_available)+
-      kv('保護者同意',reg.guardian_required==='はい'?((gc&&gc.consent_status)||'必要'):'不要（成人）')+
+      kv('保護者同意',reg.guardian_required==='はい'?guardianConsentLabel():'不要（成人）')+
       kv('入力日時',fmtDt(reg.submitted_at))+'</dl></div>';
   }
   /* (2026-10-06) プロフィールの修正。候補者の入力ミス(メール・保護者メールの打ち間違い等)を運営が直せる手段が無く、
