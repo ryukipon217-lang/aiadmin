@@ -1758,8 +1758,14 @@ function renderDetail(appId,d){
   /* mail composer */
   (async function(){
     try{
-      if(!CACHE.templates)CACHE.templates=await apiGet('listRecruitMailTemplates',{});
+      /* (2026-10-09) 詳細は「前回の内容で即描画 → 最新で描き直し」の2回描かれる。以前は定型文の取得を待ってから el('mc_tpl') を探したので、
+         待つ間に描き直されると2回分の処理が新しい画面に付いていた(定型文の一覧が二重・送信ボタンに処理が2つ=確認が2回出て
+         両方 OK だと同じメールが2通。別の候補者へ移った直後なら、前の候補者 appId の処理がその画面に付く)。
+         待つ前に自分の画面の部品をつかみ、待ち明けに画面から外れていたら・既に用意済みなら何もしない。 */
       var sel=el('mc_tpl');if(!sel)return;
+      if(!CACHE.templates)CACHE.templates=await apiGet('listRecruitMailTemplates',{});
+      if(!sel.isConnected||sel.dataset.ready)return;
+      sel.dataset.ready='1';
       /* (2026-10-06) 現行(代表面談1回制)で使わない旧フローの定型文は末尾の別グループへ分ける。一次希望時間・二次系の
          リンクは受け口が無く開けない。'accept' は「仮の文面」のまま。9/22 に「どの文面でも送れるように」と出した経緯があるため一覧には残す。 */
       var LEGACY_TPL={primary_availability_request:1,primary_availability_followup:1,second_input_request:1,secondary_input_followup:1,second_schedule_notice:1,second_interview:1,secondary_interview_thanks:1,accept:1};
