@@ -1252,6 +1252,9 @@ body{margin:0;font-family:'Geist','Zen Maru Gothic',system-ui,sans-serif;color:#
 @media (max-width:560px){.cx .cxdup-go{display:none}}
 .cx .toolbar .cxdup-open{margin-left:auto}
 @media (max-width:768px){.cx .toolbar .cxdup-open{margin-left:0}}   /* cx-mobile: ツールバーは折り返し・btn-sub は横いっぱい */
+/* (2026-10-10) スマホ幅ではボタン列の表示の動きを透明度だけにする。cxreveal の transform が掛かっている間(0.4秒)は、
+   右下に浮く作成ボタン(position:fixed)がボタン列を基準にずれ、検索欄の位置から右下へ跳んでいた */
+@media (max-width:768px){.cx .dash>.toolbar{animation-name:cxfade}}
 </style>
 <style id="cx-night">
 /* ═══ ナイトモード (html[data-theme="night"]) ══════════════════════════════════
