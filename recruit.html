@@ -303,6 +303,27 @@ var MU_ST={};                   // (議事録) 追加投稿の送信状態(フ�
 function el(id){return document.getElementById(id)}
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
 function toast(m){var t=el('toast');t.textContent=m;t.classList.add('on');clearTimeout(t._h);t._h=setTimeout(function(){t.classList.remove('on')},2600)}
+/* (2026-10-10 保護者同意 v2) 候補者の詳細の「緊急連絡先を表示」「同意の変更・取り消しを記録」。描き直しに左右されないよう、ページ全体で受ける。 */
+document.addEventListener('click',async function(ev){
+  var t=ev.target&&ev.target.closest?ev.target.closest('[data-gphone],[data-gchg]'):null;if(!t)return;
+  if(t.hasAttribute('data-gphone')){
+    var out=t.parentNode.querySelector('[data-gphone-val]');t.disabled=true;
+    try{var r=await apiGet('getGuardianEmergencyPhone',{appId:t.getAttribute('data-gphone')});out.textContent=r&&r.ok!==false?(r.phone||'（登録がありません。退会のときに削除されます）'):((r&&r.error)||'表示できませんでした');if(r&&r.ok!==false)t.style.display='none'}
+    catch(e){out.textContent=String(e&&e.message||e)}
+    t.disabled=false;return;
+  }
+  var kind=t.getAttribute('data-gchg'),box=t.closest('details'),er=box.querySelector('.gchg_err');er.classList.remove('on');
+  var note=box.querySelector('.gchg_note').value.trim();
+  if(!note){er.textContent='経緯（いつ・どなたから・どのような連絡があったか）をご記入ください';er.classList.add('on');return}
+  var pick=function(cls){var o={};box.querySelectorAll('.'+cls).forEach(function(x){o[x.getAttribute('data-k')]=!!x.checked});return o};
+  if(kind==='withdraw'&&!window.confirm('参加への同意の取り消しを記録します。記録すると要確認の一覧に載り、保護者の方の緊急連絡先は削除されます。よろしいですか。'))return;
+  t.disabled=true;
+  try{
+    var r2=await apiPost('recruitRecordGuardianConsentChange',{appId:t.getAttribute('data-app'),target:t.getAttribute('data-target')||'guardian',kind:kind,note:note,photo:pick('gchg_photo'),video:pick('gchg_video'),noShooting:box.querySelector('.gchg_noshoot').checked});
+    if(r2&&r2.ok===false)throw new Error(r2.error);
+    toast(kind==='withdraw'?'同意の取り消しを記録しました':(kind==='restore'?'取り消しの記録を戻しました':'変更を記録しました'));setTimeout(function(){location.reload()},700);
+  }catch(e){er.textContent=String(e&&e.message||e);er.classList.add('on');t.disabled=false}
+});
 function fmtDt(v){if(!v)return '';var d=new Date(v);if(isNaN(d.getTime()))return String(v);return (d.getMonth()+1)+'/'+d.getDate()+' '+('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2)}
 function fmtD(v){if(!v)return '';var d=new Date(v);if(isNaN(d.getTime()))return String(v);return d.getFullYear()+'/'+(d.getMonth()+1)+'/'+d.getDate()}
 function opts(arr,sel,ph){return '<option value="">'+esc(ph||'選択してください')+'</option>'+ (arr||[]).map(function(v){var val=typeof v==='string'?v:v.id,lab=typeof v==='string'?v:v.name;return '<option value="'+esc(val)+'"'+(String(sel)===String(val)?' selected':'')+'>'+esc(lab)+'</option>'}).join('')}
@@ -1078,9 +1099,28 @@ function renderDetail(appId,d){
   function pendingOf(types){return (A.scheduledMessages||[]).filter(function(s){return types[s.messageType]&&s.status==='pending'})[0]||null}
   /* (2026-10-09) 本人入力欄の「保護者同意」。consent_status は依頼を送っても「未送信」のまま変わらない列なので、
      同意済み以外は上部の案内と同じく送信の記録から出す(「未送信」と出て、送ったのに再送されるのを防ぐ)。 */
+  /* (2026-10-10 保護者同意 v2) 版・項目ごとの結果。改訂前の対象 (requested_version が空) は今までどおりの表示。 */
+  var gv2=!!(gc&&String(gc.requested_version||'')==='guardian_consent_v2');
+  var gDeclined=!!(gc&&String(gc.consent_status||'')==='不同意');
+  var gItems={};try{gItems=(gc&&gc.consent_items_json)?JSON.parse(String(gc.consent_items_json).replace(/^'+/,'')):{}}catch(e){gItems={}}   // 列が書式なしテキストだと先頭に ' が残る
+  /* 用途の名前は回答と一緒に保存されたものを使う (あとで用途の一覧が変わっても、その回答のときの名前で出す) */
+  var gUses=(gItems.uses&&gItems.uses.length)?gItems.uses.map(function(u){return [u.key,u.label]}):[['web','公式サイト'],['sns','公式SNS'],['report','協力先への報告資料']];
+  function gUseLabel(o){o=o||{};var xs=gUses.filter(function(u){return o[u[0]]===true}).map(function(u){return u[1]});return xs.length?xs.join('・'):'利用しない'}
+  /* (本人向けの説明と同意 v2) ご本人の選択。高校生以下・18歳未満は、ご本人と保護者の両方が選んだ用途だけを広報に使える。 */
+  var mItems=null;try{mItems=(reg&&reg.member_consent_items_json)?JSON.parse(String(reg.member_consent_items_json).replace(/^'+/,'')):null}catch(e){mItems=null}
+  function usable(kind){
+    var needG=!!(reg&&reg.guardian_required==='はい'),gOk=!!(gc&&String(gc.consent_status||'')==='同意済'&&gc.consent_items_json);
+    var m=mItems?(mItems.noShooting?{}:(mItems[kind]||{})):null,g=needG?(gOk&&!gItems.noShooting?(gItems[kind]||{}):{}):null;
+    if(m===null&&g===null)return '';
+    if(needG&&m===null)return 'なし（ご本人の記録がありません。広報には使いません）';   // 記録の無い側を「制限なし」と扱わない
+    var xs=gUses.filter(function(u){return (m===null||m[u[0]]===true)&&(g===null||g[u[0]]===true)}).map(function(u){return u[1]});
+    return xs.length?xs.join('・'):'なし（広報には使いません）';
+  }
   function guardianConsentLabel(){
+    if(gc&&String(gc.consent_status||'')==='不同意')return '「今回は同意しない」との回答'+(gc.answered_at?'（'+fmtDt(gc.answered_at)+'）':'');   // 関数の中だけで判定する (この関数は単体でも検証される)
+    if(gc&&String(gc.consent_status||'')==='同意取消')return '同意の取り消しを記録済み'+(gc.withdrawn_at?'（'+fmtDt(gc.withdrawn_at)+'）':'');
     if(gc&&String(gc.consent_status||'')==='同意済')return '同意済み'+(gc.consented_at?'（'+fmtDt(gc.consented_at)+'）':'');
-    var at=lastSent({'保護者同意依頼':1,'保護者同意未完了追い連絡':1},{guardian_consent:1,guardian_consent_followup:1});
+    var at=lastSent({'保護者同意依頼':1,'保護者同意未完了追い連絡':1},{guardian_consent:1,guardian_consent_followup:1,guardian_consent_v2:1,guardian_consent_v2_followup:1});
     if(at)return '同意待ち（依頼は送信済み・最終: '+fmtDt(at)+'）';
     if(pendingOf({'保護者同意依頼':1}))return '同意待ち（依頼はまもなく自動送信）';
     if(!(Array.isArray(A.autoMessages)&&Array.isArray(A.scheduledMessages)))return '同意待ち';
@@ -1218,15 +1258,23 @@ function renderDetail(appId,d){
     }else if(task==='同意待ち'){
       /* (2026-10-06) 固定の「自動送信済みです」をやめ、送信の記録から出す。consent_status は依頼を送っても
          「未送信」のまま変わらない列なので表示しない。自動の追い連絡は3日後の1回だけなので、再送の入口を置く。 */
-      var _gAt=lastSent({'保護者同意依頼':1,'保護者同意未完了追い連絡':1},{guardian_consent:1,guardian_consent_followup:1});
+      var _gAt=lastSent({'保護者同意依頼':1,'保護者同意未完了追い連絡':1},{guardian_consent:1,guardian_consent_followup:1,guardian_consent_v2:1,guardian_consent_v2_followup:1});
       var _gPend=pendingOf({'保護者同意依頼':1});
       var _gLogOk=Array.isArray(A.autoMessages)&&Array.isArray(A.scheduledMessages);
       var _gNo=_gLogOk&&!_gAt&&!_gPend;
+      if(gDeclined){
+        act='<div class="banner warn"><b>保護者の方から「今回は同意しない」との回答がありました'+(gc.answered_at?'（'+esc(fmtDt(gc.answered_at))+'）':'')+'。</b>'+
+          '登録は進めていません。ご本人・保護者の方と相談のうえ、手続きを止めるときは下の「選考の終了」を使ってください。保護者の方があらためて同意されると、登録は自動で進みます。'+
+          (gc.decline_note?'<br>保護者の方の記入: '+esc(gc.decline_note):'')+'</div>'+
+          '<div class="card"><div class="btnrow"><button class="btn ghost" data-compose-tpl="'+(gv2?'guardian_consent_v2':'guardian_consent')+'">保護者へ同意のご案内を送る（メール作成欄へ）</button></div>'+
+          '<p class="note" style="margin-top:8px">保護者の方から「考え直したい」「リンクの期限が切れた」と連絡があったときに使います。自動では送り直しません。</p></div>';
+      }else
       act='<div class="banner '+(_gNo?'warn':'ok')+'"><b>保護者の同意待ちです。</b>'+
         (!_gLogOk?'同意のご案内の送信記録を取得できませんでした（下の「送信の記録」をご確認ください）。'
           :_gAt?'同意のご案内は送信済みです（最終: '+esc(fmtDt(_gAt))+'）。':(_gPend?'同意のご案内は数分以内に自動で送信されます。':'<b>同意のご案内がまだ送られていません。</b>'))+
         '同意が確認されると自動で登録まで進みます。'+(gc?'<br>保護者: '+esc(gc.guardian_name||'')+'（'+esc(gc.guardian_email||'')+'）':'')+'</div>'+
-        '<div class="card"><div class="btnrow"><button class="btn ghost" data-compose-tpl="guardian_consent">保護者へ同意のご案内を送る（メール作成欄へ）</button></div>'+
+        '<div class="card"><div class="btnrow"><button class="btn ghost" data-compose-tpl="'+(gv2?'guardian_consent_v2':'guardian_consent')+'">保護者へ同意のご案内を送る（メール作成欄へ）</button></div>'+
+        '<p class="note" style="margin-top:8px">この方の案内は'+(gv2?'改訂版（v2）':'改訂前の版（v1）')+'です。版は同意の段階へ進んだときに決まり、あとから変わりません。</p>'+
         '<p class="note" style="margin-top:8px">保護者のメールアドレスが間違っている場合は、先に下の「プロフィール」の「編集する」から直してください。</p></div>';
     }else if(app.nextActor==='candidate'){
       act='<div class="banner ok"><b>ご本人の対応待ちです。</b>依頼と追いかけの連絡は自動で送信されます。</div>';
@@ -1267,7 +1315,59 @@ function renderDetail(appId,d){
     regH='<h2 class="sect-h">本人入力（追加情報）</h2><div class="sect-rule"></div><div class="card"><dl class="kv">'+
       kv('参加開始月',monthVal(reg.join_date))+kv('緊急連絡先',reg.emergency_contact)+kv('フルリモート',reg.remote_available)+
       kv('保護者同意',reg.guardian_required==='はい'?guardianConsentLabel():'不要（成人）')+
-      kv('入力日時',fmtDt(reg.submitted_at))+'</dl></div>';
+      (reg.guardian_required==='はい'?kv('保護者同意の版',gv2?'改訂版（guardian_consent_v2）':'改訂前の版（v1）'):'')+
+      kv('対象になった理由',reg.guardian_required_reason)+
+      (gv2&&gc&&String(gc.consent_status||'')==='同意済'
+        ?kv('続柄',gc.guardian_relationship)+
+         (gc.emergency_phone_set!==false?'<dt>保護者の緊急連絡先</dt><dd><button class="btn sm ghost" type="button" data-gphone="'+esc(app.id||'')+'">表示する（代表・副代表のみ）</button> <span data-gphone-val></span></dd>':'')+
+         kv('写真の広報利用',gItems.noShooting?'利用しない':gUseLabel(gItems.photo))+kv('動画の広報利用',gItems.noShooting?'利用しない':gUseLabel(gItems.video))+
+         kv('撮影について',gItems.noShooting?'撮影そのものを控える希望あり':'')+kv('保護者の方の記入',gItems.note)
+        :'')+
+      (gDeclined?kv('保護者の方の記入',gc.decline_note):'')+
+      kv('入力日時',fmtDt(reg.submitted_at))+
+      (mItems?kv('ご本人の同意の版',reg.member_consent_version?'改訂版（'+reg.member_consent_version+'）':'（運営が記録）')+
+        kv('ご本人: 写真の広報利用',mItems.noShooting?'利用しない':gUseLabel(mItems.photo))+kv('ご本人: 動画の広報利用',mItems.noShooting?'利用しない':gUseLabel(mItems.video))+
+        kv('ご本人: 撮影について',mItems.noShooting?'撮影そのものを控える希望あり':''):'')+
+      (mItems||(gv2&&gc&&String(gc.consent_status||'')==='同意済')?kv('広報に使える写真の用途',usable('photo'))+kv('広報に使える動画の用途',usable('video')):'')+
+      '</dl></div>';
+    /* (2026-10-10 本人向けの説明と同意 v2) 登録後の、ご本人の写真・動画の同意の変更の記録 (代表・副代表・人事)。 */
+    var mLog=[];try{mLog=reg.member_consent_change_log?JSON.parse(String(reg.member_consent_change_log).replace(/^'+/,'')):[]}catch(e){mLog=[]}
+    var mBox=function(cls,cur){return gUses.map(function(u){return '<label style="display:inline-flex;align-items:center;gap:6px;margin-right:14px;font-size:13px"><input type="checkbox" class="'+cls+'" data-k="'+esc(u[0])+'" '+((cur||{})[u[0]]===true&&!(mItems&&mItems.noShooting)?'checked':'')+'>'+esc(u[1])+'</label>'}).join('')};
+    regH+='<details class="card" style="margin-top:10px"><summary style="cursor:pointer;font-size:13px;font-weight:700">ご本人の写真・動画の同意の変更を記録する</summary>'+
+      '<p class="note" style="margin:10px 0">ご本人から連絡があったときに記録します（代表・副代表・人事のマネージャー以上）。変更の前後は履歴として残り、運営に通知が届きます。</p>'+
+      '<div class="fld"><label>写真の広報利用</label><div>'+mBox('gchg_photo',mItems&&mItems.photo)+'</div></div>'+
+      '<div class="fld"><label>動画の広報利用</label><div>'+mBox('gchg_video',mItems&&mItems.video)+'</div></div>'+
+      '<label style="display:flex;align-items:center;gap:8px;font-size:13px;margin:0 0 12px"><input type="checkbox" class="gchg_noshoot" '+(mItems&&mItems.noShooting?'checked':'')+'>撮影そのものを控える</label>'+
+      '<div class="fld"><label>経緯（必須）</label><textarea class="gchg_note" maxlength="500" rows="3" style="width:100%;font-family:inherit;font-size:14px;border:1px solid var(--line);border-radius:8px;padding:10px 12px" placeholder="いつ・どのような連絡があったか"></textarea></div>'+
+      '<div class="err gchg_err"></div>'+
+      '<div class="btnrow"><button class="btn sm" type="button" data-gchg="change" data-target="member" data-app="'+esc(app.id||'')+'">写真・動画の利用の変更を記録</button></div>'+
+      (mLog.length?'<p class="note" style="margin-top:10px"><b>これまでの記録</b><br>'+mLog.slice(-5).reverse().map(function(x){return esc(fmtDt(x.at))+' 変更: '+esc(String(x.note||'').slice(0,80))}).join('<br>')+'</p>':'')+
+      '</details>';
+    /* (2026-10-10 保護者同意 v2) 登録後に保護者の方から連絡があったときの、同意の変更・取り消しの記録 (代表・副代表・人事。サーバで確認)。
+       写真・動画の利用だけを変える「変更」と、参加への同意の「取り消し」。変更の前後は履歴として残る。 */
+    if(gc&&String(gc.consent_status||'')==='同意取消'){
+      regH+='<details class="card" style="margin-top:10px" open><summary style="cursor:pointer;font-size:13px;font-weight:700">保護者の方の同意は、取り消しが記録されています</summary>'+
+        '<p class="note" style="margin:10px 0">活動の停止・休止・退会の手続きを進めてください。押し間違いや、保護者の方が取り消しを撤回された場合は、記録を戻せます（代表・副代表・人事のマネージャー以上）。</p>'+
+        '<div class="fld"><label>経緯（必須）</label><textarea class="gchg_note" maxlength="500" rows="2" style="width:100%;font-family:inherit;font-size:14px;border:1px solid var(--line);border-radius:8px;padding:10px 12px"></textarea></div>'+
+        '<div class="err gchg_err"></div><div class="btnrow"><button class="btn sm ghost" type="button" data-gchg="restore" data-app="'+esc(app.id||'')+'">取り消しの記録を戻す</button></div>'+
+        '<input type="checkbox" class="gchg_noshoot" hidden></details>';
+    }
+    if(gc&&String(gc.consent_status||'')==='同意済'){
+      var gLog=[];try{gLog=gc.consent_change_log?JSON.parse(String(gc.consent_change_log).replace(/^'+/,'')):[]}catch(e){gLog=[]}
+      var gBox=function(cls,cur){return gUses.map(function(u){return '<label style="display:inline-flex;align-items:center;gap:6px;margin-right:14px;font-size:13px"><input type="checkbox" class="'+cls+'" data-k="'+esc(u[0])+'" '+((cur||{})[u[0]]===true&&!gItems.noShooting?'checked':'')+'>'+esc(u[1])+'</label>'}).join('')};
+      regH+='<details class="card" style="margin-top:10px"><summary style="cursor:pointer;font-size:13px;font-weight:700">保護者同意の内容の変更・取り消しを記録する</summary>'+
+        '<p class="note" style="margin:10px 0">保護者の方からメールなどで連絡があったときに記録します（代表・副代表・人事のマネージャー以上）。変更の前後は履歴として残り、運営に通知が届きます。</p>'+
+        '<div class="fld"><label>写真の広報利用</label><div>'+gBox('gchg_photo',gItems.photo)+'</div></div>'+
+        '<div class="fld"><label>動画の広報利用</label><div>'+gBox('gchg_video',gItems.video)+'</div></div>'+
+        '<label style="display:flex;align-items:center;gap:8px;font-size:13px;margin:0 0 12px"><input type="checkbox" class="gchg_noshoot" '+(gItems.noShooting?'checked':'')+'>撮影そのものを控える</label>'+
+        '<div class="fld"><label>経緯（必須）</label><textarea class="gchg_note" maxlength="500" rows="3" style="width:100%;font-family:inherit;font-size:14px;border:1px solid var(--line);border-radius:8px;padding:10px 12px" placeholder="いつ・どなたから・どのような連絡があったか"></textarea></div>'+
+        '<div class="err gchg_err"></div>'+
+        '<div class="btnrow"><button class="btn sm" type="button" data-gchg="change" data-app="'+esc(app.id||'')+'">写真・動画の利用の変更を記録</button>'+
+        '<button class="btn sm ghost" type="button" data-gchg="withdraw" data-app="'+esc(app.id||'')+'">参加への同意の取り消しを記録</button></div>'+
+        '<p class="note" style="margin-top:8px">取り消しを記録しても、構成員の状態は自動では変わりません。活動の停止・休止・退会の手続きは別に行ってください。</p>'+
+        (gLog.length?'<p class="note" style="margin-top:10px"><b>これまでの記録</b><br>'+gLog.slice(-5).reverse().map(function(x){return esc(fmtDt(x.at))+' '+(x.kind==='withdraw'?'取り消し':'変更')+': '+esc(String(x.note||'').slice(0,80))}).join('<br>')+'</p>':'')+
+        '</details>';
+    }
   }
   /* (2026-10-06) プロフィールの修正。候補者の入力ミス(メール・保護者メールの打ち間違い等)を運営が直せる手段が無く、
      メールが届かないまま止まっていた。保存は recruitUpdateProfile(応募行・追加情報・保護者同意を同じ値にそろえる)。
@@ -1351,9 +1451,9 @@ function renderDetail(appId,d){
 
   /* ★この方からの返信。採用メールへの返信は受信箱に一般の問い合わせと混ざって入るため、
      採用管理の画面からは「返信が来たこと」すら見えなかった。 */
-  var replyH=!replies.length?'':'<div class="mbox info"><p class="mbox-h">この方からの返信（'+replies.length+'件）</p>'+
+  var replyH=!replies.length?'':'<div class="mbox info"><p class="mbox-h">この方・保護者の方からの返信（'+replies.length+'件）</p>'+
     replies.slice(0,6).map(function(r){
-      return '<div class="mrow2"><div><b>'+esc(r.subject||'(件名なし)')+'</b>'+
+      return '<div class="mrow2"><div><b>'+(r.fromGuardian?'<span class="chip" style="margin-right:6px">保護者の方から</span>':'')+esc(r.subject||'(件名なし)')+'</b>'+
         '<div class="m">'+esc(fmtDt(r.receivedAt))+' · '+esc(r.state||'未対応')+
         (r.excerpt?'<br><span class="ex">'+esc(String(r.excerpt).slice(0,120))+'</span>':'')+'</div></div>'+
         (r.gmailUrl?'<a class="btn sm ghost" href="'+esc(r.gmailUrl)+'" target="_blank" rel="noopener">Gmailで開く</a>':'')+'</div>';
@@ -1936,6 +2036,8 @@ async function vMail(){
       '<div class="fld"><label>ミーティングID / パスコード</label><div class="grid2" style="gap:0 8px"><input type="text" id="st_zid" value="'+esc(s.zoom_meeting_id||'')+'" style="width:100%;font-family:inherit;font-size:14px;border:1px solid var(--line);border-radius:8px;padding:10px 12px"><input type="text" id="st_zpw" value="'+esc(s.zoom_passcode||'')+'" style="width:100%;font-family:inherit;font-size:14px;border:1px solid var(--line);border-radius:8px;padding:10px 12px"></div></div>'+
       '</div><div class="err" id="st_err"></div><div class="btnrow"><button class="btn" id="st_save">設定を保存</button><span class="note">設定の編集は代表・人事のみ可能です。</span></div>'+
     '</div>'+
+    '<h2 class="sect-h">保護者同意（改訂版）</h2><div class="sect-rule"></div>'+
+    '<div class="card" id="gv2Card"><p class="note">読み込んでいます…</p></div>'+
     '<h2 class="sect-h">メール定型文<span class="cnt">'+(t.templates||[]).length+'種</span></h2><div class="sect-rule"></div>'+
     '<div class="card" id="tplList">'+(t.templates||[]).map(function(tp,i){
       return '<div class="tpl" data-k="'+esc(tp.key)+'"><div class="tplh"><span class="tt">'+esc(tp.label)+'</span>'+(tp.overridden?'<span class="chip b">カスタム</span>':'<span class="chip">既定</span>')+'<span class="arrow">▾</span></div>'+
@@ -1947,6 +2049,54 @@ async function vMail(){
         '<div class="btnrow"><button class="btn sm tp_save">保存</button>'+(tp.overridden?'<button class="btn sm ghost tp_reset">既定に戻す</button>':'')+'</div>'+
       '</div></div>';
     }).join('')+'</div>');
+
+  /* (2026-10-10 保護者同意 v2) 有効化の状態と切替。既定は無効。説明文に未確定の印が残っている間は有効にできない (サーバで判定)。
+     有効にしても、改訂前に同意の段階へ進んだ方・すでに案内を送った方には改訂版を送らない。 */
+  (async function gv2Load(){
+    var box=el('gv2Card');if(!box)return;
+    var st;
+    try{st=await apiGet('getGuardianConsentV2Status',{})}catch(e){if(nav!==NAV)return;box.innerHTML='<p class="note">状態を取得できませんでした（'+esc(String(e&&e.message||e))+'）。本体の配信前は表示されません。</p>';return}
+    if(nav!==NAV||!el('gv2Card'))return;
+    var stateTxt=st.active?'有効（'+esc(String(st.cutoverAt||'').replace('T',' '))+' から）':(st.enabled?'予約中（'+esc(String(st.cutoverAt||'').replace('T',' '))+' に切り替え）':'無効（今までの案内のまま）');
+    box.innerHTML=
+      '<dl class="kv">'+
+        '<dt>現在の状態</dt><dd>'+stateTxt+'</dd>'+
+        '<dt>説明文</dt><dd>'+(st.textReady?'確定済み':'未確定の箇所が '+esc(String(st.pendingMarks))+' か所あります（確定するまで有効にできません）')+'</dd>'+
+        '<dt>対象の件数</dt><dd>改訂前の版 '+esc(String((st.counts||{}).v1||0))+' 件 ／ 改訂版 '+esc(String((st.counts||{}).v2||0))+' 件</dd>'+
+        '<dt>再通知</dt><dd>'+esc(String(st.followupDays))+'日後に1回だけ</dd>'+
+      '</dl>'+
+      '<p class="note">有効にすると、切替の日時より後に「保護者の同意待ち」へ進んだ方から、改訂版の説明と同意ページを使います。対象は「在学段階が高校以下、または18歳未満」です。それより前に同意の段階へ進んだ方・すでに案内を送った方には、改訂版を送りません。あわせて、登録フォームにご本人向けの説明と同意が出ます。すでに登録を済ませたメンバーと、その保護者の方には、何も送りません。</p>'+
+      (((st.counts||{}).v2||0)>0?'<p class="note">すでに改訂版で案内している '+esc(String(st.counts.v2))+' 件には、無効に戻しても改訂版の説明と同意ページが引き続き使われます（版はあとから変わりません）。</p>':'')+
+      '<label style="display:flex;align-items:center;gap:10px;font-size:13.5px;font-weight:700;cursor:pointer;margin:12px 0"><input type="checkbox" id="gv2_on" '+(st.enabled?'checked':'')+' '+(st.textReady||st.enabled?'':'disabled')+' style="accent-color:var(--blue);width:16px;height:16px">改訂版を有効にする</label>'+
+      '<div class="fld" style="max-width:320px"><label>切替の日時（日本時間。空欄なら保存した時刻）</label><input type="datetime-local" id="gv2_at" value="'+esc(st.cutoverAt||'')+'" '+(st.active?'disabled':'')+'><div class="hint">一度過ぎた切替の日時は変更できません。</div></div>'+
+      '<div class="err" id="gv2_err"></div>'+
+      '<div class="btnrow"><button class="btn" id="gv2_save">保存</button><button class="btn ghost" id="gv2_prev">説明とメールの全文を表示（送信しません）</button><span class="note">設定の編集は代表・人事のみ可能です。</span></div>'+
+      '<div id="gv2_preview"></div>';
+    el('gv2_save').addEventListener('click',async function(){
+      var e=el('gv2_err');e.classList.remove('on');this.disabled=true;
+      try{
+        var r=await apiPost('recruitSetGuardianConsentV2',{enabled:el('gv2_on').checked,cutoverAt:el('gv2_at').value});
+        if(r&&r.ok===false)throw new Error(r.error);
+        toast('保存しました');gv2Load();
+      }catch(ex){e.textContent=String(ex&&ex.message||ex);e.classList.add('on');this.disabled=false}
+    });
+    el('gv2_prev').addEventListener('click',async function(){
+      var pv=el('gv2_preview');pv.innerHTML='<p class="note">読み込んでいます…</p>';
+      try{
+        var p=await apiGet('getGuardianConsentV2Preview',{});
+        var pre=function(x){return '<div style="white-space:pre-wrap;font-size:13px;line-height:1.85;border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin:6px 0 14px;background:#fff">'+esc(x)+'</div>'};
+        pv.innerHTML='<p class="note" style="margin-top:14px">見本の名前で表示しています。保護者の方には何も送信しません。</p>'+
+          '<h3 style="font-size:14px;margin:14px 0 4px">'+esc(p.doc.title)+'</h3>'+
+          p.doc.sections.map(function(sc){return '<b style="font-size:13px">'+esc(sc.no+'. '+sc.title)+'</b>'+pre(sc.body)}).join('')+
+          '<b style="font-size:13px">保護者の方の確認欄</b>'+pre('保護者氏名／ご本人との続柄（'+p.relationships.join('・')+'）／緊急時の連絡先の電話番号'+(p.phoneRequired?'（必須）':'（任意）')+'\n□ '+p.declaration)+
+          '<b style="font-size:13px">個別の同意欄</b>'+pre(p.requiredItems.map(function(it){return '【'+it.label+'】□ '+it.title+': '+it.text}).join('\n')+'\n\n任意: 写真の広報利用・動画の広報利用（'+p.uses.map(function(u){return u.label}).join('・')+'）／撮影そのものを控えてほしい／自由記入')+
+          p.mails.map(function(m){return '<b style="font-size:13px">メール: '+esc(m.key)+'</b>'+pre('件名: '+m.subject+'\n\n'+m.body)}).join('')+
+          (p.member?'<h3 style="font-size:14px;margin:18px 0 4px">'+esc(p.member.doc.title)+'（登録フォームに出ます）</h3>'+
+            p.member.doc.sections.map(function(sc){return '<b style="font-size:13px">'+esc(sc.no+'. '+sc.title)+'</b>'+pre(sc.body)}).join('')+
+            '<b style="font-size:13px">ご本人の同意事項</b>'+pre('【必須】□ メンバーシップ規約に同意します\n'+p.member.requiredItems.map(function(it){return '【'+it.label+'】□ '+it.title+': '+it.text}).join('\n')+'\n\n任意: 写真の広報利用・動画の広報利用（'+p.member.uses.map(function(u){return u.label}).join('・')+'）／撮影そのものを控えてほしい'):'');
+      }catch(ex){pv.innerHTML='<p class="note">表示できませんでした（'+esc(String(ex&&ex.message||ex))+'）。</p>'}
+    });
+  })();
 
   el('st_save').addEventListener('click',async function(){
     var e=el('st_err');e.classList.remove('on');
