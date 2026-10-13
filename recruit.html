@@ -1109,6 +1109,7 @@ function renderDetail(appId,d){
   /* (本人向けの説明と同意 v2) ご本人の選択。高校生以下・18歳未満は、ご本人と保護者の両方が選んだ用途だけを広報に使える。 */
   var mItems=null;try{mItems=(reg&&reg.member_consent_items_json)?JSON.parse(String(reg.member_consent_items_json).replace(/^'+/,'')):null}catch(e){mItems=null}
   function usable(kind){
+    if(reg&&reg.guardian_required!=='はい'&&/^要確認/.test(String(reg.guardian_required_reason||'')))return '確認待ち（応募のときの学年との食い違いを確認中のため、広報には使いません）';   // (2026-10-13) 保護者確認が要る人かもしれない間は、使える用途を出さない
     var needG=!!(reg&&reg.guardian_required==='はい'),gOk=!!(gc&&String(gc.consent_status||'')==='同意済'&&gc.consent_items_json);
     var m=mItems?(mItems.noShooting?{}:(mItems[kind]||{})):null,g=needG?(gOk&&!gItems.noShooting?(gItems[kind]||{}):{}):null;
     if(m===null&&g===null)return '';
@@ -1132,13 +1133,20 @@ function renderDetail(appId,d){
   if(rs==='active'){
     if(phase==='登録'&&task==='承認待ち'){
       var missDept=!(app.final_department_id||(reg&&reg.final_department_id));
-      act='<div class="banner '+(missDept?'warn':'ok')+'"><b>'+(missDept?'所属部署が未確定のため、自動登録を保留しています。':'本登録の承認待ちです。')+'</b><br>'+
-        (missDept?'部署を選択して承認すると、構成員登録が完了します。':'必要事項は揃っています。承認すると構成員登録が完了します（通常は自動で完了します。ここに残っている場合は下の承認で完了してください）。')+'</div>'+
+      /* (2026-10-13 保護者同意 v2) 応募のときは高校生以下の学年、登録のときは保護者確認の対象外、と答えた人。自動登録を止めてあり、ご本人に確かめてから承認する */
+      var gapOpen=!!(reg&&reg.guardian_required!=='はい'&&/^要確認/.test(String(reg.guardian_required_reason||'')));
+      act=(gapOpen
+        ?'<div class="banner warn"><b>応募のときの学年と、登録のときの回答が食い違っています。</b><br>'+esc(String(reg.guardian_required_reason||''))+'。登録のときは「学年 '+esc(reg.grade||'未入力')+'・18歳未満ではない」と回答されたため、保護者の確認の対象外として受け付け、自動登録を止めています。<br>'+
+          'ご本人に確かめてから承認してください。高校生以下、または18歳未満だった場合は、承認せずに下の「選考の終了」（メールは送らない）で閉じ、「エントリーなし採用」の「面談なし」で登録リンクを新しく発行して、保護者の方の確認を取ってください。新しい候補者のプロフィールの学年に、確かめた学年を入れておくと、もう一度食い違ったときに止まります。</div>'
+        :'')+
+        '<div class="banner '+(missDept?'warn':'ok')+'"><b>'+(missDept?'所属部署が未確定のため、自動登録を保留しています。':'本登録の承認待ちです。')+'</b><br>'+
+        (missDept?'部署を選択して承認すると、構成員登録が完了します。':(gapOpen?'ご本人に確かめたうえで、下の確認にチェックを入れて承認してください。':'必要事項は揃っています。承認すると構成員登録が完了します（通常は自動で完了します。ここに残っている場合は下の承認で完了してください）。'))+'</div>'+
         '<div class="card"><div class="grid2">'+
         '<div class="fld"><label>所属部署'+(missDept?'':'<span class="opt">確定済み: '+esc(finalDept)+'</span>')+'</label><select id="ap_dept">'+opts(depts,app.final_department_id||(reg&&reg.final_department_id)||'')+'</select></div>'+
         '<div class="fld"><label>初期役職</label><select id="ap_role">'+['メンバー','アシマネ'].map(function(r){return '<option'+(String(app.initial_role||'メンバー')===r?' selected':'')+'>'+r+'</option>'}).join('')+'</select></div>'+
         '</div>'+
         '<div class="fld"><label>兼任部署<span class="opt">任意・複数選択可</span></label>'+deptChipsHtml('ap_subs',depts,String(app.sub_department_ids||'').split(',').filter(Boolean))+'</div>'+
+        (gapOpen?'<label style="display:flex;align-items:flex-start;gap:10px;font-size:13.5px;font-weight:700;cursor:pointer;margin:12px 0"><input type="checkbox" id="ap_gap" style="accent-color:var(--blue);width:16px;height:16px;margin-top:2px;flex:none">ご本人に確かめました。高校生以下でも、18歳未満でもありません。</label>':'')+
         '<div class="err" id="ap_err"></div><div class="btnrow"><button class="btn" id="ap_go">承認して構成員登録する</button></div></div>';
     }else if(phase==='一次選考'&&task==='日時選択待ち'){
       act='<div class="banner warn"><b>代表面談の日時を確定してください。</b><br>'+(app.primaryAvailableSlots?'希望時間帯: '+esc(String(app.primaryAvailableSlots).replace(/\n/g,' / ')):'エントリー時にGoogleカレンダーで日程予約されている場合があります。カレンダーの予約を確認し、同じ日時を確定してください。')+'</div>'+
@@ -1262,7 +1270,12 @@ function renderDetail(appId,d){
       var _gPend=pendingOf({'保護者同意依頼':1});
       var _gLogOk=Array.isArray(A.autoMessages)&&Array.isArray(A.scheduledMessages);
       var _gNo=_gLogOk&&!_gAt&&!_gPend;
-      if(gDeclined){
+      /* (2026-10-13) 同意は記録済みなのに、状態が同意待ちのまま止まった (混雑で状態の切り替えだけ失敗した)。運営が登録へ進める */
+      var gStuck=!!(gc&&String(gc.consent_status||'')==='同意済');
+      if(gStuck){
+        act='<div class="banner warn"><b>保護者の方の同意は記録済みですが、登録の手続きへ進んでいません。</b><br>通信の混雑などで、まれに止まることがあります。下のボタンで登録へ進めてください（保護者の方に、もう一度回答していただく必要はありません）。</div>'+
+          '<div class="card"><div class="err" id="gres_err"></div><div class="btnrow"><button class="btn" id="gres_go">登録へ進める</button></div></div>';
+      }else if(gDeclined){
         act='<div class="banner warn"><b>保護者の方から「今回は同意しない」との回答がありました'+(gc.answered_at?'（'+esc(fmtDt(gc.answered_at))+'）':'')+'。</b>'+
           '登録は進めていません。ご本人・保護者の方と相談のうえ、手続きを止めるときは下の「選考の終了」を使ってください。保護者の方があらためて同意されると、登録は自動で進みます。'+
           (gc.decline_note?'<br>保護者の方の記入: '+esc(gc.decline_note):'')+'</div>'+
@@ -1314,9 +1327,9 @@ function renderDetail(appId,d){
   if(reg){
     regH='<h2 class="sect-h">本人入力（追加情報）</h2><div class="sect-rule"></div><div class="card"><dl class="kv">'+
       kv('参加開始月',monthVal(reg.join_date))+kv('緊急連絡先',reg.emergency_contact)+kv('フルリモート',reg.remote_available)+
-      kv('保護者同意',reg.guardian_required==='はい'?guardianConsentLabel():'不要（成人）')+
+      kv('保護者同意',reg.guardian_required==='はい'?guardianConsentLabel():(/^要確認/.test(String(reg.guardian_required_reason||''))?'対象外と回答（運営の確認待ち）':'不要（成人）'))+
       (reg.guardian_required==='はい'?kv('保護者同意の版',gv2?'改訂版（guardian_consent_v2）':'改訂前の版（v1）'):'')+
-      kv('対象になった理由',reg.guardian_required_reason)+
+      kv(reg.guardian_required==='はい'?'対象になった理由':'応募のときの学年との食い違い',reg.guardian_required_reason)+
       (gv2&&gc&&String(gc.consent_status||'')==='同意済'
         ?kv('続柄',gc.guardian_relationship)+
          (gc.emergency_phone_set!==false?'<dt>保護者の緊急連絡先</dt><dd><button class="btn sm ghost" type="button" data-gphone="'+esc(app.id||'')+'">表示する（代表・副代表のみ）</button> <span data-gphone-val></span></dd>':'')+
@@ -1365,7 +1378,7 @@ function renderDetail(appId,d){
         '<div class="btnrow"><button class="btn sm" type="button" data-gchg="change" data-app="'+esc(app.id||'')+'">写真・動画の利用の変更を記録</button>'+
         '<button class="btn sm ghost" type="button" data-gchg="withdraw" data-app="'+esc(app.id||'')+'">参加への同意の取り消しを記録</button></div>'+
         '<p class="note" style="margin-top:8px">取り消しを記録しても、構成員の状態は自動では変わりません。活動の停止・休止・退会の手続きは別に行ってください。</p>'+
-        (gLog.length?'<p class="note" style="margin-top:10px"><b>これまでの記録</b><br>'+gLog.slice(-5).reverse().map(function(x){return esc(fmtDt(x.at))+' '+(x.kind==='withdraw'?'取り消し':'変更')+': '+esc(String(x.note||'').slice(0,80))}).join('<br>')+'</p>':'')+
+        (gLog.length?'<p class="note" style="margin-top:10px"><b>これまでの記録</b><br>'+gLog.slice(-5).reverse().map(function(x){return esc(fmtDt(x.at))+' '+(x.kind==='withdraw'?'取り消し':(x.kind==='restore'?'取り消しを戻した':'変更'))+': '+esc(String(x.note||'').slice(0,80))}).join('<br>')+'</p>':'')+
         '</details>';
     }
   }
@@ -1506,7 +1519,7 @@ function renderDetail(appId,d){
     '</div></div>'+
     closeH+
     '<div class="card" style="border-color:#e6c3c3;margin-top:26px"><p class="rec-sub" style="color:var(--bad)">データの削除</p>'+
-    '<p class="note">デモ・テストの候補者を、応募・面談記録・メール履歴などの関連データごと完全に削除します（復元できません）。'+(app.member_id?'<br>※構成員登録済みのため、構成員データ（メンバー管理）は残ります。':'')+'</p>'+
+    '<p class="note">デモ・テストの候補者を、応募・面談記録・メール履歴などの関連データごと完全に削除します（復元できません）。'+(app.member_id?'<br>※構成員登録済みのため、構成員データ（メンバー管理）は残ります。':'')+'<br>※構成員登録済みの候補者と、同意の記録がある候補者は、代表だけが削除できます（同意の記録は退会後1年間保管します）。</p>'+
     '<div class="btnrow"><button class="btn danger" id="del_go">この候補者を完全に削除する</button></div><div class="err" id="del_err"></div></div>');
 
   /* --- handlers --- */
@@ -1573,18 +1586,30 @@ function renderDetail(appId,d){
   if(el('ap_go'))el('ap_go').addEventListener('click',async function(){
     var deptId=el('ap_dept').value,role=el('ap_role').value,subs=chipVals('ap_subs',deptId);
     if(!deptId){showErr('ap_err',new Error('所属部署を選択してください'));return}
+    var gapEl=el('ap_gap');   // (2026-10-13) 学年の食い違いがある人だけに出る確認
+    if(gapEl&&!gapEl.checked){showErr('ap_err',new Error('ご本人に確かめたことの確認に、チェックを入れてください'));return}
+    var apBase={appId:appId,deptId:deptId,role:role,subDeptIds:subs};if(gapEl)apBase.confirmGradeGap=true;
     busy(this);
     try{
-      var r=await apiPost('registerAcceptedCandidate',{appId:appId,deptId:deptId,role:role,subDeptIds:subs});
+      var r=await apiPost('registerAcceptedCandidate',apBase);
       if(r&&r.ok===false&&r.duplicate){
         if(confirm(r.error+'\n\n既存の構成員（'+r.existingMemberId+'）に紐づけて完了しますか？')){
-          r=await apiPost('registerAcceptedCandidate',{appId:appId,deptId:deptId,role:role,subDeptIds:subs,confirmDuplicate:true});
+          r=await apiPost('registerAcceptedCandidate',Object.assign({},apBase,{confirmDuplicate:true}));
         }else{unbusy(this);return}
       }
       if(r&&r.ok===false)throw new Error(r.error||'承認に失敗しました');
       // (2026-10-06) 構成員作成済みで状態だけ残っていた行の補正。歓迎連絡は二重送信を避けて自動では送らない
       toast(r&&r.recovered?'登録済みの構成員（'+(r.memberId||'')+'）として完了にしました。歓迎連絡は自動で送っていません（必要なら作成欄の「登録完了（歓迎）」から）':'構成員登録が完了しました（'+(r.memberCode||r.memberId||'')+'）');reload();
     }catch(ex){unbusy(this);showErr('ap_err',ex)}
+  });
+  if(el('gres_go'))el('gres_go').addEventListener('click',async function(){
+    busy(this);
+    try{
+      var r=await apiPost('recruitResumeAfterGuardianConsent',{appId:appId});
+      if(r&&r.ok===false&&r.changed){alert(r.error||'保護者の方の回答が変わりました');reload();return}   // 状態は進んでいるので、画面を読み直して今の状態を出す
+      if(r&&r.ok===false)throw new Error(r.error||'進められませんでした');
+      toast('登録へ進めました');reload();
+    }catch(ex){unbusy(this);showErr('gres_err',ex)}
   });
   if(el('iv_go'))el('iv_go').addEventListener('click',async function(){
     var dt=el('iv_dt').value,who=el('iv_who').value;
@@ -1849,6 +1874,11 @@ function renderDetail(appId,d){
     busy(this,'削除しています…');
     try{
       var r=await apiPost('recruitDeleteApplication',{appId:appId});
+      /* (2026-10-13) 構成員登録済み・同意の記録がある候補者は、代表が確かめたうえでだけ消せる (同意の記録は退会後1年間保管する約束) */
+      if(r&&r.ok===false&&r.needConfirm){
+        if(!confirm('この候補者は、構成員登録済みか、同意の記録（保護者の方の回答・ご本人の同意）があります。\n同意の記録は、退会後1年間保管する約束です。\n\nテスト用のデータであることを確かめましたか？ 削除すると、同意の記録も消えて復元できません。')){unbusy(this);return}
+        r=await apiPost('recruitDeleteApplication',{appId:appId,confirmConsentRecords:true});
+      }
       if(r&&r.ok===false)throw new Error(r.error||'削除に失敗しました');
       toast('削除しました');
       CACHE.bundleAt=0;location.hash='#list';
@@ -2070,7 +2100,7 @@ async function vMail(){
       '<label style="display:flex;align-items:center;gap:10px;font-size:13.5px;font-weight:700;cursor:pointer;margin:12px 0"><input type="checkbox" id="gv2_on" '+(st.enabled?'checked':'')+' '+(st.textReady||st.enabled?'':'disabled')+' style="accent-color:var(--blue);width:16px;height:16px">改訂版を有効にする</label>'+
       '<div class="fld" style="max-width:320px"><label>切替の日時（日本時間。空欄なら保存した時刻）</label><input type="datetime-local" id="gv2_at" value="'+esc(st.cutoverAt||'')+'" '+(st.active?'disabled':'')+'><div class="hint">一度過ぎた切替の日時は変更できません。</div></div>'+
       '<div class="err" id="gv2_err"></div>'+
-      '<div class="btnrow"><button class="btn" id="gv2_save">保存</button><button class="btn ghost" id="gv2_prev">説明とメールの全文を表示（送信しません）</button><span class="note">設定の編集は代表・人事のみ可能です。</span></div>'+
+      '<div class="btnrow"><button class="btn" id="gv2_save">保存</button><button class="btn ghost" id="gv2_prev">説明とメールの全文を表示（送信しません）</button><span class="note">この設定の変更は、代表、または人事に所属するマネージャー以上のみ可能です。</span></div>'+
       '<div id="gv2_preview"></div>';
     el('gv2_save').addEventListener('click',async function(){
       var e=el('gv2_err');e.classList.remove('on');this.disabled=true;
